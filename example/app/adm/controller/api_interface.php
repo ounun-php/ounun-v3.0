@@ -55,10 +55,10 @@ class api_interface extends adm
                             $url_back = "/site/site_add.html?site_tag={$_GET['site_tag']}";
                             go_url($url_back);
                         } else {
-                            $error_msg = "出错:解码出错:({$json['data']})";
+                            $error_msg = "出错:解码出错({$json['data']})";
                         }
                     } else {
-                        $error_msg = "出错:数据出错:({$c})";
+                        $error_msg = "出错:数据出错({$c})";
                     }
                 } else {
                     $error_msg = "出错:服务器没反:({$api_host})";
