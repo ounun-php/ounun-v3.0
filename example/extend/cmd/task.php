@@ -31,7 +31,6 @@ class task extends \ounun\cmd\cmd
 
     /**
      * @param array $input
-     * @return mixed
      */
     public function execute(array $input)
     {
