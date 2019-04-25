@@ -245,14 +245,19 @@ function go_msg(string $msg, string $url = ''): void
  * @param string $message
  * @param int $error_code
  * @param mixed $data
+ * @param array $extend 延伸数据
  * @return array
  */
-function error(string $message = '', int $error_code = 1, $data = '')
+function error(string $message = '', int $error_code = 1, $data = null, $extend = [])
 {
-    if (empty($data)) {
-        return ['message' => $message, 'error_code' => $error_code];
+    $rs = ['message' => $message, 'error_code' => $error_code];
+    if ($data) {
+        $rs['data'] = $data;
     }
-    return ['message' => $message, 'error_code' => $error_code, 'data' => $data];
+    if ($extend) {
+        $rs = array_merge($extend, $rs);
+    }
+    return $rs;
 }
 
 /**
@@ -292,10 +297,14 @@ function error_code($data): int
 /**
  * @param mixed $data
  * @param string $message
+ * @param array $extend 延伸数据
  * @return array
  */
-function succeed($data, string $message = '')
+function succeed($data, string $message = '', $extend = [])
 {
+    if ($extend) {
+        return array_merge($extend, ['message' => $message, 'error_code' => 0, 'data' => $data]);
+    }
     return ['message' => $message, 'error_code' => 0, 'data' => $data];
 }
 
@@ -311,10 +320,10 @@ function succeed_data($data)
 
 /**
  * Ajax方式返回数据到客户端
- * @param mixed $data               要返回的数据
- * @param string $type              AJAX返回数据格式
+ * @param mixed $data 要返回的数据
+ * @param string $type AJAX返回数据格式
  * @param string $jsonp_callback
- * @param int $json_options         传递给json_encode的option参数
+ * @param int $json_options 传递给json_encode的option参数
  */
 function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {

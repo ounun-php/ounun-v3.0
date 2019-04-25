@@ -74,7 +74,7 @@ define('Const_Baidu_Xzh_Token', '');
             'charset' => 'utf8mb4',
             'database' => 'v2com_libs_v1',
         ],
-]);
+], 'biz');
 
 /** 支持的语言 */
 \ounun\config::lang_support_set([
