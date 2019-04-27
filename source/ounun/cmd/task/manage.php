@@ -110,7 +110,6 @@ class manage
         return static::$_db_biz;
     }
 
-
     /**
      * @param string $db_tag
      * @param array $db_config
@@ -226,17 +225,15 @@ class manage
         }
     }
 
-
     /**
      * @param string $msg
      * @param string $file
      * @param int $line
      * @param int $time
      */
-    static public function logs_msg_normal(string $msg,string $file = '', int $line = 0,  int $time = 0)
+    static public function logs_msg_normal(string $msg, string $file = '', int $line = 0, int $time = 0)
     {
-
-        static::logs_msg($msg,static::Logs_Normal,$file,$line,$time);
+        static::logs_msg($msg, static::Logs_Normal, $file, $line, $time);
     }
 
     /**
@@ -245,9 +242,9 @@ class manage
      * @param int $line
      * @param int $time
      */
-    static public function logs_msg_fail(string $msg,string $file = '', int $line = 0, int $time = 0)
+    static public function logs_msg_fail(string $msg, string $file = '', int $line = 0, int $time = 0)
     {
-        static::logs_msg($msg,static::Logs_Fail,$file,$line,$time);
+        static::logs_msg($msg, static::Logs_Fail, $file, $line, $time);
     }
 
     /**
@@ -258,7 +255,7 @@ class manage
      */
     static public function logs_msg_warning(string $msg, string $file = '', int $line = 0, int $time = 0)
     {
-        static::logs_msg($msg,static::Logs_Warning,$file,$line,$time);
+        static::logs_msg($msg, static::Logs_Warning, $file, $line, $time);
     }
 
     /**
@@ -267,22 +264,22 @@ class manage
      * @param int $line
      * @param int $time
      */
-    static public function logs_msg_succeed(string $msg, string $file = '', int $line = 0,  int $time = 0)
+    static public function logs_msg_succeed(string $msg, string $file = '', int $line = 0, int $time = 0)
     {
-        static::logs_msg($msg,static::Logs_Succeed,$file,$line,$time);
+        static::logs_msg($msg, static::Logs_Succeed, $file, $line, $time);
     }
 
     /**
      * 日志数据logs_data
-     * @param string $msg  内容
-     * @param int $status  状态  0:正常(灰) 1:失败(红色) 6:突出(橙黄)  99:成功(绿色)
+     * @param string $msg 内容
+     * @param int $status 状态  0:正常(灰) 1:失败(红色) 6:突出(橙黄)  99:成功(绿色)
      * @param string $file
      * @param int $line
-     * @param int $time    时间
+     * @param int $time 时间
      */
     static public function logs_msg(string $msg, int $status = self::Logs_Normal, string $file = '', int $line = 0, int $time = 0)
     {
-        static::logs_write_start($status);
+        static::logs_write_init($status);
 
         $time = $time == 0 ? time() : $time;
         /**  状态  时间 内容  */
@@ -297,16 +294,16 @@ class manage
                 $db->table(static::$_logs_table_task_details)->insert(array_merge(['logs_id' => static::$_logs_id], $data));
             }
         }
-        if(static::Logs_Fail == $status){
+        if (static::Logs_Fail == $status) {
             $color = console::Color_Red;
-        }elseif (static::Logs_Warning == $status){
+        } elseif (static::Logs_Warning == $status) {
             $color = console::Color_Brown;
-        }elseif (static::Logs_Succeed == $status){
+        } elseif (static::Logs_Succeed == $status) {
             $color = console::Color_Green;
-        }else{
+        } else {
             $color = console::Color_Yellow;
         }
-        console::echo($msg,$color,$file,$line,$time,"\n");
+        console::echo($msg, $color, $file, $line, $time, "\n");
     }
 
     /**
@@ -317,11 +314,11 @@ class manage
      */
     static public function logs_write(int $status, float $run_time, bool $over_clean = true)
     {
-        static::logs_write_start($status);
+        static::logs_write_init($status);
 
         if (static::$_logs_id) {
             $bind = [
-                'state' => $status,
+                'status' => $status,
                 'data' => json_encode(static::$_logs_data_important, JSON_UNESCAPED_UNICODE),
                 'time_end' => time(),
                 'time_run' => $run_time,
@@ -341,7 +338,7 @@ class manage
      * 写入日志 - 开始
      * @param int $status
      */
-    static protected function logs_write_start(int $status = self::Logs_Normal)
+    static protected function logs_write_init(int $status = self::Logs_Normal)
     {
         if (static::$_logs_id) {
             return;
@@ -356,7 +353,7 @@ class manage
                     'task_id' => $task_id,
                     'tag' => $task_curr->tag_get(),
                     'tag_sub' => $task_curr->tag_sub_get(),
-                    'state' => $status,
+                    'status' => $status,
                     'data' => json_encode(static::$_logs_data_important, JSON_UNESCAPED_UNICODE),
                     'time_add' => static::$_logs_time_add,
                     'time_end' => 0,
@@ -457,15 +454,14 @@ class manage
         $this->init();
         do {
             $tasks = $this->tasks();
-            console::echo("Start          \$tasks_count:" . str_pad(count($tasks), 5) .
+            console::echo("Start    host:".gethostname()."      \$tasks_count:" . str_pad(count($tasks), 5) .
                 "\$sleep:" . str_pad($time_sleep, 5) . " \$count:" . str_pad($this->_run_count, 5) . "  " .
-                "\$past:" . str_pad($this->_time_past, 5) . " \$live:" . str_pad($time_live, 5) . ' ----------------- ', console::Color_Purple,__FILE__,__LINE__,time());
+                "\$past:" . str_pad($this->_time_past, 5) . " \$live:" . str_pad($time_live, 5) . ' ----------------- ', console::Color_Purple, __FILE__, __LINE__);
             /** @var task_base $task */
             foreach ($tasks as $task) {
                 // var_dump(['$task'=>$task]);
                 if ($task && is_subclass_of($task, "ounun\\cmd\\task\\task_base")) {
                     $this->_task_curr = $task;
-                    console::echo("\$task_id:" . str_pad($task->struct_get()->task_id, 5) . " \$run_time:" . str_pad(round($task->run_time_get(), 4) . 's', 8), console::Color_Brown,__FILE__,__LINE__,time());
                     $this->_task_curr->execute_do($input, $this->_mode, $is_pass_check);
                 }
             }
@@ -501,14 +497,14 @@ class manage
                         $struct = new struct($v);
                         /** @var task_base $task */
                         $task = new $cls($struct);
-                        console::echo($cls, console::Color_Blue);
+                        console::echo($cls, console::Color_Blue, __FILE__, __LINE__, time());
                         if (is_subclass_of($task, "ounun\\cmd\\task\\task_base")) {
                             $this->_tasks[$v['task_id']] = $task;
                         } else {
-                            console::echo(__FILE__.':'.__LINE__. " error --> class:{$cls} not subclass:task\\task_base", console::Color_Red);
+                            console::echo("error --> class:{$cls} not subclass:task\\task_base", console::Color_Red, __FILE__, __LINE__, time());
                         }
                     } else {
-                        console::echo(__FILE__.':'.__LINE__." error --> class_exists:{$cls}", console::Color_Red);
+                        console::echo("error --> class_exists:{$cls}", console::Color_Red, __FILE__, __LINE__, time());
                     }
                 }
             }
