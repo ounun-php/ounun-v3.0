@@ -277,7 +277,7 @@ class config
     static public function template_set(string $tpl_dir, string $tpl_style = '', string $tpl_default = '')
     {
         // 模板根目录
-        if (!in_array($tpl_dir, static::$tpl_dirs)) {
+        if (!in_array($tpl_dir, static::$tpl_dirs) && is_dir($tpl_dir)) {
             static::$tpl_dirs[] = $tpl_dir;
         }
         // 模板
@@ -469,7 +469,7 @@ class config
                 $first = '';
                 $len = 0;
             }
-            if (!static::$maps_paths || !static::$maps_paths[$first] || !(is_array(static::$maps_paths[$first]) && in_array($path, array_column(static::$maps_paths[$first],'path')))) {
+            if (!static::$maps_paths || !static::$maps_paths[$first] || !(is_array(static::$maps_paths[$first]) && in_array($path, array_column(static::$maps_paths[$first], 'path')))) {
                 static::$maps_paths[$first][] = ['path' => $path, 'len' => $len, 'cut' => $cut_path, 'namespace' => $namespace_prefix];
             }
         }
@@ -508,22 +508,22 @@ class config
 
     /**
      * 添加App路径(具体应用)
-     * @param string $paths_app
-     * @param string $paths_template
-     * @param string $app_tag
-     * @param string $namespace_prefix
-     * @param string $tpl_style
-     * @param string $tpl_default
-     * @param bool $is_auto_helper
+     * @param string $paths_app_root 应用逻辑程序所在的根目录
+     * @param string $paths_template 模板所在目录
+     * @param string $paths_app_curr 当前程序所在目录
+     * @param string $namespace_prefix 加载类前缀 默认 app
+     * @param string $tpl_style 模板当前样式
+     * @param string $tpl_default 模板默认样式
+     * @param bool $is_auto_helper 是否默认加载helper
      */
-    static public function add_paths_app_instance(string $paths_app,string $paths_template,string $app_tag, string $namespace_prefix = 'app',string $tpl_style = '',string $tpl_default = '',bool $is_auto_helper = true)
+    static public function add_paths_app_instance(string $paths_app_root, string $paths_app_curr, string $paths_template, string $namespace_prefix = 'app', string $tpl_style = '', string $tpl_default = '', bool $is_auto_helper = true)
     {
         /** controller add_paths */
-        \ounun\config::add_paths($paths_app, $namespace_prefix, true);
+        \ounun\config::add_paths($paths_app_root, $namespace_prefix, true);
         /** template_set */
-        \ounun\config::template_set($paths_template . $app_tag.'/',$tpl_style,$tpl_default);
+        \ounun\config::template_set($paths_template, $tpl_style, $tpl_default);
         /** load_config */
-        \ounun\config::load_config($paths_app . $app_tag.'/',$is_auto_helper);
+        \ounun\config::load_config($paths_app_curr, $is_auto_helper);
     }
 
     /**
@@ -628,10 +628,10 @@ class config
      * @param string $dir
      * @param bool $is_auto_helper
      */
-    static public function load_config(string $dir,bool $is_auto_helper = false)
+    static public function load_config(string $dir, bool $is_auto_helper = false)
     {
         /** 加载helper */
-        if($is_auto_helper) {
+        if ($is_auto_helper) {
             is_file($dir . 'helper.php') && require $dir . 'helper.php';
         }
         // echo 'load_config0 -> '.__LINE__.':'.(is_file($dir.'helper.php')?'1':'0').' '.$dir.'helper.php'."\n";
@@ -683,7 +683,7 @@ function start(array $mod, string $host)
         $lang = config::$lang ? config::$lang : config::$lang_default;
     }
     // load_config 0 Dir
-    config::load_config(Dir_App,false);
+    config::load_config(Dir_App, false);
 
     // Routes
     if ($mod && $mod[0] && config::$routes["{$host}/{$mod[0]}"]) {
@@ -697,7 +697,7 @@ function start(array $mod, string $host)
     // apps_domain_set
     config::app_name_path_set(Dir_Ounun, Dir_Root, Dir_Data, (string)$val_0['app'], (string)$val_0['url']);
     // add_paths_app_instance
-    config::add_paths_app_instance( Dir_App,Dir_Template,config::$app_name,'app',(string)$val_0['tpl_style'], (string)$val_0['tpl_default'],true);
+    config::add_paths_app_instance(Dir_App, Dir_App . config::$app_name . '/', Dir_Template . config::$app_name . '/', 'app', (string)$val_0['tpl_style'], (string)$val_0['tpl_default'], true);
     // lang_set
     config::lang_set($lang);
     // 开始 重定义头
