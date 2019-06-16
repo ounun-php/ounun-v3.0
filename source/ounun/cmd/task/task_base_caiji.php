@@ -2,9 +2,24 @@
 namespace ounun\cmd\task;
 
 use ounun\mvc\model\admin\purview;
+use ounun\tool\db;
 
 abstract class task_base_caiji extends task_base
 {
+    /** @var int 默认(等待处理) */
+    const Status_Data_Null = 0;
+    /** @var int 正常 */
+    const Status_Data_Ok = 1;
+    /** @var int 出错(问题URL) */
+    const Status_Data_Fail =   101;
+
+    /** @var array 1:空置(等待) 2:运行中... 99:满载(过载) */
+    const Status = [
+        self::Status_Data_Null => '默认',
+        self::Status_Data_Ok   => '正常',
+        self::Status_Data_Fail => '出错',
+    ];
+
     /** @var string 分类 */
     public static $tag = 'caiji';
     /** @var string 子分类 */
@@ -22,6 +37,11 @@ abstract class task_base_caiji extends task_base
     public static $site_type = purview::app_type_admin;
     /** @var string 采集  库标识（采集数据录入的数据库） */
     public static $caiji_libs = 'caiji_no1';
+    /** @var string 采集  库标识(outs) 输出     （采集数据录入的数据库） */
+    public static $caiji_libs_table_outs = '<tag>_outs';
+    /** @var string 采集  库标识(data) 采集的数据（采集数据录入的数据库） */
+    public static $caiji_libs_table_data = '<tag>_<domain>_<data>';
+
     /** @var string  列表01 - 表名 */
     public static $caiji_libs_table_list01 = 'libs_pics_list01';
     /** @var string  列表02 - 表名 */
@@ -139,26 +159,165 @@ abstract class task_base_caiji extends task_base
      * 捡查指定字段数据是否存在
      * @param int $data_id
      * @param string $table_name
-     * @param string $fields_name
+     * @param int $origin_level
      * @return bool
      */
-    protected function _data_check(int $data_id, string $table_name, string $fields_name = 'data_id')
+    protected function _data_check(int $data_id, string $table_name, int $origin_level = 0)
     {
-        return manage::db_caiji()->table($table_name)->is_repeat($fields_name, $data_id, \PDO::PARAM_INT);
+        $cc = manage::db_caiji()->table($table_name)->where(' `origin_level` =:origin_level  and  `data_id` =:data_id ',['origin_level'=>$origin_level,'data_id'=>$data_id])->count_value();
+        if($cc){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param int $id
+     * @param string $table_name
+     * @return bool
+     */
+    protected function _data_check_id(int $id, string $table_name)
+    {
+        $cc = manage::db_caiji()->table($table_name)->where(' `id` =:id ',['id'=>$id])->count_value();
+        if($cc){
+            return true;
+        }
+        return false;
     }
 
     /**
      * @param string $table_name
-     * @param string $fields_name
      * @return int  最后的data_id
      */
-    protected function _data_last_id_get(string $table_name, string $fields_name = 'data_id')
+    protected function _data_last_id_get(string $table_name)
     {
-        $rs = manage::db_caiji()->query("SELECT `{$fields_name}` FROM {$table_name} ORDER BY `{$fields_name}` DESC limit 0,1;")->column_one();
-        if ($rs && $rs[$fields_name]) {
-            return (int)$rs[$fields_name];
+        $rs = manage::db_caiji()->query("SELECT `data_id` FROM {$table_name} ORDER BY `data_id` DESC limit 0,1;")->column_one();
+        if ($rs && $rs['data_id']) {
+            return (int)$rs['data_id'];
         }
         return 0;
+    }
+
+    /**
+     * @param array $data        数据
+     * @param int $data_id       数据id
+     * @param int $task_id       任务ID
+     * @param string $origin_url   目标URL
+     * @param string $origin_key   目标Key
+     * @param bool $is_update         true :更新   false:插入
+     * @param bool $is_update_default 数据插入 -> 本字段无效，
+     *                                           数据更新 -> true:已默认字段数据为主  false:已字段数据为主
+     * @return array
+     */
+    protected function _data_bind_caiji(array $data,int $data_id = 0,int $task_id = 0, string $origin_url = '', string $origin_key = '',
+                                        bool $is_update = false, bool $is_update_default = false)
+    {
+        // print_r($data);
+        $bind_default = [
+         // 'id'            => ['default' => 0, 'type' => db::Type_Int], // 自增ID
+            'data_id'       => ['default' => 0 , 'type' => db::Type_Int], // 数据id
+            'task_id'       => ['default' => 0,  'type' => db::Type_Int], // 任务ID
+            'origin_url'    => ['default' => '', 'type' => db::Type_String], // 目标URL
+            'origin_level'  => ['default' => 0 , 'type' => db::Type_Int],    // 级别
+
+            'origin_key'       => ['default' => '',      'type' => db::Type_String], // 目标Key
+            'origin_tag'       => ['default' => [],      'type' => db::Type_Json],   // 目标Tag(json)
+            'origin_title'     => ['default' => '',      'type' => db::Type_Int],    // 目标标题
+            'origin_data'      => ['default' => [],      'type' => db::Type_Json],   // 目标数据(json)
+            'origin_extend'    => ['default' => [],      'type' => db::Type_Json],   // 扩展(json)
+
+            'caiji_count'         => ['default' => 0, 'type' => db::Type_Int], // 采集次数
+            'is_status'           => ['default' => 0, 'type' => db::Type_Int], // 状态
+            'is_wget_again'       => ['default' => 0, 'type' => db::Type_Int], // 重试-是否每天
+            'is_wget_attachment'  => ['default' => 0, 'type' => db::Type_Int], // 附件-是否采集
+            'is_wget_data'        => ['default' => 0, 'type' => db::Type_Int], // 内容-是否采集
+
+            'is_done'      => ['default' => 0,     'type' => db::Type_Int], // 是否完成
+            'is_del'       => ['default' => 0,     'type' => db::Type_Int], // 是否删除 1已删
+            'time_add'     => ['default' => time(),'type' => db::Type_Int], // 添加时间
+            'time_update'  => ['default' => 0,     'type' => db::Type_Int], // 更新时间
+            'time_last'    => ['default' => 0,     'type' => db::Type_Int], // 完成时间
+
+            'execution_time' => ['default' => 0, 'type' => db::Type_Float], // 执行时间(秒)
+            'extend'         => ['extend' => [], 'type' => db::Type_Json],  // 任务参数paras/扩展json
+        ];
+        if($data_id){
+            $data['data_id'] = $data_id;
+        }
+        if($task_id){
+            $data['task_id'] = $task_id;
+        }
+        if($origin_url){
+            $data['origin_url'] = $origin_url;
+        }
+        if($origin_key){
+            $data['origin_key'] = $origin_key;
+        }
+        return db::bind($data,$bind_default,$is_update,$is_update_default);
+    }
+
+    /**
+     * @param array $data
+     * @param string $table_name
+     * @param bool $is_update
+     */
+    protected function _data_insert(array $data, string $table_name,bool $is_update = false)
+    {
+        if($is_update){
+            $id      = (int)$data['id'];
+            if($id){
+                $is = $this->_data_check_id($id, $table_name);
+                if($is){
+                    $data = $this->_data_bind_caiji($data,0,0,'','',true,false);
+                    unset($data['id']);
+                    manage::db_caiji()->table($table_name)->where(' `id` =:id ',['id'=>$id])->update($data);
+                }else{
+                    manage::logs_msg("warn->不已存在[{$table_name}]\$id:{$id}", manage::Logs_Warning);
+                }
+            }else{
+                $data_id      = (int)$data['data_id'];
+                $origin_level = (int)$data['origin_level'];
+                if($data_id){
+                    $is = $this->_data_check($data_id,$table_name,$origin_level);
+                    if($is){
+                        $data = $this->_data_bind_caiji($data,0,0,'','',true,false);
+                        unset($data['id'],$data['data_id'],$data['origin_level']);
+                        manage::db_caiji()->table($table_name)->where(' `origin_level` =:origin_level and `data_id` =:data_id ',['origin_level'=>$origin_level,'data_id'=>$data_id])->update($data);
+                    }else{
+                        manage::logs_msg("warn->不已存在[{$table_name}]\$data_id:{$data_id} \$origin_level:{$origin_level}", manage::Logs_Warning);
+                    }
+                }else{
+                    manage::logs_msg("warn->数据有误[{$table_name}]\$data_id:{$data_id} \$origin_level:{$origin_level}", manage::Logs_Warning);
+                }
+            }
+        }else{
+            $id = (int)$data['id'];
+            if($id){
+                $is = $this->_data_check_id($id, $table_name);
+                if($is){
+                    manage::logs_msg("warn->已存在[{$table_name}]\$id:{$id}", manage::Logs_Warning);
+                }else{
+                    $data = $this->_data_bind_caiji($data,0,0,'','',true,false);
+                    unset($data['id']);
+                    manage::db_caiji()->table($table_name)->insert($data);
+                }
+            }else{
+                $data_id      = (int)$data['data_id'];
+                $origin_level = (int)$data['origin_level'];
+                if($data_id){
+                    $is = $this->_data_check($data_id,$table_name,$origin_level);
+                    if($is){
+                        manage::logs_msg("warn->已存在[{$table_name}]\$data_id:{$data_id} \$origin_level:{$origin_level}", manage::Logs_Warning);
+                    }else{
+                        $data = $this->_data_bind_caiji($data,0,0,'','',true,false);
+                        unset($data['id']);
+                        manage::db_caiji()->table($table_name)->insert($data);
+                    }
+                }else{
+                    manage::logs_msg("warn->数据有误[{$table_name}]\$data_id:{$data_id} \$origin_level:{$origin_level}", manage::Logs_Warning);
+                }
+            }
+        }
     }
 
     /**
@@ -184,151 +343,5 @@ abstract class task_base_caiji extends task_base
                 file_put_contents($save_filename, $c);
             }
         } while ($do);
-    }
-
-    /**
-     * @param int $data_id
-     * @param int $list_id
-     * @param int $task_id
-     * @param string $origin_url
-     * @param int $origin_level
-     * @param array $origin_data
-     * @param int $is_status
-     * @param int $is_wget_again
-     * @param int $is_done
-     * @param int $time_add
-     * @param int $time_last
-     * @param float $execution_time
-     * @param array $extend
-     * @return array
-     */
-    protected function _fields_data(int $data_id , int $list_id , int $task_id = 0, string $origin_url = '', int $origin_level = 0, array $origin_data = [], int $is_status = 0, int $is_wget_again = 0, int $is_done = 0, int $time_add = 0, int $time_last = 0, float $execution_time = 0, array $extend = [])
-    {
-        $bind = $this->_fields_list($list_id ,  $task_id , $origin_url, $origin_level ,  $origin_data ,  $is_status ,  $is_wget_again ,  $is_done ,  $time_add ,  $time_last ,  $execution_time , $extend);
-        if ($data_id) {
-            $bind['data_id'] = $data_id;
-        }
-        return $bind;
-    }
-
-    /**
-     * @param int $list_id
-     * @param int $task_id
-     * @param string $origin_url
-     * @param int $origin_level
-     * @param array $origin_data
-     * @param int $is_status
-     * @param int $is_wget_again
-     * @param int $is_done
-     * @param int $time_add
-     * @param int $time_last
-     * @param float $execution_time
-     * @param array $extend
-     * @return array
-     */
-    protected function _bind_list_biz(int $list_id , int $task_id = 0, string $origin_url = '', int $origin_level = 0,
-                                           array $origin_data = [], int $is_status = 0, int $is_wget_again = 0, int $is_done = 0,
-                                           int $time_add = 0, int $time_last = 0, float $execution_time = 0, array $extend = [])
-    {
-        if (empty($time_last)) {
-            $time_last = \time();
-        }
-        if (empty($time_add)) {
-            $time_add = \time();
-        }
-        $bind = [
-            'task_id' => $task_id, // 任务ID
-            'origin_url' => $origin_url, // 源地址
-            'origin_level' => $origin_level, // 级别
-            'origin_data' => json_encode_unescaped($origin_data), // 数据(json)
-            'is_status' => $is_status, // 状态
-            'is_wget_again' => $is_wget_again, // 重试-是否每天
-            'is_done' => $is_done, // 是否完成
-            'time_add' => $time_add, // 添加时间
-            'time_last' => $time_last, // 完成时间
-            'execution_time' => $execution_time, // 执行时间(秒)
-            'extend' => json_encode_unescaped($extend), // 任务参数paras/扩展json
-        ];
-        if ($list_id) {
-            $bind['list_id'] = $list_id;
-        }
-        return $bind;
-    }
-
-    /**
-     * @param int $id             自增ID
-     * @param int $data_id        数据id
-     * @param string $origin_url  目标URL
-     * @param string $origin_key  目标Key
-     * @param string $origin_tag  目标Tag(json)
-     * @param string $origin_title 目标标题
-     * @param array $origin_data   目标数据(json)
-     * @param array $origin_extend 扩展(json)
-     * @param int $caiji_count     采集次数
-     * @param int $is_wget_attachment 附件-是否采集
-     * @param int $is_wget_data       内容-是否采集
-     * @param int $is_done     是否完成
-     * @param int $time_add    添加时间
-     * @param int $time_update 更新时间
-     * @return array
-     */
-    protected function _bind_data_caiji(int $id = 0,int $data_id = 0, string $origin_url = '',
-                                  string $origin_key = '', string $origin_tag = '',string $origin_title = '',
-                                  array $origin_data = [], array  $origin_extend = [],
-                                  int $caiji_count = 1,int $is_wget_attachment = 0,int $is_wget_data = 0,int $is_done = 0,int $time_add = 0,int $time_update = 0)
-    {
-        if (empty($time_add)) {
-            $time_add = \time();
-        }
-        if (empty($time_update)) {
-            $time_update = \time();
-        }
-        $bind = [
-            //  'list_id' => $list_id,
-            'data_id' => $data_id,
-            'origin_url' => $origin_url,
-            'origin_key' => $origin_key,
-            'origin_tag' => $origin_tag,
-            'origin_title' => $origin_title,
-
-            'origin_data' => json_encode_unescaped($origin_data),
-            'origin_extend' => json_encode_unescaped($origin_extend),
-
-            'caiji_count' => $caiji_count,
-
-            'is_wget_attachment' => $is_wget_attachment,
-            'is_wget_data' => $is_wget_data,
-            'is_done' => $is_done,
-
-            'time_add' => $time_add,
-            'time_update' => $time_update,
-        ];
-        if ($id) {
-            $bind['id'] = $id;
-        }
-        return $bind;
-    }
-
-    /**
-     * @param array $data
-     * @param string $table_name
-     * @param string $fields_name
-     */
-    protected function _data_insert(array $data, string $table_name, string $fields_name = 'data_id',bool $is_replace = false)
-    {
-        $data_id = $data[$fields_name];
-        $rs = $this->_data_check($data_id, $table_name, $fields_name);
-        if (!$rs) {
-            manage::db_caiji()->table($table_name)->insert($data);
-            // echo $this->_db->sql()."\n";
-            $is_insert = $this->_data_check($data_id, $table_name, $fields_name);
-            if ($is_insert) {
-                manage::logs_msg("ok->[成功][{$table_name}]{$fields_name}:{$data_id}");
-            } else {
-                manage::logs_msg("error->[失败]数据插入[{$table_name}]{$fields_name}:{$data_id}", manage::Logs_Fail);
-            }
-        } else {
-            manage::logs_msg("warn->已存在[{$table_name}]{$fields_name}:{$data_id}", manage::Logs_Warning);
-        }
     }
 }
