@@ -426,9 +426,14 @@ class pdo
      */
     public function delete(int $limit = 1): int
     {
-        $this->limit($limit)
-            ->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ' ' . $this->_limit . ';')
-            ->_execute($this->_bind_param);
+        if($limit === 0 ){
+            $this->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ';')
+                 ->_execute($this->_bind_param);
+        }else{
+            $this->limit($limit)
+                 ->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ' ' . $this->_limit . ';')
+                 ->_execute($this->_bind_param);
+        }
         return $this->_stmt->rowCount(); //取得前一次 MySQL 操作所影响的记录行数
     }
 
