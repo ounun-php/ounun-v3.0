@@ -109,7 +109,7 @@ class http
      * @param $referer
      * @return bool|string
      */
-    public static function file_get_contents(string $url, string $referer = '',$is_unzip = false)
+    public static function file_get_contents(string $url, string $referer = '',bool $is_unzip = false,string $header = '')
     {
         $referer = $referer ? $referer : $url;
         $opts = [
@@ -117,7 +117,7 @@ class http
                 'method' => "GET",
                 'header' => "Accept-Language: zh-CN,zh;q=0.9,en;q=0.8\r\n" .
                     "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36\r\n" .
-                    "Referer: {$referer}\r\n",
+                    "Referer: {$referer}\r\n".$header,
             ],
             "ssl" => [
                 // "allow_self_signed" => false ,
