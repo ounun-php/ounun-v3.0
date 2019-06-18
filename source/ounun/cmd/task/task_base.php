@@ -257,16 +257,19 @@ abstract class task_base
     protected function _db_update(int $run_status = manage::Status_Runing)
     {
         if ($this->_run_is) {
-            $this->_task_struct->update(time());
-            $bind = [
-                'task_id'      => $this->_task_struct->task_id,
-                'time_ignore'  => $this->_task_struct->time_ignore,
-                'time_last'    => $this->_task_struct->time_last,
+            $time = time();
+            if($time > $this->_task_struct->time_ignore ) {
+                $this->_task_struct->update($time);
+                $bind = [
+                    'task_id'      => $this->_task_struct->task_id,
+                    'time_ignore'  => $this->_task_struct->time_ignore,
+                    'time_last'    => $this->_task_struct->time_last,
 
-                'run_hostname' => gethostname(),
-                'run_status'   => $run_status,
-            ];
-            manage::db_caiji()->query("UPDATE ".manage::$table_task." SET `run_hostname` = :run_hostname ,`run_status` = :run_status ,`time_ignore` = :time_ignore ,`time_last` = :time_last  WHERE `task_id` = :task_id; ", $bind)->affected();
+                    'run_hostname' => gethostname(),
+                    'run_status'   => $run_status,
+                ];
+                manage::db_caiji()->query("UPDATE ".manage::$table_task." SET `run_hostname` = :run_hostname ,`run_status` = :run_status ,`time_ignore` = :time_ignore ,`time_last` = :time_last  WHERE `task_id` = :task_id; ", $bind)->affected();
+            }
         }
     }
 }

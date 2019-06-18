@@ -41,7 +41,7 @@ class struct
     public $crontab = '';
 
     /** @var int 最小间隔 */
-    public $interval_min = 59;
+    public $interval_min = 29;
     /** @var int 执行次数 */
     public $count = 0;
     /** @var array 数据json ["任务tag","方法","参数1","参数2",...] */
