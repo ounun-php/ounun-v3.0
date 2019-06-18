@@ -92,6 +92,35 @@ class parse
     }
 
     /**
+     * 获取目录内容
+     * @param string $content 所在内容
+     * @param string $middle  目标内容分格点
+     * @param array  $rules   分析规则 ['key'=> 主键, 'type' => <'left'默认,'right'> , 'left' => $left, 'right'=>$right]
+     */
+    static public function list(string $content, string $middle, array $rules)
+    {
+        $rs = [];
+        $c2 = explode($middle, $content);
+        $key0 = $rules[0]['key'];
+        foreach ($c2 as $v2) {
+            if($v2){
+                $rs2 = [];
+                foreach ($rules as ['key'=> $key, 'type' => $type , 'left' => $left, 'right'=>$right]){
+                    if('right' == $type){
+                        $rs2[$key] = self::right($v2, $right, $left);
+                    }else{
+                        $rs2[$key] = self::left($v2, $left, $right);
+                    }
+                }
+                if($rs2[$key0]){
+                    $rs[] = $rs2;
+                }
+            }
+        }
+        return $rs;
+    }
+
+    /**
      * 取出正则数据
      * @param  $pattern string
      *      网址: <a href="(http://:any)">(:any)</a>
