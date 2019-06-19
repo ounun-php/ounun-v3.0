@@ -56,8 +56,10 @@ abstract class task_base_caiji extends task_base
     public static $caiji_out_table = 'outs_pics';
     /** @var string 根目录 */
     public static $caiji_res_dir_root   = '/data/ossfs_io3/';
+    public static $caiji_res_dir_root_tag      = '{ossfs_io3}';
     /** @var string 根目录(加密文件) */
     public static $caiji_res_dir_root_m = '/data/ossfs_io3/';
+    public static $caiji_res_dir_root_m_tag    = '{ossfs_io3}';
     /** @var string 采集  保存目录 */
     public static $caiji_res_dir_name   = '6mm';
     /** @var string 采集  附件数据保存网站 */

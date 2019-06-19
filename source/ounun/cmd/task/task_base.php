@@ -131,18 +131,32 @@ abstract class task_base
         // init
         $this->_db_init();
         manage::logs_init(0,static::$table_task_logs,static::$table_task_logs_details);
-        $this->_db_update(manage::Status_Runing);
+        $this->_db_update(manage::Status_Runing,true);
         // logs
         console::echo("↓↓↓ 任务开始 ↓↓↓ --> task_id:{$this->struct_get()->task_id} name:{$this->tag_get()}/{$this->struct_get()->task_name}", console::Color_Green, __FILE__, __LINE__, time(), ' ');
         console::echo(get_class($this), console::Color_Blue);
         // execute
         $this->execute($argc_input, $argc_mode, $is_pass_check);
+        return $this->execute_end();
+    }
+
+    /**  */
+    public function execute_end()
+    {
         // _run_time
         $this->_run_time += microtime(true);
         $this->_db_done();
         console::echo("↑↑↑ 任务结束 ↑↑↑ <-- task_id:{$this->struct_get()->task_id} logs_id:".manage::logs_id_get()." ", console::Color_Green, __FILE__, __LINE__, time(), '');
         console::echo('运行时间:' . str_pad(round($this->run_time_get(), 4) . 's', 8), console::Color_Light_Purple,'',0,0,"\n\n");
         return $this->struct_get()->task_id;
+    }
+
+    public function __destruct()
+    {
+        if($this->_run_is){
+            echo __METHOD__."\n";
+            $this->execute_end();
+        }
     }
 
     /**
@@ -254,11 +268,11 @@ abstract class task_base
     /**
      * @param int $run_status
      */
-    protected function _db_update(int $run_status = manage::Status_Runing)
+    protected function _db_update(int $run_status = manage::Status_Runing,bool $is_init = false)
     {
         if ($this->_run_is) {
             $time = time();
-            if($time > $this->_task_struct->time_ignore ) {
+            if($is_init || $time > $this->_task_struct->time_ignore ) {
                 $this->_task_struct->update($time);
                 $bind = [
                     'task_id'      => $this->_task_struct->task_id,
