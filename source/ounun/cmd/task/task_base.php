@@ -272,7 +272,9 @@ abstract class task_base
     {
         if ($this->_run_is) {
             $time = time();
-            if($is_init || $time > $this->_task_struct->time_ignore ) {
+            $time_last60 = $this->_task_struct->time_last + 60;
+            // echo "\$is_init:".($is_init?'true':'false')." \$time:{$time} time_ignore:{$time_last60}  ".($time - $time_last60).":".($time > $time_last60?'true':'false')."\n";
+            if($is_init || $time > $time_last60 ) {
                 $this->_task_struct->update($time);
                 $bind = [
                     'task_id'      => $this->_task_struct->task_id,
