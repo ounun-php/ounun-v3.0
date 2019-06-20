@@ -177,6 +177,9 @@ class http
      */
     public static function file_get_put(string $url, string $filename_save, string $referer = '', int $loop_max = 5, int $sleep_time_seconds = 1, int $filesize_min = 64)
     {
+        if('http' != substr($url,0,4)){
+            return false;
+        }
         $c = static::file_get_contents_loop($url, $referer, $loop_max, $sleep_time_seconds, $filesize_min);
         if ($c) {
             return file_put_contents($filename_save, $c);
