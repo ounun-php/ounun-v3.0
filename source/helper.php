@@ -905,7 +905,12 @@ abstract class v
         url_check($this->page_url, $ext_req, $domain);
 
         // cache_html
-        static::$cache_html_trim = '' == Environment ? $cache_html_trim : false;
+        if('' == Environment ){
+            $debug = \ounun\config::$global['debug'];
+            static::$cache_html_trim = $debug && isset($debug['html_trim']) ? $debug['html_trim'] : $cache_html_trim;
+        }else{
+            static::$cache_html_trim = false;
+        }
         if ($is_cache_html) {
             static::$cache_html_time = $cache_html_time > 300 ? $cache_html_time : static::$cache_html_time;
             $this->cache_html($this->page_url);

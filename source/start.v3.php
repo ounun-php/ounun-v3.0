@@ -373,9 +373,11 @@ class config
             '{$domain}' => static::$app_domain,
 
             '{$res}' => static::$url_res,
+
             '{$static}' => static::$url_static,
             '{$upload}' => static::$url_upload,
             '{$static_g}' => static::$url_static_g,
+            '/public/static_g/' => static::$url_static_g,
             '/public/static/' => static::$url_static,
             '/public/upload/' => static::$url_upload,
         ], static::$tpl_replace_str);
