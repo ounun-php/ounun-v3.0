@@ -4,7 +4,7 @@ namespace ounun\mvc\model;
 
 class cms
 {
-    /** @var cms DB 相关 */
+    /** @var 实例 */
     protected static $instance;
 
     /**
@@ -36,4 +36,6 @@ class cms
         }
         static::$instance = $this;
     }
+
+    
 }

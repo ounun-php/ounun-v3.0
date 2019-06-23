@@ -882,10 +882,10 @@ abstract class v
     }
 
     /** @var string 当前面页(网址) */
-    public $page_url = '';
+    // public $page_url = '';
 
     /** @var string 当前面页(文件名) */
-    public $page_file = '';
+    // public $page_file = '';
 
     /**
      * 初始化Page
@@ -899,10 +899,8 @@ abstract class v
     public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        $this->page_file = $page_file;
-        $this->page_url = \ounun\config::url_page($this->page_file);
-
-        url_check($this->page_url, $ext_req, $domain);
+        \ounun\config::url_page($page_file);
+        url_check(ounun\config::$page_url, $ext_req, $domain);
 
         // cache_html
         if('' == Environment ){
@@ -913,7 +911,7 @@ abstract class v
         }
         if ($is_cache_html) {
             static::$cache_html_time = $cache_html_time > 300 ? $cache_html_time : static::$cache_html_time;
-            $this->cache_html($this->page_url);
+            $this->cache_html(ounun\config::$page_url);
         }
 
         // template

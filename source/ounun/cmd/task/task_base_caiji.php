@@ -180,7 +180,7 @@ abstract class task_base_caiji extends task_base
      */
     protected function _data_last_id_get(string $table_name)
     {
-        $rs = manage::db_caiji()->query("SELECT `data_id` FROM {$table_name} ORDER BY `data_id` DESC limit 0,1;")->column_one();
+        $rs = manage::db_caiji()->query("SELECT `data_id` FROM {$table_name} ORDER BY `id` DESC limit 0,1;")->column_one();
         if ($rs && $rs['data_id']) {
             return (int)$rs['data_id'];
         }
