@@ -1048,7 +1048,7 @@ class pdo
             ]);
             $this->_stmt->debugDumpParams();
             // echo $this->_stmt->queryString."\n";
-            trigger_error("Sql Error:" . $e->getMessage() . "\n", E_USER_ERROR);
+            trigger_error("Sql Error:" . $e->getMessage() . "\nTrace:".$e->getTraceAsString()."\n", E_USER_ERROR);
         }
     }
 

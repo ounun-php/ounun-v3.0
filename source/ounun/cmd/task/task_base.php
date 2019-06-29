@@ -29,7 +29,9 @@ abstract class task_base
     /** @var string 表名日志（详情） */
     public static $table_task_logs_details = '';
 
-
+    /** @var string 采集  库标识（采集数据录入的数据库） */
+    public static $caiji_tag = '-';
+    
     /** @var struct 任务数据结构 */
     protected $_task_struct;
     /** @var int 状态  0:正常(灰) 1:失败(红色) 6:突出(橙黄)  99:成功(绿色) */
@@ -129,7 +131,6 @@ abstract class task_base
         $this->_argc_mode = $argc_mode;
         $this->_run_is = true;
         // init
-        $this->_db_init();
         manage::logs_init(0,static::$table_task_logs,static::$table_task_logs_details);
         $this->_db_update(manage::Status_Runing,true);
         // logs
@@ -197,45 +198,6 @@ abstract class task_base
         return error('task_struct数据有误');
     }
 
-    /**
-     * _db_init
-     */
-    public function _db_init()
-    {
-        if ($this->_run_is && $this->_task_struct) {
-            $is_db_caiji = false;
-            $is_db_site  = false;
-            if($this->_task_struct->run_type == manage::Run_Type_Post){
-                $is_db_caiji = true;
-                $is_db_site  = true;
-            }elseif($this->_task_struct->run_type == manage::Run_Type_System){
-                $is_db_caiji = false;
-                $is_db_site  = true;
-            }else{ // manage::Run_Type_Caiji
-                $is_db_caiji = true;
-                $is_db_site  = false;
-            }
-            // caiji
-            if($is_db_caiji && $this->_task_struct->caiji_tag){
-                $caiji_tag = $this->_task_struct->caiji_tag;
-                $libs = config::$global['caiji'][$caiji_tag];
-                if ($libs && $libs['db'] && config::$database[$libs['db']]) {
-                    manage::db_caiji(config::$database[$libs['db']]);
-                }
-            }
-            // site
-            if($is_db_site && $this->_task_struct->site_tag){
-                $site_info = $this->_site_info_get();
-                if ($site_info['config_db']) {
-                    $db_cfg = json_decode($site_info['config_db'], true);
-                    if ($db_cfg && $db_cfg['host']) {
-                        manage::db_site($db_cfg); 
-                    }
-                }
-            }
-        }
-    }
-
     /** 通过site_tag获得$site_info */
     protected function _site_info_get()
     {
@@ -260,7 +222,9 @@ abstract class task_base
             ];
             $this->_run_is = false;
             manage::logs_extend_set(['count' => $this->_task_struct->count]);
-            manage::db_caiji()->query("UPDATE ".manage::$table_task." SET `run_hostname` = :run_hostname ,`run_status` = :run_status ,`time_ignore` = :time_ignore ,`time_last` = :time_last ,`count` = `count` + 1 WHERE `task_id` = :task_id; ", $bind)->affected();
+            if(manage::$table_task){
+                manage::db_caiji()->query("UPDATE ".manage::$table_task." SET `run_hostname` = :run_hostname ,`run_status` = :run_status ,`time_ignore` = :time_ignore ,`time_last` = :time_last ,`count` = `count` + 1 WHERE `task_id` = :task_id; ", $bind)->affected();
+            }
         }
         manage::logs_write($this->_logs_status, $this->run_time_get(),true);
     }
@@ -284,7 +248,9 @@ abstract class task_base
                     'run_hostname' => gethostname(),
                     'run_status'   => $run_status,
                 ];
-                manage::db_caiji()->query("UPDATE ".manage::$table_task." SET `run_hostname` = :run_hostname ,`run_status` = :run_status ,`time_ignore` = :time_ignore ,`time_last` = :time_last  WHERE `task_id` = :task_id; ", $bind)->affected();
+                if(manage::$table_task){
+                    manage::db_caiji()->query("UPDATE ".manage::$table_task." SET `run_hostname` = :run_hostname ,`run_status` = :run_status ,`time_ignore` = :time_ignore ,`time_last` = :time_last  WHERE `task_id` = :task_id; ", $bind)->affected();
+                }
             }
         }
     }

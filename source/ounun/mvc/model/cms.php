@@ -4,7 +4,7 @@ namespace ounun\mvc\model;
 
 class cms
 {
-    /** @var 实例 */
+    /** @var self 实例 */
     protected static $instance;
 
     /**

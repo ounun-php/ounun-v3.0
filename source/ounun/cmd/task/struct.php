@@ -32,7 +32,7 @@ class struct
     /** @var int 任务组id */
     public $group_id = 0;
     /** @var int 类型 0:指定日期时间 1:间隔时间 */
-    public $type = 0;
+    public $type = 1;
     /** @var string 分类标识 */
     public $tag = '';
     /** @var string 子分类 */

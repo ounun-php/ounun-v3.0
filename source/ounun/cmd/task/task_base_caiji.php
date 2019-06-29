@@ -36,7 +36,7 @@ abstract class task_base_caiji extends task_base
     /** @var string 类型 */
     public static $site_type = purview::app_type_admin;
     /** @var string 采集  库标识（采集数据录入的数据库） */
-    public static $caiji_libs = 'caiji_no1';
+    public static $caiji_tag = 'caiji_no1';
     /** @var string 采集  库标识(outs) 输出     （采集数据录入的数据库） */
     public static $caiji_libs_table_outs = '<tag>_outs';
     /** @var string 采集  库标识(data) 采集的数据（采集数据录入的数据库） */
@@ -113,6 +113,22 @@ abstract class task_base_caiji extends task_base
     public function data_attachment()
     {
 
+    }
+
+    /**
+     * 捡查指定字段是否都有数据
+     */
+    protected function _data_valid(array $data = [],array $keys = [])
+    {
+        $rs = true;
+        foreach ($keys as $key){
+            if($data && isset($data[$key]) && $data[$key]){
+                $rs = true;
+            }else{
+                return false;
+            }
+        }
+        return $rs;
     }
 
     /**

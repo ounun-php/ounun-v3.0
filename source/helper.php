@@ -781,6 +781,15 @@ abstract class v
     /** @var \ounun\pdo DB */
     public static $db_v;
 
+    /** @return \ounun\pdo DB */
+    public static function db_v_get()
+    {
+        if (empty(static::$db_v)) {
+            static::$db_v = \ounun\pdo::instance(\ounun\config::database_default_get());
+        }
+        return static::$db_v;
+    }
+
     /** @var int cache_html_time */
     public static $cache_html_time = 2678400; // 31天
 
