@@ -168,7 +168,7 @@ class pdo
      */
     public function table(string $table = ''): self
     {
-        if ($this->_table && $table) {
+        if ($this->_table || $table) {
             $this->_clean();
         }
         $this->_table = $table;

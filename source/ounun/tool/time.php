@@ -32,7 +32,7 @@ class time
         // if($time > $time_curr){ return false; }
         $time_poor = $time_curr - $time;
         if ($time_poor <= 0) {
-            $str = '一眨眼之间';
+            $str = '刚刚';
         } else if ($time_poor < 60 && $time_poor > 0) {
             $str = $time_poor . '秒之前';
         } else if ($time_poor >= 60 && $time_poor <= 60 * 60) {

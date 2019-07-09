@@ -391,7 +391,9 @@ class config
             '{$static}' => static::$url_static,
             '{$upload}' => static::$url_upload,
             '{$static_g}' => static::$url_static_g,
-        //  '{$min}' => static::$global['static_cdn_min'] ? '.min' : '',
+
+            '{$sitename}' => i18n()::title,
+
             '/public/static_g/' => static::$url_static_g,
             '/public/static/' => static::$url_static,
             '/public/upload/' => static::$url_upload,

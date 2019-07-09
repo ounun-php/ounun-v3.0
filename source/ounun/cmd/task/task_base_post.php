@@ -35,32 +35,7 @@ abstract class task_base_post extends task_base
     public static $site_table_data = '';
 
 
-    /**
-     * @param array $input
-     * @param int $mode
-     * @param bool $is_pass_check
-     */
-    public function execute(array $input = [], int $mode = manage::Mode_Dateup, bool $is_pass_check = false)
-    {
-        try {
-            $this->_logs_status = manage::Logs_Succeed;
-            $is_caiji_api = $this->_caiji_seting();
-            if(empty($is_caiji_api)){
-                return ;
-            }
-            $loop_count = 5;
-            do{
-                list($loop, $loop_count) = $this->data_01($input,$loop_count);
-                $loop_count--;
-            }while($loop && $loop_count > 0);
-            // $this->data_01();
-            manage::logs_msg("Successful update:{$this->_task_struct->task_id}/{$this->_task_struct->task_name}", $this->_logs_status,__FILE__,__LINE__,time());
-        } catch (\Exception $e) {
-            $this->_logs_status = manage::Logs_Fail;
-            manage::logs_msg($e->getMessage(),$this->_logs_status,__FILE__,__LINE__,time());
-            manage::logs_msg('Fail Coll tag:'.static::$tag.' tag_sub:'.static::$tag_sub, manage::Logs_Fail,__FILE__,__LINE__,time());
-        }
-    }
+
 
 
     /** 发布 01 */

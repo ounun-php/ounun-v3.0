@@ -503,7 +503,7 @@ function extend_decode_json(string $extend_string)
 {
     $extend = [];
     if ($extend_string) {
-        $extend = json_decode($extend_string);
+        $extend = json_decode($extend_string,true);
     }
     return $extend;
 }

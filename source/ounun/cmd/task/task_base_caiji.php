@@ -3,6 +3,7 @@ namespace ounun\cmd\task;
 
 use ounun\mvc\model\admin\purview;
 use ounun\tool\db;
+use ounun\tool\time;
 
 abstract class task_base_caiji extends task_base
 {
@@ -115,8 +116,17 @@ abstract class task_base_caiji extends task_base
 
     }
 
+    public function check_01()
+    {
+        manage::logs_msg_warning("数据check 没定义", __FILE__, __LINE__, time());
+    }
+
+
     /**
      * 捡查指定字段是否都有数据
+     * @param array $data
+     * @param array $keys
+     * @return bool
      */
     protected function _data_valid(array $data = [],array $keys = [])
     {
@@ -129,6 +139,27 @@ abstract class task_base_caiji extends task_base
             }
         }
         return $rs;
+    }
+
+
+    /**
+     * @param string $caiji_tag  类型标识
+     * @param string $data_table 源表名
+     * @param string $data_id    数据ID
+     * @param string $remark     备注
+     * @param array $extend      扩展数据
+     */
+    protected function _error_update(string $caiji_tag,string $data_table,string $data_id,string $remark= '',array $extend=[]){
+        $bind = [
+            'caiji_tag' => $caiji_tag,
+            'data_table' => $data_table,
+            'data_id' => $data_id,
+            'status' => 1,
+            'time_add' => \time(),
+            'remark' => $remark,
+            'extend' => json_encode_unescaped($extend)
+        ];
+        manage::db_biz()->table('`sys_caiji_error`')->insert($bind);
     }
 
     /**
@@ -244,7 +275,7 @@ abstract class task_base_caiji extends task_base
             'time_last'    => ['default' => 0,     'type' => db::Type_Int], // 完成时间
 
             'execution_time' => ['default' => 0, 'type' => db::Type_Float], // 执行时间(秒)
-            'extend'         => ['extend' => [], 'type' => db::Type_Json],  // 任务参数paras/扩展json
+            'extend'         => ['default' => [], 'type' => db::Type_Json],  // 任务参数paras/扩展json
         ];
         if($data_id){
             $data['data_id'] = $data_id;
