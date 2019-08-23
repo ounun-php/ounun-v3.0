@@ -135,7 +135,7 @@ class template
     {
         if (empty(\v::$cache_html) || \v::$cache_html->stop) {
             // ob_start();
-            template::ob_start();
+            static::ob_start();
             register_shutdown_function([$this, 'callback'], false);
         }
     }
@@ -184,14 +184,10 @@ class template
         return strtr($buffer, config::template_replace_str_get());
     }
 
-    /**
-     * @param mixed $output_callback
-     * @param int   $chunk_size
-     * @param bool  $erase
-     */
-    static public function ob_start($output_callback = null,int $chunk_size = 0 , bool $erase = false){
+    /** */
+    static public function ob_start(){
         if(empty(static::$_ob_start)){
-            ob_start($output_callback,$chunk_size,$erase);
+            ob_start();
             static::$_ob_start = true;
         }
         return;
