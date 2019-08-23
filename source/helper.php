@@ -860,10 +860,16 @@ abstract class v
 
     /**
      * @param string $filename
+     * @param bool $is_out_buffer
+     * @param bool $is_out_get
+     * @param bool $is_out_post
+     * @param bool $is_out_url
+     * @param bool $is_run_time
+     * @param bool $is_bof
      */
-    public static function debug_init($filename='404'){
+    public static function debug_init($filename='404',$is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false){
         if (empty(static::$debug)) {
-            static::$debug = new \ounun\debug(\ounun\config::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', false, false, false, true);
+            static::$debug = new \ounun\debug(\ounun\config::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,$is_run_time,$is_bof);
         }
     }
 
