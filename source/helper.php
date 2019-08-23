@@ -859,6 +859,15 @@ abstract class v
     public static $debug;
 
     /**
+     * @param string $filename
+     */
+    public static function debug_init($filename='404'){
+        if (empty(static::$debug)) {
+            static::$debug = new \ounun\debug(\ounun\config::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', false, false, false, true);
+        }
+    }
+
+    /**
      * 调试日志
      * @param $k
      * @param $log
@@ -999,9 +1008,7 @@ abstract class v
     public function __call($method, $arguments)
     {
         header('HTTP/1.1 404 Not Found');
-        if (empty(static::$debug)) {
-            static::$debug = new \ounun\debug(\ounun\config::$dir_data . 'logs/error_404_' . date('Ymd') . '.txt', false, false, false, true);
-        }
+        $this->debug_init('404');
         error404("\$method:{$method} \$args:" . json_encode($arguments) . "");
     }
 }
