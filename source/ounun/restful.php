@@ -23,15 +23,17 @@ class restful  extends \v
         if($data){
             $this->_request_inputs = json_decode_array($data);
         }
-        if (!$mod) {
-            $mod = [\ounun\config::def_method];
-        }
-        $class = "{$this->_class}\\{$mod[0]}";
-        if(class_exists($class)){
-            \ounun\config::$view = $this;
-            new $class($mod,$this);
-        }else{
-            parent::__construct($mod);
+        if($this->_class){
+            if (!$mod) {
+                $mod = [\ounun\config::def_method];
+            }
+            $class = "{$this->_class}\\{$mod[0]}";
+            if(class_exists($class)){
+                \ounun\config::$view = $this;
+                new $class($mod,$this);
+            }else{
+                parent::__construct($mod);
+            }
         }
     }
 

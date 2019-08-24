@@ -11,10 +11,10 @@ abstract class restful
     /** @var \ounun\restful */
     protected $_restful;
 
-    public function __construct(array $mod,\ounun\restful $restful)
+    public function __construct(array $mod = [],?\ounun\restful $restful = null)
     {
-        $this->_mod= $mod;
-        $this->_restful = $restful;
+        $this->_mod = $mod;
+        $this->_restful = $restful??new \ounun\restful($mod);
 
         $m = $this->_restful->method_get();
         if('GET' == $m || 'POST' ==  $m || 'PUT' == $m || 'DELETE' == $m){
