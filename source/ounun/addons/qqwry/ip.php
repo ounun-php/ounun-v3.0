@@ -26,7 +26,7 @@ namespace plugins\qqwry;
 class ip
 {
     /** @var string  本插件所在目录 */
-    const Dir_Plugins =  __DIR__ . '/';
+    const Dir_Plugins = __DIR__ . 'ip.php/';
 
     /** @var self    实例 */
     protected static $instance;

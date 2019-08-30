@@ -10,17 +10,17 @@ namespace ounun;
 class agent
 {
     // 设备类型
-    const DEVICE_MOBILE = 1;
-    const DEVICE_DESKTOP = 2;
-    const DEVICE_UNKNOWN = -1;
+    const DEVICE_Mobile = 1;
+    const DEVICE_Desktop = 2;
+    const DEVICE_Unknown = -1;
 
     // 浏览器类型
-    const BROWSER_TYPE_IPHONE = 1;
-    const BROWSER_TYPE_IPAD = 2;
-    const BROWSER_TYPE_IPOD = 3;
-    const BROWSER_TYPE_ANDROID = 4;
-    const BROWSER_TYPE_XZAPP = 5;
-    const BROWSER_TYPE_UNKNOWN = -1;
+    const Browser_Type_IPHONE = 1;
+    const Browser_Type_IPAD = 2;
+    const Browser_Type_IPOD = 3;
+    const Browser_Type_ANDROID = 4;
+    const Browser_Type_XZAPP = 5;
+    const Browser_Type_UNKNOWN = -1;
 
     // 系统类型
     const OS_TYPE_IOS = 1;
@@ -32,12 +32,12 @@ class agent
     const RETINA_TYPE_NOT = 0;
 
     // 是否IOS6系统
-    const IOS6_YES = 1;
-    const IOS6_NOT = 0;
+    const Ios6_Yes = 1;
+    const Ios6_No = 0;
 
     // 是否微信打开
-    const MICRO_MESSAGE_YES = 1;
-    const MICRO_MESSAGE_NOT = 0;
+    const Wechat_Msg_Yes = 1;
+    const Wechat_Msg_No = 0;
 
     // APP已经安装
     const APP_INSTALLED_YES = 1;
@@ -60,26 +60,26 @@ class agent
     {
         $agent = self::getAgent($agent);
         if (stripos($agent, 'baiduboxapp') !== false) {
-            return self::BROWSER_TYPE_XZAPP;
+            return self::Browser_Type_XZAPP;
         }
 
         if (stripos($agent, 'iphone') !== false) {
-            return self::BROWSER_TYPE_IPHONE;
+            return self::Browser_Type_IPHONE;
         }
 
         if (stripos($agent, 'ipad') !== false) {
-            return self::BROWSER_TYPE_IPAD;
+            return self::Browser_Type_IPAD;
         }
 
         if (stripos($agent, 'ipod') !== false) {
-            return self::BROWSER_TYPE_IPOD;
+            return self::Browser_Type_IPOD;
         }
 
         if (stripos($agent, 'android') !== false) {
-            return self::BROWSER_TYPE_ANDROID;
+            return self::Browser_Type_ANDROID;
         }
 
-        return self::BROWSER_TYPE_UNKNOWN;
+        return self::Browser_Type_UNKNOWN;
     }
 
     // 系统类型
@@ -89,12 +89,12 @@ class agent
         $browserType = self::browserType($agent);
 
         switch ($browserType) {
-            case self::BROWSER_TYPE_IPHONE:
-            case self::BROWSER_TYPE_IPAD:
-            case self::BROWSER_TYPE_IPOD:
+            case self::Browser_Type_IPHONE:
+            case self::Browser_Type_IPAD:
+            case self::Browser_Type_IPOD:
                 $osType = self::OS_TYPE_IOS;
                 break;
-            case self::BROWSER_TYPE_ANDROID:
+            case self::Browser_Type_ANDROID:
                 $osType = self::OS_TYPE_ANDROID;
                 break;
             default:
@@ -108,9 +108,9 @@ class agent
     public static function deviceType()
     {
         if (self::isMobile()) {
-            return self::DEVICE_MOBILE;
+            return self::DEVICE_Mobile;
         } else {
-            return self::DEVICE_DESKTOP;
+            return self::DEVICE_Desktop;
         }
     }
 
@@ -133,9 +133,9 @@ class agent
         $agent = self::getAgent($agent);
 
         if (stripos($agent, 'iPhone OS 6')) {
-            return self::IOS6_YES;
+            return self::Ios6_Yes;
         } else {
-            return self::IOS6_NOT;
+            return self::Ios6_No;
         }
     }
 
@@ -145,9 +145,9 @@ class agent
         $agent = self::getAgent($agent);
 
         if (stripos($agent, 'MicroMessenger') !== false) {
-            return self::MICRO_MESSAGE_YES;
+            return self::Wechat_Msg_Yes;
         } else {
-            return self::MICRO_MESSAGE_NOT;
+            return self::Wechat_Msg_No;
         }
     }
 
@@ -161,7 +161,10 @@ class agent
         }
     }
 
-    // 是移动设备访问
+    /**
+     * 是移动设备访问
+     * @return bool
+     */
     public static function isMobile()
     {
         // 如果有HTTP_X_WAP_PROFILE则一定是移动设备
@@ -194,6 +197,10 @@ class agent
         return false;
     }
 
+    /**
+     * @param string $agent
+     * @return mixed|string
+     */
     public static function getAgent($agent = '')
     {
         $agent = empty($agent) ? $_SERVER['HTTP_USER_AGENT'] : $agent;

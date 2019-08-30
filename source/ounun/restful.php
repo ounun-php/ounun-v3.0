@@ -142,11 +142,19 @@ class restful  extends \v
         return $responseData;
     }
 
+    /**
+     * @param $responseData
+     * @return false|string
+     */
     public function encode_json($responseData) {
         $jsonResponse = json_encode($responseData);
         return $jsonResponse;
     }
 
+    /**
+     * @param $responseData
+     * @return mixed
+     */
     public function encode_xml($responseData) {
         // 创建 SimpleXMLElement 对象
         $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');

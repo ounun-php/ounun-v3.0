@@ -267,8 +267,8 @@ function https_is()
 function error(string $message = '', int $error_code = 1, $data = null, $extend = [])
 {
     $rs = [
-        'message' => $message,       'msg'    => $message,
-        'error_code' => $error_code, 'status' => $error_code,
+        'msg'    => $message,
+        'status' => $error_code,
     ];
     if ($data) {
         $rs['data'] = $data;
@@ -323,15 +323,15 @@ function succeed($data, string $message = '', $extend = [])
 {
     if ($extend) {
         return array_merge($extend, [
-            'message' => $message,  'msg'    => $message,
-            'error_code' => 0,      'status' => 0,
-            'data' => $data
+            'msg'    => $message,
+            'status' => 0,
+            'data'   => $data
         ]);
     }
     return [
-        'message'    => $message, 'msg'    => $message,
-        'error_code' => 0,        'status' => 0,
-        'data' => $data
+        'msg'    => $message,
+        'status' => 0,
+        'data'   => $data
     ];
 }
 
