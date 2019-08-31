@@ -30,13 +30,8 @@ abstract class task_base_post extends task_base
     /** @var string 采集  库标识(data) 采集的数据（采集数据录入的数据库） */
     public static $caiji_table_data = '`yst_leha_user`';
 
-
     /** @var string  网站数据 - 数据 - 表名 */
     public static $site_table_data = '';
-
-
-
-
 
     /** 发布 01 */
     public function data_01(array $input = [],int $loop_count = 5)
