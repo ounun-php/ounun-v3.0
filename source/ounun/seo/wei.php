@@ -9,13 +9,13 @@ class wei
 {
     public static function wei($str)
     {
-        return strtr($str, config\data::wei);
+        return strtr($str, data::wei);
     }
 
     public static function test()
     {
-        echo count(config\data::wei), "<br />\n";
-        $d = config\data::wei;
+        echo count(data::wei), "<br />\n";
+        $d = data::wei;
         $f = file_get_contents('42537.txt');
         $f = explode("\n", $f);
         foreach ($f as $v) {
