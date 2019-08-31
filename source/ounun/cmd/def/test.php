@@ -1,5 +1,4 @@
 <?php
-
 namespace ounun\cmd\def;
 
 class test extends \ounun\cmd\cmd

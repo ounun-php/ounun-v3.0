@@ -1,10 +1,6 @@
 <?php
-
-
 namespace ounun\cmd;
 
-
-use ounun\config;
 
 abstract class cmd_multiple extends cmd
 {

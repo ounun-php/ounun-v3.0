@@ -1,5 +1,4 @@
 <?php
-
 namespace ounun\cmd\def;
 
 use ounun\cmd\cmd;

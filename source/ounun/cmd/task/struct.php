@@ -1,5 +1,4 @@
 <?php
-
 namespace ounun\cmd\task;
 
 use ounun\utils\crontab;

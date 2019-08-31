@@ -1,5 +1,4 @@
 <?php
-
 namespace ounun\cache\drive;
 
 class redis extends base
