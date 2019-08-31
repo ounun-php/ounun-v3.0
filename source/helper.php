@@ -748,7 +748,8 @@ function sanitize_filename(string $string): string
  * 当前开发环境
  * @return string '','2','-dev'
  */
-function environment(){
+function environment()
+{
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
     }
