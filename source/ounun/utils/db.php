@@ -22,7 +22,7 @@ class db
      * @param array $data_default 默认字段数据
      * @param bool $is_update true:更新  false:插入
      * @param bool $is_update_default 数据插入 -> 本字段无效，
-     *                                           数据更新 -> true:已默认字段数据为主  false:已字段数据为主 
+     *                                           数据更新 -> true:已默认字段数据为主  false:已字段数据为主
      * @return array
      */
     static public function bind(array $bind_data, array $data_default, bool $is_update = true, bool $is_update_default = false)
