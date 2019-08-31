@@ -82,11 +82,11 @@ class api extends \v
     }
 
     /**
-     * @return \ounun\mvc\model\admin\secure
+     * @return \mvc\model\admin\secure
      */
     protected function _secure_check()
     {
-        $secure = new \ounun\mvc\model\admin\secure(config::$app_key_communication);
+        $secure = new \mvc\model\admin\secure(config::$app_key_communication);
         $rs = $secure->check($_GET, time());
         if (error_is($rs)) {
             exit(json_encode_unescaped($rs));

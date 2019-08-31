@@ -1,7 +1,6 @@
 <?php
 namespace ounun\cmd;
 
-
 class console
 {
     /** @var string 默认执行的命令 */
