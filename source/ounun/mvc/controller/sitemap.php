@@ -111,7 +111,7 @@ class sitemap extends \v
     {
         return '<?xml version="1.0" encoding="utf-8"?' . '>' . "\n"
             . '<sitemapindex>' . "\n"
-            . \ounun\tool\data::array2xml($sitemaps, 'sitemap') .
+            . \ounun\utils\data::array2xml($sitemaps, 'sitemap') .
            '</sitemapindex>';
     }
 

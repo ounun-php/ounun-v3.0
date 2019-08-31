@@ -1,5 +1,5 @@
 <?php
-namespace ounun\tool\curl;
+namespace ounun\utils\curl;
 
 class http
 {

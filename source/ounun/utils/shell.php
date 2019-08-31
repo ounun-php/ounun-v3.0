@@ -1,7 +1,5 @@
 <?php
-/** 命名空间 */
-
-namespace plugins;
+namespace ounun\utils;
 
 
 class shell

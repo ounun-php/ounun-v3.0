@@ -240,6 +240,46 @@ function go_msg(string $msg, string $url = ''): void
     }
 }
 
+
+/**
+ * 彈出alert對話框
+ * @param string $msg
+ * @param bool $outer
+ * @param bool $meta
+ * @return string
+ */
+function msg(string $msg, bool $outer = true, $meta = true): string
+{
+    $rs = "\n" . 'alert(' . json_encode($msg) . ');' . "\n";
+    if ($outer) {
+        if ($meta) {
+            $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+        } else {
+            $mt = '';
+        }
+        $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
+    }
+    return $rs;
+}
+
+/**
+ * 出错提示错
+ * @param string $msg
+ * @param bool $close
+ */
+function msg_close(string $msg, bool $close = false): void
+{
+    $rs = "\n" . 'alert(' . json_encode($msg) . ');' . "\n";
+    $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+    $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
+    echo $rs;
+    if ($close) {
+        // 本页自动关闭.
+        echo '<script type="text/javascript">window.opener = null; window.open("", "_self", ""); window.close(); </script>';
+    }
+    exit();
+}
+
 /**
  * 判断服务器是否是HTTPS连接
  * @return bool
@@ -365,7 +405,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
         // 返回xml格式数据
         case \ounun\mvc\c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
-            exit(\ounun\tool\data::xml_encode($data));
+            exit(\ounun\utils\data::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
         case \ounun\mvc\c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
@@ -404,6 +444,34 @@ function json_encode_unescaped($data): string
 function json_decode_array(?string $json_string)
 {
     return json_decode($json_string, true);
+}
+
+/**
+ * 获得 extend数据php
+ * @param string $extend_string
+ * @return array|mixed
+ */
+function extend_decode_php(string $extend_string)
+{
+    $ext = [];
+    if ($extend_string) {
+        $ext = unserialize($extend_string);
+    }
+    return $ext;
+}
+
+/**
+ * 获得 extend数据json
+ * @param string $extend_string
+ * @return array|mixed
+ */
+function extend_decode_json(string $extend_string)
+{
+    $extend = [];
+    if ($extend_string) {
+        $extend = json_decode($extend_string,true);
+    }
+    return $extend;
 }
 
 /**
@@ -492,34 +560,6 @@ function base58_decode($base58)
 }
 
 /**
- * 获得 extend数据php
- * @param string $extend_string
- * @return array|mixed
- */
-function extend_decode_php(string $extend_string)
-{
-    $ext = [];
-    if ($extend_string) {
-        $ext = unserialize($extend_string);
-    }
-    return $ext;
-}
-
-/**
- * 获得 extend数据json
- * @param string $extend_string
- * @return array|mixed
- */
-function extend_decode_json(string $extend_string)
-{
-    $extend = [];
-    if ($extend_string) {
-        $extend = json_decode($extend_string,true);
-    }
-    return $extend;
-}
-
-/**
  * 对字符串进行编码，这样可以安全地通过URL
  * @param string $string to encode
  * @return string
@@ -573,45 +613,6 @@ function short_url_decode(string $string = ''): int
         $string = substr($string, 1);
     }
     return $p;
-}
-
-/**
- * 彈出alert對話框
- * @param string $msg
- * @param bool $outer
- * @param bool $meta
- * @return string
- */
-function msg(string $msg, bool $outer = true, $meta = true): string
-{
-    $rs = "\n" . 'alert(' . json_encode($msg) . ');' . "\n";
-    if ($outer) {
-        if ($meta) {
-            $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
-        } else {
-            $mt = '';
-        }
-        $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
-    }
-    return $rs;
-}
-
-/**
- * 出错提示错
- * @param string $msg
- * @param bool $close
- */
-function msg_close(string $msg, bool $close = false): void
-{
-    $rs = "\n" . 'alert(' . json_encode($msg) . ');' . "\n";
-    $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
-    $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
-    echo $rs;
-    if ($close) {
-        // 本页自动关闭.
-        echo '<script type="text/javascript">window.opener = null; window.open("", "_self", ""); window.close(); </script>';
-    }
-    exit();
 }
 
 /**
@@ -689,18 +690,6 @@ function error404(string $msg = ''): void
 }
 
 /**
- * @param $delimiters
- * @param $string
- * @return array
- */
-function explodes(string $delimiters, string $string)
-{
-    $ready = \str_replace($delimiters, $delimiters[0], $string);
-    $launch = \explode($delimiters[0], $ready);
-    return $launch;
-}
-
-/**
  * Convert special characters to HTML safe entities.
  * 特殊字符转换成 HTML安全格式。
  * @param string $string to encode
@@ -759,13 +748,18 @@ function sanitize_filename(string $string): string
  * 当前开发环境
  * @return string '','2','-dev'
  */
-function environment()
-{
+function environment(){
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
     }
+    //
     if (is_file(Dir_Root . 'app/config.prod.php')) {
         $GLOBALS['_environment_'] = '';
+    } elseif (isset($GLOBALS['_environment_ini_']) && $GLOBALS['_environment_ini_'] && is_file($GLOBALS['_environment_ini_'])){
+        // Parse with sections
+        $ini = parse_ini_file($GLOBALS['_environment_ini_'], true);
+        $GLOBALS['_environment_'] = $ini['global']['environment'];
+        $GLOBALS['_environment_data_'] = $ini;
     } else {
         $env_file = isset($GLOBALS['_environment_file_']) && $GLOBALS['_environment_file_'] ? $GLOBALS['_environment_file_'] : '/www/wwwroot/release.txt';
         if (is_file($env_file)) {
@@ -777,7 +771,6 @@ function environment()
     }
     return $GLOBALS['_environment_'];
 }
-
 
 /**
  * 构造模块基类

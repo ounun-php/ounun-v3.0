@@ -183,8 +183,11 @@ class template
         return strtr($buffer, config::template_replace_str_get());
     }
 
-    /** */
-    static public function ob_start(){
+    /**
+     * 开启 ob_start
+     */
+    static public function ob_start()
+    {
         if(empty(static::$_ob_start)){
             ob_start();
             static::$_ob_start = true;

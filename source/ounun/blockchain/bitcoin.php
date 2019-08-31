@@ -1,4 +1,5 @@
 <?php
+namespace blockchain;
 /*
 EasyBitcoin-PHP
 
@@ -64,8 +65,6 @@ echo $bitcoin->error;
 echo $bitcoin->status;
 
 */
-
-namespace blockchain;
 
 class bitcoin
 {

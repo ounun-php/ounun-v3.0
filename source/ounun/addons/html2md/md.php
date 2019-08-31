@@ -1,6 +1,5 @@
 <?php
-
-namespace plugins;
+namespace ounun\addons\html2md;
 
 /*
     //display error in runtime

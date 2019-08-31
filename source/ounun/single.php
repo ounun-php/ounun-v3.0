@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dreamxyp
- * Date: 2019/3/9
- * Time: 10:02
- */
-
 namespace ounun;
 
 

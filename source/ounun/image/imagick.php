@@ -20,7 +20,12 @@ class imagick
         if ($this->image !== null) $this->image->destroy();
     }
 
-    // 载入图像
+    /**
+     * 载入图像
+     * @param $path
+     * @return \Imagick
+     * @throws \ImagickException
+     */
     public function open($path)
     {
         $this->image = new \Imagick($path);

@@ -2,8 +2,8 @@
 namespace ounun\cmd\task;
 
 use ounun\mvc\model\admin\purview;
-use ounun\tool\db;
-use ounun\tool\time;
+use ounun\utils\db;
+use ounun\utils\time;
 
 abstract class task_base_caiji extends task_base
 {

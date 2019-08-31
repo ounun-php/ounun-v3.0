@@ -1,7 +1,5 @@
 <?php
-/** 命名空间 */
-
-namespace plugins\captcha;
+namespace ounun\addons\captcha;
 
 /**
  * 认证码类

@@ -4,7 +4,6 @@ namespace ounun\mvc\model;
 
 
 use ounun\config;
-use ounun\tool\str;
 
 class oauth_cookie
 {

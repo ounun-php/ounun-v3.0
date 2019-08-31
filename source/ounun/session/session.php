@@ -1,7 +1,8 @@
 <?php
+namespace ounun\session;
 
-namespace ounun;
 
+use ounun\pdo;
 
 /**
  * Class session
@@ -303,7 +304,7 @@ class session implements \SessionHandlerInterface, \SessionUpdateTimestampHandle
         } elseif ($_COOKIE[$this->_session_name] && 32 == strlen($_COOKIE[$this->_session_name])) {
             $this->_session_id = $_COOKIE[$this->_session_name];
         } else {
-            $this->_session_id = tool\str::uniqid();
+            $this->_session_id = utils\str::uniqid();
         }
         return $this->_session_id;
     }

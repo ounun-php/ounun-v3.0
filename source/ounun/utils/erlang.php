@@ -1,6 +1,5 @@
 <?php
-
-namespace plugins;
+namespace ounun\utils;
 
 class erlang
 {

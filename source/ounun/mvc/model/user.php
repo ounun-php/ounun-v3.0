@@ -1,6 +1,4 @@
 <?php
-/** 命名空间 */
-
 namespace ounun\mvc\model;
 
 /**

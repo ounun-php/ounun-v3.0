@@ -1,6 +1,5 @@
 <?php
-
-namespace plugins\captcha;
+namespace ounun\addons\captcha;
 
 class session
 {

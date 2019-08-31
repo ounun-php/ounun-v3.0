@@ -1,6 +1,5 @@
 <?php
-
-namespace ounun\tool;
+namespace ounun\utils;
 
 /**
  * php解析crontab时间格式

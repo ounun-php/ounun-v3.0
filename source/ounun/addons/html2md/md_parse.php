@@ -1,6 +1,5 @@
 <?php
-
-namespace plugins;
+namespace ounun\addons\html2md;
 
 class md_parse
 {

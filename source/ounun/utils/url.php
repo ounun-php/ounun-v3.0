@@ -1,13 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dreamxyp
- * Date: 2019/3/2
- * Time: 23:50
- */
-
-namespace ounun\tool;
-
+namespace ounun\utils;
 
 class url
 {
@@ -17,7 +9,7 @@ class url
      * @param string $a_ext
      * @return string
      */
-    public function a(array $data, int $len = 0, string $a_ext = ''): string
+    static  public function a(array $data, int $len = 0, string $a_ext = ''): string
     {
         $tag = $len ? str::msubstr($data['title'], 0, $len, true) : $data['title'];
         return "<a href=\"{$data['url']}\" title=\"{$data['title']}\" {$a_ext}>{$tag}</a>";
@@ -28,13 +20,13 @@ class url
      * @param int $len
      * @return array
      */
-    public function a_m(array $urls, int $len = 0): array
+    static public function a_m(array $urls, int $len = 0): array
     {
         $rs = [];
         foreach ($urls as $v) {
             if ($v['url'] && $v['title']) {
                 $ext = $v['ext'] ? $v['ext'] : '';
-                $rs[] = $this->a($v, $len, $ext);
+                $rs[] = static::a($v, $len, $ext);
             }
         }
         return $rs;
@@ -46,9 +38,9 @@ class url
      * @param int $len
      * @return string
      */
-    public function a_s(array $urls, string $glue = "", int $len = 0): string
+    static  public function a_s(array $urls, string $glue = "", int $len = 0): string
     {
-        $rs = $this->a_m($urls, $len);
+        $rs = static::a_m($urls, $len);
         return implode($glue, $rs);
     }
 
@@ -58,18 +50,18 @@ class url
      * @param bool $is_html
      * @return array
      */
-    public function kv2a_m(array $array, string $url_fun, $is_html = true): array
+    static public function kv2a_m(array $array, string $url_fun, $is_html = true): array
     {
         $rs = [];
         foreach ($array as $id => $title) {
-            $url = $this->$url_fun($id);
+            $url = static::$url_fun($id);
             $rs[] = [
                 'title' => $title,
                 'url' => $url
             ];
         }
         if ($is_html) {
-            $rs = $this->a_m($rs);
+            $rs = static::a_m($rs);
         }
         return $rs;
     }
@@ -81,9 +73,9 @@ class url
      * @param string $glue
      * @return string
      */
-    public function kv2a_s(array $array, string $url_fun, string $glue = ""): string
+    static  public function kv2a_s(array $array, string $url_fun, string $glue = ""): string
     {
-        $rs = $this->kv2a_m($array, $url_fun, true);
+        $rs = static::kv2a_m($array, $url_fun, true);
         return implode($glue, $rs);
     }
 }

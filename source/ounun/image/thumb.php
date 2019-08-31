@@ -27,7 +27,7 @@ class thumb
      *  * @param  int $width    缩放后的宽度
      *  * @param  int $height   缩放后的高度
      *  * @param  string $qz    是新图片的前缀
-     *  * @return mixed      是缩放后的图片名称,失败返回false;
+     *  * @return mixed 是缩放后的图片名称,失败返回false;
      *  */
     public function thumb($name, $width, $height, $out_file_name, $force = false)
     {

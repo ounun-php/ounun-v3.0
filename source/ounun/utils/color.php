@@ -1,12 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dreamxyp
- * Date: 2019/3/2
- * Time: 23:42
- */
-
-namespace ounun\tool;
+namespace ounun\utils;
 
 
 class color

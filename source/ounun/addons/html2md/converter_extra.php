@@ -1,6 +1,5 @@
 <?php
-
-namespace plugins\html2markdown;
+namespace ounun\addons\html2md;
 
 class converter_extra extends converter
 {

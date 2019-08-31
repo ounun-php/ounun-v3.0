@@ -1,5 +1,5 @@
 <?php
-namespace ounun\tool;
+namespace ounun\utils;
 
 
 class hide

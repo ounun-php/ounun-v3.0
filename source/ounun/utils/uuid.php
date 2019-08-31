@@ -1,12 +1,5 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: dreamxyp
- * Date: 2019/5/11
- * Time: 03:38
- */
-
-namespace ounun\tool;
+namespace ounun\utils;
 
 
 class uuid

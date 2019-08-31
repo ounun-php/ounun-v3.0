@@ -130,6 +130,10 @@ class restful  extends \v
         exit($response);
     }
 
+    /**
+     * @param $responseData
+     * @return string
+     */
     public function encode_html($responseData) {
         if(is_array($responseData)){
             $htmlResponse = '<table style="border: darkcyan solid 1px;">';

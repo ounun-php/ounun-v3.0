@@ -2,7 +2,7 @@
 
 namespace ounun\mvc\model\admin;
 
-use plugins\xxtea;
+use ounun\utils\xxtea;
 
 class secure
 {

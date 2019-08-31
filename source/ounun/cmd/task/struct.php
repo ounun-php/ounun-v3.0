@@ -2,7 +2,7 @@
 
 namespace ounun\cmd\task;
 
-use ounun\tool\crontab;
+use ounun\utils\crontab;
 
 class struct
 {

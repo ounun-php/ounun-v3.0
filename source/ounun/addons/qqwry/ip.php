@@ -1,6 +1,5 @@
 <?php
-
-namespace plugins\qqwry;
+namespace ounun\addons\qqwry;
 
 /**
  * IP 地理位置查询类

@@ -1,5 +1,4 @@
 <?php
-
 namespace ounun\seo\config;
 
 class data
