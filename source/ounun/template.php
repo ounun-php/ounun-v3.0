@@ -51,7 +51,7 @@ class template
         if ($addons && is_array($addons)) {
             foreach ($addons as $v) {
                 $filename1 = $v['path'] . $addon_tag . '/template/' . $filename;
-             // echo "\$filename:{$filename1}\n";
+                // echo "\$filename:{$filename1}\n";
                 if (is_file($filename1)) {
                     return $filename1;
                 }
@@ -67,10 +67,10 @@ class template
      * @param array $styles
      * @return string
      */
-    public function tpl_fixed(string $filename, array $styles = []): string
+    public function tpl_fixed(string $filename, array $styles = [], bool $show_debug = true): string
     {
         $styles = $styles ? $styles : [$this->_style_name, $this->_style_name_default];
-        // print_r(['scfg::$tpl_dirs'=>scfg::$tpl_dirs,'$styles'=>$styles]);
+        // print_r(['config::$tpl_dirs'=>config::$tpl_dirs,'$styles'=>$styles]);
         foreach (config::$tpl_dirs as $dir) {
             foreach ($styles as $style) {
                 $filename2 = "{$dir}{$style}/{$filename}";
@@ -82,7 +82,9 @@ class template
                 }
             }
         }
-        $this->error($filename);
+        if($show_debug){
+            $this->error($filename);
+        }
         return '';
     }
 
@@ -123,7 +125,13 @@ class template
      */
     protected function error($filename)
     {
-        trigger_error("Can't find Template:{$filename} \ndirs:[" . implode(',', config::$tpl_dirs) . "] \nstyle:{$this->_style_name} \nstyle_default:{$this->_style_name_default}", E_USER_ERROR);
+        echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
+                    <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_style_name} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Style_default: </strong>{$this->_style_name_default} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>".implode('<br />', config::$tpl_dirs)." <br />
+              </div>";
+        trigger_error("Can't find Template:{$filename} \nstyle:{$this->_style_name} \nstyle_default:{$this->_style_name_default} \ndirs:[" . implode(',', config::$tpl_dirs) . "]", E_USER_ERROR);
     }
 
     /**

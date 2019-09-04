@@ -1,5 +1,4 @@
 <?php
-
 namespace ounun\mvc\model;
 
 abstract class cms

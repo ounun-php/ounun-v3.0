@@ -759,8 +759,8 @@ function environment()
     } elseif (isset($GLOBALS['_environment_ini_']) && $GLOBALS['_environment_ini_'] && is_file($GLOBALS['_environment_ini_'])){
         // Parse with sections
         $ini = parse_ini_file($GLOBALS['_environment_ini_'], true);
-        $GLOBALS['_environment_'] = $ini['global']['environment'];
-        $GLOBALS['_environment_data_'] = $ini;
+        $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
+        \ounun\config::environment_set($ini);
     } else {
         $env_file = isset($GLOBALS['_environment_file_']) && $GLOBALS['_environment_file_'] ? $GLOBALS['_environment_file_'] : '/www/wwwroot/release.txt';
         if (is_file($env_file)) {
@@ -844,10 +844,14 @@ abstract class v
      */
     static public function tpl_fixed(string $filename,string $addon_tag = ''): string
     {
+        $tpl = static::$tpl->tpl_fixed($filename,[],false);
+        if($tpl){
+            return $tpl;
+        }
         if($addon_tag){
             return static::$tpl->tpl_fixed_addon($filename,$addon_tag);
         }
-        return static::$tpl->tpl_fixed($filename);
+        return '';
     }
 
     /**
@@ -913,12 +917,6 @@ abstract class v
         \ounun\config::$view = $this;
         $this->$method($mod);
     }
-
-    /** @var string 当前面页(网址) */
-    // public $page_url = '';
-
-    /** @var string 当前面页(文件名) */
-    // public $page_file = '';
 
     /**
      * 初始化Page
@@ -1020,6 +1018,6 @@ abstract class v
     {
         header('HTTP/1.1 404 Not Found');
         $this->debug_init('404');
-        error404("\$method:{$method} \$args:" . json_encode($arguments) . "");
+        error404("\$method:{$method} \$args:" . json_encode($arguments) . " \$class:".get_class($this));
     }
 }

@@ -25,6 +25,7 @@ class config
     static public $database = [];
     /** @var string 默认 数据库 */
     static public $database_default = '';
+
     /** @var array 自动加载路径paths */
     static public $maps_paths = [];
     /** @var array 自动加载路径maps */
@@ -88,17 +89,14 @@ class config
     /** @var array 模板替换数据组 */
     static public $tpl_replace_str = [];
 
-    /** @var string 网站地址地图 */
-    static public $table_sitemap = ' `zqun_sitemap` ';
-    /** @var string 网站地址地图 Push记录 */
-    static public $table_sitemap_push = ' `zqun_sitemap_push` ';
+
 
     /** @var \ounun\mvc\model\i18n 语言包 */
     static public $i18n;
-    /** @var string 当前语言 */
-    static public $lang = 'zh_cn';
     /** @var string 默认语言 */
     static public $lang_default = 'zh_cn';
+    /** @var string 当前语言 */
+    static public $lang = 'zh_cn';
     /** @var array 支持的语言 */
     public static $langs = [
         "en_us" => "English", // "zh"=>"繁體中文",
@@ -161,6 +159,15 @@ class config
     }
 
     /**
+     * 本地环境变量设定
+     * @param array $ini
+     */
+    static public function environment_set(array $ini = [])
+    {
+        // print_r($ini);
+    }
+
+    /**
      * 设定公共配制数据
      * @param array $config
      */
@@ -190,22 +197,7 @@ class config
         }
     }
 
-    /**
-     * 设定路由数据
-     * @param array $routes
-     * @param array $routes_default
-     */
-    static public function routes_set(array $routes, array $routes_default = [])
-    {
-        if ($routes) {
-            foreach ($routes as $k => $v) {
-                static::$routes[$k] = $v;
-            }
-        }
-        if ($routes_default) {
-            static::$routes_default = $routes_default;
-        }
-    }
+
 
     /**
      * 设定地址
@@ -456,6 +448,11 @@ class config
         return $page_url;
     }
 
+    /**
+     * @param string $page_base_file
+     * @param string $page_url
+     * @param string $page_lang
+     */
     static public function url_page_set(string $page_base_file,string $page_url,string $page_lang)
     {
         /** @var string Base Page */
@@ -657,32 +654,18 @@ class config
 
     /**
      * 加载controller
-     * @param string  $class_filename
-     * @param string  $addon_tag
+     * @param string $class_filename
      * @return string
      */
-    static public function load_controller(string $class_filename, string $addon_tag = '')
+    static public function load_controller(string $class_filename)
     {
-        if($addon_tag){
-            $paths = static::$maps_paths['addons'];
-            if ($paths && is_array($paths)) {
-                foreach ($paths as $v) {
-                    $filename = $v['path'] . $class_filename;
-                    // echo "\$filename:{$filename}\n";
-                    if (is_file($filename)) {
-                        return $filename;
-                    }
-                }
-            }
-        }else{
-            $paths = static::$maps_paths['app'];
-            if ($paths && is_array($paths)) {
-                foreach ($paths as $v) {
-                    $filename = $v['path'] . static::$app_name . '/' . $class_filename;
-                    // echo "\$filename:{$filename}\n";
-                    if (is_file($filename)) {
-                        return $filename;
-                    }
+        $paths = static::$maps_paths['app'];
+        if ($paths && is_array($paths)) {
+            foreach ($paths as $v) {
+                $filename = $v['path'] . static::$app_name . '/' . $class_filename;
+            //  echo "\$filename:{$filename}\n";
+                if (is_file($filename)) {
+                    return $filename;
                 }
             }
         }
@@ -733,6 +716,42 @@ class config
 
     /** 路由数据(默认) */
     static public $routes_default = ['app' => 'www', 'url' => '/'];
+
+    /** 路由数据 */
+    static public $routes_cache = [];
+
+    /**
+     * 设定路由数据
+     * @param array $routes
+     * @param array $routes_default
+     * @param array $routes_cache
+     */
+    static public function routes_set(array $routes, array $routes_default = [],array $routes_cache = [])
+    {
+        if ($routes) {
+            foreach ($routes as $k => $v) {
+                static::$routes[$k] = $v;
+            }
+        }
+        if ($routes_default) {
+            static::$routes_default = $routes_default;
+        }
+        if($routes_cache) {
+            static::$routes_cache = $routes_cache;
+        }
+    }
+
+    /**
+     * #todo 快速路由
+     * @param array $mod
+     * @return array
+     */
+    static public function routes_get(array $mod = [])
+    {
+        $filename  = '';
+        $classname = '';
+        return [$filename,$classname,$mod];
+    }
 }
 
 /**
@@ -766,24 +785,19 @@ function start(array $mod, string $host)
     config::add_paths_app_instance(Dir_App, Dir_App . config::$app_name . '/', Dir_Template . config::$app_name . '/', 'app', (string)$val_0['tpl_style'], (string)$val_0['tpl_default'], true);
     // lang_set
     config::lang_set($lang);
+
     // 开始 重定义头
-    // header('X-Powered-By: Ounun.org');
+    header('X-Powered-By: cms.cc; ounun.org; v3.1.2');
+    // 设定 模块与方法(缓存)
+    list($filename,$classname,$mod) = config::routes_get($mod);
     // 设定 模块与方法
-    if (is_array($mod) && $mod[0]) {
-        /** 插件 */
-        if($mod[0] && $mod[1] && 'addons' == $mod[0]){
-            array_shift($mod);
-            $addon_tag = array_shift($mod);
-            $classname = config::$app_name == 'api' || config::$app_name == 'control' ? config::$app_name : 'web';
-            $filename  = config::load_controller("{$addon_tag}/{$classname}.php",$addon_tag);
-            $module    = "\\addons\\{$addon_tag}\\{$classname}";
-            if(empty($mod[0])){
-                $mod = [config::def_method];
-            }
-        }else{
-            $filename = config::load_controller("controller/{$mod[0]}.php");
+    if(empty($filename)){
+        if (is_array($mod) && $mod[0]) {
+            $filename  = config::load_controller("controller/{$mod[0]}.php");
+            $addon_tag = $mod[0];
             if ($filename) {
-                $module = $mod[0];
+                $module    = $mod[0];
+                $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
                 if ($mod[1]) {
                     array_shift($mod);
                 } else {
@@ -793,7 +807,8 @@ function start(array $mod, string $host)
                 if ($mod[1]) {
                     $filename = config::load_controller("controller/{$mod[0]}/{$mod[1]}.php");
                     if ($filename) {
-                        $module = $mod[0] . '\\' . $mod[1];
+                        $module    = $mod[0] . '\\' . $mod[1];
+                        $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
                         if ($mod[2]) {
                             array_shift($mod);
                             array_shift($mod);
@@ -803,46 +818,72 @@ function start(array $mod, string $host)
                     } else {
                         $filename = config::load_controller("controller/{$mod[0]}/index.php");
                         if ($filename) {
-                            $module = "{$mod[0]}\\index";
+                            $module    = "{$mod[0]}\\index";
+                            $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
                             array_shift($mod);
-                        } else {
-                            $module = config::def_module;
-                            $filename = config::load_controller("controller/index.php");
                         }
                     }
                 } else {
                     $filename = config::load_controller("controller/{$mod[0]}/index.php");
                     if ($filename) {
-                        $module = "{$mod[0]}\\index";
-                        $mod = [config::def_method];
-                        // array_shift($mod);
-                    } else {
-                        // 默认模块
-                        $module = config::def_module;
-                        $filename = config::load_controller("controller/index.php");
+                        $module    = "{$mod[0]}\\index";
+                        $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
+                        $mod       = [config::def_method];
                     }
                 } // end --------- if ($mod[1])
             } // end ------------- \Dir_App . "module/" . $mod[0] . '.php';
-            $module = '\\app\\' . config::$app_name . '\\controller\\' . $module;
-        } // end ----------------- if($mod[0] && $mod[1] && 'addons' == $mod[0])
-    } else {
-        // 默认模块 与 默认方法
-        $mod      =[config::def_method];
-        $module   = config::def_module;
-        $module   = '\\app\\' . config::$app_name . '\\controller\\' . $module;
-        $filename = config::load_controller("controller/index.php");
+            // echo "\$filename:".__LINE__." -->:{$filename}\n";
+        } else {
+            // 默认模块 与 默认方法
+            $module    = config::def_module;
+            $addon_tag = config::def_module;
+            $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
+            $mod       =[config::def_method];
+            $filename  = config::load_controller("controller/index.php");
+        }
+        // echo "\$filename:".__LINE__." -->:{$filename} \$addon_tag:{$addon_tag}\n";
+        if(empty($filename) && $addon_tag){
+            $app_name        = config::$app_name == 'api' || config::$app_name == 'control' ? config::$app_name : 'web';
+            $class_filename  = "{$addon_tag}/{$app_name}.php";
+            $classname       = "\\addons\\{$addon_tag}\\{$app_name}";
+
+            $paths           = config::$maps_paths['addons'];
+            if ($paths && is_array($paths)) {
+                foreach ($paths as $v) {
+                    $filename0 = $v['path'] . $class_filename;
+                    //  echo "\$filename0:{$filename0}\n";
+                    if (is_file($filename0)) {
+                        //  echo " --> \$filename000:{$filename}\n";
+                        $filename = $filename0;
+                        if ($mod[1]) {
+                            array_shift($mod);
+                        } else {
+                            $mod = [config::def_method];
+                        }
+                        break;
+                    }
+                }
+            }
+        } // end addons
+        //  echo "\$filename:".__LINE__." -->:{$filename}\n";
+        if(empty($filename)){
+            $module    = config::def_module;
+        //  $addon_tag = config::def_module;
+            $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
+            $filename  = config::load_controller("controller/index.php");
+        }
     }
     // 包括模块文件
     if ($filename) {
         require $filename;
-        if (class_exists($module, false)) {
-            new $module($mod);
+        if (class_exists($classname, false)) {
+            new $classname($mod);
             exit();
         } else {
-            $error = "Can't find controller:'{$module}' filename:" . $filename;
+            $error = "Can't find controller:'{$classname}' filename:" . $filename;
         }
     } else {
-        $error = "Can't find controller:{$module}";
+        $error = "Can't find controller:{$classname}";
     }
     header('HTTP/1.1 404 Not Found');
     trigger_error($error, E_USER_ERROR);

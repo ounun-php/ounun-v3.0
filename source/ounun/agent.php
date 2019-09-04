@@ -18,13 +18,13 @@ class agent
     const Browser_Type_IPAD = 2;
     const Browser_Type_IPOD = 3;
     const Browser_Type_ANDROID = 4;
-    const Browser_Type_XZAPP = 5;
+    const Browser_Type_XzApp = 5;
     const Browser_Type_UNKNOWN = -1;
 
     // 系统类型
-    const OS_TYPE_IOS = 1;
-    const OS_TYPE_ANDROID = 2;
-    const OS_TYPE_UNKNOWN = -1;
+    const Os_Type_Ios = 1;
+    const Os_Type_ANDROID = 2;
+    const Os_Type_UNKNOWN = -1;
 
     // 是否RETINA屏
     const RETINA_TYPE_YES = 1;
@@ -59,7 +59,7 @@ class agent
     {
         $agent = self::getAgent($agent);
         if (stripos($agent, 'baiduboxapp') !== false) {
-            return self::Browser_Type_XZAPP;
+            return self::Browser_Type_XzApp;
         }
 
         if (stripos($agent, 'iphone') !== false) {
@@ -91,13 +91,13 @@ class agent
             case self::Browser_Type_IPHONE:
             case self::Browser_Type_IPAD:
             case self::Browser_Type_IPOD:
-                $osType = self::OS_TYPE_IOS;
+                $osType = self::Os_Type_Ios;
                 break;
             case self::Browser_Type_ANDROID:
-                $osType = self::OS_TYPE_ANDROID;
+                $osType = self::Os_Type_ANDROID;
                 break;
             default:
-                $osType = self::OS_TYPE_UNKNOWN;
+                $osType = self::Os_Type_UNKNOWN;
         }
 
         return $osType;
@@ -119,7 +119,7 @@ class agent
         $agent = self::getAgent($agent);
         $osType = self::osType($agent);
 
-        if (($osType == self::OS_TYPE_IOS) && (self::isIos6($agent) != 1)) {
+        if (($osType == self::Os_Type_Ios) && (self::isIos6($agent) != 1)) {
             return self::RETINA_TYPE_YES;
         } else {
             return self::RETINA_TYPE_NOT;

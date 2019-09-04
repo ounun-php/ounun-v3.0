@@ -22,6 +22,8 @@
     "ext-memcached": "*",
     "ext-redis": "*",
     "ext-gd": "*",
+    "ext-xml": "*",
+    "ext-xmlrpc": "*",
     "ext-imagick": "*",
     "ext-simplexml": "*",
     "php": ">=7.2"
