@@ -742,15 +742,46 @@ class config
     }
 
     /**
-     * #todo 快速路由
+     * 模块 快速路由
      * @param array $mod
+     * @param string $addon_tag
      * @return array
      */
-    static public function routes_get(array $mod = [])
+    static public function routes_get(array $mod = [],string $addon_tag = '')
     {
-        $filename  = '';
-        $classname = '';
-        return [$filename,$classname,$mod];
+        $app_name            = static::$app_name == 'api' || static::$app_name == 'control' ? static::$app_name : 'web';
+        $class_filename      = '';
+        $filename            = '';
+        if(empty($addon_tag)){
+            $addon_tag       = (is_array($mod) && $mod[0]) ? $mod[0] : static::def_module;
+            if(static::$routes_cache[$addon_tag]){
+                $class_filename  = "{$addon_tag}/{$app_name}.php";
+                $classname       = "\\addons\\{$addon_tag}\\{$app_name}";
+            }
+        }else{
+            $class_filename  = "{$addon_tag}/{$app_name}.php";
+            $classname       = "\\addons\\{$addon_tag}\\{$app_name}";
+        }
+        // paths
+        if($class_filename){
+            $paths           = config::$maps_paths['addons'];
+            if ($paths && is_array($paths)) {
+                foreach ($paths as $v) {
+                    $filename = $v['path'] . $class_filename;
+                    //  echo "\$filename0:{$filename0}\n";
+                    if (is_file($filename)) {
+                        //  echo " --> \$filename000:{$filename}\n";
+                        if ($mod[1]) {
+                            array_shift($mod);
+                        } else {
+                            $mod = [config::def_method];
+                        }
+                        return [$filename,$classname,$mod];
+                    }
+                }
+            }
+        }
+        return [$filename,$class_filename,$mod];
     }
 }
 
@@ -789,7 +820,7 @@ function start(array $mod, string $host)
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org; v3.1.2');
     // 设定 模块与方法(缓存)
-    list($filename,$classname,$mod) = config::routes_get($mod);
+    list($filename,$classname,$mod) = config::routes_get($mod,'');
     // 设定 模块与方法
     if(empty($filename)){
         if (is_array($mod) && $mod[0]) {
@@ -838,32 +869,14 @@ function start(array $mod, string $host)
             $module    = config::def_module;
             $addon_tag = config::def_module;
             $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
-            $mod       =[config::def_method];
             $filename  = config::load_controller("controller/index.php");
+            if($filename){
+                $mod   =[config::def_method];
+            }
         }
         // echo "\$filename:".__LINE__." -->:{$filename} \$addon_tag:{$addon_tag}\n";
         if(empty($filename) && $addon_tag){
-            $app_name        = config::$app_name == 'api' || config::$app_name == 'control' ? config::$app_name : 'web';
-            $class_filename  = "{$addon_tag}/{$app_name}.php";
-            $classname       = "\\addons\\{$addon_tag}\\{$app_name}";
-
-            $paths           = config::$maps_paths['addons'];
-            if ($paths && is_array($paths)) {
-                foreach ($paths as $v) {
-                    $filename0 = $v['path'] . $class_filename;
-                    //  echo "\$filename0:{$filename0}\n";
-                    if (is_file($filename0)) {
-                        //  echo " --> \$filename000:{$filename}\n";
-                        $filename = $filename0;
-                        if ($mod[1]) {
-                            array_shift($mod);
-                        } else {
-                            $mod = [config::def_method];
-                        }
-                        break;
-                    }
-                }
-            }
+            list($filename,$classname,$mod) = config::routes_get($mod,$addon_tag);
         } // end addons
         //  echo "\$filename:".__LINE__." -->:{$filename}\n";
         if(empty($filename)){
