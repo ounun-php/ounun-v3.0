@@ -764,7 +764,7 @@ class config
         }
         // paths
         if($class_filename){
-            $paths           = config::$maps_paths['addons'];
+            $paths           = static::$maps_paths['addons'];
             if ($paths && is_array($paths)) {
                 foreach ($paths as $v) {
                     $filename = $v['path'] . $class_filename;
@@ -774,7 +774,7 @@ class config
                         if ($mod[1]) {
                             array_shift($mod);
                         } else {
-                            $mod = [config::def_method];
+                            $mod = [static::def_method];
                         }
                         return [$filename,$classname,$mod];
                     }
@@ -821,6 +821,7 @@ function start(array $mod, string $host)
     header('X-Powered-By: cms.cc; ounun.org; v3.1.2');
     // 设定 模块与方法(缓存)
     list($filename,$classname,$mod) = config::routes_get($mod,'');
+    // echo "\$filename:".__LINE__." -->:{$filename}\n";
     // 设定 模块与方法
     if(empty($filename)){
         if (is_array($mod) && $mod[0]) {
@@ -878,13 +879,14 @@ function start(array $mod, string $host)
         if(empty($filename) && $addon_tag){
             list($filename,$classname,$mod) = config::routes_get($mod,$addon_tag);
         } // end addons
-        //  echo "\$filename:".__LINE__." -->:{$filename}\n";
+        // echo "\$filename:".__LINE__." -->:{$filename}\n";
         if(empty($filename)){
             $module    = config::def_module;
         //  $addon_tag = config::def_module;
             $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
             $filename  = config::load_controller("controller/index.php");
         }
+        // echo "\$filename:".__LINE__." -->:{$filename}\n";
     }
     // 包括模块文件
     if ($filename) {
