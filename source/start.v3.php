@@ -303,18 +303,7 @@ class config
         }
     }
 
-    /**
-     * 设定模板替换
-     * @param array $data
-     */
-    static public function template_array_set(array $data)
-    {
-        if ($data && is_array($data)) {
-            foreach ($data as $key => $value) {
-                static::$tpl_replace_str[$key] = $value;
-            }
-        }
-    }
+
 
     /**
      * @param string $seo_title
@@ -342,6 +331,18 @@ class config
         }
     }
 
+    /**
+     * 设定模板替换
+     * @param array $data
+     */
+    static public function template_array_set(array $data)
+    {
+        if ($data && is_array($data)) {
+            foreach ($data as $key => $value) {
+                static::$tpl_replace_str[$key] = $value;
+            }
+        }
+    }
 
     /**
      * 设定模板替换
@@ -768,7 +769,7 @@ class config
             if ($paths && is_array($paths)) {
                 foreach ($paths as $v) {
                     $filename = $v['path'] . $class_filename;
-                    //  echo "\$filename0:{$filename0}\n";
+                    // echo "\$filename:{$filename0}\n";
                     if (is_file($filename)) {
                         //  echo " --> \$filename000:{$filename}\n";
                         if ($mod[1]) {
@@ -781,7 +782,7 @@ class config
                 }
             }
         }
-        return [$filename,$class_filename,$mod];
+        return ['','',$mod];
     }
 }
 
@@ -875,7 +876,7 @@ function start(array $mod, string $host)
                 $mod   =[config::def_method];
             }
         }
-        // echo "\$filename:".__LINE__." -->:{$filename} \$addon_tag:{$addon_tag}\n";
+        // echo "\$filename:".__LINE__." -->:{$filename}  --------- \$addon_tag:{$addon_tag}\n";
         if(empty($filename) && $addon_tag){
             list($filename,$classname,$mod) = config::routes_get($mod,$addon_tag);
         } // end addons
