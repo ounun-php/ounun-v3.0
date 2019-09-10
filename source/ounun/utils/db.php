@@ -15,6 +15,12 @@ class db
     const Type_Json = 'json';
     /** @var string 字符串类型 */
     const Type_String = 'string';
+    /** @var string 日期转秒数0点0分 */
+    const Type_Date2Time_00 = 'd2t00';
+    /** @var string 日期转秒数23点59分59秒 */
+    const Type_Date2Time_24 = 'd2t24';
+    /** @var string 日期时间转秒数 */
+    const Type_String2Time = 's2t';
 
     /**
      * 数据库bind
@@ -27,6 +33,23 @@ class db
      */
     static public function bind(array $bind_data, array $data_default, bool $is_update = true, bool $is_update_default = false)
     {
+        // extend ext
+        if($bind_data['ext'] && is_array($bind_data['ext'])){
+            if($bind_data['extend'] && is_string($bind_data['extend'])) {
+                $bind_data['extend'] = json_decode_array($bind_data['extend']);
+            }else{
+                $bind_data['extend'] = (array)$bind_data['extend'];
+            }
+            if(!is_array($bind_data['extend'])){
+                $bind_data['extend'] = [];
+            }
+            foreach ($bind_data['ext'] as $k=>$v){
+                if($v){
+                    $bind_data['extend'][$k]=$v;
+                }
+            }
+        }
+        // bind
         $bind = [];
         if ($is_update) {
             $fields = $is_update_default ? array_keys($data_default) : array_keys($bind_data);
@@ -52,6 +75,12 @@ class db
                             $bind[$field] = json_encode_unescaped($extend);
                         }
                     }
+                } elseif (static::Type_Date2Time_00 == $value['type']) {
+                    $bind[$field] = strtotime($bind_data[$field] . " 00:00:00");
+                } elseif (static::Type_Date2Time_24 == $value['type']) {
+                    $bind[$field] = strtotime($bind_data[$field] . " 23:59:59") + 1;
+                } elseif (static::Type_String2Time == $value['type']) {
+                    $bind[$field] = strtotime($bind_data[$field]);
                 } else {
                     $bind[$field] = (string)$bind_data[$field];
                 }

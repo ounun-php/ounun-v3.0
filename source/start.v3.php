@@ -381,11 +381,11 @@ class config
 
             '{$res}' => static::$url_res,
 
+            '{$sitename}' => i18n()::title,
+
             '{$static}' => static::$url_static,
             '{$upload}' => static::$url_upload,
             '{$static_g}' => static::$url_static_g,
-
-            '{$sitename}' => i18n()::title,
 
             '/public/static_g/' => static::$url_static_g,
             '/public/static/' => static::$url_static,
