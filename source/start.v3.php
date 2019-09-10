@@ -392,7 +392,7 @@ class config
             '{$upload}' => static::$url_upload,
             '{$static_g}' => static::$url_static_g,
 
-            '{$sitename}' => i18n()::title,
+            '{$sitename}' => \i18n()::title,
 
             '/public/static_g/' => static::$url_static_g,
             '/public/static/' => static::$url_static,
@@ -694,7 +694,7 @@ class config
      * @param string $dir
      * @param bool $is_auto_helper
      */
-    static public function load_config(string $dir, bool $is_auto_helper = false)
+    static public function load_config(string $dir, bool $is_auto_helper = true)
     {
         /** 加载helper */
         if ($is_auto_helper) {
