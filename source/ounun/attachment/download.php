@@ -1,10 +1,10 @@
 <?php
 namespace ounun\attachment;
 
-class download extends abs
+class download extends driver
 {
-	public $allow_exts = 'jpg|jpeg|gif|png|bmp',
-	       $site_url = SITE_URL;
+	public $allow_exts = 'jpg|jpeg|gif|png|bmp';
+	// public $site_url = SITE_URL;
 	
 	function __construct($dir = null, $allow_exts = null, $site_url = null)
     {
@@ -27,7 +27,7 @@ class download extends abs
     {
     	if (!preg_match("#^(".$this->site_url.")#", $file))
     	{
-    		$file = UPLOAD_URL.$this->by_file($file);
+    		$file = static::$url_.$this->by_file($file);
     	}
     	return $file;
     }

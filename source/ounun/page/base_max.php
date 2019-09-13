@@ -1,14 +1,16 @@
 <?php
 /**
- * 主要功能: 分頁,有問題問我吧,沒時間寫注
- *
- * dreamxyp(QQ:31996798) - Page.class.php
- * coding:夏一平
- * 創建時間:2006-10-30
- * @example
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 namespace ounun\page;
 
+
+/**
+ * 主要功能: 分頁,有問題問我吧,沒時間寫注
+ * Class base_max
+ * @package ounun\page
+ */
 class base_max
 {
     /** @var string  提示串 */
@@ -33,7 +35,7 @@ class base_max
     /** @var array */
     protected $_where_bind = [];
 
-    /** @var \ounun\pdo */
+    /** @var \ounun\db\pdo */
     protected $_db;
     /** @var string */
     protected $_table;
@@ -55,13 +57,13 @@ class base_max
     /**
      * 创建一个分页类
      * page constructor.
-     * @param \ounun\pdo $db
+     * @param \ounun\db\pdo $db
      * @param string $table
      * @param string $url
      * @param array $where
      * @param array $config
      */
-    public function __construct(\ounun\pdo $db, string $table, string $url, array $where = [], array $config = [])
+    public function __construct(\ounun\db\pdo $db, string $table, string $url, array $where = [], array $config = [])
     {
         $this->_db = $db;
         $this->_table = $table;

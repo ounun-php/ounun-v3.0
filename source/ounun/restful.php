@@ -1,4 +1,8 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 namespace ounun;
 
 class restful  extends \v
@@ -25,11 +29,11 @@ class restful  extends \v
         }
         if($this->_class){
             if (!$mod) {
-                $mod = [\ounun\config::def_method];
+                $mod = [\ounun::def_method];
             }
             $class = "{$this->_class}\\{$mod[0]}";
             if(class_exists($class)){
-                \ounun\config::$view = $this;
+                \ounun::$view = $this;
                 new $class($mod,$this);
             }else{
                 parent::__construct($mod);

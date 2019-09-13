@@ -1,11 +1,15 @@
 <?php
 /**
- * [KuaiWei System] Copyright (c) 2019 KuaiWei.CC
- * Kuaiwei is NOT a free software, it under the license terms, visited http://www.kuaiwei.cc/ for more details.
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 namespace ounun;
 
-// 接口输出类
+/**
+ * 接口输出类
+ * Class agent
+ * @package ounun
+ */
 class agent
 {
     // 设备类型

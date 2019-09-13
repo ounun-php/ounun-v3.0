@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 class form_element
 {
 	private static $enctype = 'application/x-www-form-urlencoded';

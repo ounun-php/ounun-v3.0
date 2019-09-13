@@ -1,4 +1,9 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
+
 // last updated by yanbingbing,
 // check is not empty string before regex check
 // if not isset or empty string return true (is valid)

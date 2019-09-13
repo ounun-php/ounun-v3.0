@@ -1,4 +1,15 @@
 <?php
+/** Ounun版本号 */
+
+use ounun\cache\buffer\html;
+
+define('Ounun_Version', '3.2.1');
+/** 是否Cli - 环境常量 */
+define('Is_Cli', PHP_SAPI == 'cli' ? true : false);
+/** 是否Win - 环境常量 */
+define('Is_Win', strpos(PHP_OS, 'WIN') !== false);
+/** root根目录 **/
+defined('Dir_Root') || define('Dir_Root', realpath(__DIR__ . '/../') . '/');
 /** libs库文件目录 **/
 defined('Dir_Ounun') || define('Dir_Ounun', __DIR__ . '/');
 /** libs目录 **/
@@ -395,27 +406,27 @@ function succeed_data($data)
 function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
-        $type = \ounun\mvc\c::Format_Json;
+        $type = \ounun\console\c::Format_Json;
     }
     switch ($type) {
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\mvc\c::Format_Json :
+        case \ounun\console\c::Format_Json :
             header('Content-Type:application/json; charset=utf-8');
             exit(json_encode($data, $json_options));
         // 返回xml格式数据
-        case \ounun\mvc\c::Format_Xml :
+        case \ounun\console\c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
             exit(\ounun\utils\data::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\mvc\c::Format_Jsonp:
+        case \ounun\console\c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
             exit($jsonp_callback . '(' . json_encode($data, $json_options) . ');');
         // 返回可执行的js脚本
-        case  \ounun\mvc\c::Format_JS :
-        case  \ounun\mvc\c::Format_Eval :
+        case  \ounun\console\c::Format_JS :
+        case  \ounun\console\c::Format_Eval :
             header('Content-Type:application/javascript; charset=utf-8');
             exit($data);
         // 返回可执行的js脚本
@@ -677,11 +688,11 @@ function error404(string $msg = ''): void
                     <h1>404 Not Found' . ($msg ? '(' . $msg . ')' : '') . '</h1>
                 </div>
                 <hr>
-                <div align="center"><a href="' . \ounun\config::$url_www . '">返回网站首页</a></div>
+                <div align="center"><a href="' . \ounun::$url_www . '">返回网站首页</a></div>
             </body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
-            <!-- ' . \ounun\config::$app_name . ' -->
+            <!-- ' . \ounun::$app_name . ' -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
@@ -754,19 +765,20 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     //
-    if (is_file(Dir_Root . 'app/config.prod.php')) {
-        $GLOBALS['_environment_'] = '';
-    } elseif (isset($GLOBALS['_environment_ini_']) && $GLOBALS['_environment_ini_'] && is_file($GLOBALS['_environment_ini_'])){
-        // Parse with sections
-        $ini = parse_ini_file($GLOBALS['_environment_ini_'], true);
-        $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
-        \ounun\config::environment_set($ini);
+    $env_file = Dir_Root.'.environment.ini';
+    if(is_file($env_file)){
+        $ini = parse_ini_file($env_file, true);
+        if(empty($ini)){
+            $GLOBALS['_environment_'] = '';
+        }else{
+            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
+            \ounun::environment_set($ini);
+        }
     } else {
-        $env_file = isset($GLOBALS['_environment_file_']) && $GLOBALS['_environment_file_'] ? $GLOBALS['_environment_file_'] : '/www/wwwroot/release.txt';
+        $env_file = Dir_Root . 'environment.txt';
         if (is_file($env_file)) {
             $GLOBALS['_environment_'] = '';
         } else {
-            $env_file = Dir_Root . 'environment.txt';
             $GLOBALS['_environment_'] = (is_file($env_file) && filesize($env_file) >= 1) ? trim(file_get_contents($env_file)) : '';
         }
     }
@@ -780,17 +792,17 @@ function environment()
  */
 abstract class v
 {
-    /** @var \ounun\mvc\model\cms cms */
+    /** @var \ounun\console\model\cms cms */
     public static $cms;
 
-    /** @var \ounun\pdo DB */
+    /** @var \ounun\db\pdo DB */
     public static $db_v;
 
-    /** @return \ounun\pdo DB */
+    /** @return \ounun\db\pdo DB */
     public static function db_v_get()
     {
         if (empty(static::$db_v)) {
-            static::$db_v = \ounun\pdo::instance(\ounun\config::database_default_get());
+            static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
         }
         return static::$db_v;
     }
@@ -801,7 +813,7 @@ abstract class v
     /** @var bool html_trim */
     public static $cache_html_trim = true;
 
-    /** @var \ounun\cache\html cache_html */
+    /** @var html cache_html */
     public static $cache_html;
 
     /**
@@ -810,13 +822,13 @@ abstract class v
      */
     public function cache_html($key)
     {
-        if ('' == Environment && \ounun\config::$global['cache_html']) {
-            $cfg = \ounun\config::$global['cache_html'];
-            $cfg['mod'] = 'html_' . \ounun\config::$app_name . \ounun\config::$tpl_style;
-            $key2 = \ounun\config::$app_name . '_' . \ounun\config::$tpl_style . '_' . $key;
-            $debug = \ounun\config::$global['debug'];
+        if ('' == Environment && \ounun::$global['cache_html']) {
+            $cfg = \ounun::$global['cache_html'];
+            $cfg['mod'] = 'html_' . \ounun::$app_name . \ounun::$tpl_style;
+            $key2 = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . $key;
+            $debug = \ounun::$global['debug'];
             $debug = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
-            static::$cache_html = new \ounun\cache\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
+            static::$cache_html = new \ounun\cache\buffer\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
             static::$cache_html->run(true);
         }
     }
@@ -878,7 +890,7 @@ abstract class v
      */
     public static function debug_init($filename='404',$is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false){
         if (empty(static::$debug)) {
-            static::$debug = new \ounun\debug(\ounun\config::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,$is_run_time,$is_bof);
+            static::$debug = new \ounun\debug(\ounun::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,$is_run_time,$is_bof);
         }
     }
 
@@ -911,10 +923,10 @@ abstract class v
     public function __construct($mod)
     {
         if (!$mod) {
-            $mod = [\ounun\config::def_method];
+            $mod = [\ounun::def_method];
         }
         $method = $mod[0];
-        \ounun\config::$view = $this;
+        \ounun::$view = $this;
         $this->$method($mod);
     }
 
@@ -930,34 +942,34 @@ abstract class v
     public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun\config::url_page($page_file);
-        url_check(ounun\config::$page_url, $ext_req, $domain);
+        \ounun::url_page($page_file);
+        url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html
         if('' == Environment ){
-            $debug = \ounun\config::$global['debug'];
+            $debug = \ounun::$global['debug'];
             static::$cache_html_trim = $debug && isset($debug['html_trim']) ? $debug['html_trim'] : $cache_html_trim;
         }else{
             static::$cache_html_trim = false;
         }
         if ($is_cache_html) {
             static::$cache_html_time = $cache_html_time > 300 ? $cache_html_time : static::$cache_html_time;
-            $this->cache_html(ounun\config::$page_url);
+            $this->cache_html(\ounun::$page_url);
         }
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new \ounun\template(\ounun\config::$tpl_style, \ounun\config::$tpl_default, static::$cache_html_trim);
+            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_default, static::$cache_html_trim);
         }
 
         // db
         if (empty(static::$db_v)) {
-            static::$db_v = \ounun\pdo::instance(\ounun\config::database_default_get());
+            static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
         }
 
         // cms
-        if (\ounun\config::$app_cms_classname) {
-            $cls = \ounun\config::$app_cms_classname;
+        if (\ounun::$app_cms_classname) {
+            $cls = \ounun::$app_cms_classname;
             static::$cms = new $cls(static::$db_v);
         }
     }
@@ -979,8 +991,8 @@ abstract class v
     {
         url_check('/robots.txt');
         header('Content-Type: text/plain');
-        if (file_exists(\ounun\config::$dir_app . 'robots.txt')) {
-            readfile(\ounun\config::$dir_app . 'robots.txt');
+        if (file_exists(\ounun::$dir_app . 'robots.txt')) {
+            readfile(\ounun::$dir_app . 'robots.txt');
         } else {
             exit("User-agent: *\nDisallow:");
         }
@@ -994,8 +1006,8 @@ abstract class v
     {
         url_check('/ads.txt');
         header('Content-Type: text/plain');
-        if (file_exists(\ounun\config::$dir_app . 'ads.txt')) {
-            readfile(\ounun\config::$dir_app . 'ads.txt');
+        if (file_exists(\ounun::$dir_app . 'ads.txt')) {
+            readfile(\ounun::$dir_app . 'ads.txt');
         } else {
             exit("google.com, pub-7081168645550959, DIRECT, f08c47fec0942fa0");
         }
@@ -1006,7 +1018,7 @@ abstract class v
      */
     public function favicon($mod)
     {
-        go_url(\ounun\config::$url_static . 'favicon.ico', false, 301);
+        go_url(\ounun::$url_static . 'favicon.ico', false, 301);
     }
 
     /**

@@ -8,17 +8,17 @@ class config
     static protected $_inst = [];
 
     /**
-     * @param \ounun\pdo $db
+     * @param \ounun\db\pdo $db
      * @param string $tag
      * @param array $config
      * @param string $config_key
      * @return $this
      */
-    static public function instance(string $tag = 'tag', \ounun\pdo $db = null, array $config = [], $config_key = 'cache_file')
+    static public function instance(string $tag = 'tag', \ounun\db\pdo $db = null, array $config = [], $config_key = 'cache_file')
     {
         if (empty(static::$_inst[$tag])) {
             if (empty($config)) {
-                $config = \ounun\config::$global[$config_key];
+                $config = \ounun::$global[$config_key];
             }
             static::$_inst[$tag] = new static($tag, $db, $config);
         }
@@ -31,7 +31,7 @@ class config
     /** @var core */
     protected $_cache;
 
-    /** @var \ounun\pdo */
+    /** @var \ounun\db\pdo */
     protected $_db;
 
     /** @var int 最后更新时间，大于这个时间数据都过期 */
@@ -39,11 +39,11 @@ class config
 
     /**
      * config constructor.
-     * @param \ounun\pdo $db
+     * @param \ounun\db\pdo $db
      * @param array $cache_config
      * @param string $tag
      */
-    public function __construct(string $tag, \ounun\pdo $db, array $cache_config)
+    public function __construct(string $tag, \ounun\db\pdo $db, array $cache_config)
     {
         $this->_db = $db;
         $this->_cache = new core();

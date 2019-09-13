@@ -1,9 +1,8 @@
 <?php
 /**
- * [KuaiWei System] Copyright (c) 2019 KuaiWei.CC
- * Kuaiwei is NOT a free software, it under the license terms, visited http://www.kuaiwei.cc/ for more details.
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
 namespace ounun\image;
 
 class image

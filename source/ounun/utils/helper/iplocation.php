@@ -1,4 +1,8 @@
-<?php 
+<?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 define('IPDATA_MINI', CMSTOP_PATH.DS.'resources'.DS.'ipdata'.DS.'mini.Dat');
 define('IPDATA_FULL', CMSTOP_PATH.DS.'resources'.DS.'ipdata'.DS.'QQWry.Dat');
 

@@ -1,0 +1,19 @@
+<?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
+namespace ounun\console\model;
+
+// "zh_cn"=>"简本中文",
+class i18n
+{
+    /** 语言标识 */
+    const lang             = 'zh_cn';
+    /** 语言名称 */
+    const lang_name        = '简本中文';
+    /** @var string 根据域名 得到对应模板 */
+    const tpl_style        = '_default';
+    /** @var string 模板(默认) */
+    const tpl_default      = '_default';
+}

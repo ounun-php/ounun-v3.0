@@ -1,6 +1,15 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 namespace ounun;
 
+
+/**
+ * Class template
+ * @package ounun
+ */
 class template
 {
     /** @var bool 是否开启ob_start */
@@ -129,7 +138,7 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_style_name} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style_default: </strong>{$this->_style_name_default} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>".implode('<br />', config::$tpl_dirs)." <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>".implode('<br />', \ounun::$tpl_dirs)." <br />
               </div>";
         trigger_error("Can't find Template:{$filename} \nstyle:{$this->_style_name} \nstyle_default:{$this->_style_name_default} \ndirs:[" . implode(',', config::$tpl_dirs) . "]", E_USER_ERROR);
     }
@@ -188,7 +197,7 @@ class template
         }
 
         // 替换
-        return strtr($buffer, config::template_replace_str_get());
+        return strtr($buffer, \ounun::template_replace_str_get());
     }
 
     /**

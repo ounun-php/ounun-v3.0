@@ -1,7 +1,4 @@
 <?php
-
-namespace ounun;
-
 /**
  * 路由
  * @param $routes      array  目录路由表
@@ -10,7 +7,7 @@ namespace ounun;
  * @param $default_app string 默认应用
  * @return string 应用
  */
-class config
+class ounun
 {
     /** @var string 默认模块名称 */
     const def_module = 'index';
@@ -91,7 +88,7 @@ class config
 
 
 
-    /** @var \ounun\mvc\model\i18n 语言包 */
+    /** @var \ounun\console\model\i18n 语言包 */
     static public $i18n;
     /** @var string 默认语言 */
     static public $lang_default = 'zh_cn';
@@ -395,7 +392,7 @@ class config
 
     /**
      * 语言包
-     * @return \ounun\mvc\model\i18n
+     * @return \ounun\console\model\i18n
      */
     static public function i18n_get()
     {
@@ -534,9 +531,9 @@ class config
     static public function add_paths_app_root(string $path, bool $is_auto_helper = false, bool $is_auto_cmd = false)
     {
         /** src-0 \         自动加载 */
-        \ounun\config::add_paths($path . 'src/', '', false);
+        \ounun::add_paths($path . 'src/', '', false);
         /** src-0 \addons   自动加载  */
-        \ounun\config::add_paths($path . 'addons/', 'addons', true);
+        \ounun::add_paths($path . 'addons/', 'addons', true);
 
         /** 加载helper */
         if ($is_auto_helper) {
@@ -569,11 +566,11 @@ class config
     static public function add_paths_app_instance(string $paths_app_root, string $paths_app_curr, string $paths_template, string $namespace_prefix = 'app', string $tpl_style = '', string $tpl_default = '', bool $is_auto_helper = true)
     {
         /** controller add_paths */
-        \ounun\config::add_paths($paths_app_root, $namespace_prefix, true);
+        static::add_paths($paths_app_root, $namespace_prefix, true);
         /** template_set */
-        \ounun\config::template_set($paths_template, $tpl_style, $tpl_default);
+        static::template_set($paths_template, $tpl_style, $tpl_default);
         /** load_config */
-        \ounun\config::load_config($paths_app_curr, $is_auto_helper);
+        static::load_config($paths_app_curr, $is_auto_helper);
     }
 
     /**
@@ -794,98 +791,98 @@ class config
 function start(array $mod, string $host)
 {
     // 语言
-    if ($mod && $mod[0] && config::$langs[$mod[0]]) {
+    if ($mod && $mod[0] && ounun::$langs[$mod[0]]) {
         $lang = array_shift($mod);
     } else {
-        $lang = config::$lang ? config::$lang : config::$lang_default;
+        $lang = ounun::$lang ? ounun::$lang : ounun::$lang_default;
     }
     // load_config 0 Dir
-    config::load_config(Dir_App, false);
+    ounun::load_config(Dir_App, false);
 
     // Routes
-    if ($mod && $mod[0] && config::$routes["{$host}/{$mod[0]}"]) {
+    if ($mod && $mod[0] && ounun::$routes["{$host}/{$mod[0]}"]) {
         $mod_0 = array_shift($mod);
-        $val_0 = config::$routes["{$host}/{$mod_0}"];
-    } elseif (config::$routes[$host]) {
-        $val_0 = config::$routes[$host];
+        $val_0 = ounun::$routes["{$host}/{$mod_0}"];
+    } elseif (ounun::$routes[$host]) {
+        $val_0 = ounun::$routes[$host];
     } else {
-        $val_0 = config::$routes_default;
+        $val_0 = ounun::$routes_default;
     }
     // apps_domain_set
-    config::app_name_path_set(Dir_Ounun, Dir_Root, Dir_Data, (string)$val_0['app'], (string)$val_0['url']);
+    ounun::app_name_path_set(Dir_Ounun, Dir_Root, Dir_Data, (string)$val_0['app'], (string)$val_0['url']);
     // add_paths_app_instance
-    config::add_paths_app_instance(Dir_App, Dir_App . config::$app_name . '/', Dir_Template . config::$app_name . '/', 'app', (string)$val_0['tpl_style'], (string)$val_0['tpl_default'], true);
+    ounun::add_paths_app_instance(Dir_App, Dir_App . ounun::$app_name . '/', Dir_Template . ounun::$app_name . '/', 'app', (string)$val_0['tpl_style'], (string)$val_0['tpl_default'], true);
     // lang_set
-    config::lang_set($lang);
+    ounun::lang_set($lang);
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org; v3.1.2');
     // 设定 模块与方法(缓存)
-    list($filename,$classname,$mod) = config::routes_get($mod,'');
+    list($filename,$classname,$mod) = ounun::routes_get($mod,'');
     // echo "\$filename:".__LINE__." -->:{$filename}\n";
     // 设定 模块与方法
     if(empty($filename)){
         if (is_array($mod) && $mod[0]) {
-            $filename  = config::load_controller("controller/{$mod[0]}.php");
+            $filename  = ounun::load_controller("controller/{$mod[0]}.php");
             $addon_tag = $mod[0];
             if ($filename) {
                 $module    = $mod[0];
-                $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
+                $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
                 if ($mod[1]) {
                     array_shift($mod);
                 } else {
-                    $mod = [config::def_method];
+                    $mod = [ounun::def_method];
                 }
             } else {
                 if ($mod[1]) {
-                    $filename = config::load_controller("controller/{$mod[0]}/{$mod[1]}.php");
+                    $filename = ounun::load_controller("controller/{$mod[0]}/{$mod[1]}.php");
                     if ($filename) {
                         $module    = $mod[0] . '\\' . $mod[1];
-                        $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
+                        $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
                         if ($mod[2]) {
                             array_shift($mod);
                             array_shift($mod);
                         } else {
-                            $mod = [config::def_method];
+                            $mod = [ounun::def_method];
                         }
                     } else {
-                        $filename = config::load_controller("controller/{$mod[0]}/index.php");
+                        $filename = ounun::load_controller("controller/{$mod[0]}/index.php");
                         if ($filename) {
                             $module    = "{$mod[0]}\\index";
-                            $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
+                            $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
                             array_shift($mod);
                         }
                     }
                 } else {
-                    $filename = config::load_controller("controller/{$mod[0]}/index.php");
+                    $filename = ounun::load_controller("controller/{$mod[0]}/index.php");
                     if ($filename) {
                         $module    = "{$mod[0]}\\index";
-                        $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
-                        $mod       = [config::def_method];
+                        $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
+                        $mod       = [ounun::def_method];
                     }
                 } // end --------- if ($mod[1])
             } // end ------------- \Dir_App . "module/" . $mod[0] . '.php';
             // echo "\$filename:".__LINE__." -->:{$filename}\n";
         } else {
             // 默认模块 与 默认方法
-            $module    = config::def_module;
-            $addon_tag = config::def_module;
-            $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
-            $filename  = config::load_controller("controller/index.php");
+            $module    = ounun::def_module;
+            $addon_tag = ounun::def_module;
+            $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
+            $filename  = ounun::load_controller("controller/index.php");
             if($filename){
-                $mod   =[config::def_method];
+                $mod   =[ounun::def_method];
             }
         }
         // echo "\$filename:".__LINE__." -->:{$filename}  --------- \$addon_tag:{$addon_tag}\n";
         if(empty($filename) && $addon_tag){
-            list($filename,$classname,$mod) = config::routes_get($mod,$addon_tag);
+            list($filename,$classname,$mod) = ounun::routes_get($mod,$addon_tag);
         } // end addons
         // echo "\$filename:".__LINE__." -->:{$filename}\n";
         if(empty($filename)){
-            $module    = config::def_module;
+            $module    = ounun::def_module;
         //  $addon_tag = config::def_module;
-            $classname = '\\app\\' . config::$app_name . '\\controller\\' . $module;
-            $filename  = config::load_controller("controller/index.php");
+            $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
+            $filename  = ounun::load_controller("controller/index.php");
         }
         // echo "\$filename:".__LINE__." -->:{$filename}\n";
     }
@@ -920,11 +917,11 @@ function start_web()
 function start_cmd($argv)
 {
     // load_config 0 Dir
-    config::load_config(Dir_App);
+    ounun::load_config(Dir_App);
     // cmd
     $cmd = is_file(Dir_App . 'cmd.php') ? include Dir_App . 'cmd.php' : [];
     // console
-    $c = new cmd\console($cmd);
+    $c = new ounun\console($cmd);
     $c->run($argv);
 }
 

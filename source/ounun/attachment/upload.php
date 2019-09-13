@@ -1,10 +1,11 @@
 <?php
 namespace ounun\attachment;
 
-class upload extends abs
+class upload extends driver
 {
-	public $allow_exts = 'gif|jpg|jpeg|bmp|png|txt|zip|rar|doc|docx|xls|ppt|pdf', //如果是*，代表任意类型
-	       $maxfilesize = 1024;
+	public $allow_exts = 'gif|jpg|jpeg|bmp|png|txt|zip|rar|doc|docx|xls|ppt|pdf'; //如果是*，代表任意类型
+
+    public $maxfilesize = 1024;
 	
 	function __construct($dir = null, $allow_exts = null, $maxfilesize = null)
 	{
@@ -26,20 +27,23 @@ class upload extends abs
     		return false;
     	}
     	
-        $info = array();
+        $info = [];
     	if (is_array($_FILES[$field]['name']))
     	{
     		foreach ($_FILES[$field]['name'] as $key=>$name)
     		{
-    			$file = array('tmp_name'=>$_FILES[$field]['tmp_name'][$key],
-    			              'name'=>$_FILES[$field]['name'][$key],
-    			              'size'=>$_FILES[$field]['size'][$key],
-    			              'type'=>$_FILES[$field]['type'][$key],
-    			              'error'=>$_FILES[$field]['error'][$key],
-    			              'rename'=>$rename
-    			              );
+    			$file = [
+                    'tmp_name'=>$_FILES[$field]['tmp_name'][$key],
+                    'name'=>$_FILES[$field]['name'][$key],
+                    'size'=>$_FILES[$field]['size'][$key],
+                    'type'=>$_FILES[$field]['type'][$key],
+                    'error'=>$_FILES[$field]['error'][$key],
+                    'rename'=>$rename
+                ];
     			$result = $this->move($file);
-    			if (!$result) return false;
+    			if (!$result) {
+                    return false;
+                }
     			$info[] = $result;
     		}
     	}
@@ -54,18 +58,19 @@ class upload extends abs
     
     function error()
     {
-    	$ERROR = array(1=>'上传的文件超过了 php.ini 中 upload_max_filesize 选项限制的值',
-    	               2=>'上传文件的大小超过了 HTML 表单中 MAX_FILE_SIZE 选项指定的值',
-    	               3=>'文件只有部分被上传',
-    	               4=>'没有文件被上传',
-    	               6=>'找不到临时文件夹',
-    	               7=>'文件写入失败',
-    	               10=>'上传文件格式不符合要求',
-    	               11=>'重命名文件格式不符合要求',
-    	               12=>'上传文件太大',
-    	               13=>'文件移动出错',
-    	               );
-    	return $ERROR[$this->errno];
+    	$error = [
+            1=>'上传的文件超过了 php.ini 中 upload_max_filesize 选项限制的值',
+            2=>'上传文件的大小超过了 HTML 表单中 MAX_FILE_SIZE 选项指定的值',
+            3=>'文件只有部分被上传',
+            4=>'没有文件被上传',
+            6=>'找不到临时文件夹',
+            7=>'文件写入失败',
+            10=>'上传文件格式不符合要求',
+            11=>'重命名文件格式不符合要求',
+            12=>'上传文件太大',
+            13=>'文件移动出错',
+        ];
+    	return $error[$this->errno];
     }
     
     private function check($file)
@@ -124,8 +129,7 @@ class upload extends abs
 
 		$filepath = $this->format(dirname($this->target), false).'/';
 		$info = array('alias'=>$file['name'], 'filename'=>$this->filename, 'filepath'=>$filepath, 'filemime'=>$file['type'], 'fileext'=>$fileext, 'filesize'=>$file['size']);
-		if ($this->is_image($file['name']))
-		{
+		if ($this->is_image($file['name'])) {
 			$info['isimage'] = 1;
 		}
 	    $this->files[] = $info;
