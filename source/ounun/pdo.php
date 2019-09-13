@@ -65,7 +65,7 @@ class pdo
     /** @var string pdo驱动默认为mysql */
     protected $_driver = 'mysql';
     /** @var string table前缀 - 替换成的前缀 */
-    protected $_table_prefix_replace = '';
+    protected $_table_prefix_replace = 'v1';
     /** @var string table前缀 - 被替换的常量 */
     protected $_table_prefix_search = '#@_';
 

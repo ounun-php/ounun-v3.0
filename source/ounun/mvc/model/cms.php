@@ -133,5 +133,27 @@ abstract class cms
      * @param bool $is_multi
      * @return mixed
      */
-    abstract protected function _lists_decode(array &$rs , bool $is_multi = true);
+    protected function _lists_decode(array &$rs , bool $is_multi = true){
+        if($is_multi) {
+            foreach ($rs as &$v) {
+                $this->_lists_decode($v,false);
+            }
+        }else{
+            if($rs['tags']){
+                $rs['tags'] = \addons\tag\apps::decode($rs['tags']);
+                // print_r($v['tags']);
+                if($rs['tags'] && is_array($rs['tags'])){
+                    foreach ($rs['tags'] as $v1){
+                        $this->tags[$rs['tag_id']] = $v1;
+                    }
+                }
+            }
+            if($rs['contents']){
+                $rs['contents'] = json_decode_array($rs['contents']);
+            }
+            if($rs['extend']){
+                $rs['extend'] = json_decode_array($rs['extend']);
+            }
+        }
+    }
 }

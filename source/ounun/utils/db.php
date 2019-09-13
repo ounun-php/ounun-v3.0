@@ -76,18 +76,47 @@ class db
                         }
                     }
                 } elseif (static::Type_Date2Time_00 == $value['type']) {
-                    $bind[$field] = strtotime($bind_data[$field] . " 00:00:00");
+                    $value_data  = $bind_data[$field];
+                    if(empty($value_data)){
+                        $value_data = $value['default'];
+                    }
+                    $bind[$field] = strtotime($value_data . " 00:00:00");
                 } elseif (static::Type_Date2Time_24 == $value['type']) {
-                    $bind[$field] = strtotime($bind_data[$field] . " 23:59:59") + 1;
+                    $value_data  = $bind_data[$field];
+                    if(empty($value_data)){
+                        $value_data = $value['default'];
+                    }
+                    $bind[$field] = strtotime($value_data . " 23:59:59") + 1;
                 } elseif (static::Type_String2Time == $value['type']) {
-                    $bind[$field] = strtotime($bind_data[$field]);
+                    $value_data  = $bind_data[$field];
+                    if(empty($value_data)){
+                        $value_data = $value['default'];
+                    }
+                    $bind[$field] = strtotime($value_data);
                 } else {
                     $bind[$field] = (string)$bind_data[$field];
                 }
             } elseif ($value) {
                 if (static::Type_Json == $value['type']) {
-                    $bind[$field] = json_encode_unescaped($value['default']);
-                }elseif(null === $value['default']){
+                    $extend = $value['default'];
+                    if(is_array($extend) || is_object($extend)){
+                        $bind[$field] = json_encode_unescaped($extend);
+                    }else{
+                        $extend = json_decode_array($bind_data[$field]);
+                        if ($extend) {
+                            $bind[$field] = json_encode_unescaped($extend);
+                        }
+                    }
+                }elseif (static::Type_Date2Time_00 == $value['type']) {
+                    $value_data = $value['default'];
+                    $bind[$field] = strtotime($value_data . " 00:00:00");
+                } elseif (static::Type_Date2Time_24 == $value['type']) {
+                    $value_data = $value['default'];
+                    $bind[$field] = strtotime($value_data . " 23:59:59") + 1;
+                } elseif (static::Type_String2Time == $value['type']) {
+                    $value_data = $value['default'];
+                    $bind[$field] = strtotime($value_data);
+                } elseif(null === $value['default']){
                     unset($bind[$field]);
                 } else {
                     $bind[$field] = $value['default'];
