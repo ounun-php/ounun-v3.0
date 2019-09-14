@@ -22,6 +22,7 @@ class ZipArchive {
 			"with 'zlib' support.\n");
 		}
 	}
+
 	public function open($filename, $flags=null)
 	{
 		$this->entrylist = array();

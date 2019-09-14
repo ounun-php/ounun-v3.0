@@ -2,6 +2,8 @@
 namespace ounun\cache;
 
 
+use ounun\cache;
+
 class config
 {
     /** @var array<\ounun\cache\config> */
@@ -28,7 +30,7 @@ class config
     /** @var array */
     protected $_cache_data = [];
 
-    /** @var core */
+    /** @var cache */
     protected $_cache;
 
     /** @var \ounun\db\pdo */
@@ -46,7 +48,7 @@ class config
     public function __construct(string $tag, \ounun\db\pdo $db, array $cache_config)
     {
         $this->_db = $db;
-        $this->_cache = new core();
+        $this->_cache = new cache();
         $this->_cache->config($cache_config, "config_{$tag}");
     }
 

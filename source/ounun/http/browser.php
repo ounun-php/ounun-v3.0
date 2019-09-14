@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+namespace ounun\http;
 
 /**
 * @version      $Id: browser.php 10707 2008-08-21 09:52:47Z eddieajau $
@@ -16,9 +17,6 @@
 * other free or open source software licenses.
 * See COPYRIGHT.php for copyright notices and details.
 */
-
-// Check to ensure this file is within the rest of the framework
-defined('JPATH_BASE') or die();
 
 /**
  * Browser class, provides capability information about the current web client.
@@ -34,7 +32,7 @@ defined('JPATH_BASE') or die();
  * @since       1.5
  */
 
-class JBrowser extends JObject
+class browser
 {
     /**
      * Major version number.

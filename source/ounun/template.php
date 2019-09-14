@@ -80,7 +80,7 @@ class template
     {
         $styles = $styles ? $styles : [$this->_style_name, $this->_style_name_default];
         // print_r(['config::$tpl_dirs'=>config::$tpl_dirs,'$styles'=>$styles]);
-        foreach (config::$tpl_dirs as $dir) {
+        foreach (\ounun::$tpl_dirs as $dir) {
             foreach ($styles as $style) {
                 $filename2 = "{$dir}{$style}/{$filename}";
                 if (is_file($filename2)) {

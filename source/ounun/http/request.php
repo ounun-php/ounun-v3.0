@@ -3,27 +3,31 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+namespace ounun\http;
+
 class request
 {
-	static $_request_url,
-	       $_request_uri,
-	       $_request_base,
-	       $_pathinfo;
+    public static $_request_url;
+    public static $_request_uri;
+    public static $_request_base;
+    public static $_pathinfo;
 	
-	public static function &get_instance()
+	public static function &i()
 	{
 		static $instance;
-		if (!is_null($instance)) return $instance;
-		$instance = new request();
+		if (!is_null($instance)) {
+            return $instance;
+        }
+		$instance = new self();
 		return $instance;
 	}
 
-	public static function get_method()
+	public static function method_get()
 	{
 		return $_SERVER['REQUEST_METHOD'];
 	}
 
-	public static function get_base()
+	public static function base_get()
 	{
 		if (!is_null(self::$_request_base)) return self::$_request_base;
 		$base = self::is_ssl() ? 'https://' : 'http://';
@@ -32,17 +36,17 @@ class request
 		return $base;
 	}
 	
-	public static function get_url()
+	public static function url_get()
 	{
 		if (!is_null(self::$_request_url)) return self::$_request_url;
 		$url = self::is_ssl() ? 'https://' : 'http://';
 		$url .= self::get_host();
-		$url .= self::get_uri();
+		$url .= self::uri_get();
 		self::$_request_url = $url;
 		return $url;
 	}
 
-	public static function get_uri()
+	public static function uri_get()
 	{
 		if (!is_null(self::$_request_uri)) return self::$_request_uri;
 
@@ -84,7 +88,7 @@ class request
 			self::$_pathinfo = $_SERVER['PATH_INFO'];
 			return $_SERVER['PATH_INFO'];
 		}
-		$pathinfo = substr(self::get_uri(), strlen(self::get_scriptname()));
+		$pathinfo = substr(self::uri_get(), strlen(self::get_scriptname()));
 		if(substr($pathinfo, 0, 1) == '/')
 		{
 			if ($_SERVER['QUERY_STRING']) $pathinfo = substr($pathinfo, 0, strpos($pathinfo, '?'));

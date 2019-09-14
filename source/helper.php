@@ -1,8 +1,5 @@
 <?php
 /** Ounun版本号 */
-
-use ounun\cache\buffer\html;
-
 define('Ounun_Version', '3.2.1');
 /** 是否Cli - 环境常量 */
 define('Is_Cli', PHP_SAPI == 'cli' ? true : false);
@@ -486,91 +483,6 @@ function extend_decode_json(string $extend_string)
 }
 
 /**
- * @param $string
- * @return bool|string
- */
-function base58_encode($string)
-{
-    $alphabet = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
-    $base = strlen($alphabet);
-    if (is_string($string) === false) {
-        return false;
-    }
-    if (strlen($string) === 0) {
-        return '';
-    }
-    $bytes = array_values(unpack('C*', $string));
-    $decimal = $bytes[0];
-    for ($i = 1, $l = count($bytes); $i < $l; $i++) {
-        $decimal = bcmul($decimal, 256);
-        $decimal = bcadd($decimal, $bytes[$i]);
-    }
-    $output = '';
-    while ($decimal >= $base) {
-        $div = bcdiv($decimal, $base, 0);
-        $mod = bcmod($decimal, $base);
-        $output .= $alphabet[$mod];
-        $decimal = $div;
-    }
-    if ($decimal > 0) {
-        $output .= $alphabet[$decimal];
-    }
-    $output = strrev($output);
-    foreach ($bytes as $byte) {
-        if ($byte === 0) {
-            $output = $alphabet[0] . $output;
-            continue;
-        }
-        break;
-    }
-    return (string)$output;
-}
-
-/**
- * 字附串
- * @param $base58
- * @return bool|string
- */
-function base58_decode($base58)
-{
-    $alphabet = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
-    $base = strlen($alphabet);
-
-    if (is_string($base58) === false) {
-        return false;
-    }
-    if (strlen($base58) === 0) {
-        return '';
-    }
-    $indexes = array_flip(str_split($alphabet));
-    $chars = str_split($base58);
-    foreach ($chars as $char) {
-        if (isset($indexes[$char]) === false) {
-            return false;
-        }
-    }
-    $decimal = $indexes[$chars[0]];
-    for ($i = 1, $l = count($chars); $i < $l; $i++) {
-        $decimal = bcmul($decimal, $base);
-        $decimal = bcadd($decimal, $indexes[$chars[$i]]);
-    }
-    $output = '';
-    while ($decimal > 0) {
-        $byte = bcmod($decimal, 256);
-        $output = pack('C', $byte) . $output;
-        $decimal = bcdiv($decimal, 256, 0);
-    }
-    foreach ($chars as $char) {
-        if ($indexes[$char] === 0) {
-            $output = "\x00" . $output;
-            continue;
-        }
-        break;
-    }
-    return $output;
-}
-
-/**
  * 对字符串进行编码，这样可以安全地通过URL
  * @param string $string to encode
  * @return string
@@ -624,21 +536,6 @@ function short_url_decode(string $string = ''): int
         $string = substr($string, 1);
     }
     return $p;
-}
-
-/**
- * 获得libs Data数据
- * @param string $data_mod
- * @param string $data_dir
- * @return mixed
- */
-function data(string $data_mod, string $data_dir)
-{
-    $filename = "{$data_dir}data.{$data_mod}.ini.php";
-    if (file_exists($filename)) {
-        return require $filename;
-    }
-    return null;
 }
 
 /**
@@ -813,7 +710,7 @@ abstract class v
     /** @var bool html_trim */
     public static $cache_html_trim = true;
 
-    /** @var html cache_html */
+    /** @var ounun\cache\buffer\html cache_html */
     public static $cache_html;
 
     /**

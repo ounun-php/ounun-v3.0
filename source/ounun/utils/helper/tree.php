@@ -15,7 +15,7 @@ class tree
 		$this->field_id = $id;
 		$this->field_parentid = $parentid;
 		$this->field_name = $name;
-		$this->db = & factory::db();
+		$this->db = & \v::db_v_get();
 	}
 
 	function set($data)

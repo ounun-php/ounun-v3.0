@@ -14,7 +14,9 @@ class download extends driver
     
     public function set($dir, $allow_exts = null, $site_url = null)
     {
-    	if (!is_null($site_url)) $this->site_url = $site_url;
+    	if (!is_null($site_url)) {
+            $this->site_url = $site_url;
+        }
         parent::set($dir, $allow_exts);
     }
     
@@ -25,23 +27,21 @@ class download extends driver
     
     private function by_file_callback($file)
     {
-    	if (!preg_match("#^(".$this->site_url.")#", $file))
-    	{
-    		$file = static::$url_.$this->by_file($file);
+    	if (!preg_match("#^(".static::$url_site.")#", $file)) {
+    		$file = static::$url_site.$this->by_file($file);
     	}
     	return $file;
     }
     
     public function by_file($file)
     {
-    	if (is_array($file))
-    	{
-    		return array_map(array($this, 'by_file'), $file);
-    	}
-    	else 
-    	{
+    	if (is_array($file)) {
+    		return array_map([$this, 'by_file'], $file);
+    	} else {
 	    	$path = $this->copy($file);
-	    	if (!$path) return false;
+	    	if (!$path){
+                return false;
+            }
 	    	$info = $this->info($path);
 	    	$this->files[] = $info;
 	    	return $info['filepath'].$info['filename'];
@@ -51,14 +51,18 @@ class download extends driver
     public function by_dir($dir)
     {
     	$data = @scandir($dir);
-    	if (!$data) return false;
+    	if (!$data) {
+            return false;
+        }
     	
-    	$file = array();
+    	$file = [];
     	foreach ($data as $v)
     	{
     		$v = $dir.$v;
-    		if (is_file($v)) $file[] = $v;
+    		if (is_file($v)) {
+                $file[] = $v;
+            }
     	}
-    	return array_map(array($this, 'by_file'), $file);
+    	return array_map([$this, 'by_file'], $file);
     }
 }

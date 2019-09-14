@@ -7,18 +7,18 @@ namespace ounun\utils\helper;
 
 class date
 {
-     protected $timestamp,
-               $year,
-               $month,
-               $day,
-               $hour,
-               $minute,
-               $second,
-               $yday,
-               $mday,
-               $wday,
-               $weekday,
-               $monthtext;
+    protected $timestamp;
+    protected $year;
+    protected $month;
+    protected $day;
+    protected $hour;
+    protected $minute;
+    protected $second;
+    protected $yday;
+    protected $mday;
+    protected $wday;
+    protected $weekday;
+    protected $monthtext;
 
     public function __construct($date = null)
     {
@@ -115,25 +115,24 @@ class date
 
     public function timediff($time, $precision = false)
     {
-        if(!is_numeric($precision) && !is_bool($precision)) 
-        {
-            static $_diff = array('y'=>'年', 'm'=>'个月', 'd'=>'天', 'w'=>'周', 's'=>'秒', 'h'=>'小时', 'm'=>'分钟');
+        if(!is_numeric($precision) && !is_bool($precision)) {
+            static $_diff = ['y'=>'年', 'm'=>'个月', 'd'=>'天', 'w'=>'周', 'h'=>'小时', 'i'=>'分钟', 's'=>'秒'];
             return ceil($this->diff($time, $precision)).$_diff[$precision].'前';
         }
         $diff = abs($this->totime($time) - $this->timestamp);
-        static $chunks = array(array(31536000, '年'), array(2592000, '个月'), array(604800, '周'), array(86400, '天'), array(3600, '小时'), array(60, '分钟'), array(1, '秒'));
+        static $chunks = [
+            [31536000, '年'],
+            [2592000 , '个月'], array(604800, '周'), array(86400, '天'), array(3600, '小时'), array(60, '分钟'), array(1, '秒')
+        ];
         $count =0;
         $since = '';
-        for($i = 0; $i < count($chunks); $i++)
-        {
-            if($diff>=$chunks[$i][0])
-            {
+        for($i = 0; $i < count($chunks); $i++) {
+            if($diff>=$chunks[$i][0]) {
                 $num   =  floor($diff/$chunks[$i][0]);
                 $since .= sprintf('%d'.$chunks[$i][1],$num);
                 $diff =  (int)($diff-$chunks[$i][0]*$num);
                 $count++;
-                if(!$precision || $count>=$precision) 
-                {
+                if(!$precision || $count>=$precision) {
                     break;
                 }
             }
@@ -210,9 +209,13 @@ class date
 
     public function __get($name)
     {
-    	if ($name == 'date') return $this->year.'-'.$this->month.'-'.$this->day;
-    	elseif (property_exists($this, $name)) return $this->$name;
-    	else return null;
+    	if ($name == 'date') {
+            return $this->year.'-'.$this->month.'-'.$this->day;
+        } elseif (property_exists($this, $name)) {
+            return $this->$name;
+        } else {
+            return null;
+        }
     }
     
     public function __tostring()
@@ -220,4 +223,3 @@ class date
         return $this->format();
     }
 }
-?>

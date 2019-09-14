@@ -8,9 +8,13 @@ namespace ounun;
 class restful  extends \v
 {
     protected $_class;
+
     protected $_method;
+
     protected $_request_gets;
+
     protected $_request_post;
+
     protected $_request_inputs;
 
     protected $_http_accept;
@@ -41,7 +45,7 @@ class restful  extends \v
         }
     }
 
-    public function set_headers(string $contentType, int $statusCode)
+    public function headers_set(string $contentType, int $statusCode)
     {
         $Http_Status_Message = [
             100 => 'Continue',
@@ -120,7 +124,7 @@ class restful  extends \v
     public function out($rawData,int $statusCode = 200,string $requestContentType='') {
 
         $requestContentType = $requestContentType??$this->_http_accept;
-        $this->set_headers($requestContentType, $statusCode);
+        $this->headers_set($requestContentType, $statusCode);
 
         if(strpos($requestContentType,'application/json') !== false){
             $response = $this->encode_json($rawData);

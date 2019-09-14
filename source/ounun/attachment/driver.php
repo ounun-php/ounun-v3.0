@@ -77,9 +77,12 @@ abstract class driver
 	
 	function copy($source, $target = null)
 	{
-		if (!$this->set_source($source)) return false;
-		if (!$this->set_target($target, pathinfo($source, PATHINFO_EXTENSION))) return false;
-        
+		if (!$this->set_source($source)) {
+            return false;
+        }
+		if (!$this->set_target($target, pathinfo($source, PATHINFO_EXTENSION))){
+            return false;
+        }
 		if (!@copy($this->source, $this->target)) {
 			return false;
 		}
@@ -88,17 +91,18 @@ abstract class driver
 	
 	function info($file = null)
 	{
-		if (is_null($file)) $file = $this->target;
+		if (is_null($file)) {
+            $file = $this->target;
+        }
 		
-		$info = array();
+		$info = [];
 		$pathinfo = pathinfo($file);
 		$info['filepath'] = $this->format($pathinfo['dirname'], false).'/';
 		$info['filename'] = $pathinfo['basename'];
 		$info['fileext'] = strtolower($pathinfo['extension']);
 		$info['filesize'] = filesize($file);
 		$info['isimage'] = in_array($info['fileext'], array('jpg', 'jpeg', 'png', 'gif', 'bmp')) ? 1 : 0;
-		if ($info['isimage'])
-		{
+		if ($info['isimage']) {
 			$image = @getimagesize($file);
 			$info['filemime'] = $image['mime'];
 		}

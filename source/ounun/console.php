@@ -5,7 +5,6 @@
  */
 namespace ounun;
 
-
 use ounun\console\cmd;
 
 class console
@@ -69,7 +68,7 @@ class console
         $this->name = $name;
         $this->version = $version;
 
-        $cmds = array_merge(self::$default_cmds, $cmds);
+        $cmds = array_merge(static::$default_cmds, $cmds);
         if (is_array($cmds)) {
             foreach ($cmds as $cmd) {
                 if (class_exists($cmd)) {
@@ -102,7 +101,7 @@ class console
     {
         // print_r(['$argv'=>$argv]);
         if (empty($argv) || empty($argv[1]) || '--help' == $argv[1] || '--list' == $argv[1]) {
-            $command = $this->commands[self::Default_Cmd];
+            $command = $this->commands[static::Default_Cmd];
             $command->execute($argv);
         } else {
             $command = $this->commands[$argv[1]];
@@ -112,15 +111,15 @@ class console
                 } else {
                     $run_time = 0 - microtime(true);
                     $run_cmd = str_pad($argv[1], 16);
-                    static::echo("-- runing... {$run_cmd} " . date("Y-m-d H:i:s") . "             --------------------", self::Color_Cyan);
+                    static::echo("-- runing... {$run_cmd} " . date("Y-m-d H:i:s") . "             --------------------", static::Color_Cyan);
                     $command->execute($argv);
                     $run_time += microtime(true);
                     static::echo("-- done      {$run_cmd} " . date("Y-m-d H:i:s") . " run:" . str_pad(round($run_time, 4) . 's', 8) . "--------------------", self::Color_Cyan);
                 }
             } else {
-                static::echo("命令:{$argv[1]} 不存在!", self::Color_Light_Red);
-                static::echo("你可以尝试下面", self::Color_Green);
-                $command = $this->commands[self::Default_Cmd];
+                static::echo("命令:{$argv[1]} 不存在!", static::Color_Light_Red);
+                static::echo("你可以尝试下面", static::Color_Green);
+                $command = $this->commands[static::Default_Cmd];
                 $command->execute($argv);
             }
         }

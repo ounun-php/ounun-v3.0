@@ -84,7 +84,7 @@ class pinyin_gbk
         if ($from_encoding != 'gbk') {
             $string = mb_convert_encoding($string, 'gbk', $from_encoding);
         }
-        $_res = array();
+        $_res = [];
         for ($i = 0; $i < strlen($string); $i++) {
             $_P = ord($string[$i]);
             if ($_P > 0x80) {
@@ -142,58 +142,7 @@ class pinyin_gbk
     }
 
 
-    /**
-     * 汉字转拼单
-     * @param $str
-     * @param int $ishead
-     * @param int $isclose
-     * @return string
-     */
-    function pinyin2($str, $ishead = 0, $isclose = 1)
-    {
-        $str = \util::u2g($str);//转成GBK
-        global $pinyins;
-        $restr = '';
-        $str = trim($str);
-        $slen = strlen($str);
-        if ($slen < 2) {
-            return $str;
-        }
-        if (count($pinyins) == 0) {
-            $fp = fopen('./Lib/Conf/pinyin.dat', 'r');
-            if ($fp) {
-                while (!feof($fp)) {
-                    $line = trim(fgets($fp));
-                    $pinyins[$line[0] . $line[1]] = substr($line, 3, strlen($line) - 3);
-                }
-            }
-            fclose($fp);
-        }
-        for ($i = 0; $i < $slen; $i++) {
-            if (ord($str[$i]) > 0x80) {
-                $c = $str[$i] . $str[$i + 1];
-                $i++;
-                if (isset($pinyins[$c])) {
-                    if ($ishead == 0) {
-                        $restr .= $pinyins[$c];
-                    } else {
-                        $restr .= $pinyins[$c][0];
-                    }
-                } else {
-                    $restr .= "_";
-                }
-                //}else if( eregi("[a-z0-9]",$str[$i]) )
-            } else if (preg_match('/[a-z0-9]/i', $str[$i])) {
-                $restr .= $str[$i];
-            } else {
-                $restr .= "_";
-            }
-        }
-        if ($isclose == 0) {
-            unset($pinyins);
-        }
-        return $restr;
-    }
+
 
     /**
      * 汉字转拼单

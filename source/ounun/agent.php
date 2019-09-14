@@ -23,12 +23,12 @@ class agent
     const Browser_Type_IPOD = 3;
     const Browser_Type_ANDROID = 4;
     const Browser_Type_XzApp = 5;
-    const Browser_Type_UNKNOWN = -1;
+    const Browser_Type_Unknown = -1;
 
     // 系统类型
     const Os_Type_Ios = 1;
     const Os_Type_ANDROID = 2;
-    const Os_Type_UNKNOWN = -1;
+    const Os_Type_Unknown = -1;
 
     // 是否RETINA屏
     const RETINA_TYPE_YES = 1;
@@ -43,15 +43,15 @@ class agent
     const Wechat_Msg_No = 0;
 
     // APP已经安装
-    const APP_INSTALLED_YES = 1;
-    const APP_INSTALLED_NOT = 0;
+    const App_Installed_Yes = 1;
+    const App_Installed_Not = 0;
 
     // 得到agent完整类型信息
-    public static function getDeviceInfo()
+    public static function device_info_get()
     {
         return [
             'deviceType' => self::deviceType(),
-            'browserType' => self::browserType(),
+            'browserType' => self::browser_type(),
             'isRetina' => self::isRetina(),
             'osType' => self::osType(),
             'isIos6' => self::isIos6(),
@@ -59,7 +59,7 @@ class agent
     }
 
     // 浏览器类型
-    public static function browserType($agent = '')
+    public static function browser_type($agent = '')
     {
         $agent = self::getAgent($agent);
         if (stripos($agent, 'baiduboxapp') !== false) {
@@ -82,14 +82,14 @@ class agent
             return self::Browser_Type_ANDROID;
         }
 
-        return self::Browser_Type_UNKNOWN;
+        return self::Browser_Type_Unknown;
     }
 
     // 系统类型
     public static function osType($agent = '')
     {
         $agent = self::getAgent($agent);
-        $browserType = self::browserType($agent);
+        $browserType = self::browser_type($agent);
 
         switch ($browserType) {
             case self::Browser_Type_IPHONE:
@@ -101,7 +101,7 @@ class agent
                 $osType = self::Os_Type_ANDROID;
                 break;
             default:
-                $osType = self::Os_Type_UNKNOWN;
+                $osType = self::Os_Type_Unknown;
         }
 
         return $osType;
@@ -158,9 +158,9 @@ class agent
     public static function isAppInstalled()
     {
         if (isset($_GET['isappinstalled']) && ($_GET['isappinstalled'] == 1)) {
-            return self::APP_INSTALLED_YES;
+            return self::App_Installed_Yes;
         } else {
-            return self::APP_INSTALLED_NOT;
+            return self::App_Installed_Not;
         }
     }
 
@@ -180,10 +180,12 @@ class agent
         }
         // 脑残法，判断手机发送的客户端标志,兼容性有待提高
         if (isset ($_SERVER['HTTP_USER_AGENT'])) {
-            $clientkeywords = array('nokia', 'sony', 'ericsson', 'mot', 'samsung', 'htc', 'sgh', 'lg', 'sharp',
+            $clientkeywords = [
+                'nokia', 'sony', 'ericsson', 'mot', 'samsung', 'htc', 'sgh', 'lg', 'sharp',
                 'sie-', 'philips', 'panasonic', 'alcatel', 'lenovo', 'iphone', 'ipod', 'blackberry', 'meizu',
                 'android', 'netfront', 'symbian', 'ucweb', 'windowsce', 'palm', 'operamini', 'operamobi', 'openwave',
-                'nexusone', 'cldc', 'midp', 'wap', 'mobile', 'WindowsWechat');
+                'nexusone', 'cldc', 'midp', 'wap', 'mobile', 'WindowsWechat'
+            ];
             // 从HTTP_USER_AGENT中查找手机浏览器的关键字
             if (preg_match("/(" . implode('|', $clientkeywords) . ")/i", strtolower($_SERVER['HTTP_USER_AGENT']))) {
                 return true;

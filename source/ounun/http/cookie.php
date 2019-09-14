@@ -19,7 +19,7 @@ class cookie
         $this->_domain = $domain;
     }
 
-    function set($var, $value = null, $time = 0)
+    public function set($var, $value = null, $time = 0)
     {
         if (is_null($value)) {
             $time = time() - 3600;
@@ -38,7 +38,7 @@ class cookie
         }
     }
 
-    function get($var)
+    public function get($var)
     {
         $var = $this->_prefix.$var;
         return isset($_COOKIE[$var]) ? $_COOKIE[$var] : false;
