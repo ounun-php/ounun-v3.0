@@ -753,22 +753,18 @@ function environment()
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
     }
-    //
-    if (is_file(Dir_Root . 'app/config.prod.php')) {
-        $GLOBALS['_environment_'] = '';
-    } elseif (isset($GLOBALS['_environment_ini_']) && $GLOBALS['_environment_ini_'] && is_file($GLOBALS['_environment_ini_'])){
-        // Parse with sections
-        $ini = parse_ini_file($GLOBALS['_environment_ini_'], true);
-        $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
-        \ounun\config::environment_set($ini);
-    } else {
-        $env_file = isset($GLOBALS['_environment_file_']) && $GLOBALS['_environment_file_'] ? $GLOBALS['_environment_file_'] : '/www/wwwroot/release.txt';
-        if (is_file($env_file)) {
+    /** @var string $env_file 读取环境配制 */
+    $env_file = Dir_Root.'.environment.php';
+    if(is_file($env_file)){
+        $ini = require $env_file;
+        if(empty($ini)){
             $GLOBALS['_environment_'] = '';
-        } else {
-            $env_file = Dir_Root . 'environment.txt';
-            $GLOBALS['_environment_'] = (is_file($env_file) && filesize($env_file) >= 1) ? trim(file_get_contents($env_file)) : '';
+        }else{
+            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
+            \ounun\config::environment_set($ini);
         }
+    } else {
+        $GLOBALS['_environment_'] = '2';
     }
     return $GLOBALS['_environment_'];
 }
