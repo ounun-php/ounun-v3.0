@@ -661,10 +661,10 @@ function environment()
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
     }
-    //
-    $env_file = Dir_Root.'.environment.ini';
+    /** @var string $env_file 读取环境配制 */
+    $env_file = Dir_Root.'.environment.php';
     if(is_file($env_file)){
-        $ini = parse_ini_file($env_file, true);
+        $ini = require $env_file;
         if(empty($ini)){
             $GLOBALS['_environment_'] = '';
         }else{
@@ -672,12 +672,7 @@ function environment()
             \ounun::environment_set($ini);
         }
     } else {
-        $env_file = Dir_Root . 'environment.txt';
-        if (is_file($env_file)) {
-            $GLOBALS['_environment_'] = '';
-        } else {
-            $GLOBALS['_environment_'] = (is_file($env_file) && filesize($env_file) >= 1) ? trim(file_get_contents($env_file)) : '';
-        }
+        $GLOBALS['_environment_'] = '2';
     }
     return $GLOBALS['_environment_'];
 }
