@@ -5,7 +5,7 @@
  */
 namespace ounun\console\model;
 
-abstract class cms
+abstract class logic
 {
     /** @var self 实例 */
     protected static $instance;
@@ -135,9 +135,8 @@ abstract class cms
      * json数据decode
      * @param array $rs
      * @param bool $is_multi
-     * @return mixed
      */
-    protected function _lists_decode(array &$rs , bool $is_multi = true){
+    public function _lists_decode(array &$rs , bool $is_multi = true){
         if($is_multi) {
             foreach ($rs as &$v) {
                 $this->_lists_decode($v,false);

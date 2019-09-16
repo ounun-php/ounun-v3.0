@@ -1,5 +1,5 @@
 <?php
-namespace ounun\cache\driver;
+namespace ounun\cache;
 
 abstract class driver
 {

@@ -26,6 +26,7 @@
     "ext-xmlrpc": "*",
     "ext-imagick": "*",
     "ext-simplexml": "*",
+    "ext-wincache": "*",
     "php": ">=7.2"
   },
   "require-dev": {

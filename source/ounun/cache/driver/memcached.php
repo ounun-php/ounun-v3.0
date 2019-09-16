@@ -2,7 +2,7 @@
 namespace ounun\cache\driver;
 
 
-class memcached extends driver
+class memcached extends \ounun\cache\driver
 {
     /** @var array Memcache服务器配制 */
     private $_mem_config = array();

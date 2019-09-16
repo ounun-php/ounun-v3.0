@@ -1,8 +1,7 @@
 <?php
 namespace ounun\cache\driver;
 
-
-class file extends driver
+class file extends \ounun\cache\driver
 {
     /** @var string 存放路径 */
     private $_root = '';

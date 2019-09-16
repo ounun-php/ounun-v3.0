@@ -684,7 +684,7 @@ function environment()
  */
 abstract class v
 {
-    /** @var \ounun\console\model\cms cms */
+    /** @var \ounun\console\model\logic cms */
     public static $cms;
 
     /** @var \ounun\db\pdo DB */
@@ -810,16 +810,16 @@ abstract class v
 
     /**
      * ounun_view constructor.
-     * @param $mod
+     * @param $url_mods
      */
-    public function __construct($mod)
+    public function __construct($url_mods)
     {
-        if (!$mod) {
-            $mod = [\ounun::def_method];
+        if (!$url_mods) {
+            $url_mods = [\ounun::def_method];
         }
-        $method = $mod[0];
+        $method = $url_mods[0];
         \ounun::$view = $this;
-        $this->$method($mod);
+        $this->$method($url_mods);
     }
 
     /**

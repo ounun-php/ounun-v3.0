@@ -21,7 +21,11 @@ class restful  extends \v
 
     protected $_http_version = 'HTTP/1.1';
 
-    public function __construct($mod)
+    /**
+     * restful constructor.
+     * @param $url_mods
+     */
+    public function __construct($url_mods)
     {
         $this->_method = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
@@ -32,15 +36,15 @@ class restful  extends \v
             $this->_request_inputs = json_decode_array($data);
         }
         if($this->_class){
-            if (!$mod) {
-                $mod = [\ounun::def_method];
+            if (!$url_mods) {
+                $url_mods = [\ounun::def_method];
             }
-            $class = "{$this->_class}\\{$mod[0]}";
+            $class = "{$this->_class}\\{$url_mods[0]}";
             if(class_exists($class)){
                 \ounun::$view = $this;
-                new $class($mod,$this);
+                new $class($url_mods,$this);
             }else{
-                parent::__construct($mod);
+                parent::__construct($url_mods);
             }
         }
     }

@@ -1,7 +1,7 @@
 <?php
 namespace ounun\cache\driver;
 
-class redis extends driver
+class redis extends \ounun\cache\driver
 {
     /** @var array Redis服务器配制 */
     private $_redis_config = array();

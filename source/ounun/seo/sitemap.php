@@ -14,14 +14,14 @@ class sitemap extends \v
 
     /**
      * sitemap constructor.
-     * @param $mod
+     * @param $url_mods
      */
-    public function __construct($mod)
+    public function __construct($url_mods)
     {
         if( \ounun::$global['sitemap'] && \ounun::$global['sitemap']['urls']  ){
             $this->_table = \ounun::$global['sitemap']['urls'];
         }
-        parent::__construct($mod);
+        parent::__construct($url_mods);
     }
 
     /**
