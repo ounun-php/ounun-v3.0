@@ -50,7 +50,7 @@ class cookie
 
         // 设定就有误 报错
         if (empty(static::$key_private) || empty(static::$domain) ) {
-            trigger_error("Can't find config::\$global['oauth']", E_USER_ERROR);
+            trigger_error("Can't find \ounun::\$global['oauth']", E_USER_ERROR);
         }
     }
 

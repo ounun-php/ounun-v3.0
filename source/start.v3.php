@@ -928,4 +928,4 @@ function start_cmd($argv)
 /** 加载common.php */
 require __DIR__ . '/helper.php';
 /** 注册自动加载 */
-spl_autoload_register('\\ounun\\config::load_class');
+spl_autoload_register('\\ounun::load_class');

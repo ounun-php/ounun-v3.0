@@ -61,7 +61,7 @@ class sitemap extends \v
         $total = static::$db_v->table($this->_table)->count_value('`url_id`');
         $total_page = ceil($total / com_baidu::max_sitemaps_page);
 
-        $url_root_curr = substr(config::url_root_curr_get(),0,-1);
+        $url_root_curr = substr(\ounun::url_root_curr_get(),0,-1);
         $urls = [];
         $date = date('Y-m-d', time());
         for ($page = 1; $page <= $total_page; $page++) {
@@ -87,7 +87,7 @@ class sitemap extends \v
         $rows = com_baidu::max_sitemaps_page;
         $rs = static::$db_v->query("SELECT * FROM {$this->_table} ORDER BY `lastmod` DESC ,`url_id` ASC limit {$start},{$rows};")->column_all();
         // echo $this->_db->sql()."<br />";
-        $url_root_curr = substr(config::url_root_curr_get(),0,-1);
+        $url_root_curr = substr(\ounun::url_root_curr_get(),0,-1);
         $urls = [];
         foreach ($rs as $v) {
             $urls[] = [
@@ -99,7 +99,7 @@ class sitemap extends \v
         }
         // print_r($urls);
         $xml = $this->_maps_xml_page($urls);
-        if (config::$tpl_style == '_wap' || config::$tpl_style == '_mip') {
+        if (\ounun::$tpl_style == '_wap' || \ounun::$tpl_style == '_mip') {
             $xml = str_replace('</loc>', '</loc><mobile:mobile type="mobile" />', $xml);
         }
         return $xml;
@@ -113,7 +113,7 @@ class sitemap extends \v
     {
         return '<?xml version="1.0" encoding="utf-8"?' . '>' . "\n"
             . '<sitemapindex>' . "\n"
-            . \ounun\utils\data::array2xml($sitemaps, 'sitemap') .
+            . \ounun\utils\db::array2xml($sitemaps, 'sitemap') .
            '</sitemapindex>';
     }
 

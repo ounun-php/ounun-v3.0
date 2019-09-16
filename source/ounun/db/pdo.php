@@ -121,11 +121,11 @@ class pdo
     public static function instance(string $tag = '', array $config = []): self
     {
         if (empty($tag)) {
-            $tag = config::database_default_get();
+            $tag = \ounun::database_default_get();
         }
         if (empty(self::$_instance[$tag])) {
             if (empty($config)) {
-                $config = config::$database[$tag];
+                $config = \ounun::$database[$tag];
             }
             if ($config) {
                 self::$_instance[$tag] = new static($config);

@@ -56,7 +56,7 @@ class template
      */
     public function tpl_fixed_addon(string $filename,string $addon_tag): string
     {
-        $addons = config::$maps_paths['addons'];
+        $addons = \ounun::$maps_paths['addons'];
         if ($addons && is_array($addons)) {
             foreach ($addons as $v) {
                 $filename1 = $v['path'] . $addon_tag . '/template/' . $filename;
@@ -140,7 +140,7 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Style_default: </strong>{$this->_style_name_default} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>".implode('<br />', \ounun::$tpl_dirs)." <br />
               </div>";
-        trigger_error("Can't find Template:{$filename} \nstyle:{$this->_style_name} \nstyle_default:{$this->_style_name_default} \ndirs:[" . implode(',', config::$tpl_dirs) . "]", E_USER_ERROR);
+        trigger_error("Can't find Template:{$filename} \nstyle:{$this->_style_name} \nstyle_default:{$this->_style_name_default} \ndirs:[" . implode(',', \ounun::$tpl_dirs) . "]", E_USER_ERROR);
     }
 
     /**

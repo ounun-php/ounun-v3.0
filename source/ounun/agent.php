@@ -54,7 +54,7 @@ class agent
             'browserType' => self::browser_type(),
             'isRetina' => self::isRetina(),
             'osType' => self::osType(),
-            'isIos6' => self::isIos6(),
+            'isIos6' => self::is_ios6(),
         ];
     }
 
@@ -123,7 +123,7 @@ class agent
         $agent = self::getAgent($agent);
         $osType = self::osType($agent);
 
-        if (($osType == self::Os_Type_Ios) && (self::isIos6($agent) != 1)) {
+        if (($osType == self::Os_Type_Ios) && (self::is_ios6($agent) != 1)) {
             return self::RETINA_TYPE_YES;
         } else {
             return self::RETINA_TYPE_NOT;
@@ -131,7 +131,7 @@ class agent
     }
 
     // ios6系统的手机(iphone4, iphone4s)
-    public static function isIos6($agent = '')
+    public static function is_ios6($agent = '')
     {
         $agent = self::getAgent($agent);
 
@@ -143,7 +143,7 @@ class agent
     }
 
     // 检查是否在微信中打开
-    public static function isMicroMessage($agent = '')
+    public static function is_micro_message($agent = '')
     {
         $agent = self::getAgent($agent);
 
