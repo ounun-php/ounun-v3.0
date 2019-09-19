@@ -413,7 +413,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
         // 返回xml格式数据
         case \ounun\console\c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
-            exit(\ounun\utils\data::xml_encode($data));
+            exit(\ounun\utils\db::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
         case \ounun\console\c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
