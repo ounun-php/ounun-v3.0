@@ -40,10 +40,12 @@ class restful  extends \v
     /**
      * @param string $domain
      */
-    static public  function set_headers_cross($domain = '*')
+    static public  function set_headers_cross()
     {
         header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Origin: '.$domain);
+        header('Access-Control-Allow-Origin: *');
+        header('Access-Control-Allow-Methods: GET');
+        header('Access-Control-Allow-Headers:x-requested-with,content-type');
     }
 
     public function set_headers(string $contentType, int $statusCode)
