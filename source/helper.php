@@ -103,9 +103,12 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
     }
     $url = trim($url);
     if ($rs) {
-        if ($url && strlen($url) > 1) {
+        $len = strlen($url);
+        if ($url && $len > 0) {
             if (strpos($url, '?') === false) {
                 return $url . '?' . implode('&', $rs);
+            }elseif ('?' === $url[$len-1]){
+                return $url . implode('&', $rs);
             }
             return $url . '&' . implode('&', $rs);
         }

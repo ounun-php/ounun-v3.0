@@ -21,11 +21,7 @@ class restful  extends \v
 
     protected $_http_version = 'HTTP/1.1';
 
-    /**
-     * restful constructor.
-     * @param $url_mods
-     */
-    public function __construct($url_mods)
+    public function __construct($mod)
     {
         $this->_method = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
@@ -36,20 +32,37 @@ class restful  extends \v
             $this->_request_inputs = json_decode_array($data);
         }
         if($this->_class){
-            if (!$url_mods) {
-                $url_mods = [\ounun::def_method];
+            if (!$mod) {
+                $mod = [\ounun::def_method];
             }
-            $class = "{$this->_class}\\{$url_mods[0]}";
+            $class = "{$this->_class}\\{$mod[0]}";
             if(class_exists($class)){
                 \ounun::$view = $this;
-                new $class($url_mods,$this);
+                new $class($mod,$this);
             }else{
-                parent::__construct($url_mods);
+                parent::__construct($mod);
             }
         }
     }
 
-    public function headers_set(string $contentType, int $statusCode)
+    /**
+     * @param string $methods
+     * @param string $domain
+     */
+    static public  function set_headers_cross(string $methods = 'GET',string $domain = '*')
+    {
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Origin: '.$domain);
+        header('Access-Control-Allow-Methods: '.$methods);
+        header('Access-Control-Allow-Headers:x-requested-with,content-type');
+    }
+
+    /**
+     * @param string $content_type
+     * @param int $status_code
+     * @param string $http_version
+     */
+    public static function set_headers(string $content_type, int $status_code = 200, string $http_version = 'HTTP/1.1')
     {
         $Http_Status_Message = [
             100 => 'Continue',
@@ -94,10 +107,10 @@ class restful  extends \v
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported'
         ];
-        $statusMessage = $Http_Status_Message[$statusCode]??$Http_Status_Message[500];
+        $status_message = $Http_Status_Message[$status_code]??$Http_Status_Message[200];
 
-        header($this->_http_version. ' ' . $statusCode  . ' ' . $statusMessage);
-        header('Content-Type: '. $contentType. '; charset=utf-8');
+        header($http_version. ' ' . $status_code  . ' ' . $status_message);
+        header('Content-Type: '. $content_type. '; charset=utf-8');
     }
 
     public function gets_get($key = ''){
@@ -125,56 +138,61 @@ class restful  extends \v
         return $this->_method;
     }
 
-    public function out($rawData,int $statusCode = 200,string $requestContentType='') {
+    /**
+     * @param mixed $raw_data
+     * @param int $status_code
+     * @param string $request_content_type
+     */
+    public function out($raw_data, int $status_code = 200, string $request_content_type='') {
 
-        $requestContentType = $requestContentType??$this->_http_accept;
-        $this->headers_set($requestContentType, $statusCode);
+        $request_content_type = $request_content_type??$this->_http_accept;
+        static::set_headers($request_content_type, $status_code, $this->_http_version);
 
-        if(strpos($requestContentType,'application/json') !== false){
-            $response = $this->encode_json($rawData);
-        } else if(strpos($requestContentType,'text/html') !== false){
-            $response = $this->encode_html($rawData);
-        } else if(strpos($requestContentType,'application/xml') !== false){
-            $response = $this->encode_xml($rawData);
+        if(strpos($request_content_type,'application/json') !== false){
+            $response = $this->encode_json($raw_data);
+        } else if(strpos($request_content_type,'text/html') !== false){
+            $response = $this->encode_html($raw_data);
+        } else if(strpos($request_content_type,'application/xml') !== false){
+            $response = $this->encode_xml($raw_data);
         } else {
-            $response = $this->encode_json($rawData);
+            $response = $this->encode_json($raw_data);
         }
         exit($response);
     }
 
     /**
-     * @param $responseData
+     * @param $response_data
      * @return string
      */
-    public function encode_html($responseData) {
-        if(is_array($responseData)){
+    public function encode_html($response_data) {
+        if(is_array($response_data)){
             $htmlResponse = '<table style="border: darkcyan solid 1px;">';
-            foreach($responseData as $key=>$value) {
+            foreach($response_data as $key=> $value) {
                 $htmlResponse .= "<tr><td>". $key. "</td><td>". $value. "</td></tr>";
             }
             $htmlResponse .= "</table>";
             return $htmlResponse;
         }
-        return $responseData;
+        return $response_data;
     }
 
     /**
-     * @param $responseData
+     * @param $response_data
      * @return false|string
      */
-    public function encode_json($responseData) {
-        $jsonResponse = json_encode($responseData);
+    public function encode_json($response_data) {
+        $jsonResponse = json_encode($response_data);
         return $jsonResponse;
     }
 
     /**
-     * @param $responseData
+     * @param $response_data
      * @return mixed
      */
-    public function encode_xml($responseData) {
+    public function encode_xml($response_data) {
         // 创建 SimpleXMLElement 对象
         $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
-        foreach($responseData as $key=>$value) {
+        foreach($response_data as $key=> $value) {
             $xml->addChild($key, $value);
         }
         return $xml->asXML();
