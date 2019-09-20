@@ -48,7 +48,7 @@ class restful  extends \v
         header('Access-Control-Allow-Headers:x-requested-with,content-type');
     }
 
-    public function set_headers(string $contentType, int $statusCode)
+    public static function set_headers(string $content_type, int $status_code = 200, string $http_version = 'HTTP/1.1')
     {
         $Http_Status_Message = [
             100 => 'Continue',
@@ -93,10 +93,10 @@ class restful  extends \v
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported'
         ];
-        $statusMessage = $Http_Status_Message[$statusCode]??$Http_Status_Message[500];
+        $status_message = $Http_Status_Message[$status_code]??$Http_Status_Message[200];
 
-        header($this->_http_version. ' ' . $statusCode  . ' ' . $statusMessage);
-        header('Content-Type: '. $contentType. '; charset=utf-8');
+        header($http_version. ' ' . $status_code  . ' ' . $status_message);
+        header('Content-Type: '. $content_type. '; charset=utf-8');
     }
 
     public function gets_get($key = ''){
@@ -127,7 +127,7 @@ class restful  extends \v
     public function out($rawData,int $statusCode = 200,string $requestContentType='') {
 
         $requestContentType = $requestContentType??$this->_http_accept;
-        $this->set_headers($requestContentType, $statusCode);
+        static::set_headers($requestContentType, $statusCode, $this->_http_version);
 
         if(strpos($requestContentType,'application/json') !== false){
             $response = $this->encode_json($rawData);
