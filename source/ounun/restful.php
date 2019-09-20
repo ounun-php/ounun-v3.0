@@ -37,6 +37,15 @@ class restful  extends \v
         }
     }
 
+    /**
+     * @param string $domain
+     */
+    static public  function set_headers_cross($domain = '*')
+    {
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Origin: '.$domain);
+    }
+
     public function set_headers(string $contentType, int $statusCode)
     {
         $Http_Status_Message = [
