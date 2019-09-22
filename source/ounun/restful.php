@@ -49,12 +49,12 @@ class restful  extends \v
      * @param string $methods
      * @param string $domain
      */
-    static public  function set_headers_cross(string $methods = 'GET',string $domain = '*')
+    static public  function set_headers_cross(string $methods = 'GET,POST,PUT,DELETE,OPTIONS',string $domain = '*')
     {
         header('Access-Control-Allow-Credentials: true');
         header('Access-Control-Allow-Origin: '.$domain);
         header('Access-Control-Allow-Methods: '.$methods);
-        header('Access-Control-Allow-Headers:x-requested-with,content-type');
+        header('Access-Control-Allow-Headers: authentication,origin,x-requested-with,content-type,accept,token,appid,unitid');
     }
 
     /**
