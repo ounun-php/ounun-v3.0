@@ -21,16 +21,23 @@ abstract class driver
 
 	protected $files = [];
 	
-	function __construct($dir = null) 
+	function __construct(string $dir = '')
 	{
 		$this->set_dir($dir);
 		$this->time = time();
 	}
 	
-    function set($dir, $allow_exts = null)
+    function set($dir, $allow_exts = [])
     {
     	$this->set_dir($dir);
-    	if (!is_null($allow_exts)) $this->allow_exts = $allow_exts;
+    	if ($allow_exts) {
+    	    if(is_array($allow_exts)){
+                $this->allow_exts = $allow_exts;
+            }elseif (is_string($allow_exts)){
+                $allow_exts = explode('|',$allow_exts);
+                $this->allow_exts = $allow_exts;
+            }
+        }
     }
 	
 	function set_source($source)
@@ -42,7 +49,7 @@ abstract class driver
 		return true;
 	}
 	
-	function set_target($target = null, $fileext = null)
+	function set_target($target = null, $file_ext = null)
 	{
 		if (is_null($target)) {
 			$filename = $dir = null;
@@ -50,15 +57,15 @@ abstract class driver
 			$pathinfo = pathinfo($target);
 			$dir = $pathinfo['dirname'];
 			$filename = $pathinfo['basename'];
-			$fileext = null;
+			$file_ext = null;
 		}
 		$this->set_dir($dir);
-		$this->set_filename($filename, $fileext);
+		$this->set_filename($filename, $file_ext);
 		$this->target = $this->dir.$this->filename;
 		return true;
 	}
 	
-	function set_dir($dir = null,$time = 0 )
+	function set_dir($dir = null,int $time = 0 )
 	{
         $time  = $time??time();
 		if (is_null($dir)) {
@@ -67,15 +74,15 @@ abstract class driver
 			$dir = folder::path($dir);
 		}
 		$this->dir = $dir;
-		return folder::create($this->dir);
+		return mkdir($this->dir,0777,true);
 	}
-	
-	function set_filename($filename = null, $fileext = null)
+
+    public function set_filename($filename = null, $fileext = null)
 	{
 		$this->filename = is_null($filename) ? $this->time.mt_rand(100, 999).'.'.$fileext : $filename;
 	}
-	
-	function copy($source, $target = null)
+
+    public function copy($source, $target = null)
 	{
 		if (!$this->set_source($source)) {
             return false;
@@ -88,8 +95,8 @@ abstract class driver
 		}
 		return $this->target;
 	}
-	
-	function info($file = null)
+
+    public function info($file = null)
 	{
 		if (is_null($file)) {
             $file = $this->target;
@@ -97,28 +104,40 @@ abstract class driver
 		
 		$info = [];
 		$pathinfo = pathinfo($file);
-		$info['filepath'] = $this->format($pathinfo['dirname'], false).'/';
+		$info['file_path'] = $this->format($pathinfo['dirname'], false).'/';
+        $info['file_ext'] = strtolower($pathinfo['extension']);
 		$info['filename'] = $pathinfo['basename'];
-		$info['fileext'] = strtolower($pathinfo['extension']);
 		$info['filesize'] = filesize($file);
-		$info['isimage'] = in_array($info['fileext'], array('jpg', 'jpeg', 'png', 'gif', 'bmp')) ? 1 : 0;
+		$info['isimage'] = in_array($info['fileext'], ['jpg', 'jpeg', 'png', 'gif', 'bmp']) ? 1 : 0;
 		if ($info['isimage']) {
-			$image = @getimagesize($file);
+			$image = getimagesize($file);
 			$info['filemime'] = $image['mime'];
 		}
 		return $info;
 	}
-	
-	function is_image($file)
+
+    /**
+     * @param string $file
+     * @return bool
+     */
+    public function is_image(string $file, string $extension = '')
 	{
-		return in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), array('jpg', 'jpeg', 'png', 'gif', 'bmp'));
+		return in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'bmp']);
 	}
-	
-	function get_files()
+
+    /**
+     * @return array
+     */
+	public function files_get()
 	{
 		return $this->files;
 	}
-	
+
+    /**
+     * @param $file
+     * @param $is
+     * @return mixed
+     */
     protected function format($file,$is)
     {
 		return str_replace('\\', '/', preg_replace("/^".preg_quote(static::$path_upload, '/')."/", '', $file));

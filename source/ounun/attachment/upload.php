@@ -3,9 +3,10 @@ namespace ounun\attachment;
 
 class upload extends driver
 {
-	public $allow_exts = 'gif|jpg|jpeg|bmp|png|txt|zip|rar|doc|docx|xls|ppt|pdf'; //如果是*，代表任意类型
+    /** @var array  如果是*，代表任意类型 */
+	public $allow_exts = ['gif','jpg','jpeg','bmp','png','txt','zip','rar','doc','docx','xls','ppt','pdf'];
 
-    public $maxfilesize = 1024;
+    public $filesize_max = 1024;
 	
 	function __construct($dir = null, $allow_exts = null, $maxfilesize = null)
 	{
@@ -15,7 +16,7 @@ class upload extends driver
 
     function set($dir, $allow_exts = null, $maxfilesize = null)
     {
-    	if (!is_null($maxfilesize)) $this->maxfilesize = $maxfilesize*1024;
+    	if (!is_null($maxfilesize)) $this->filesize_max = $maxfilesize*1024;
         parent::set($dir, $allow_exts);
     }
     
@@ -81,7 +82,7 @@ class upload extends driver
 			return false;
 		}
 		
-		if ($file['size'] > $this->maxfilesize)
+		if ($file['size'] > $this->filesize_max)
 		{
 			$this->errno = 12;
 			return false;

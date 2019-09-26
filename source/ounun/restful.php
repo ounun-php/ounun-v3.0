@@ -49,7 +49,7 @@ class restful  extends \v
      * @param string $methods
      * @param string $domain
      */
-    static public  function set_headers_cross(string $methods = 'GET,POST,PUT,DELETE,OPTIONS',string $domain = '*')
+    static public  function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*')
     {
         header('Access-Control-Allow-Credentials: true');
         header('Access-Control-Allow-Origin: '.$domain);
@@ -62,7 +62,7 @@ class restful  extends \v
      * @param int $status_code
      * @param string $http_version
      */
-    public static function set_headers(string $content_type, int $status_code = 200, string $http_version = 'HTTP/1.1')
+    public static function headers_set(string $content_type, int $status_code = 200, string $http_version = 'HTTP/1.1')
     {
         $Http_Status_Message = [
             100 => 'Continue',
@@ -146,7 +146,7 @@ class restful  extends \v
     public function out($raw_data, int $status_code = 200, string $request_content_type='') {
 
         $request_content_type = $request_content_type??$this->_http_accept;
-        static::set_headers($request_content_type, $status_code, $this->_http_version);
+        static::headers_set($request_content_type, $status_code, $this->_http_version);
 
         if(strpos($request_content_type,'application/json') !== false){
             $response = $this->encode_json($raw_data);

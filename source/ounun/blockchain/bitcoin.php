@@ -63,7 +63,6 @@ echo $bitcoin->error;
 // or will be 0 if cURL was unable to connect.
 // Example:
 echo $bitcoin->status;
-
 */
 
 class bitcoin

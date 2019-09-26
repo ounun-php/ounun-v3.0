@@ -16,4 +16,11 @@ class i18n
     const tpl_style        = '_default';
     /** @var string 模板(默认) */
     const tpl_default      = '_default';
+    
+    /** 网站标题 */
+    const title            = 'CMS.cc开源移动内容管理系统';
+
+    const keywords         = 'CMS.cc开源移动内容管理系统';
+
+    const description      = 'CMS.cc开源移动内容管理系统';
 }
