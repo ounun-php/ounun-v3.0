@@ -786,6 +786,48 @@ class pdo
         return $this->_pdo;
     }
 
+
+    /**
+     * 开启事务
+     * @return bool
+     */
+    public function trans_begin()
+    {
+        return $this->_pdo->beginTransaction();
+    }
+
+    /**
+     * 提交事务
+     * @return bool
+     */
+    public function trans_commit()
+    {
+        return $this->_pdo->commit();
+    }
+
+    /**
+     * 关闭事务
+     * @return bool
+     */
+    public function trans_rollback()
+    {
+        return $this->_pdo->rollBack();
+    }
+
+    /**
+     * 根据结果提交滚回事务
+     * @param $res
+     * @return bool
+     */
+    public function trans_check($res)
+    {
+        if($res){
+            return $this->trans_commit();
+        }else{
+            return $this->trans_rollback();
+        }
+    }
+
     /**
      * 返回PDO
      * @return \PDOStatement 返回PDOStatement
