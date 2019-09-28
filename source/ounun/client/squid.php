@@ -23,8 +23,7 @@ class squid
 		if(empty($urlArr)) {
             return;
         }
-		if ($this->HTCPMulticastAddress && $this->HTCPPort) 
-		{
+		if ($this->HTCPMulticastAddress && $this->HTCPPort) {
 			return $this->HTCPPurge($urlArr);
 		}
 		$fname = '$this->purge';

@@ -297,6 +297,31 @@ class http
         return (intval($status["http_code"]) === 200) ? $content : false;
     }
 
+
+    /**
+     * HTTP请求（支持HTTP/HTTPS，支持GET/POST）
+     * @param $url
+     * @param null $data
+     * @return bool|string
+     */
+    static  public function curl_https_post_json($url, $data = null)
+    {
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, FALSE);
+
+        if (!empty($data)) {
+            curl_setopt($curl, CURLOPT_POST, TRUE);
+            curl_setopt($curl, CURLOPT_POSTFIELDS,$data);
+        }
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        $output = curl_exec($curl);
+        curl_close($curl);
+        // file_put_contents('/tmp/heka_weixin.' . date("Ymd") . '.log', date('Y-m-d H:i:s') . "\t" . $output . "\n", FILE_APPEND);
+        return $output;
+    }
+
     /**
      * POST数据过滤处理
      * @param array $data

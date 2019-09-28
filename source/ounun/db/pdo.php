@@ -790,6 +790,48 @@ class pdo
         return $this->_pdo;
     }
 
+
+    /**
+     * 开启事务
+     * @return bool
+     */
+    public function trans_begin()
+    {
+        return $this->_pdo->beginTransaction();
+    }
+
+    /**
+     * 提交事务
+     * @return bool
+     */
+    public function trans_commit()
+    {
+        return $this->_pdo->commit();
+    }
+
+    /**
+     * 关闭事务
+     * @return bool
+     */
+    public function trans_rollback()
+    {
+        return $this->_pdo->rollBack();
+    }
+
+    /**
+     * 根据结果提交滚回事务
+     * @param $res
+     * @return bool
+     */
+    public function trans_check($res)
+    {
+        if($res){
+            return $this->trans_commit();
+        }else{
+            return $this->trans_rollback();
+        }
+    }
+
     /**
      * 返回PDO
      * @return \PDOStatement 返回PDOStatement
@@ -965,6 +1007,9 @@ class pdo
         $fields = [];
         if ($data && is_array($data)) {
             foreach ($data as $col => &$val) {
+                if($val && is_array($val)){
+                    $val = '\''.implode('\',\'',$val).'\'';
+                }
                 if ('-' == $col[1]) {
                     list($type_length, $field) = explode(':', $col);
                     list($type, $length) = explode('-', $type_length);
