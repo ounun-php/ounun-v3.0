@@ -124,10 +124,10 @@ class http
             ],
             "ssl" => [
                 // "allow_self_signed" => false ,
-                "verify_peer_name" => false,
+                "verify_peer_name"     => false,
                 // "verify_peer"       => false,
-                "allow_self_signed" => false,
-                "verify_peer" => false,
+                "allow_self_signed"    => false,
+                "verify_peer"          => false,
             ],
         ];
         $context = stream_context_create($opts);

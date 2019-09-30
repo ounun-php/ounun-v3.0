@@ -123,7 +123,7 @@ class cache
     {
         if (0 == $this->_type) {
             $this->_type = self::Type_File;
-            $this->_drive = new driver\file($mod, $root, $format_string, $large_scale);
+            $this->_drive = new cache\driver\file($mod, $root, $format_string, $large_scale);
         } else {
             trigger_error("ERROR! Repeat Seting:Cache->config_file().", E_USER_ERROR);
         }
@@ -138,7 +138,7 @@ class cache
     {
         if (0 == $this->_type) {
             $this->_type = self::Type_Memcache;
-            $this->_drive = new driver\memcache($mod, $expire, $format_string, $large_scale, $zip_threshold, $zip_min_saving, $flag);
+            $this->_drive = new cache\driver\memcache($mod, $expire, $format_string, $large_scale, $zip_threshold, $zip_min_saving, $flag);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
                     $this->_drive->add_server($v['host'], $v['port'], $v['weight']);
@@ -157,8 +157,8 @@ class cache
     public function config_redis(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $auth = false)
     {
         if (0 == $this->_type) {
-            $this->_type = self::Type_Redis;
-            $this->_drive = new driver\redis($mod, $expire, $large_scale, $format_string, $auth);
+            $this->_type  = self::Type_Redis;
+            $this->_drive = new cache\driver\redis($mod, $expire, $large_scale, $format_string, $auth);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
                     $this->_drive->connect($v['host'], $v['port']);
@@ -178,7 +178,7 @@ class cache
     {
         if (0 == $this->_type) {
             $this->_type = self::Type_Memcached;
-            $this->_drive = new driver\memcached($mod, $expire, $format_string, $large_scale, $auth);
+            $this->_drive = new cache\driver\memcached($mod, $expire, $format_string, $large_scale, $auth);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
                     $this->_drive->add_server($v['host'], $v['port'], $v['weight']);
