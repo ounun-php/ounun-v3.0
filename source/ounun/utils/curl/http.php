@@ -120,10 +120,11 @@ class http
                 'method' => "GET",
                 'header' => "Accept-Language: zh-CN,zh;q=0.9,en;q=0.8\r\n" .
                     "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36\r\n" .
-                    "Referer: {$referer}\r\n".$header,
+                    "Referer: {$referer}\r\n".
+                    $header,
             ],
             "ssl" => [
-                // "allow_self_signed" => false ,
+                // "allow_self_signed" => false,
                 "verify_peer_name"     => false,
                 // "verify_peer"       => false,
                 "allow_self_signed"    => false,
