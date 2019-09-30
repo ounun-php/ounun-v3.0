@@ -687,9 +687,6 @@ function environment()
  */
 abstract class v
 {
-    /** @var \ounun\console\model\logic cms */
-    public static $cms;
-
     /** @var \ounun\db\pdo DB */
     public static $db_v;
 
@@ -863,10 +860,10 @@ abstract class v
         }
 
         // cms
-        if (\ounun::$app_cms_classname) {
-            $cls = \ounun::$app_cms_classname;
-            static::$cms = new $cls(static::$db_v);
-        }
+//        if (\ounun::$app_cms_classname) {
+//            $cls = \ounun::$app_cms_classname;
+//            static::$cms = new $cls(static::$db_v);
+//        }
     }
 
     /**

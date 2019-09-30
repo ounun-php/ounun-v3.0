@@ -38,7 +38,7 @@ class ldap
 	function connect()
 	{
 		if ($this->host == '') return false;
-		$this->_resource = @ ldap_connect($this->host, $this->port);
+		$this->_resource = ldap_connect($this->host, $this->port);
 		if ($this->_resource)
 		{
 			if ($this->use_ldapV3) 
@@ -69,7 +69,7 @@ class ldap
 
 	function close() 
 	{
-		@ ldap_close($this->_resource);
+		 ldap_close($this->_resource);
 	}
 
 	function setDN($username,$nosub = 0)
@@ -95,7 +95,7 @@ class ldap
 
 	function anonymous_bind()
 	{
-		$bindResult = @ldap_bind($this->_resource);
+		$bindResult = ldap_bind($this->_resource);
 		return $bindResult;
 	}
 

@@ -9,6 +9,11 @@ abstract class driver
 
     static public $path_upload = '';
 
+    /** @var array  如果是*，代表任意类型 */
+    public $allow_exts = ['gif','jpg','jpeg','bmp','png','txt','zip','rar','doc','docx','xls','ppt','pdf'];
+
+    public $filesize_max = 1024;
+
 	protected $dir;
 
 	protected $filename;
@@ -20,14 +25,22 @@ abstract class driver
 	protected $time;
 
 	protected $files = [];
-	
-	function __construct(string $dir = '')
+
+    /**
+     * driver constructor.
+     * @param string $dir
+     */
+    public function __construct(string $dir = '')
 	{
 		$this->set_dir($dir);
 		$this->time = time();
 	}
-	
-    function set($dir, $allow_exts = [])
+
+    /**
+     * @param string $dir
+     * @param array $allow_exts
+     */
+    public function set(string $dir, array $allow_exts = [])
     {
     	$this->set_dir($dir);
     	if ($allow_exts) {
@@ -39,8 +52,12 @@ abstract class driver
             }
         }
     }
-	
-	function set_source($source)
+
+    /**
+     * @param $source
+     * @return bool
+     */
+    public function set_source($source)
 	{
 		if (strpos($source, 'http://') === false && !file_exists($source)) {
             return false;
@@ -48,8 +65,8 @@ abstract class driver
 		$this->source = $source;
 		return true;
 	}
-	
-	function set_target($target = null, $file_ext = null)
+
+    public function set_target($target = null, $file_ext = null)
 	{
 		if (is_null($target)) {
 			$filename = $dir = null;
@@ -64,8 +81,8 @@ abstract class driver
 		$this->target = $this->dir.$this->filename;
 		return true;
 	}
-	
-	function set_dir($dir = null,int $time = 0 )
+
+    public function set_dir($dir = '',int $time = 0 )
 	{
         $time  = $time??time();
 		if (is_null($dir)) {

@@ -3,10 +3,8 @@ namespace ounun\attachment;
 
 class download extends driver
 {
-	public $allow_exts = 'jpg|jpeg|gif|png|bmp';
-	// public $site_url = SITE_URL;
 	
-	function __construct($dir = null, $allow_exts = null, $site_url = null)
+	function __construct(string $dir = '', string $allow_exts = '', string $site_url = '')
     {
     	parent::__construct($dir);
     	$this->set($dir, $allow_exts, $site_url);

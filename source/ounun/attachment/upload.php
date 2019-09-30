@@ -3,24 +3,19 @@ namespace ounun\attachment;
 
 class upload extends driver
 {
-    /** @var array  如果是*，代表任意类型 */
-	public $allow_exts = ['gif','jpg','jpeg','bmp','png','txt','zip','rar','doc','docx','xls','ppt','pdf'];
-
-    public $filesize_max = 1024;
-	
-	function __construct($dir = null, $allow_exts = null, $maxfilesize = null)
+    public function __construct($dir = '', $allow_exts = '', $maxfilesize = 0)
 	{
 		parent::__construct($dir);
 		$this->set($dir, $allow_exts, $maxfilesize);
 	}
 
-    function set($dir, $allow_exts = null, $maxfilesize = null)
+    public function set($dir, $allow_exts = '', $maxfilesize = 0)
     {
     	if (!is_null($maxfilesize)) $this->filesize_max = $maxfilesize*1024;
         parent::set($dir, $allow_exts);
     }
-    
-    function execute($field, $rename = false)
+
+    public  function execute($field, $rename = false)
     {
     	if (!isset($_FILES[$field]) || !$_FILES[$field]['name'])
     	{
@@ -56,8 +51,8 @@ class upload extends driver
     	}
     	return $info;
     }
-    
-    function error()
+
+    public  function error()
     {
     	$error = [
             1=>'上传的文件超过了 php.ini 中 upload_max_filesize 选项限制的值',
@@ -129,7 +124,14 @@ class upload extends driver
 		@unlink($file['tmp_name']);
 
 		$filepath = $this->format(dirname($this->target), false).'/';
-		$info = array('alias'=>$file['name'], 'filename'=>$this->filename, 'filepath'=>$filepath, 'filemime'=>$file['type'], 'fileext'=>$fileext, 'filesize'=>$file['size']);
+		$info = [
+            'alias'   =>$file['name'],
+            'filename'=>$this->filename,
+            'filepath'=>$filepath,
+            'filemime'=>$file['type'],
+            'fileext' =>$fileext,
+            'filesize'=>$file['size']
+        ];
 		if ($this->is_image($file['name'])) {
 			$info['isimage'] = 1;
 		}
