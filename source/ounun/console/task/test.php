@@ -5,9 +5,9 @@
  */
 namespace ounun\cmd\task;
 
-use ounun\console\cmd;
+use ounun\console\task;
 
-class test extends cmd
+class test extends task
 {
     public function configure()
     {

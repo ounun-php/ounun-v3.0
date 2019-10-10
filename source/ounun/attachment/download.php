@@ -1,4 +1,8 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 namespace ounun\attachment;
 
 class download extends driver
@@ -18,35 +22,35 @@ class download extends driver
         parent::set($dir, $allow_exts);
     }
     
-    public function by_content($string)
+    public function content($string)
     {
         return preg_replace('/(http:\/\/[^>]*?\.('.$this->allow_exts.'))/ie', "\$this->by_file_callback('\\1')", $string);
     }
     
-    private function by_file_callback($file)
+    private function file_callback($file)
     {
     	if (!preg_match("#^(".static::$url_site.")#", $file)) {
-    		$file = static::$url_site.$this->by_file($file);
+    		$file = static::$url_site.$this->file($file);
     	}
     	return $file;
     }
     
-    public function by_file($file)
+    public function file($file)
     {
     	if (is_array($file)) {
-    		return array_map([$this, 'by_file'], $file);
+    		return array_map([$this, 'file'], $file);
     	} else {
 	    	$path = $this->copy($file);
 	    	if (!$path){
                 return false;
             }
 	    	$info = $this->info($path);
-	    	$this->files[] = $info;
+	    	$this->_files[] = $info;
 	    	return $info['filepath'].$info['filename'];
     	}
     }
     
-    public function by_dir($dir)
+    public function dir($dir)
     {
     	$data = @scandir($dir);
     	if (!$data) {
@@ -61,6 +65,19 @@ class download extends driver
                 $file[] = $v;
             }
     	}
-    	return array_map([$this, 'by_file'], $file);
+    	return array_map([$this, 'file'], $file);
+    }
+
+
+    /**
+     * @param string $image_url
+     * @param int $w
+     * @param int $h
+     * @param int $q
+     * @return string
+     */
+    static public function image_oss_url(string $image_url,int $w,int $h,int $q = 90,string $ext='')
+    {
+        return "{$image_url}?x-oss-process=image/auto-orient,1/resize,m_fill,w_{$w},h_{$h}/quality,Q_{$q}{$ext}";
     }
 }

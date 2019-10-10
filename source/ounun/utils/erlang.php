@@ -5,6 +5,8 @@
  */
 namespace ounun\utils;
 
+use ounun\utils\curl\http;
+
 class erlang
 {
     protected $_key;
@@ -113,7 +115,7 @@ class erlang
     {
         $host = "http://{$this->_host}:{$this->_port}/";
         $model = "{{$mod},{$fun},{$data}}";
-        return \plugins\curl\http::post($host, $model, [], 600);
+        return http::stream_post($host, $model, [], 600);
     }
 }
 

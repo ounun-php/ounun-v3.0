@@ -6,7 +6,9 @@
 namespace ounun\console;
 
 
-abstract class cmd_multiple extends cmd
+use ounun\console;
+
+abstract class task_multiple extends task_driver
 {
     /** @var int 间隔(秒,默认5秒) */
     protected $_time_argc_sleep = 5;

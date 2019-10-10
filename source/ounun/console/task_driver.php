@@ -5,12 +5,10 @@
  */
 namespace ounun\console;
 
-
 use ounun\console;
 use ounun\db\pdo;
 
-
-abstract class cmd
+abstract class task_driver
 {
     /** @var pdo */
     public static $db;
@@ -28,7 +26,7 @@ abstract class cmd
     public $description;
 
     /**
-     * cmd constructor.
+     * task constructor.
      * @param console $console
      */
     public function __construct(console $console)

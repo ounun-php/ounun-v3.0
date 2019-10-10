@@ -14,7 +14,7 @@ defined('Dir_Vendor') || define('Dir_Vendor', Dir_Root . 'vendor/');
 /** data目录 **/
 defined('Dir_Extend') || define('Dir_Extend', Dir_Root . 'extend/');
 /** template目录 **/
-defined('Dir_Template') || define('Dir_Template', Dir_Root . 'template/');
+//defined('Dir_Template') || define('Dir_Template', Dir_Root . 'template/');
 /** data目录 **/
 defined('Dir_Data') || define('Dir_Data', Dir_Root . 'data/');
 /** cache目录 **/
@@ -744,16 +744,14 @@ abstract class v
      * (兼容)返回一个 模板文件地址(绝对目录,相对root)
      * @param string $filename
      * @param string $addon_tag
+     * @param bool $show_debug
      * @return string
      */
-    static public function tpl_fixed(string $filename,string $addon_tag = ''): string
+    static public function tpl_fixed(string $filename,string $addon_tag = '',bool $show_debug = true): string
     {
-        $tpl = static::$tpl->tpl_fixed($filename,[],false);
+        $tpl = static::$tpl->tpl_fixed($filename,$addon_tag,[],$show_debug);
         if($tpl){
             return $tpl;
-        }
-        if($addon_tag){
-            return static::$tpl->tpl_fixed_addon($filename,$addon_tag);
         }
         return '';
     }
@@ -763,9 +761,9 @@ abstract class v
      * @param string $filename
      * @return string
      */
-    static public function tpl_curr(string $filename): string
+    static public function tpl_curr(string $filename, string $addon_tag = ''): string
     {
-        return static::$tpl->tpl_curr($filename);
+        return static::$tpl->tpl_curr($filename,$addon_tag);
     }
 
     /** @var \ounun\debug 调试 相关 */
@@ -851,19 +849,13 @@ abstract class v
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_default, static::$cache_html_trim);
+            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_type,\ounun::$tpl_type_default, static::$cache_html_trim);
         }
 
         // db
         if (empty(static::$db_v)) {
             static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
         }
-
-        // cms
-//        if (\ounun::$app_cms_classname) {
-//            $cls = \ounun::$app_cms_classname;
-//            static::$cms = new $cls(static::$db_v);
-//        }
     }
 
     /**

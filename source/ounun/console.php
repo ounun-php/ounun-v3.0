@@ -5,7 +5,7 @@
  */
 namespace ounun;
 
-use ounun\console\cmd;
+use ounun\console\task;
 
 class console
 {
@@ -13,21 +13,37 @@ class console
     const Default_Cmd = 'help';
 
     const Color_None = "\033[0m";
+
     const Color_Black = "\033[0;30m";
+
     const Color_Dark_Gray = "\033[1;30m";
+
     const Color_Blue = "\033[0;34m";
+
     const Color_Light_BBlue = "\033[1;34m";
+
     const Color_Green = "\033[0;32m";      // success
+
     const Color_Light_Green = "\033[1;32m";
+
     const Color_Cyan = "\033[0;36m";
+
     const Color_Light_Cyan = "\033[1;36m";
+
     const Color_Red = "\033[0;31m";
+
     const Color_Light_Red = "\033[1;31m"; // error
+
     const Color_Purple = "\033[0;35m";
+
     const Color_Light_Purple = "\033[1;35m";
+
     const Color_Brown = "\033[0;33m";
+
     const Color_Yellow = "\033[1;33m";    // info
+
     const Color_Light_Gray = "\033[0;37m";
+    
     const Color_White = "\033[1;37m";
 
     /** @var array 不同深度的颜色 */
@@ -47,7 +63,7 @@ class console
     public $name;
     /** @var string 命令版本 */
     public $version;
-    /** @var cmd[] 命令 */
+    /** @var task[] 命令 */
     public $commands = [];
 
     /** @var array  默认提供的命令 */
@@ -83,10 +99,10 @@ class console
 
     /**
      * 添加一个指令
-     * @param cmd $cmd 命令实例
-     * @return bool|cmd
+     * @param task $cmd 命令实例
+     * @return bool|task
      */
-    public function add(cmd $cmd)
+    public function add(task $cmd)
     {
         $this->commands[$cmd->name] = $cmd;
         return $cmd;

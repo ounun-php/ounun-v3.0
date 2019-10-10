@@ -46,6 +46,45 @@ class agent
     const App_Installed_Yes = 1;
     const App_Installed_Not = 0;
 
+    // -------------------------------------------------------
+
+    const Status_Off = 0;
+
+    const Status_On = 1;
+
+    const Status_Success = 0;
+
+
+    const Menu_Currentself = 1;
+
+    const Menu_History = 2;
+
+    const Menu_Conditional = 3;
+
+
+    const Personal_Base_Type = 1;
+
+    const Personal_Auth_Type = 2;
+
+    const Personal_List_Type = 3;
+
+
+    const Display_Type_Welcome = 9;
+
+    const Display_Type_Lastvisit = 1;
+
+    const Display_Type_Account = 2;
+
+    const Display_Type_Wxapp = 3;
+
+    const Display_Type_Webapp = 4;
+
+    const Display_Type_Phoneapp = 5;
+
+    const Display_Type_Platform = 6;
+
+    const Display_Type_Module = 7;
+
     // 得到agent完整类型信息
     public static function device_info_get()
     {

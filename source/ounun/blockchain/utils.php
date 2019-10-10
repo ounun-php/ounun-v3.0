@@ -1,8 +1,7 @@
 <?php
 namespace ounun\blockchain;
 
-
-class tools
+class utils
 {
     /**
      * @param $string

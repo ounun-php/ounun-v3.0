@@ -10,12 +10,12 @@ class http
     /**
      * post数据
      * @param string $url
-     * @param array $data
+     * @param array|string $data
      * @param array $cookie
      * @param int $timeout
      * @return array
      */
-    static public function stream_post(string $url, $data = array(), $cookie = array(), $timeout = 3)
+    static public function stream_post(string $url, $data, $cookie = array(), $timeout = 3)
     {
         $info = parse_url($url);
         $host = $info['host'];

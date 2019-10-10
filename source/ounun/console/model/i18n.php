@@ -9,13 +9,19 @@ namespace ounun\console\model;
 class i18n
 {
     /** 语言标识 */
-    const lang             = 'zh_cn';
+    const lang              = 'zh_cn';
     /** 语言名称 */
-    const lang_name        = '简本中文';
+    const lang_name         = '简本中文';
+
     /** @var string 根据域名 得到对应模板 */
-    const tpl_style        = '_default';
+    const tpl_style         = 'default';
     /** @var string 模板(默认) */
-    const tpl_default      = '_default';
+    const tpl_style_default = 'default';
+
+    /** @var string 根据域名 得到对应模板 */
+    const tpl_type         = 'pc';
+    /** @var string 模板(默认) */
+    const tpl_type_default = 'pc';
     
     /** 网站标题 */
     const title            = 'CMS.cc开源移动内容管理系统';

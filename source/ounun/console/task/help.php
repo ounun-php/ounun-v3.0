@@ -7,9 +7,9 @@ namespace ounun\cmd\task;
 
 
 use ounun\console;
-use ounun\console\cmd;
+use ounun\console\task;
 
-class help extends cmd
+class help extends task
 {
     public function configure()
     {
@@ -38,7 +38,7 @@ class help extends cmd
         }
         $cc = count($cs);
         $i = 0;
-        /** @var cmd $c */
+        /** @var task $c */
         console::echo("\n可执行命令:", console::Color_Purple);
         foreach ($cs as $v) {
             foreach ($v as $c) {

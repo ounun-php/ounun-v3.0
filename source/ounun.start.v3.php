@@ -72,15 +72,17 @@ class ounun
     static public $app_path = '';
     /** @var string 域名Domain */
     static public $app_domain = '';
-    /** @var string 对应cms类名 */
-    static public $app_cms_classname;
     /** @var string 当前app之前通信内问key */
     static public $app_key_communication = '';
 
+    /** @var string 应用模板类型 pc  */
+    static public $tpl_type = 'pc';
+    /** @var string 应用模板类型[默认] */
+    static public $tpl_type_default = 'pc';
     /** @var string 模板-样式 */
-    static public $tpl_style = '';
+    static public $tpl_style = 'default';
     /** @var string 模板-样式[默认] */
-    static public $tpl_default = '';
+    static public $tpl_style_default = 'default';
     /** @var array Template view目录 */
     static public $tpl_dirs = [];
     /** @var array 模板替换数据组 */
@@ -99,21 +101,6 @@ class ounun
         "en_us" => "English", // "zh"=>"繁體中文",
         "zh_cn" => "简体中文", // "ja"=>"日本語",
     ];
-
-    /**
-     * 设定对应cms类名 及通信keys
-     * @param string $app_cms_classname
-     * @param string $key_communication
-     */
-    static public function cms_classname_set(string $app_cms_classname = '', string $key_communication = '')
-    {
-        if ($app_cms_classname) {
-            static::$app_cms_classname = $app_cms_classname;
-        }
-        if ($key_communication) {
-            static::$app_key_communication = $key_communication;
-        }
-    }
 
     /**
      * 设定语言
@@ -272,17 +259,27 @@ class ounun
 
     /**
      * 设定 模板及模板根目录
-     * @param string $tpl_dir 模板根目录
-     * @param string $tpl_style 模板
-     * @param string $tpl_default 模板(默认)
+     * @param string $tpl_style 风格
+     * @param string $tpl_style_default 风格(默认)
+     * @param string $tpl_type  类型
+     * @param string $tpl_type_default  类型(默认)
+     * @param array  $tpl_dirs  模板根目录
      */
-    static public function template_set(string $tpl_dir, string $tpl_style = '', string $tpl_default = '')
+    static public function template_set(array $tpl_dirs = [],
+                                        string $tpl_style = '', string $tpl_style_default = '',
+                                        string $tpl_type = '', string $tpl_type_default = '')
     {
         // 模板根目录
-        if (!in_array($tpl_dir, static::$tpl_dirs) && is_dir($tpl_dir)) {
-            static::$tpl_dirs[] = $tpl_dir;
+        if($tpl_dirs && is_array($tpl_dirs)){
+            foreach ($tpl_dirs as $tpl_dir){
+                // print_r(['__LINE__'=>__LINE__,'$tpl_dir'=>$tpl_dir]);
+                if (!in_array($tpl_dir, static::$tpl_dirs) && is_dir($tpl_dir['path'])) {
+                    // print_r(['__LINE__'=>__LINE__,'$tpl_dir'=>$tpl_dir]);
+                    static::$tpl_dirs[] = $tpl_dir;
+                }
+            }
         }
-        // 模板
+        // 风格
         if ($tpl_style) {
             static::$tpl_style = $tpl_style;
         } else {
@@ -290,17 +287,32 @@ class ounun
                 static::$tpl_style = static::i18n_get()::tpl_style;
             }
         }
-        // 模板(默认)
-        if ($tpl_default) {
-            static::$tpl_default = $tpl_default;
+        // 风格(默认)
+        if ($tpl_style_default) {
+            static::$tpl_style_default = $tpl_style_default;
         } else {
-            if (static::$i18n && empty(static::$tpl_style)) {
-                static::$tpl_default = static::i18n_get()::tpl_default;
+            if (static::$i18n && empty(static::$tpl_style_default)) {
+                static::$tpl_style_default = static::i18n_get()::tpl_style_default;
+            }
+        }
+
+        // 类型
+        if ($tpl_type) {
+            static::$tpl_type = $tpl_type;
+        } else {
+            if (static::$i18n && empty(static::$tpl_type)) {
+                static::$tpl_type = static::i18n_get()::tpl_type;
+            }
+        }
+        // 类型(默认)
+        if ($tpl_type_default) {
+            static::$tpl_type_default = $tpl_type_default;
+        } else {
+            if (static::$i18n && empty(static::$tpl_type_default)) {
+                static::$tpl_type_default = static::i18n_get()::tpl_type_default;
             }
         }
     }
-
-
 
     /**
      * @param string $seo_title
@@ -378,7 +390,7 @@ class ounun
 
             '{$res}' => static::$url_res,
 
-            '{$sitename}' => i18n()::title,
+            // '{$sitename}' => i18n()::title,
 
             '{$static}' => static::$url_static,
             '{$upload}' => static::$url_upload,
@@ -526,9 +538,9 @@ class ounun
      * 添加App路径(根目录)
      * @param string $path
      * @param bool $is_auto_helper
-     * @param bool $is_auto_cmd
+     * @param bool $is_auto_task
      */
-    static public function add_paths_app_root(string $path, bool $is_auto_helper = false, bool $is_auto_cmd = false)
+    static public function add_paths_app_root(string $path, bool $is_auto_helper = false, bool $is_auto_task = false)
     {
         /** src-0 \         自动加载 */
         \ounun::add_paths($path . 'src/', '', false);
@@ -540,14 +552,14 @@ class ounun
             is_file($path . 'app/helper.php') && require $path . 'app/helper.php';
         }
 
-        /** 加载cmd */
-        if ($is_auto_cmd) {
-            $cmd = is_file($path . 'app/cmd.php') ? include $path . 'app/cmd.php' : [];
-            if ($cmd) {
-                if (static::$global['cmd'] && is_array(static::$global['cmd'])) {
-                    static::$global['cmd'] = array_merge(static::$global['cmd'], $cmd);
+        /** 加载task */
+        if ($is_auto_task) {
+            $task = is_file($path . 'app/task.php') ? include $path . 'app/task.php' : [];
+            if ($task) {
+                if (static::$global['task'] && is_array(static::$global['task'])) {
+                    static::$global['task'] = array_merge(static::$global['task'], $task);
                 } else {
-                    static::$global['cmd'] = $cmd;
+                    static::$global['task'] = $task;
                 }
             }
         }
@@ -555,20 +567,24 @@ class ounun
 
     /**
      * 添加App路径(具体应用)
-     * @param string $paths_app_root 应用逻辑程序所在的根目录
-     * @param string $paths_template 模板所在目录
-     * @param string $paths_app_curr 当前程序所在目录
+     * @param string $paths_app_root   应用逻辑程序所在的根目录
      * @param string $namespace_prefix 加载类前缀 默认 app
-     * @param string $tpl_style 模板当前样式
-     * @param string $tpl_default 模板默认样式
-     * @param bool $is_auto_helper 是否默认加载helper
+     * @param string $paths_app_curr   当前程序所在目录
+     * @param bool $is_auto_helper     是否默认加载helper
+     * @param array  $tpl_dirs
+     * @param string $tpl_style
+     * @param string $tpl_style_default   模板风格（默认）
+     * @param string $tpl_type
+     * @param string $tpl_type_default
      */
-    static public function add_paths_app_instance(string $paths_app_root, string $paths_app_curr, string $paths_template, string $namespace_prefix = 'app', string $tpl_style = '', string $tpl_default = '', bool $is_auto_helper = true)
+    static public function add_paths_app_instance(string $paths_app_root, string $namespace_prefix,
+                                                  string $paths_app_curr, bool $is_auto_helper = true,
+                                                  array $tpl_dirs = [], string $tpl_style = '',  string $tpl_style_default = '',  string $tpl_type = '', string $tpl_type_default = '')
     {
         /** controller add_paths */
         static::add_paths($paths_app_root, $namespace_prefix, true);
         /** template_set */
-        static::template_set($paths_template, $tpl_style, $tpl_default);
+        static::template_set($tpl_dirs,$tpl_style ,   $tpl_style_default , $tpl_type  ,  $tpl_type_default);
         /** load_config */
         static::load_config($paths_app_curr, $is_auto_helper);
     }
@@ -684,11 +700,7 @@ class ounun
         // echo 'load_config0 -> '.__LINE__.':'.(is_file($dir.'helper.php')?'1':'0').' '.$dir.'helper.php'."\n";
         if (Environment) {
             /** 加载config */
-            if (is_file($dir . 'config.prod.php')) {
-                require $dir . 'config.prod.php';
-            } else {
-                is_file($dir . 'config.php') && require $dir . 'config.php';
-            }
+            is_file($dir . 'config.php') && require $dir . 'config.php';
             // echo 'load_config1 -> '.__LINE__.':'.(is_file($dir.'config.php')?'1':'0').' '.$dir.'config.php'."\n";
             /** 加载config-xxx */
             if (Environment && is_file($dir . 'config' . Environment . '.php')) {
@@ -697,11 +709,7 @@ class ounun
             }
         } else {
             /** 加载config */
-            if (is_file($dir . 'config.prod.php')) {
-                require $dir . 'config.prod.php';
-            } else {
-                is_file($dir . 'config.php') && require $dir . 'config.php';
-            }
+            is_file($dir . 'config.php') && require $dir . 'config.php';
         }
     }
 
@@ -802,21 +810,24 @@ function start(array $mod, string $host)
     // Routes
     if ($mod && $mod[0] && ounun::$routes["{$host}/{$mod[0]}"]) {
         $mod_0 = array_shift($mod);
-        $val_0 = ounun::$routes["{$host}/{$mod_0}"];
+        $cfg_0 = ounun::$routes["{$host}/{$mod_0}"];
     } elseif (ounun::$routes[$host]) {
-        $val_0 = ounun::$routes[$host];
+        $cfg_0 = ounun::$routes[$host];
     } else {
-        $val_0 = ounun::$routes_default;
+        $cfg_0 = ounun::$routes_default;
     }
+
     // apps_domain_set
-    ounun::app_name_path_set(Dir_Ounun, Dir_Root, Dir_Data, (string)$val_0['app'], (string)$val_0['url']);
+    ounun::app_name_path_set(Dir_Ounun, Dir_Root, Dir_Data, (string)$cfg_0['app'], (string)$cfg_0['url']);
     // add_paths_app_instance
-    ounun::add_paths_app_instance(Dir_App, Dir_App . ounun::$app_name . '/', Dir_Template . ounun::$app_name . '/', 'app', (string)$val_0['tpl_style'], (string)$val_0['tpl_default'], true);
+    ounun::add_paths_app_instance(Dir_App,'app',
+        Dir_App . ounun::$app_name . '/', true,
+        [],(string)$cfg_0['tpl_style'], (string)$cfg_0['tpl_style_default'],(string)$cfg_0['tpl_type'], (string)$cfg_0['tpl_type_default']);
     // lang_set
     ounun::lang_set($lang);
 
     // 开始 重定义头
-    header('X-Powered-By: cms.cc; ounun.org; v3.1.2');
+    header('X-Powered-By: cms.cc v3.2.1; ounun.org v3.1.2;');
     // 设定 模块与方法(缓存)
     list($filename,$classname,$mod) = ounun::routes_get($mod,'');
     // echo "\$filename:".__LINE__." -->:{$filename}\n";
@@ -914,14 +925,14 @@ function start_web()
  * Cmd
  * @param $argv
  */
-function start_cmd($argv)
+function start_task($argv)
 {
     // load_config 0 Dir
     ounun::load_config(Dir_App);
-    // cmd
-    $cmd = is_file(Dir_App . 'cmd.php') ? include Dir_App . 'cmd.php' : [];
+    // task
+    $task = is_file(Dir_App . 'task.php') ? include Dir_App . 'task.php' : [];
     // console
-    $c = new ounun\console($cmd);
+    $c = new ounun\console($task);
     $c->run($argv);
 }
 

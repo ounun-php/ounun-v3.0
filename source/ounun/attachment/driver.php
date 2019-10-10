@@ -14,17 +14,17 @@ abstract class driver
 
     public $filesize_max = 1024;
 
-	protected $dir;
+	protected $_dir;
 
-	protected $filename;
+	protected $_filename;
 
-	protected $source;
+	protected $_source;
 
-	protected $target;
+	protected $_target;
 
-	protected $time;
+	protected $_time;
 
-	protected $files = [];
+	protected $_files = [];
 
     /**
      * driver constructor.
@@ -33,7 +33,7 @@ abstract class driver
     public function __construct(string $dir = '')
 	{
 		$this->set_dir($dir);
-		$this->time = time();
+		$this->_time = time();
 	}
 
     /**
@@ -57,12 +57,12 @@ abstract class driver
      * @param $source
      * @return bool
      */
-    public function set_source($source)
+    public function source_set($source)
 	{
 		if (strpos($source, 'http://') === false && !file_exists($source)) {
             return false;
         }
-		$this->source = $source;
+		$this->_source = $source;
 		return true;
 	}
 
@@ -78,7 +78,7 @@ abstract class driver
 		}
 		$this->set_dir($dir);
 		$this->set_filename($filename, $file_ext);
-		$this->target = $this->dir.$this->filename;
+		$this->_target = $this->_dir.$this->_filename;
 		return true;
 	}
 
@@ -90,33 +90,33 @@ abstract class driver
 		} else {
 			$dir = folder::path($dir);
 		}
-		$this->dir = $dir;
-		return mkdir($this->dir,0777,true);
+		$this->_dir = $dir;
+		return mkdir($this->_dir,0777,true);
 	}
 
     public function set_filename($filename = null, $fileext = null)
 	{
-		$this->filename = is_null($filename) ? $this->time.mt_rand(100, 999).'.'.$fileext : $filename;
+		$this->_filename = is_null($filename) ? $this->_time.mt_rand(100, 999).'.'.$fileext : $filename;
 	}
 
     public function copy($source, $target = null)
 	{
-		if (!$this->set_source($source)) {
+		if (!$this->source_set($source)) {
             return false;
         }
 		if (!$this->set_target($target, pathinfo($source, PATHINFO_EXTENSION))){
             return false;
         }
-		if (!@copy($this->source, $this->target)) {
+		if (!@copy($this->_source, $this->_target)) {
 			return false;
 		}
-		return $this->target;
+		return $this->_target;
 	}
 
     public function info($file = null)
 	{
 		if (is_null($file)) {
-            $file = $this->target;
+            $file = $this->_target;
         }
 		
 		$info = [];
@@ -147,7 +147,7 @@ abstract class driver
      */
 	public function files_get()
 	{
-		return $this->files;
+		return $this->_files;
 	}
 
     /**

@@ -12,12 +12,21 @@ namespace ounun;
  */
 class cache
 {
+    const Cache_Expire_Short = 60;
+
+    const Cache_Expire_Middle = 300;
+
+    const Cache_Expire_Long = 3600;
+
+    const Cache_Key_Length = 100;
+
+
     const Type_File = 1;
     const Type_Memcache = 2;
     const Type_Redis = 3;
     const Type_Memcached = 4;
 
-    /**  @var \ounun\cache\driver\driver */
+    /**  @var \ounun\cache\driver */
     private $_drive = null;
 
     /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */

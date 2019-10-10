@@ -6,7 +6,7 @@
 namespace ounun\db;
 
 
-class dbkv
+class kv
 {
     private $handle;
 

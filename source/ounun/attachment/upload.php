@@ -1,4 +1,8 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 namespace ounun\attachment;
 
 class upload extends driver
@@ -115,18 +119,18 @@ class upload extends driver
 			$this->set_filename($file['rename']);
 		}
 		
-        $this->target = $this->dir.$this->filename;
-		if (!@move_uploaded_file($file['tmp_name'], $this->target))
+        $this->_target = $this->_dir.$this->_filename;
+		if (!@move_uploaded_file($file['tmp_name'], $this->_target))
 		{
 			$this->errno = 13;
 			return false;
 		}
 		@unlink($file['tmp_name']);
 
-		$filepath = $this->format(dirname($this->target), false).'/';
+		$filepath = $this->format(dirname($this->_target), false).'/';
 		$info = [
             'alias'   =>$file['name'],
-            'filename'=>$this->filename,
+            'filename'=>$this->_filename,
             'filepath'=>$filepath,
             'filemime'=>$file['type'],
             'fileext' =>$fileext,
@@ -135,7 +139,7 @@ class upload extends driver
 		if ($this->is_image($file['name'])) {
 			$info['isimage'] = 1;
 		}
-	    $this->files[] = $info;
+	    $this->_files[] = $info;
 		return $info['filepath'].$info['filename'];
     }
 }
