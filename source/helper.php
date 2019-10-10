@@ -849,7 +849,7 @@ abstract class v
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_type,\ounun::$tpl_type_default, static::$cache_html_trim);
+            static::$tpl = new \ounun\template(\ounun::$tpl_style,\ounun::$tpl_style_default, \ounun::$tpl_type,\ounun::$tpl_type_default, static::$cache_html_trim);
         }
 
         // db

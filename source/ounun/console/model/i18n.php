@@ -16,12 +16,12 @@ class i18n
     /** @var string 根据域名 得到对应模板 */
     const tpl_style         = 'default';
     /** @var string 模板(默认) */
-    const tpl_style_default = 'default';
+    const tpl_style_default = '';
 
     /** @var string 根据域名 得到对应模板 */
     const tpl_type         = 'pc';
     /** @var string 模板(默认) */
-    const tpl_type_default = 'pc';
+    const tpl_type_default = '';
     
     /** 网站标题 */
     const title            = 'CMS.cc开源移动内容管理系统';

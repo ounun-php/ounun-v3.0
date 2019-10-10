@@ -37,14 +37,14 @@ class template
     /** @var string 模板目录(当前) */
     protected $_dir_current;
 
-    /** @var string 风格 */
-    protected $_style;
-
     /** @var string 插目目录名 */
     protected $_addon_tag;
 
-    /** @var string 模板类型(当前) */
-    protected $_type_current;
+    /** @var string 风格 */
+    protected $_style;
+    /** @var string 风格(默认) */
+    protected $_style_default;
+
     /** @var string 模板类型 */
     protected $_type;
     /** @var string 模板类型(默认为pc) */
@@ -56,14 +56,18 @@ class template
     /**
      * 创建对像 template constructor.
      * @param string $tpl_style 风格
+     * @param string $tpl_style_default 风格(默认)
      * @param string $tpl_type  类型
      * @param string $tpl_type_default 模板文件所以目录(默认)
      * @param bool $is_trim
      */
-    public function __construct(string $tpl_style = '',string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
+    public function __construct(string $tpl_style = '',string $tpl_style_default = '',string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
     {
         if($tpl_style){
             $this->_style = $tpl_style;
+        }
+        if($tpl_style_default){
+            $this->_style_default = $tpl_style_default;
         }
 
         if($tpl_type){
@@ -74,7 +78,6 @@ class template
         }
 
         $this->_dir_current = '';
-        $this->_type_default = '';
         $this->_is_trim = $is_trim;
 
         $this->replace();
@@ -87,12 +90,19 @@ class template
      * @param array $types
      * @return string
      */
-    public function tpl_fixed(string $filename, string $addon_tag, array $types = [], bool $show_debug = true, bool $remember_dir_current = true): string
+    public function tpl_fixed(string $filename, string $addon_tag, bool $show_debug = true, bool $remember_dir_current = true): string
     {
         // echo "-----<br />\n";
         // print_r(['\ounun::$tpl_dirs'=>\ounun::$tpl_dirs,'\ounun::$maps_paths'=>\ounun::$maps_paths]);
         // echo "<hr /><br />\n";
-        $types = $types ? $types : [$this->_type, $this->_type_default];
+
+        // $types
+        if($this->_type_default && $this->_type != $this->_type_default) {
+            $types = [$this->_type, $this->_type_default];
+        }else {
+            $types = [$this->_type];
+        }
+
         if($addon_tag){
             $this->_addon_tag = $addon_tag;
             $addon_tag2 =  $addon_tag.'/';
@@ -102,17 +112,24 @@ class template
         foreach (\ounun::$tpl_dirs as $tpl_dir) {
             // print_r($tpl_dir);
             if('root' == $tpl_dir['type']){
-                foreach ($types as $type) {
-                    $filename2 = "{$tpl_dir['path']}{$this->_style}/{$type}/{$addon_tag2}{$filename}";
-                    // echo "line:".__LINE__." filename:{$filename2} <br />\n";
-                    if (is_file($filename2)) {
-                        if($remember_dir_current){
-                            $this->_dir_current = dirname($filename2) . '/';
-                            $this->_type_current = $type;
-                        }
-                        return $filename2;
-                    }
+                // $styles
+                if($this->_style_default && $this->_style != $this->_style_default) {
+                    $styles = [$this->_style, $this->_style_default];
+                }else {
+                    $styles = [$this->_style];
                 }
+                foreach ($styles as $style){
+                    foreach ($types as $type) {
+                        $filename2 = "{$tpl_dir['path']}{$style}/{$type}/{$addon_tag2}{$filename}";
+                        // echo "line:".__LINE__." filename:{$filename2} <br />\n";
+                        if (is_file($filename2)) {
+                            if($remember_dir_current){
+                                $this->_dir_current = dirname($filename2) . '/';
+                            }
+                            return $filename2;
+                        }
+                    } // end $types
+                } // end $styles
             }elseif ('app' == $tpl_dir['type']){
                 foreach ($types as $type) {
                     $filename2 = "{$tpl_dir['path']}".\ounun::$app_name."/template/{$type}/{$addon_tag2}{$filename}";
@@ -120,7 +137,6 @@ class template
                     if (is_file($filename2)) {
                         if($remember_dir_current){
                             $this->_dir_current = dirname($filename2) . '/';
-                            $this->_type_current = $type;
                         }
                         return $filename2;
                     }
@@ -133,7 +149,6 @@ class template
                     if (is_file($filename2)) {
                         if($remember_dir_current){
                             $this->_dir_current = dirname($filename2) . '/';
-                            $this->_type_current = $type;
                         }
                         return $filename2;
                     }
@@ -163,32 +178,19 @@ class template
             }
         }
 
-        // fixed
-        if($this->_type_default && $this->_type != $this->_type_default) {
-            if ($this->_type_current) {
-                if ($this->_type_current == $this->_type_default) {
-                    $styles = [$this->_type_default, $this->_type];
-                } else {
-                    $styles = [$this->_type, $this->_type_default];
-                }
-            } else {
-                $styles = [$this->_type, $this->_type_default];
-            }
-        }else {
-            $styles = [$this->_type];
-        }
+
 
 
         // $this->_addon_tag == ''
         if(empty($addon_tag)  && $this->_addon_tag){
             $addon_tag = $this->_addon_tag;
-            $filename2 = $this->tpl_fixed($filename,  '',$styles,false,false);
+            $filename2 = $this->tpl_fixed($filename,  '',false,false);
             if($filename2){
                 return  $filename2;
             }
         }
 
-        return $this->tpl_fixed($filename,  $addon_tag,$styles,true,false);
+        return $this->tpl_fixed($filename,  $addon_tag,true,false);
     }
 
 
@@ -205,7 +207,6 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_style} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Type_Current: </strong>{$this->_type_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>".json_encode_unescaped(\ounun::$tpl_dirs)." <br />
               </div>";

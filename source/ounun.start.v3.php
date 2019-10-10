@@ -757,7 +757,6 @@ class ounun
     {
         $app_name            = static::$app_name == 'api' || static::$app_name == 'control' ? static::$app_name : 'web';
         $class_filename      = '';
-        $filename            = '';
         if(empty($addon_tag)){
             $addon_tag       = (is_array($mod) && $mod[0]) ? $mod[0] : static::def_module;
             if(static::$routes_cache[$addon_tag]){
