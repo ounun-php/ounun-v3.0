@@ -87,11 +87,18 @@ class template
      * @param array $types
      * @return string
      */
-    public function tpl_fixed(string $filename, string $addon_tag, array $types = [], bool $show_debug = true): string
+    public function tpl_fixed(string $filename, string $addon_tag, array $types = [], bool $show_debug = true, bool $remember_dir_current = true): string
     {
-        //  print_r(['\ounun::$tpl_dirs'=>\ounun::$tpl_dirs,'\ounun::$maps_paths'=>\ounun::$maps_paths]);
+        // echo "-----<br />\n";
+        // print_r(['\ounun::$tpl_dirs'=>\ounun::$tpl_dirs,'\ounun::$maps_paths'=>\ounun::$maps_paths]);
+        // echo "<hr /><br />\n";
         $types = $types ? $types : [$this->_type, $this->_type_default];
-        $addon_tag2 = $addon_tag ? "{$addon_tag}/" :'';
+        if($addon_tag){
+            $this->_addon_tag = $addon_tag;
+            $addon_tag2 =  $addon_tag.'/';
+        }else{
+            $addon_tag2 = '';
+        }
         foreach (\ounun::$tpl_dirs as $tpl_dir) {
             // print_r($tpl_dir);
             if('root' == $tpl_dir['type']){
@@ -99,10 +106,10 @@ class template
                     $filename2 = "{$tpl_dir['path']}{$this->_style}/{$type}/{$addon_tag2}{$filename}";
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
-                        $this->_dir_current = dirname($filename2) . '/';
-                        $this->_addon_tag = $addon_tag;
-                        $this->_type_current = $type;
-                        // echo "line:".__LINE__." filename:{$filename2} <br />\n";
+                        if($remember_dir_current){
+                            $this->_dir_current = dirname($filename2) . '/';
+                            $this->_type_current = $type;
+                        }
                         return $filename2;
                     }
                 }
@@ -111,10 +118,10 @@ class template
                     $filename2 = "{$tpl_dir['path']}".\ounun::$app_name."/template/{$type}/{$addon_tag2}{$filename}";
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
-                        $this->_dir_current = dirname($filename2) . '/';
-                        $this->_addon_tag = $addon_tag;
-                        $this->_type_current = $type;
-                        // echo "line:".__LINE__." filename:{$filename2} <br />\n";
+                        if($remember_dir_current){
+                            $this->_dir_current = dirname($filename2) . '/';
+                            $this->_type_current = $type;
+                        }
                         return $filename2;
                     }
                 }
@@ -122,17 +129,16 @@ class template
             }else{
                 foreach ($types as $type) {
                     $filename2 = "{$tpl_dir['path']}{$addon_tag2}/template/{$type}/{$filename}";
-                    //  echo "line:".__LINE__." filename:{$filename2} <br />\n";
+                    // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
-                        $this->_dir_current = dirname($filename2) . '/';
-                        $this->_addon_tag = $addon_tag;
-                        $this->_type_current = $type;
-                        // echo "line:".__LINE__." filename:{$filename2} <br />\n";
+                        if($remember_dir_current){
+                            $this->_dir_current = dirname($filename2) . '/';
+                            $this->_type_current = $type;
+                        }
                         return $filename2;
                     }
                 }
             }
-
         }
         if($show_debug){
             $this->error($filename, $addon_tag);
@@ -158,17 +164,31 @@ class template
         }
 
         // fixed
-        if ($this->_type_current) {
-            if ($this->_type_current == $this->_type_default) {
-                $styles = [$this->_type_default, $this->_type];
+        if($this->_type_default && $this->_type != $this->_type_default) {
+            if ($this->_type_current) {
+                if ($this->_type_current == $this->_type_default) {
+                    $styles = [$this->_type_default, $this->_type];
+                } else {
+                    $styles = [$this->_type, $this->_type_default];
+                }
             } else {
-                $styles = [$this->_style, $this->_type_default];
+                $styles = [$this->_type, $this->_type_default];
             }
-        } else {
-            $styles = [$this->_style, $this->_type_default];
+        }else {
+            $styles = [$this->_type];
         }
 
-        return $this->tpl_fixed($filename,  $addon_tag,$styles);
+
+        // $this->_addon_tag == ''
+        if(empty($addon_tag)  && $this->_addon_tag){
+            $addon_tag = $this->_addon_tag;
+            $filename2 = $this->tpl_fixed($filename,  '',$styles,false,false);
+            if($filename2){
+                return  $filename2;
+            }
+        }
+
+        return $this->tpl_fixed($filename,  $addon_tag,$styles,true,false);
     }
 
 
@@ -181,8 +201,9 @@ class template
     {
         echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
                     <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$addon_tag} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_style} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Current: </strong>{$this->_type_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
