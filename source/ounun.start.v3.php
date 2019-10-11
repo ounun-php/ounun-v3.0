@@ -65,6 +65,8 @@ class ounun
     static public $url_upload = '';
     /** @var string StaticG URL */
     static public $url_static_g = '';
+    /** @var string 为插件时网址前缀URL */
+    static public $url_addon_pre = '';
 
     /** @var string 当前APP */
     static public $app_name = '';
@@ -87,8 +89,6 @@ class ounun
     static public $tpl_dirs = [];
     /** @var array 模板替换数据组 */
     static public $tpl_replace_str = [];
-
-
 
     /** @var \ounun\console\model\i18n 语言包 */
     static public $i18n;
@@ -755,18 +755,32 @@ class ounun
      */
     static public function routes_get(array $mod = [],string $addon_tag = '')
     {
-        $app_name            = static::$app_name == 'api' || static::$app_name == 'control' ? static::$app_name : 'web';
+        $app_name            = (static::$app_name == 'web' || static::$app_name == 'api' || static::$app_name == 'control' || static::$app_name == 'process') ? static::$app_name : 'web';
         $class_filename      = '';
+
         if(empty($addon_tag)){
-            $addon_tag       = (is_array($mod) && $mod[0]) ? $mod[0] : static::def_module;
-            if(static::$routes_cache[$addon_tag]){
-                $class_filename  = "{$addon_tag}/{$app_name}.php";
-                $classname       = "\\addons\\{$addon_tag}\\{$app_name}";
+            if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['addon_tag']){
+                $addon_tag              = $route['addon_tag'];
+                $class_filename         = "{$addon_tag}/{$app_name}/{$route['subclass']}.php";
+                $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['subclass']}";
+                static::$url_addon_pre  = $route['url']?'/'.$route['url']:'';
+                array_shift($mod);
+            }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['addon_tag']){
+                $addon_tag              = $route['addon_tag'];
+                $class_filename         = "{$addon_tag}/{$app_name}.php";
+                $classname              = "\\addons\\{$addon_tag}\\{$app_name}";
+                static::$url_addon_pre  = $route['url'] && $route['url'] != static::def_module ? '/'.$addon_tag : '';
             }
         }else{
-            $class_filename  = "{$addon_tag}/{$app_name}.php";
-            $classname       = "\\addons\\{$addon_tag}\\{$app_name}";
+            $class_filename         = "{$addon_tag}/{$app_name}.php";
+            $classname              = "\\addons\\{$addon_tag}\\{$app_name}";
+            static::$url_addon_pre  = $addon_tag && $addon_tag != static::def_module ? '/'.$addon_tag :'';
         }
+//        print_r([
+//            '$class_filename' => $class_filename,
+//            '$classname' => $classname,
+//            'static::$routes_cache' => static::$routes_cache
+//        ]);
         // paths
         if($class_filename){
             $paths           = static::$maps_paths['addons'];

@@ -749,7 +749,7 @@ abstract class v
      */
     static public function tpl_fixed(string $filename,string $addon_tag = '',bool $show_debug = true): string
     {
-        $tpl = static::$tpl->tpl_fixed($filename,$addon_tag,[],$show_debug);
+        $tpl = static::$tpl->tpl_fixed($filename,$addon_tag,$show_debug);
         if($tpl){
             return $tpl;
         }
