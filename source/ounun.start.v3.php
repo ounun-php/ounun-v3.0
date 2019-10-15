@@ -14,6 +14,25 @@ class ounun
     /** @var string 默认操作名称 */
     const def_method = 'index';
 
+    /** @var string web 网页 */
+    const App_Name_Web = 'web';
+    /** @var string api 数据API接口 */
+    const App_Name_Api = 'api';
+    /** @var string control 控制后台 */
+    const App_Name_Control = 'control';
+    /** @var string process 异步进程 */
+    const App_Name_Process = 'process';
+    /** @var string crontab 定时任务 */
+    const App_Name_Crontab = 'crontab';
+    /** @var array 应用名称组 */
+    const App_Names = [
+        self::App_Name_Web ,
+        self::App_Name_Api  ,
+        self::App_Name_Control ,
+        self::App_Name_Process ,
+        self::App_Name_Crontab ,
+    ];
+
     /** @var array 公共配制数据 */
     static public $global = [];
     /** @var \v */
@@ -753,34 +772,29 @@ class ounun
      * @param string $addon_tag
      * @return array
      */
-    static public function routes_get(array $mod = [],string $addon_tag = '')
+    static public function routes_get(array $mod = [])
     {
-        $app_name            = (static::$app_name == 'web' || static::$app_name == 'api' || static::$app_name == 'control' || static::$app_name == 'process') ? static::$app_name : 'web';
+        $app_name            = (static::$app_name == static::App_Name_Web || in_array(static::$app_name,static::App_Names)) ? static::$app_name : static::App_Name_Web;
         $class_filename      = '';
 
-        if(empty($addon_tag)){
-            if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['addon_tag']){
-                $addon_tag              = $route['addon_tag'];
+        if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['addon_tag']){
+            $addon_tag              = $route['addon_tag'];
+            $class_filename         = "{$addon_tag}/{$app_name}/{$route['subclass']}.php";
+            $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['subclass']}";
+            static::$url_addon_pre  = $route['url']?'/'.$route['url']:'';
+            array_shift($mod);
+        }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['addon_tag']){
+            $addon_tag              = $route['addon_tag'];
+            if($route['subclass']){
                 $class_filename         = "{$addon_tag}/{$app_name}/{$route['subclass']}.php";
                 $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['subclass']}";
-                static::$url_addon_pre  = $route['url']?'/'.$route['url']:'';
-                array_shift($mod);
-            }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['addon_tag']){
-                $addon_tag              = $route['addon_tag'];
+            }else{
                 $class_filename         = "{$addon_tag}/{$app_name}.php";
                 $classname              = "\\addons\\{$addon_tag}\\{$app_name}";
-                static::$url_addon_pre  = $route['url'] && $route['url'] != static::def_module ? '/'.$addon_tag : '';
             }
-        }else{
-            $class_filename         = "{$addon_tag}/{$app_name}.php";
-            $classname              = "\\addons\\{$addon_tag}\\{$app_name}";
-            static::$url_addon_pre  = $addon_tag && $addon_tag != static::def_module ? '/'.$addon_tag :'';
+            static::$url_addon_pre  = $route['url'] && $route['url'] != static::def_module ? '/'.$route['url'] : '';
         }
-//        print_r([
-//            '$class_filename' => $class_filename,
-//            '$classname' => $classname,
-//            'static::$routes_cache' => static::$routes_cache
-//        ]);
+
         // paths
         if($class_filename){
             $paths           = static::$maps_paths['addons'];
@@ -842,7 +856,7 @@ function start(array $mod, string $host)
     // 开始 重定义头
     header('X-Powered-By: cms.cc v3.2.1; ounun.org v3.1.2;');
     // 设定 模块与方法(缓存)
-    list($filename,$classname,$mod) = ounun::routes_get($mod,'');
+    list($filename,$classname,$mod) = ounun::routes_get($mod);
     // echo "\$filename:".__LINE__." -->:{$filename}\n";
     // 设定 模块与方法
     if(empty($filename)){
@@ -897,10 +911,6 @@ function start(array $mod, string $host)
                 $mod   =[ounun::def_method];
             }
         }
-        // echo "\$filename:".__LINE__." -->:{$filename}  --------- \$addon_tag:{$addon_tag}\n";
-        if(empty($filename) && $addon_tag){
-            list($filename,$classname,$mod) = ounun::routes_get($mod,$addon_tag);
-        } // end addons
         // echo "\$filename:".__LINE__." -->:{$filename}\n";
         if(empty($filename)){
             $module    = ounun::def_module;

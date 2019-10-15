@@ -585,10 +585,11 @@ function error404(string $msg = ''): void
             </head>
             <body bgcolor="white">
                 <div align="center">
-                    <h1>404 Not Found' . ($msg ? '(' . $msg . ')' : '') . '</h1>
+                    <h1>404 Not Found</h1>
                 </div>
                 <hr>
                 <div align="center"><a href="' . \ounun::$url_www . '">返回网站首页</a></div>
+                '.($msg?'<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">'.$msg.'</div>':'').'
             </body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
@@ -832,7 +833,7 @@ abstract class v
     public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun::url_page($page_file);
+        \ounun::url_page(\ounun::$url_addon_pre.$page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html
@@ -864,7 +865,9 @@ abstract class v
      */
     public function index($mod)
     {
-        error404();
+        error404("<strong>method</strong>  -->:".__METHOD__." <br />\n  
+                        <strong>mod</strong> ------>:" . json_encode($mod) . " <br />\n  
+                        <strong>class</strong> ---->:".get_class($this));
     }
 
     /**
@@ -914,6 +917,8 @@ abstract class v
     {
         header('HTTP/1.1 404 Not Found');
         $this->debug_init('404');
-        error404("\$method:{$method} \$args:" . json_encode($arguments) . " \$class:".get_class($this));
+        error404("<strong>method</strong> --> : {$method} <br />\n 
+                        <strong>args</strong> ------> : " . json_encode($arguments) . " <br />\n 
+                        <strong>class</strong> -----> : ".get_class($this));
     }
 }

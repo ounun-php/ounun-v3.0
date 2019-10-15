@@ -5,7 +5,6 @@
  */
 namespace ounun\utils;
 
-
 class color
 {
     /**

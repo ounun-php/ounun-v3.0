@@ -178,11 +178,8 @@ class template
             }
         }
 
-
-
-
         // $this->_addon_tag == ''
-        if(empty($addon_tag)  && $this->_addon_tag){
+        if(empty($addon_tag) && $this->_addon_tag){
             $addon_tag = $this->_addon_tag;
             $filename2 = $this->tpl_fixed($filename,  '',false,false);
             if($filename2){

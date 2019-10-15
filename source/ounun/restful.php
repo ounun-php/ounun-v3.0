@@ -38,6 +38,8 @@ class restful  extends \v
             $class = "{$this->_class}\\{$mod[0]}";
             if(class_exists($class)){
                 \ounun::$view = $this;
+                static::$tpl  = true;  // 不去初始化template
+                $this->init_page(\ounun::$url_addon_pre.'/'.($mod[0] && $mod[0] != \ounun::def_method ? $mod[0].'.php':''), false, true);
                 new $class($mod,$this);
             }else{
                 parent::__construct($mod);

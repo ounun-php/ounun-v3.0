@@ -5,7 +5,8 @@
  */
 namespace ounun;
 
-use ounun\console\task;
+
+use ounun\console\task_driver;
 
 class console
 {
@@ -63,7 +64,7 @@ class console
     public $name;
     /** @var string 命令版本 */
     public $version;
-    /** @var task[] 命令 */
+    /** @var task_driver[] 命令 */
     public $commands = [];
 
     /** @var array  默认提供的命令 */
@@ -99,10 +100,10 @@ class console
 
     /**
      * 添加一个指令
-     * @param task $cmd 命令实例
-     * @return bool|task
+     * @param task_driver $cmd 命令实例
+     * @return bool|task_driver
      */
-    public function add(task $cmd)
+    public function add(task_driver $cmd)
     {
         $this->commands[$cmd->name] = $cmd;
         return $cmd;
