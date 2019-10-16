@@ -12,7 +12,7 @@ class kv
 
     function __construct($storage = 'dba', $handler = 'flatfile')
     {
-        require_once(dirname(__FILE__).DS.'storage.php');
+        require_once(dirname(__FILE__).'/'.'storage.php');
         $this->handle = & dbkv_storage::get_instance($storage, $handler);
     }
 

@@ -28,7 +28,7 @@ abstract class storage
     {
         $class = 'dbkv_storage_'.$storage;
         if (!class_exists($class)) {
-            require(dirname(__FILE__).DS.'storage'.DS.$storage.'.php');
+            require(dirname(__FILE__).'/'.'storage'.'/'.$storage.'.php');
         }
         return new $class($handler);
     }

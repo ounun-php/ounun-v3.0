@@ -5,8 +5,8 @@
  */
 namespace ounun\utils\helper;
 
-define('IPDATA_MINI', CMSTOP_PATH.DS.'resources'.DS.'ipdata'.DS.'mini.Dat');
-define('IPDATA_FULL', CMSTOP_PATH.DS.'resources'.DS.'ipdata'.DS.'QQWry.Dat');
+define('IPDATA_MINI', CMSTOP_PATH.'/'.'resources'.'/'.'ipdata'.'/'.'mini.Dat');
+define('IPDATA_FULL', CMSTOP_PATH.'/'.'resources'.'/'.'ipdata'.'/'.'QQWry.Dat');
 
 class iplocation
 {

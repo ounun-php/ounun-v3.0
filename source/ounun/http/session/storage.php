@@ -20,7 +20,7 @@ abstract class session_storage extends object
 			$class = 'session_storage_'.$name;
 			if(!class_exists($class))
 			{
-				$path = dirname(__FILE__).DS.'storage'.DS.$name.'.php';
+				$path = dirname(__FILE__).'/'.'storage'.'/'.$name.'.php';
 				if (!file_exists($path)) exit('Unable to load session storage class: '.$name);
 				require_once($path);
 			}

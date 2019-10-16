@@ -15,10 +15,10 @@ class segment
 		{
 			$this->scws = scws_new();
 		}
-		elseif (file_exists(FW_PATH.'helper'.DS.'pscws4.php'))
+		elseif (file_exists(FW_PATH.'helper'.'/'.'pscws4.php'))
 		{
 			import('helper.pscws4');
-			define('RESOURCE_PATH', ROOT_PATH.DS.'cmstop'.DS.'resources'.DS.'scws'.DS);
+			define('RESOURCE_PATH', ROOT_PATH.'/'.'cmstop'.'/'.'resources'.'/'.'scws'.'/');
 			$this->scws = new PSCWS4('utf8');
 			$this->scws->set_dict(RESOURCE_PATH.'dict.utf8.xdb');
 			$this->scws->set_rule(RESOURCE_PATH.'rules.ini');

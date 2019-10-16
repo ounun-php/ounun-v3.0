@@ -398,7 +398,7 @@ class ounun
             '{$url_mip}' => static::$url_mip,
             '{$url_api}' => static::$url_api,
 
-            //  '{$url_page}' => static::url_page(),
+            // '{$url_page}' => static::url_page(),
 
             '{$canonical_www}' => static::$page_www, // static::$url_www . $url_base,
             '{$canonical_mip}' => static::$page_mip, // static::$url_mip . $url_base,
@@ -407,10 +407,9 @@ class ounun
             '{$app}' => static::$app_name,
             '{$domain}' => static::$app_domain,
 
+            '{$sitename}' => static::i18n_get()::title,
+
             '{$res}' => static::$url_res,
-
-            // '{$sitename}' => i18n()::title,
-
             '{$static}' => static::$url_static,
             '{$upload}' => static::$url_upload,
             '{$static_g}' => static::$url_static_g,

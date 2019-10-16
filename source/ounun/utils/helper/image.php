@@ -4,7 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 namespace ounun\utils\helper;
-// define('WATERMARK_DIR', CMSTOP_PATH.'resources'.DS.'watermark'.DS);
+// define('WATERMARK_DIR', CMSTOP_PATH.'resources'.'/'.'watermark'.'/');
 
 class image
 {

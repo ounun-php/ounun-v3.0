@@ -382,7 +382,7 @@ class element extends form_element
 			'maxlength'=>$maxlength,
 			'attribute'=>'uncount=1'
 		));
-		if(extension_loaded('scws') || file_exists(FW_PATH.'helper'.DS.'pscws4.php'))
+		if(extension_loaded('scws') || file_exists(FW_PATH.'helper'.'/'.'pscws4.php'))
 		{
 			$return .= '&nbsp;&nbsp;<input type="button" class="button_style_1" value="提取关键字" onclick="get_tags()"></input>';
 			$return .= '<script type="text/javascript">

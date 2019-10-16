@@ -23,6 +23,12 @@ defined('Dir_Cache') || define('Dir_Cache', Dir_Data . 'cache/');
 defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
 defined('Environment') || define('Environment', environment());
+if(Environment){
+    /** 开始时间戳 **/
+    define('Ounun_Start_Time', microtime(true));
+    /** 开始内存量 **/
+    define('Ounun_Start_Memory', memory_get_usage());
+}
 
 /**
  * 得到访客的IP

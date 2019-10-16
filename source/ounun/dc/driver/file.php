@@ -30,8 +30,8 @@ class file extends \ounun\dc\driver
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
-        if (substr($this->options['path'], -1) != DS) {
-            $this->options['path'] .= DS;
+        if (substr($this->options['path'], -1) != '/') {
+            $this->options['path'] .= '/';
         }
         $this->init();
     }
@@ -64,10 +64,10 @@ class file extends \ounun\dc\driver
         $name = md5($name);
         if ($this->options['cache_subdir']) {
             // 使用子目录
-            $name = substr($name, 0, 2) . DS . substr($name, 2);
+            $name = substr($name, 0, 2) . '/' . substr($name, 2);
         }
         if ($this->options['prefix']) {
-            $name = $this->options['prefix'] . DS . $name;
+            $name = $this->options['prefix'] . '/' . $name;
         }
         $filename = $this->options['path'] . $name . '.php';
         $dir      = dirname($filename);
@@ -227,7 +227,7 @@ class file extends \ounun\dc\driver
             $this->rm('tag_' . md5($tag));
             return true;
         }
-        $files = (array) glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . DS : '') . '*');
+        $files = (array) glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . '/' : '') . '*');
         foreach ($files as $path) {
             if (is_dir($path)) {
                 $matches = glob($path . '/*.php');
