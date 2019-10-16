@@ -3,9 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace think\cache\driver;
+namespace ounun\dc\driver;
 
-use think\cache\Driver;
 
 /**
  * Redis缓存驱动，适合单机部署、有前端代理实现高可用的场景，性能最好
@@ -14,7 +13,7 @@ use think\cache\Driver;
  * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
  * @author    尘缘 <130775@qq.com>
  */
-class Redis extends Driver
+class redis extends \ounun\dc\driver
 {
     protected $options = [
         'host'       => '127.0.0.1',

@@ -3,14 +3,14 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\cache;
+namespace ounun\dc;
 
 /**
  * 缓存基础类
  * Class driver
  * @package ounun\cache
  */
-abstract class driver2
+abstract class driver
 {
     protected $handler = null;
     protected $options = [];
@@ -41,7 +41,7 @@ abstract class driver2
      * @param int       $expire  有效时间 0为永久
      * @return boolean
      */
-    abstract public function set($name, $value, $expire = null);
+    abstract public function set($name, $value, $expire = 0);
 
     /**
      * 自增缓存（针对数值缓存）
@@ -101,7 +101,7 @@ abstract class driver2
             $this->rm($name);
             return $result;
         } else {
-            return;
+            return null;
         }
     }
 
@@ -112,8 +112,9 @@ abstract class driver2
      * @param mixed     $value  存储数据
      * @param int       $expire  有效时间 0为永久
      * @return mixed
+     * @throws \throwable
      */
-    public function remember($name, $value, $expire = null)
+    public function remember($name, $value, $expire = 0)
     {
         if (!$this->has($name)) {
             $time = time();
@@ -216,7 +217,6 @@ abstract class driver2
 
     /**
      * 返回句柄对象，可执行其它高级方法
-     *
      * @access public
      * @return object
      */
@@ -224,4 +224,5 @@ abstract class driver2
     {
         return $this->handler;
     }
+
 }

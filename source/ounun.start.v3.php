@@ -111,10 +111,10 @@ class ounun
 
     /** @var \ounun\console\model\i18n 语言包 */
     static public $i18n;
-    /** @var string 默认语言 */
-    static public $lang_default = 'zh_cn';
     /** @var string 当前语言 */
     static public $lang = 'zh_cn';
+    /** @var string 默认语言 */
+    static public $lang_default = 'zh_cn';
     /** @var array 支持的语言 */
     public static $langs = [
         "en_us" => "English", // "zh"=>"繁體中文",

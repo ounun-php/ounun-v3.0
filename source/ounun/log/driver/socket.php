@@ -60,7 +60,7 @@ class socket
             return false;
         }
         $trace = [];
-        if (App::$debug) {
+        if (Environment) {
             $runtime    = round(microtime(true) - THINK_START_TIME, 10);
             $reqs       = $runtime > 0 ? number_format(1 / $runtime, 2) : '∞';
             $time_str   = ' [运行时间：' . number_format($runtime, 6) . 's][吞吐率：' . $reqs . 'req/s]';

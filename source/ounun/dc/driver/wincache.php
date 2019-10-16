@@ -3,48 +3,33 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace think\cache\driver;
+namespace ounun\dc\driver;
 
-use think\cache\Driver;
 
-class Memcache extends Driver
+/**
+ * Wincache缓存驱动
+ * @author    liu21st <liu21st@gmail.com>
+ */
+class wincache extends \ounun\dc\driver
 {
     protected $options = [
-        'host'       => '127.0.0.1',
-        'port'       => 11211,
-        'expire'     => 0,
-        'timeout'    => 0, // 超时时间（单位：毫秒）
-        'persistent' => true,
-        'prefix'     => '',
+        'prefix' => '',
+        'expire' => 0,
     ];
 
     /**
      * 构造函数
      * @param array $options 缓存参数
-     * @access public
      * @throws \BadFunctionCallException
+     * @access public
      */
     public function __construct($options = [])
     {
-        if (!extension_loaded('memcache')) {
-            throw new \BadFunctionCallException('not support: memcache');
+        if (!function_exists('wincache_ucache_info')) {
+            throw new \BadFunctionCallException('not support: WinCache');
         }
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
-        }
-        $this->handler = new \Memcache;
-        // 支持集群
-        $hosts = explode(',', $this->options['host']);
-        $ports = explode(',', $this->options['port']);
-        if (empty($ports[0])) {
-            $ports[0] = 11211;
-        }
-        // 建立连接
-        foreach ((array) $hosts as $i => $host) {
-            $port = isset($ports[$i]) ? $ports[$i] : $ports[0];
-            $this->options['timeout'] > 0 ?
-            $this->handler->addServer($host, $port, $this->options['persistent'], 1, $this->options['timeout']) :
-            $this->handler->addServer($host, $port, $this->options['persistent'], 1);
         }
     }
 
@@ -57,7 +42,7 @@ class Memcache extends Driver
     public function has($name)
     {
         $key = $this->getCacheKey($name);
-        return $this->handler->get($key) ? true : false;
+        return wincache_ucache_exists($key);
     }
 
     /**
@@ -69,8 +54,8 @@ class Memcache extends Driver
      */
     public function get($name, $default = false)
     {
-        $result = $this->handler->get($this->getCacheKey($name));
-        return false !== $result ? $result : $default;
+        $key = $this->getCacheKey($name);
+        return wincache_ucache_exists($key) ? wincache_ucache_get($key) : $default;
     }
 
     /**
@@ -79,7 +64,7 @@ class Memcache extends Driver
      * @param string            $name 缓存变量名
      * @param mixed             $value  存储数据
      * @param integer|\DateTime $expire  有效时间（秒）
-     * @return bool
+     * @return boolean
      */
     public function set($name, $value, $expire = null)
     {
@@ -89,11 +74,11 @@ class Memcache extends Driver
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
+        $key = $this->getCacheKey($name);
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
-        $key = $this->getCacheKey($name);
-        if ($this->handler->set($key, $value, 0, $expire)) {
+        if (wincache_ucache_set($key, $value, $expire)) {
             isset($first) && $this->setTagItem($key);
             return true;
         }
@@ -110,10 +95,7 @@ class Memcache extends Driver
     public function inc($name, $step = 1)
     {
         $key = $this->getCacheKey($name);
-        if ($this->handler->get($key)) {
-            return $this->handler->increment($key, $step);
-        }
-        return $this->handler->set($key, $step);
+        return wincache_ucache_inc($key, $step);
     }
 
     /**
@@ -125,47 +107,39 @@ class Memcache extends Driver
      */
     public function dec($name, $step = 1)
     {
-        $key   = $this->getCacheKey($name);
-        $value = $this->handler->get($key) - $step;
-        $res   = $this->handler->set($key, $value);
-        if (!$res) {
-            return false;
-        } else {
-            return $value;
-        }
+        $key = $this->getCacheKey($name);
+        return wincache_ucache_dec($key, $step);
     }
 
     /**
      * 删除缓存
-     * @param    string  $name 缓存变量名
-     * @param bool|false $ttl
-     * @return bool
+     * @access public
+     * @param string $name 缓存变量名
+     * @return boolean
      */
-    public function rm($name, $ttl = false)
+    public function rm($name)
     {
-        $key = $this->getCacheKey($name);
-        return false === $ttl ?
-        $this->handler->delete($key) :
-        $this->handler->delete($key, $ttl);
+        return wincache_ucache_delete($this->getCacheKey($name));
     }
 
     /**
      * 清除缓存
      * @access public
      * @param string $tag 标签名
-     * @return bool
+     * @return boolean
      */
     public function clear($tag = null)
     {
         if ($tag) {
-            // 指定标签清除
             $keys = $this->getTagItem($tag);
             foreach ($keys as $key) {
-                $this->handler->delete($key);
+                wincache_ucache_delete($key);
             }
             $this->rm('tag_' . md5($tag));
             return true;
+        } else {
+            return wincache_ucache_clear();
         }
-        return $this->handler->flush();
     }
+
 }

@@ -3,15 +3,14 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace think\cache\driver;
+namespace ounun\dc\driver;
 
-use think\cache\Driver;
 
 /**
- * Wincache缓存驱动
+ * Xcache缓存驱动
  * @author    liu21st <liu21st@gmail.com>
  */
-class Wincache extends Driver
+class xcache extends \ounun\dc\driver
 {
     protected $options = [
         'prefix' => '',
@@ -21,13 +20,13 @@ class Wincache extends Driver
     /**
      * 构造函数
      * @param array $options 缓存参数
-     * @throws \BadFunctionCallException
      * @access public
+     * @throws \BadFunctionCallException
      */
     public function __construct($options = [])
     {
-        if (!function_exists('wincache_ucache_info')) {
-            throw new \BadFunctionCallException('not support: WinCache');
+        if (!function_exists('xcache_info')) {
+            throw new \BadFunctionCallException('not support: Xcache');
         }
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
@@ -43,7 +42,7 @@ class Wincache extends Driver
     public function has($name)
     {
         $key = $this->getCacheKey($name);
-        return wincache_ucache_exists($key);
+        return xcache_isset($key);
     }
 
     /**
@@ -56,7 +55,7 @@ class Wincache extends Driver
     public function get($name, $default = false)
     {
         $key = $this->getCacheKey($name);
-        return wincache_ucache_exists($key) ? wincache_ucache_get($key) : $default;
+        return xcache_isset($key) ? xcache_get($key) : $default;
     }
 
     /**
@@ -75,11 +74,11 @@ class Wincache extends Driver
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        $key = $this->getCacheKey($name);
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
-        if (wincache_ucache_set($key, $value, $expire)) {
+        $key = $this->getCacheKey($name);
+        if (xcache_set($key, $value, $expire)) {
             isset($first) && $this->setTagItem($key);
             return true;
         }
@@ -96,7 +95,7 @@ class Wincache extends Driver
     public function inc($name, $step = 1)
     {
         $key = $this->getCacheKey($name);
-        return wincache_ucache_inc($key, $step);
+        return xcache_inc($key, $step);
     }
 
     /**
@@ -109,7 +108,7 @@ class Wincache extends Driver
     public function dec($name, $step = 1)
     {
         $key = $this->getCacheKey($name);
-        return wincache_ucache_dec($key, $step);
+        return xcache_dec($key, $step);
     }
 
     /**
@@ -120,7 +119,7 @@ class Wincache extends Driver
      */
     public function rm($name)
     {
-        return wincache_ucache_delete($this->getCacheKey($name));
+        return xcache_unset($this->getCacheKey($name));
     }
 
     /**
@@ -132,15 +131,18 @@ class Wincache extends Driver
     public function clear($tag = null)
     {
         if ($tag) {
+            // 指定标签清除
             $keys = $this->getTagItem($tag);
             foreach ($keys as $key) {
-                wincache_ucache_delete($key);
+                xcache_unset($key);
             }
             $this->rm('tag_' . md5($tag));
             return true;
+        }
+        if (function_exists('xcache_unset_by_prefix')) {
+            return xcache_unset_by_prefix($this->options['prefix']);
         } else {
-            return wincache_ucache_clear();
+            return false;
         }
     }
-
 }

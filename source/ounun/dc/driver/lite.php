@@ -3,15 +3,14 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace think\cache\driver;
+namespace ounun\dc\driver;
 
-use think\cache\Driver;
 
 /**
  * 文件类型缓存类
  * @author    liu21st <liu21st@gmail.com>
  */
-class Lite extends Driver
+class lite extends \ounun\dc\driver
 {
     protected $options = [
         'prefix' => '',

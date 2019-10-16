@@ -23,6 +23,7 @@
     "ext-redis": "*",
     "ext-gd": "*",
     "ext-xml": "*",
+    "ext-apcu": "*",
     "ext-xmlrpc": "*",
     "ext-imagick": "*",
     "ext-simplexml": "*",

@@ -3,44 +3,35 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace think\cache\driver;
+namespace ounun\dc\driver;
 
-use think\cache\Driver;
 
-class Memcached extends Driver
+class memcache extends \ounun\dc\driver
 {
     protected $options = [
-        'host'     => '127.0.0.1',
-        'port'     => 11211,
-        'expire'   => 0,
-        'timeout'  => 0, // 超时时间（单位：毫秒）
-        'prefix'   => '',
-        'username' => '', //账号
-        'password' => '', //密码
-        'option'   => [],
+        'host'       => '127.0.0.1',
+        'port'       => 11211,
+        'expire'     => 0,
+        'timeout'    => 0, // 超时时间（单位：毫秒）
+        'persistent' => true,
+        'prefix'     => '',
     ];
 
     /**
      * 构造函数
      * @param array $options 缓存参数
      * @access public
+     * @throws \BadFunctionCallException
      */
     public function __construct($options = [])
     {
-        if (!extension_loaded('memcached')) {
-            throw new \BadFunctionCallException('not support: memcached');
+        if (!extension_loaded('memcache')) {
+            throw new \BadFunctionCallException('not support: memcache');
         }
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
-        $this->handler = new \Memcached;
-        if (!empty($this->options['option'])) {
-            $this->handler->setOptions($this->options['option']);
-        }
-        // 设置连接超时时间（单位：毫秒）
-        if ($this->options['timeout'] > 0) {
-            $this->handler->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $this->options['timeout']);
-        }
+        $this->handler = new \Memcache;
         // 支持集群
         $hosts = explode(',', $this->options['host']);
         $ports = explode(',', $this->options['port']);
@@ -48,14 +39,11 @@ class Memcached extends Driver
             $ports[0] = 11211;
         }
         // 建立连接
-        $servers = [];
         foreach ((array) $hosts as $i => $host) {
-            $servers[] = [$host, (isset($ports[$i]) ? $ports[$i] : $ports[0]), 1];
-        }
-        $this->handler->addServers($servers);
-        if ('' != $this->options['username']) {
-            $this->handler->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
-            $this->handler->setSaslAuthData($this->options['username'], $this->options['password']);
+            $port = isset($ports[$i]) ? $ports[$i] : $ports[0];
+            $this->options['timeout'] > 0 ?
+            $this->handler->addServer($host, $port, $this->options['persistent'], 1, $this->options['timeout']) :
+            $this->handler->addServer($host, $port, $this->options['persistent'], 1);
         }
     }
 
@@ -103,9 +91,8 @@ class Memcached extends Driver
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
-        $key    = $this->getCacheKey($name);
-        $expire = 0 == $expire ? 0 : $_SERVER['REQUEST_TIME'] + $expire;
-        if ($this->handler->set($key, $value, $expire)) {
+        $key = $this->getCacheKey($name);
+        if ($this->handler->set($key, $value, 0, $expire)) {
             isset($first) && $this->setTagItem($key);
             return true;
         }
@@ -172,7 +159,9 @@ class Memcached extends Driver
         if ($tag) {
             // 指定标签清除
             $keys = $this->getTagItem($tag);
-            $this->handler->deleteMulti($keys);
+            foreach ($keys as $key) {
+                $this->handler->delete($key);
+            }
             $this->rm('tag_' . md5($tag));
             return true;
         }

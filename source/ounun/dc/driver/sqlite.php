@@ -3,15 +3,14 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace think\cache\driver;
+namespace ounun\dc\driver;
 
-use think\cache\Driver;
 
 /**
  * Sqlite缓存驱动
  * @author    liu21st <liu21st@gmail.com>
  */
-class Sqlite extends Driver
+class sqlite extends \ounun\dc\driver
 {
     protected $options = [
         'db'         => ':memory:',
