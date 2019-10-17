@@ -922,7 +922,9 @@ abstract class v
     public function __call($method, $arguments)
     {
         header('HTTP/1.1 404 Not Found');
-        $this->debug_init('404');
+        if(Environment){
+            $this->debug_init('404');
+        }
         error404("<strong>method</strong> --> : {$method} <br />\n 
                         <strong>args</strong> ------> : " . json_encode($arguments) . " <br />\n 
                         <strong>class</strong> -----> : ".get_class($this));
