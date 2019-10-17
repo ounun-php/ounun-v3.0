@@ -723,8 +723,8 @@ abstract class v
     {
         if ('' == Environment && \ounun::$global['cache_html']) {
             $cfg = \ounun::$global['cache_html'];
-            $cfg['mod'] = 'html_' . \ounun::$app_name . \ounun::$tpl_style;
-            $key2 = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . $key;
+            $cfg['mod'] = 'html_' . \ounun::$app_name .'_'. \ounun::$tpl_style. '_'.\ounun::$tpl_type;
+            $key2  = \ounun::$app_name . '_' . \ounun::$tpl_style .'_'.\ounun::$tpl_type. '_' . $key;
             $debug = \ounun::$global['debug'];
             $debug = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
             static::$cache_html = new \ounun\cache\buffer\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
