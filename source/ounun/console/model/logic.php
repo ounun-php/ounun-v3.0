@@ -118,8 +118,7 @@ abstract class logic
         }
         if($count > 0 || $start > 0 ){
             $rs = $db->limit($count,$start)->column_all();
-        }else
-        {
+        }else{
             $rs = $db->column_all();
         }
 
@@ -142,15 +141,6 @@ abstract class logic
                 $this->_lists_decode($v,false);
             }
         }else{
-            if($rs['tags']){
-                $rs['tags'] = \addons\tag\apps::decode($rs['tags']);
-                // print_r($v['tags']);
-                if($rs['tags'] && is_array($rs['tags'])){
-                    foreach ($rs['tags'] as $v1){
-                        $this->tags[$rs['tag_id']] = $v1;
-                    }
-                }
-            }
             if($rs['contents']){
                 $rs['contents'] = json_decode_array($rs['contents']);
             }

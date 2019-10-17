@@ -38,12 +38,18 @@ class subject implements \SplSubject
     }
 
     /**
-     * @param string $event
+     * @param string $event_status
+     * @param string $event_action
      * @param array $paras
      */
-    public function notify(string $event = '',array $paras = [])
+    public function notify(string $event_status = '',string $event_action = '',array $paras = [])
     {
-        if ($event) {
+        if ($event_status) {
+            if($event_action){
+                $event = "{$event_status}_{$event_action}";
+            }else{
+                $event =  $event_status;
+            }
             $this->event_paras = [$event,$paras];
         }
         $this->_storage->rewind();

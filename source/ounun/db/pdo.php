@@ -719,7 +719,7 @@ class pdo
      */
     public function max_value(string $field, string $alias = '`max`', $default_value = 0)
     {
-        return $this->min($field, $alias)->column_value($alias, $default_value);
+        return $this->max($field, $alias)->column_value($alias, $default_value);
     }
 
     /**
@@ -882,11 +882,11 @@ class pdo
 
     /**
      * 为 SQL 查询里的字符串添加引号(特殊情况时才用)
-     * @param $data
-     * @param int $type
+     * @param mixed $data
+     * @param int   $type
      * @return string
      */
-    public function quote($data, int $type = \PDO::PARAM_STR)
+    public function quote($data, int $type = \PDO::PARAM_INT)
     {
         $rs = [];
         if (is_array($data)) {
@@ -1007,9 +1007,6 @@ class pdo
         $fields = [];
         if ($data && is_array($data)) {
             foreach ($data as $col => &$val) {
-                if($val && is_array($val)){
-                    $val = '\''.implode('\',\'',$val).'\'';
-                }
                 if ('-' == $col[1]) {
                     list($type_length, $field) = explode(':', $col);
                     list($type, $length) = explode('-', $type_length);
