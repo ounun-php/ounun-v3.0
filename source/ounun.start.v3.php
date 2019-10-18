@@ -109,7 +109,7 @@ class ounun
     /** @var array 模板替换数据组 */
     static public $tpl_replace_str = [];
 
-    /** @var \ounun\console\model\i18n 语言包 */
+    /** @var \ounun\apps\i18n 语言包 */
     static public $i18n;
     /** @var string 当前语言 */
     static public $lang = 'zh_cn';
@@ -132,9 +132,9 @@ class ounun
             static::$lang = $lang;
         }
         $lang_default && self::$lang_default = $lang_default;
-        $i18ns = ['app\\' . static::$app_name . '\\model\\i18n', 'extend\\i18n', 'ounun\\mvc\\model\\i18n'];
+        $i18ns = ['app\\' . static::$app_name . '\\i18n', 'extend\\i18n', 'ounun\\apps\\i18n'];
         if ($lang != static::$lang_default) {
-            array_unshift($i18ns, 'app\\' . static::$app_name . '\\model\\i18n\\' . $lang);
+            array_unshift($i18ns, 'app\\' . static::$app_name . '\\i18n\\' . $lang);
         }
         foreach ($i18ns as $i18n) {
             $file = static::load_class_file_exists($i18n);
@@ -422,7 +422,7 @@ class ounun
 
     /**
      * 语言包
-     * @return \ounun\console\model\i18n
+     * @return \ounun\apps\i18n
      */
     static public function i18n_get()
     {

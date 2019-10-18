@@ -3,14 +3,10 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\console\model;
+namespace ounun\apps\logic;
 
-/**
- * YgcmsUC
- * Ygcms阳光CMS 用户中心
- * @author 一平 dreamxyp@gmail.com
- */
-class user
+
+class oauth extends user
 {
     /** 通信私钥   */
     protected $_key_private = '';
@@ -22,7 +18,7 @@ class user
      * @param $key_private
      * @param $domain
      */
-    public function __construct($key_private, $domain)
+    public function key_set($key_private, $domain)
     {
         $this->_key_private = $key_private;
         $this->_domain = $domain;

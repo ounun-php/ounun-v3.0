@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\console\model;
+namespace ounun\apps;
+
 
 // "zh_cn"=>"简本中文",
 class i18n
@@ -22,7 +23,7 @@ class i18n
     const tpl_type         = 'pc';
     /** @var string 模板(默认) */
     const tpl_type_default = '';
-    
+
     /** 网站标题 */
     const title            = 'CMS.cc开源移动内容管理系统';
 

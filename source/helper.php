@@ -315,17 +315,17 @@ function https_is()
 
 /**
  * 返回一个错误
- * @param string $message
- * @param int $error_code
+ * @param string $msg
+ * @param int $status
  * @param mixed $data
  * @param array $extend 延伸数据
  * @return array
  */
-function error(string $message = '', int $error_code = 1, $data = null, $extend = [])
+function error(string $msg = '', int $status = 1, $data = null, $extend = [])
 {
     $rs = [
-        'msg'    => $message,
-        'status' => $error_code,
+        'msg'    => $msg,
+        'status' => $status,
     ];
     if ($data) {
         $rs['data'] = $data;

@@ -3,48 +3,13 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\console\model;
+namespace ounun\apps\logic;
 
-abstract class logic
+
+class json_data extends \ounun\apps\logic
 {
-    /** @var self 实例 */
-    protected static $instance;
-
-    /**
-     * @param \ounun\db\pdo $db
-     * @return $this 返回数据库连接对像
-     */
-    public static function i(\ounun\db\pdo $db = null): self
-    {
-        if (empty(static::$instance)) {
-            if (empty($db)) {
-                $db = \v::db_v_get();
-            }
-            static::$instance = new static($db);
-        }
-        return static::$instance;
-    }
-
-    /** @var \ounun\db\pdo */
-    public $db;
-
-    /** @var string  */
-    public $table = '';
-
     /**  @var array  */
     public $tags = [];
-
-    /**
-     * cms constructor.
-     * @param \ounun\db\pdo $db
-     */
-    public function __construct(\ounun\db\pdo $db = null)
-    {
-        if ($db) {
-            $this->db = $db;
-        }
-        static::$instance = $this;
-    }
 
     /**
      * @param string $table
@@ -129,13 +94,14 @@ abstract class logic
         return $rs;
     }
 
-    
+
     /**
      * json数据decode
      * @param array $rs
      * @param bool $is_multi
      */
-    public function _lists_decode(array &$rs , bool $is_multi = true){
+    public function _lists_decode(array &$rs , bool $is_multi = true)
+    {
         if($is_multi) {
             foreach ($rs as &$v) {
                 $this->_lists_decode($v,false);
