@@ -25,11 +25,30 @@ abstract class restful
     }
 
     /** GET 返回资源信息 */
-    abstract public function GET();
+    public function GET()
+    {
+        $rs = succeed([__METHOD__,$this->_restful->input_get(),$this->_restful->gets_get(),$this->_restful->post_get()]);
+        out($rs);
+    }
+
     /** POST 创建资源信息 */
-    abstract public function POST();
+    public function POST()
+    {
+        $rs = succeed([__METHOD__,$this->_restful->input_get(),$this->_restful->gets_get(),$this->_restful->post_get()]);
+        out($rs);
+    }
+
     /** PUT 更新资源信息 */
-    abstract public function PUT();
+    public function PUT()
+    {
+        $rs = succeed([__METHOD__,$this->_restful->input_get(),$this->_restful->gets_get(),$this->_restful->post_get()]);
+        out($rs);
+    }
+
     /** DELETE 删除资源信息 */
-    abstract public function DELETE();
+    public function DELETE()
+    {
+        $rs = succeed([__METHOD__,$this->_restful->input_get(),$this->_restful->gets_get(),$this->_restful->post_get()]);
+        out($rs);
+    }
 }
