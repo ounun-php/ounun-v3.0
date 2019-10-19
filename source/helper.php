@@ -871,9 +871,9 @@ abstract class v
      */
     public function index($mod)
     {
-        error404("<strong>method</strong>  -->:".__METHOD__." <br />\n  
-                        <strong>mod</strong> ------>:" . json_encode($mod) . " <br />\n  
-                        <strong>class</strong> ---->:".get_class($this));
+        error404("<strong>method</strong>  --> ".__METHOD__." <br />\n  
+                        <strong>mod</strong> ------> " . json_encode($mod) . " <br />\n  
+                        <strong>class</strong> ----> ".get_class($this));
     }
 
     /**
@@ -925,8 +925,8 @@ abstract class v
         if(Environment){
             $this->debug_init('404');
         }
-        error404("<strong>method</strong> --> : {$method} <br />\n 
-                        <strong>args</strong> ------> : " . json_encode($arguments) . " <br />\n 
-                        <strong>class</strong> -----> : ".get_class($this));
+        error404("<strong>method</strong> -->   {$method} <br />\n 
+                        <strong>args</strong> ------> " . json_encode($arguments) . " <br />\n 
+                        <strong>class</strong> -----> ".get_class($this));
     }
 }
