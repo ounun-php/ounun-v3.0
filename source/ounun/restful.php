@@ -23,6 +23,11 @@ class restful  extends \v
 
     public function __construct($mod)
     {
+        $rs = $this->_construct_before($mod);
+        if(error_is($rs)){
+            out($rs);
+        }
+        //
         $this->_method = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
         $this->_request_gets = $_GET;
@@ -45,6 +50,15 @@ class restful  extends \v
                 parent::__construct($mod);
             }
         }
+    }
+
+    /**
+     * @param $mod
+     * @return bool|array
+     */
+    public function _construct_before($mod)
+    {
+        return true;
     }
 
     /**
@@ -162,18 +176,19 @@ class restful  extends \v
         exit($response);
     }
 
+
     /**
      * @param $response_data
      * @return string
      */
     public function encode_html($response_data) {
         if(is_array($response_data)){
-            $htmlResponse = '<table style="border: darkcyan solid 1px;">';
+            $html_response = '<table style="border: darkcyan solid 1px;">';
             foreach($response_data as $key=> $value) {
-                $htmlResponse .= "<tr><td>". $key. "</td><td>". $value. "</td></tr>";
+                $html_response .= "<tr><td>". $key. "</td><td>". $value. "</td></tr>";
             }
-            $htmlResponse .= "</table>";
-            return $htmlResponse;
+            $html_response .= "</table>";
+            return $html_response;
         }
         return $response_data;
     }

@@ -144,7 +144,7 @@ class template
             // }elseif ('app' == $tpl_dir['type']){
             }else{
                 foreach ($types as $type) {
-                    $filename2 = "{$tpl_dir['path']}{$addon_tag2}/template/{$type}/{$filename}";
+                    $filename2 = "{$tpl_dir['path']}{$addon_tag2}template/{$type}/{$filename}";
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
                         if($remember_dir_current){
