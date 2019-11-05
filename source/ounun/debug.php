@@ -39,12 +39,14 @@ class debug
 
     /**
      * 构造函数
-     * Debug constructor.
-     * @param string $filename 输出文件名
-     * @param bool $is_out_buffer 是否输出 buffer
-     * @param bool $is_out_get 是否输出 get
-     * @param bool $is_out_post 是否输出 post
-     * @param bool $is_out_url 是否输出 url
+     * debug constructor.
+     * @param string $filename     输出文件名
+     * @param bool $is_out_buffer  是否输出 buffer
+     * @param bool $is_out_get      是否输出 get
+     * @param bool $is_out_post    是否输出 post
+     * @param bool $is_out_url     是否输出 url
+     * @param bool $is_run_time    运行时间毫秒
+     * @param bool $is_bof         倒序(后面的日志写到前面)
      */
     public function __construct($filename = 'debug.txt',
                                 $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true, $is_run_time = true, $is_bof = true)
@@ -175,7 +177,7 @@ class debug
      * @param mixed $v
      * @param bool $debug
      * @param string $function
-     * @param string $line
+     * @param int $line
      */
     static public function header(string $k, $v, bool $debug = false, string $function = '', int $line = 0)
     {
@@ -200,5 +202,26 @@ class debug
             $idx = str_pad(static::$_header_idx, 4, '0', STR_PAD_LEFT);
             header("{$idx}-{$key}: {$v}", false);
         }
+    }
+
+    /** @var self 单例模式 */
+    static protected $_instance;
+
+    /**
+     * @param string $filename     输出文件名
+     * @param bool $is_out_buffer  是否输出 buffer
+     * @param bool $is_out_get      是否输出 get
+     * @param bool $is_out_post    是否输出 post
+     * @param bool $is_out_url     是否输出 url
+     * @param bool $is_run_time    运行时间毫秒
+     * @param bool $is_bof         倒序(后面的日志写到前面)
+     * @return $this 调试日志单例
+     */
+    public static function i($filename = 'debug.txt', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true, $is_run_time = true, $is_bof = true): self
+    {
+        if (empty(static::$_instance)) {
+            static::$_instance = new static($filename, $is_out_buffer , $is_out_get , $is_out_post , $is_out_url , $is_run_time , $is_bof);
+        }
+        return static::$_instance;
     }
 }
