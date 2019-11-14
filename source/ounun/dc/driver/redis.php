@@ -63,7 +63,7 @@ class redis extends \ounun\dc\driver
      */
     public function has($name)
     {
-        return $this->handler->get($this->getCacheKey($name)) ? true : false;
+        return $this->handler->get($this->cache_key_get($name)) ? true : false;
     }
 
     /**
@@ -75,7 +75,7 @@ class redis extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $value = $this->handler->get($this->getCacheKey($name));
+        $value = $this->handler->get($this->cache_key_get($name));
         if (is_null($value) || false === $value) {
             return $default;
         }
@@ -108,14 +108,14 @@ class redis extends \ounun\dc\driver
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
-        $key   = $this->getCacheKey($name);
+        $key   = $this->cache_key_get($name);
         $value = is_scalar($value) ? $value : 'think_serialize:' . serialize($value);
         if ($expire) {
             $result = $this->handler->setex($key, $expire, $value);
         } else {
             $result = $this->handler->set($key, $value);
         }
-        isset($first) && $this->setTagItem($key);
+        isset($first) && $this->tag_item_set($key);
         return $result;
     }
 
@@ -128,7 +128,7 @@ class redis extends \ounun\dc\driver
      */
     public function inc($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
 
         return $this->handler->incrby($key, $step);
     }
@@ -142,7 +142,7 @@ class redis extends \ounun\dc\driver
      */
     public function dec($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
 
         return $this->handler->decrby($key, $step);
     }
@@ -155,7 +155,7 @@ class redis extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        return $this->handler->delete($this->getCacheKey($name));
+        return $this->handler->delete($this->cache_key_get($name));
     }
 
     /**
@@ -168,7 +168,7 @@ class redis extends \ounun\dc\driver
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->getTagItem($tag);
+            $keys = $this->tag_item_get($tag);
             foreach ($keys as $key) {
                 $this->handler->delete($key);
             }

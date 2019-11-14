@@ -38,6 +38,13 @@ class imagick
         return $this->image;
     }
 
+    /**
+     * @param int $x
+     * @param int $y
+     * @param null $width
+     * @param null $height
+     * @throws \ImagickException
+     */
     public function crop($x = 0, $y = 0, $width = null, $height = null)
     {
         if ($width == null) $width = $this->image->getImageWidth() - $x;

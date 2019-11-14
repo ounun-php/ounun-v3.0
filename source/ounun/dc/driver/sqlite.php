@@ -44,7 +44,7 @@ class sqlite extends \ounun\dc\driver
      * @param string $name 缓存名
      * @return string
      */
-    protected function getCacheKey($name)
+    protected function cache_key_get($name)
     {
         return $this->options['prefix'] . sqlite_escape_string($name);
     }
@@ -57,7 +57,7 @@ class sqlite extends \ounun\dc\driver
      */
     public function has($name)
     {
-        $name   = $this->getCacheKey($name);
+        $name   = $this->cache_key_get($name);
         $sql    = 'SELECT value FROM ' . $this->options['table'] . ' WHERE var=\'' . $name . '\' AND (expire=0 OR expire >' . $_SERVER['REQUEST_TIME'] . ') LIMIT 1';
         $result = sqlite_query($this->handler, $sql);
         return sqlite_num_rows($result);
@@ -72,7 +72,7 @@ class sqlite extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $name   = $this->getCacheKey($name);
+        $name   = $this->cache_key_get($name);
         $sql    = 'SELECT value FROM ' . $this->options['table'] . ' WHERE var=\'' . $name . '\' AND (expire=0 OR expire >' . $_SERVER['REQUEST_TIME'] . ') LIMIT 1';
         $result = sqlite_query($this->handler, $sql);
         if (sqlite_num_rows($result)) {
@@ -96,7 +96,7 @@ class sqlite extends \ounun\dc\driver
      */
     public function set($name, $value, $expire = null)
     {
-        $name  = $this->getCacheKey($name);
+        $name  = $this->cache_key_get($name);
         $value = sqlite_escape_string(serialize($value));
         if (is_null($expire)) {
             $expire = $this->options['expire'];
@@ -165,7 +165,7 @@ class sqlite extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        $name = $this->getCacheKey($name);
+        $name = $this->cache_key_get($name);
         $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE var=\'' . $name . '\'';
         sqlite_query($this->handler, $sql);
         return true;

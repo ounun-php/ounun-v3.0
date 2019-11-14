@@ -41,7 +41,7 @@ class lite extends \ounun\dc\driver
      * @param string $name 缓存变量名
      * @return string
      */
-    protected function getCacheKey($name)
+    protected function cache_key_get($name)
     {
         return $this->options['path'] . $this->options['prefix'] . md5($name) . '.php';
     }
@@ -66,7 +66,7 @@ class lite extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $filename = $this->getCacheKey($name);
+        $filename = $this->cache_key_get($name);
         if (is_file($filename)) {
             // 判断是否过期
             $mtime = filemtime($filename);
@@ -100,14 +100,14 @@ class lite extends \ounun\dc\driver
             $expire = 0 === $expire ? 10 * 365 * 24 * 3600 : $expire;
             $expire = time() + $expire;
         }
-        $filename = $this->getCacheKey($name);
+        $filename = $this->cache_key_get($name);
         if ($this->tag && !is_file($filename)) {
             $first = true;
         }
         $ret = file_put_contents($filename, ("<?php return " . var_export($value, true) . ";"));
         // 通过设置修改时间实现有效期
         if ($ret) {
-            isset($first) && $this->setTagItem($filename);
+            isset($first) && $this->tag_item_set($filename);
             touch($filename, $expire);
         }
         return $ret;
@@ -155,7 +155,7 @@ class lite extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        return unlink($this->getCacheKey($name));
+        return unlink($this->cache_key_get($name));
     }
 
     /**
@@ -168,7 +168,7 @@ class lite extends \ounun\dc\driver
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->getTagItem($tag);
+            $keys = $this->tag_item_get($tag);
             foreach ($keys as $key) {
                 unlink($key);
             }

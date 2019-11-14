@@ -66,7 +66,7 @@ class memcached extends \ounun\dc\driver
      */
     public function has($name)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return $this->handler->get($key) ? true : false;
     }
 
@@ -79,7 +79,7 @@ class memcached extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $result = $this->handler->get($this->getCacheKey($name));
+        $result = $this->handler->get($this->cache_key_get($name));
         return false !== $result ? $result : $default;
     }
 
@@ -102,10 +102,10 @@ class memcached extends \ounun\dc\driver
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
-        $key    = $this->getCacheKey($name);
+        $key    = $this->cache_key_get($name);
         $expire = 0 == $expire ? 0 : $_SERVER['REQUEST_TIME'] + $expire;
         if ($this->handler->set($key, $value, $expire)) {
-            isset($first) && $this->setTagItem($key);
+            isset($first) && $this->tag_item_set($key);
             return true;
         }
         return false;
@@ -120,7 +120,7 @@ class memcached extends \ounun\dc\driver
      */
     public function inc($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         if ($this->handler->get($key)) {
             return $this->handler->increment($key, $step);
         }
@@ -136,7 +136,7 @@ class memcached extends \ounun\dc\driver
      */
     public function dec($name, $step = 1)
     {
-        $key   = $this->getCacheKey($name);
+        $key   = $this->cache_key_get($name);
         $value = $this->handler->get($key) - $step;
         $res   = $this->handler->set($key, $value);
         if (!$res) {
@@ -154,7 +154,7 @@ class memcached extends \ounun\dc\driver
      */
     public function rm($name, $ttl = false)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return false === $ttl ?
         $this->handler->delete($key) :
         $this->handler->delete($key, $ttl);
@@ -170,7 +170,7 @@ class memcached extends \ounun\dc\driver
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->getTagItem($tag);
+            $keys = $this->tag_item_get($tag);
             $this->handler->deleteMulti($keys);
             $this->rm('tag_' . md5($tag));
             return true;

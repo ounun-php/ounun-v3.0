@@ -19,13 +19,13 @@ class base
     /** @var array   当前页面时 */
     protected $_config_now = ['<li class="now">', '</li>'];
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
-    protected $_cfg_tag = ['第一页', '上一页', '下一页', '最后一页'];
+    protected $_config_tag = ['第一页', '上一页', '下一页', '最后一页'];
     /** @var int     最多显示几页 */
-    protected $_cfg_max = 7;
+    protected $_config_max = 7;
     /** @var int     一页显示几条数据 */
-    protected $_cfg_rows = 20;
+    protected $_config_rows = 20;
     /** @var array   第一页 */
-    protected $_cfg_index = [];
+    protected $_config_index = [];
 
     /** @var \ounun\db\pdo */
     protected $_db;
@@ -75,14 +75,13 @@ class base
         }
 
         if ($rows) {
-            $this->_cfg_rows = $rows;
+            $this->_config_rows = $rows;
         }
     }
 
     /**
      * 设定总接口
-     * @param string|array $key
-     * @param string $value
+     * @param array $config
      */
     public function config_set(array $config)
     {
@@ -100,33 +99,34 @@ class base
         }
         // 第一页 上一页 下一页 最后一页
         if ($config['tag']) {
-            $this->_cfg_tag = $config['tag'];
+            $this->_config_tag = $config['tag'];
         }
         // 最多显示几页
         if ($config['max']) {
-            $this->_cfg_max = $config['max'];
+            $this->_config_max = $config['max'];
         }
         // 一页显示几条数据
         if ($config['rows']) {
-            $this->_cfg_rows = $config['rows'];
+            $this->_config_rows = $config['rows'];
         }
         // 第一页
         if ($config['index']) {
-            $this->_cfg_index = $config['index'];
+            $this->_config_index = $config['index'];
         }
     }
 
     /**
      * 得到分页数据
      * @param int $page
-     * @param array $config
+     * @param string $title
+     * @param bool $default_end
      * @return array
      */
     public function init(int $page = 0, string $title = "", bool $default_end = false): array
     {
         $page_default = $this->_config_default;
         $page_now = $this->_config_now;
-        $cfg_tag = $this->_cfg_tag;
+        $cfg_tag = $this->_config_tag;
         $title = $title ? "{$title}-" : '';
 
         $rs_page = [];
@@ -173,24 +173,24 @@ class base
      */
     public function data(int $page = 0, bool $default_end = false): array
     {
-        $m = ceil($this->_cfg_max / 2);
+        $m = ceil($this->_config_max / 2);
         $this->_total = $this->total();
-        $this->_total_page = ceil($this->_total / $this->_cfg_rows);
+        $this->_total_page = ceil($this->_total / $this->_config_rows);
         $page = $default_end
             ? ($page < 1 ? $this->_total_page : $page)
             : ($page < 1 ? 1 : $page);
         $this->_page = $page;
         $this->_page_max = $default_end;
 
-        if ($this->_total_page > $this->_cfg_max) {
-            $sub_total = $this->_cfg_max;
+        if ($this->_total_page > $this->_config_max) {
+            $sub_total = $this->_config_max;
             $sub_begin = true;
             $sub_end = true;
             if ($page <= $m) {
                 $sub_start = 1;
                 $sub_begin = false;
             } elseif ($this->_total_page - $page < $m) {
-                $sub_start = $this->_total_page - $this->_cfg_max + 1;
+                $sub_start = $this->_total_page - $this->_config_max + 1;
                 $sub_end = false;
             } else {
                 $sub_start = $page - $m + 1;
@@ -260,7 +260,7 @@ class base
      */
     public function limit_rows(): int
     {
-        return $this->_cfg_rows;
+        return $this->_config_rows;
     }
 
     /**
@@ -269,9 +269,9 @@ class base
     public function limit_start(): int
     {
         if ($this->_page_max && $this->_page == $this->_total_page) {
-            $start = $this->_total - $this->_cfg_rows;
+            $start = $this->_total - $this->_config_rows;
         } else {
-            $start = ($this->_page - 1) * $this->_cfg_rows;
+            $start = ($this->_page - 1) * $this->_config_rows;
         }
         return $start < 0 ? 0 : $start;
     }
@@ -294,20 +294,20 @@ class base
     protected function _url_set(int $page): string
     {
         $url = str_replace('{page}', $page, $this->_url);
-        if ($this->_cfg_index) {
+        if ($this->_config_index) {
             if ($this->_page_max && $page == $this->_total_page) {
-                if (is_array($this->_cfg_index)) {
-                    $cfg_index = str_replace('{total_page}', $page, $this->_cfg_index[0]);
-                    $url = str_replace($cfg_index, $this->_cfg_index[1], $url);
+                if (is_array($this->_config_index)) {
+                    $cfg_index = str_replace('{total_page}', $page, $this->_config_index[0]);
+                    $url = str_replace($cfg_index, $this->_config_index[1], $url);
                 } else {
-                    $cfg_index = str_replace('{total_page}', $page, $this->_cfg_index);
+                    $cfg_index = str_replace('{total_page}', $page, $this->_config_index);
                     $url = str_replace($cfg_index, '', $url);
                 }
             } elseif (1 == $page) {
-                if (is_array($this->_cfg_index)) {
-                    $url = str_replace($this->_cfg_index[0], $this->_cfg_index[1], $url);
+                if (is_array($this->_config_index)) {
+                    $url = str_replace($this->_config_index[0], $this->_config_index[1], $url);
                 } else {
-                    $url = str_replace($this->_cfg_index, '', $url);
+                    $url = str_replace($this->_config_index, '', $url);
                 }
             }
         }
@@ -323,7 +323,6 @@ class base
         $rs = $this->_db->table($this->_table)
             ->field(' ' . $this->_sql_count . ' as `cc` ')
             ->where($this->_where_str, $this->_where_bind)->column_one();
-        //  ->row("select {$this->_sql_count} as `cc` from {$this->_table} {$this->_where_str}", $this->_where_bind);
         if ($rs && $rs['cc']) {
             return (int)$rs['cc'];
         }

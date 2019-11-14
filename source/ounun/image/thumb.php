@@ -32,7 +32,7 @@ class thumb
      *  * @param  string $qz    是新图片的前缀
      *  * @return mixed 是缩放后的图片名称,失败返回false;
      *  */
-    public function thumb($name, $width, $height, $out_file_name, $force = false)
+    public function __construct($name, $width, $height, $out_file_name, $force = false)
     {
         /* 获取图片宽度、高度、及类型信息 */
         $img_info = $this->_info($name);

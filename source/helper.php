@@ -203,10 +203,10 @@ function go_note(string $url1, string $url2, string $note, bool $top = false): v
     if ($url2) {
         $url1 = $top . "location.href='{$url1}';\n";
         $url2 = $top . "location.href='{$url2}';\n";
-        echo 'if(window.confirm(' . json_encode($note) . ')){' . "\n" . $url1 . '}else{' . "\n" . $url2 . '}' . "\n";
+        echo 'if(window.confirm(' . json_encode($note,JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '}else{' . "\n" . $url2 . '}' . "\n";
     } else {
         $url1 = $top . "location.href='{$url1}';\n";
-        echo 'if(window.confirm(' . json_encode($note) . ')){' . "\n" . $url1 . '};' . "\n";
+        echo 'if(window.confirm(' . json_encode($note,JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '};' . "\n";
     }
     echo '</script>' . "\n";
     exit();
@@ -267,7 +267,7 @@ function go_msg(string $msg, string $url = ''): void
  */
 function msg(string $msg, bool $outer = true, $meta = true): string
 {
-    $rs = "\n" . 'alert(' . json_encode($msg) . ');' . "\n";
+    $rs = "\n" . 'alert(' . json_encode($msg,JSON_UNESCAPED_UNICODE) . ');' . "\n";
     if ($outer) {
         if ($meta) {
             $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
@@ -286,7 +286,7 @@ function msg(string $msg, bool $outer = true, $meta = true): string
  */
 function msg_close(string $msg, bool $close = false): void
 {
-    $rs = "\n" . 'alert(' . json_encode($msg) . ');' . "\n";
+    $rs = "\n" . 'alert(' . json_encode($msg,JSON_UNESCAPED_UNICODE) . ');' . "\n";
     $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
     $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
     echo $rs;
@@ -872,7 +872,7 @@ abstract class v
     public function index($mod)
     {
         error404("<strong>method</strong>  --> ".__METHOD__." <br />\n  
-                        <strong>mod</strong> ------> " . json_encode($mod) . " <br />\n  
+                        <strong>mod</strong> ------> " . json_encode($mod,JSON_UNESCAPED_UNICODE) . " <br />\n  
                         <strong>class</strong> ----> ".get_class($this));
     }
 
@@ -926,7 +926,7 @@ abstract class v
             $this->debug_init('404');
         }
         error404("<strong>method</strong> -->   {$method} <br />\n 
-                        <strong>args</strong> ------> " . json_encode($arguments) . " <br />\n 
+                        <strong>args</strong> ------> " . json_encode($arguments,JSON_UNESCAPED_UNICODE) . " <br />\n 
                         <strong>class</strong> -----> ".get_class($this));
     }
 }

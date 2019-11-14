@@ -53,7 +53,7 @@ function altStyle(obj, disabled) {
         }
     }
 
-    var disabled = !disabled ? 0 : disabled;
+    disabled = !disabled ? 0 : disabled;
     if (disabled) {
         return;
     }

@@ -41,7 +41,7 @@ class xcache extends \ounun\dc\driver
      */
     public function has($name)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return xcache_isset($key);
     }
 
@@ -54,7 +54,7 @@ class xcache extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return xcache_isset($key) ? xcache_get($key) : $default;
     }
 
@@ -77,9 +77,9 @@ class xcache extends \ounun\dc\driver
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         if (xcache_set($key, $value, $expire)) {
-            isset($first) && $this->setTagItem($key);
+            isset($first) && $this->tag_item_set($key);
             return true;
         }
         return false;
@@ -94,7 +94,7 @@ class xcache extends \ounun\dc\driver
      */
     public function inc($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return xcache_inc($key, $step);
     }
 
@@ -107,7 +107,7 @@ class xcache extends \ounun\dc\driver
      */
     public function dec($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return xcache_dec($key, $step);
     }
 
@@ -119,7 +119,7 @@ class xcache extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        return xcache_unset($this->getCacheKey($name));
+        return xcache_unset($this->cache_key_get($name));
     }
 
     /**
@@ -132,7 +132,7 @@ class xcache extends \ounun\dc\driver
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->getTagItem($tag);
+            $keys = $this->tag_item_get($tag);
             foreach ($keys as $key) {
                 xcache_unset($key);
             }

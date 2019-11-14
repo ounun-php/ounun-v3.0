@@ -41,7 +41,7 @@ class wincache extends \ounun\dc\driver
      */
     public function has($name)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return wincache_ucache_exists($key);
     }
 
@@ -54,7 +54,7 @@ class wincache extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return wincache_ucache_exists($key) ? wincache_ucache_get($key) : $default;
     }
 
@@ -74,12 +74,12 @@ class wincache extends \ounun\dc\driver
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         if ($this->tag && !$this->has($name)) {
             $first = true;
         }
         if (wincache_ucache_set($key, $value, $expire)) {
-            isset($first) && $this->setTagItem($key);
+            isset($first) && $this->tag_item_set($key);
             return true;
         }
         return false;
@@ -94,7 +94,7 @@ class wincache extends \ounun\dc\driver
      */
     public function inc($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return wincache_ucache_inc($key, $step);
     }
 
@@ -107,7 +107,7 @@ class wincache extends \ounun\dc\driver
      */
     public function dec($name, $step = 1)
     {
-        $key = $this->getCacheKey($name);
+        $key = $this->cache_key_get($name);
         return wincache_ucache_dec($key, $step);
     }
 
@@ -119,7 +119,7 @@ class wincache extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        return wincache_ucache_delete($this->getCacheKey($name));
+        return wincache_ucache_delete($this->cache_key_get($name));
     }
 
     /**
@@ -131,7 +131,7 @@ class wincache extends \ounun\dc\driver
     public function clear($tag = null)
     {
         if ($tag) {
-            $keys = $this->getTagItem($tag);
+            $keys = $this->tag_item_get($tag);
             foreach ($keys as $key) {
                 wincache_ucache_delete($key);
             }

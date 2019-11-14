@@ -12,8 +12,10 @@ namespace ounun\dc;
  */
 abstract class driver
 {
-    protected $handler = null;
+    protected $handler;
+    /** @var array 配制数组 */
     protected $options = [];
+    /** @var string 标识名 */
     protected $tag;
 
     /**
@@ -83,7 +85,7 @@ abstract class driver
      * @param string $name 缓存名
      * @return string
      */
-    protected function getCacheKey($name)
+    protected function cache_key_get($name)
     {
         return $this->options['prefix'] . $name;
     }
@@ -165,11 +167,11 @@ abstract class driver
             if (is_string($keys)) {
                 $keys = explode(',', $keys);
             }
-            $keys = array_map([$this, 'getCacheKey'], $keys);
+            $keys = array_map([$this, 'cache_key_get'], $keys);
             if ($overlay) {
                 $value = $keys;
             } else {
-                $value = array_unique(array_merge($this->getTagItem($name), $keys));
+                $value = array_unique(array_merge($this->tag_item_get($name), $keys));
             }
             $this->set($key, implode(',', $value), 0);
         }
@@ -182,7 +184,7 @@ abstract class driver
      * @param string $name 缓存标识
      * @return void
      */
-    protected function setTagItem($name)
+    protected function tag_item_set($name)
     {
         if ($this->tag) {
             $key       = 'tag_' . md5($this->tag);
@@ -204,7 +206,7 @@ abstract class driver
      * @param string $tag 缓存标签
      * @return array
      */
-    protected function getTagItem($tag)
+    protected function tag_item_get($tag)
     {
         $key   = 'tag_' . md5($tag);
         $value = $this->get($key);

@@ -59,7 +59,7 @@ class file extends \ounun\dc\driver
      * @param  bool   $auto 是否自动创建目录
      * @return string
      */
-    protected function getCacheKey($name, $auto = false)
+    protected function cache_key_get($name, $auto = false)
     {
         $name = md5($name);
         if ($this->options['cache_subdir']) {
@@ -98,7 +98,7 @@ class file extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $filename = $this->getCacheKey($name);
+        $filename = $this->cache_key_get($name);
         if (!is_file($filename)) {
             return $default;
         }
@@ -138,7 +138,7 @@ class file extends \ounun\dc\driver
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        $filename = $this->getCacheKey($name, true);
+        $filename = $this->cache_key_get($name, true);
         if ($this->tag && !is_file($filename)) {
             $first = true;
         }
@@ -150,7 +150,7 @@ class file extends \ounun\dc\driver
         $data   = "<?php\n//" . sprintf('%012d', $expire) . "\n exit();?>\n" . $data;
         $result = file_put_contents($filename, $data);
         if ($result) {
-            isset($first) && $this->setTagItem($filename);
+            isset($first) && $this->tag_item_set($filename);
             clearstatcache();
             return true;
         } else {
@@ -206,7 +206,7 @@ class file extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        $filename = $this->getCacheKey($name);
+        $filename = $this->cache_key_get($name);
         return $this->unlink($filename);
     }
 
@@ -220,7 +220,7 @@ class file extends \ounun\dc\driver
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->getTagItem($tag);
+            $keys = $this->tag_item_get($tag);
             foreach ($keys as $key) {
                 $this->unlink($key);
             }
