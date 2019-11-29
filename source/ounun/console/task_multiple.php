@@ -11,15 +11,15 @@ use ounun\console;
 abstract class task_multiple extends task_driver
 {
     /** @var int 间隔(秒,默认5秒) */
-    protected $_time_argc_sleep = 5;
+    protected int $_time_argc_sleep = 5;
     /** @var int 寿命(秒,默认300秒) */
-    protected $_time_argc_live = 59;
+    protected int $_time_argc_live = 59;
     /** @var int 当前时间 */
-    protected $_time_curr = 0;
+    protected int $_time_curr = 0;
     /** @var int 过去的时间 */
-    protected $_time_past = 0;
+    protected int $_time_past = 0;
     /** @var int 执行次数 */
-    protected $_time_run_count = 0;
+    protected int $_time_run_count = 0;
 
 
     /**

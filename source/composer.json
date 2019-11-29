@@ -1,5 +1,5 @@
 {
-  "name": "ounun-php/ounun-v3.0",
+  "name": "ounun-php/core-v3.0",
   "description": "the new ounun framework",
   "type": "library",
   "keywords": [
@@ -28,7 +28,7 @@
     "ext-imagick": "*",
     "ext-simplexml": "*",
     "ext-wincache": "*",
-    "php": ">=7.2"
+    "php": ">=7.4"
   },
   "require-dev": {
     "phpunit/phpunit": "8.1.*"

@@ -11,19 +11,19 @@ use ounun\db\pdo;
 abstract class task_driver
 {
     /** @var pdo */
-    public static $db;
+    public static pdo $db;
 
     /** @var console 控制台 */
-    public $console;
+    public console $console;
 
     /** @var string 命令的名字（"ounun" 后面的部分） */
-    public $name;
+    public string $name;
 
     /** @var string 运行命令时使用 "--help" 选项时的完整命令描述 */
-    public $help;
+    public string $help;
 
     /** @var string 运行 "php ./ounun list" 时的简短描述 */
-    public $description;
+    public string $description;
 
     /**
      * task constructor.
