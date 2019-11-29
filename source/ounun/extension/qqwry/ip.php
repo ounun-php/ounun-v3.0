@@ -8,7 +8,6 @@ namespace ounun\extension\qqwry;
 /**
  * IP 地理位置查询类
  *
- * @author 马秉尧
  * @version 1.5
  * @copyright 2005 CoolCode.CN
  *

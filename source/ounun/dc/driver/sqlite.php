@@ -8,7 +8,6 @@ namespace ounun\dc\driver;
 
 /**
  * Sqlite缓存驱动
- * @author    liu21st <liu21st@gmail.com>
  */
 class sqlite extends \ounun\dc\driver
 {

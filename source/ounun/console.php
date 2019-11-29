@@ -5,7 +5,6 @@
  */
 namespace ounun;
 
-
 use ounun\console\task_driver;
 
 class console
@@ -44,7 +43,7 @@ class console
     const Color_Yellow = "\033[1;33m";    // info
 
     const Color_Light_Gray = "\033[0;37m";
-    
+
     const Color_White = "\033[1;37m";
 
     /** @var array 不同深度的颜色 */
@@ -220,7 +219,7 @@ class console
     }
 
     /**
-     * @param $array
+     * @param mixed $array
      * @param string $tab
      * @param int $depth0
      * @param string $file

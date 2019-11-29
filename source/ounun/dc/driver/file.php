@@ -7,7 +7,6 @@ namespace ounun\dc\driver;
 
 /**
  * 文件类型缓存类
- * @author    liu21st <liu21st@gmail.com>
  */
 class file extends \ounun\dc\driver
 {
@@ -276,7 +275,6 @@ class file extends \ounun\dc\driver
      * 判断文件是否存在后，删除
      * @param $path
      * @return bool
-     * @author byron sampson <xiaobo.sun@qq.com>
      * @return boolean
      */
     private function unlink($path)

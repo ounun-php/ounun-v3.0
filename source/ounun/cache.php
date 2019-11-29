@@ -12,18 +12,25 @@ namespace ounun;
  */
 class cache
 {
-    const Cache_Expire_Short = 60;
+    /** @var int 有效期 1分钟（秒） */
+    const Expire_Short = 60;
 
-    const Cache_Expire_Middle = 300;
+    /** @var int 有效期 5分钟（秒） */
+    const Expire_Middle = 300;
 
-    const Cache_Expire_Long = 3600;
+    /** @var int 有效期 长,1小时（秒） */
+    const Expire_Long = 3600;
 
-    const Cache_Key_Length = 100;
+    /** @var int key长度 */
+    const Key_Length = 64;
 
 
     const Type_File = 1;
+
     const Type_Memcache = 2;
+
     const Type_Redis = 3;
+
     const Type_Memcached = 4;
 
     /**  @var \ounun\cache\driver */
@@ -309,4 +316,4 @@ class cache
     {
         return $this->_drive->filename();
     }
-} 
+}

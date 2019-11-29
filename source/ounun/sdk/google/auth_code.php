@@ -7,7 +7,6 @@ namespace ounun\sdk\google;
 /**
  * PHP Class for handling Google Authenticator 2-factor authentication
  *
- * @author Michael Kliewe
  * @copyright 2012 Michael Kliewe
  * @license http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link http://www.phpgangsta.de/

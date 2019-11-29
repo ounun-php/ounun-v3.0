@@ -8,7 +8,6 @@ namespace ounun\dc\driver;
 
 /**
  * Xcache缓存驱动
- * @author    liu21st <liu21st@gmail.com>
  */
 class xcache extends \ounun\dc\driver
 {

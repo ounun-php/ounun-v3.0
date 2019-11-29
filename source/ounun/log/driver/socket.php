@@ -7,7 +7,6 @@ namespace ounun\log\driver;
 
 /**
  * github: https://github.com/luofei614/SocketLog
- * @author luofei614<weibo.com/luofei614>
  *
  * @package ounun\log\driver
  */
@@ -147,7 +146,6 @@ class socket
 
     /**
      * 发送给指定客户端
-     * @author Zjmainstay
      * @param $tabid
      * @param $client_id
      * @param $logs

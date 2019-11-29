@@ -8,7 +8,6 @@ namespace ounun\dc\driver;
 
 /**
  * Wincache缓存驱动
- * @author    liu21st <liu21st@gmail.com>
  */
 class wincache extends \ounun\dc\driver
 {

@@ -1216,9 +1216,6 @@ class converter
 
     /**
      * decode email addresses
-     *
-     * @author derernst@gmx.ch <http://www.php.net/manual/en/function.html-entity-decode.php#68536>
-     * @author Milian Wolff <http://milianw.de>
      */
     protected function decode($text, $quote_style = ENT_QUOTES)
     {
@@ -1250,7 +1247,6 @@ class converter
     /**
      * UTF-8 chr() which supports numeric entities
      *
-     * @author grey - greywyvern - com <http://www.php.net/manual/en/function.chr.php#55978>
      * @param array $matches
      * @return string UTF-8 encoded
      */
@@ -1276,8 +1272,6 @@ class converter
      * @param string $str
      * @return int
      *
-     * @author dtorop 932 at hotmail dot com <http://www.php.net/manual/en/function.strlen.php#37975>
-     * @author Milian Wolff <http://milianw.de>
      */
     protected function strlen($str)
     {

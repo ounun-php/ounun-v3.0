@@ -11,7 +11,6 @@ namespace ounun\dc\driver;
  * 有需要在业务层实现读写分离、或者使用RedisCluster的需求，请使用Redisd驱动
  *
  * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
- * @author    尘缘 <130775@qq.com>
  */
 class redis extends \ounun\dc\driver
 {
