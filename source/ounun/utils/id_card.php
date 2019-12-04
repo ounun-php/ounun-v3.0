@@ -20,7 +20,7 @@ class id_card
     {
         $id = strtoupper($id);
         $regx = '/(^\d{15}$)|(^\d{17}([0-9]|X)$)/';
-        $arr_split = array();
+        $arr_split = [];
         if (!preg_match($regx, $id)) {
             return false;
         }

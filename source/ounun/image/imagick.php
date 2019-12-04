@@ -268,7 +268,7 @@ class imagick
     }
 
     // 添加水印文字
-    public function add_text($text, $x = 0, $y = 0, $angle = 0, $style = array())
+    public function add_text($text, $x = 0, $y = 0, $angle = 0, $style = [])
     {
         $draw = new \ImagickDraw();
         if (isset($style['font'])) $draw->setFont($style['font']);

@@ -9,10 +9,10 @@ class squid
 {
 	private $serverUrl,
 	        $servers,
-	        $HTCPMulticastAddress, 
+	        $HTCPMulticastAddress,
 	        $HTCPPort,
 	        $HTCPMulticastTTL;
-	        
+
 	function __construct($serverUrl, $servers, $HTCPMulticastAddress, $HTCPPort, $HTCPMulticastTTL)
 	{
 		$this->serverUrl = $serverUrl;
@@ -21,7 +21,7 @@ class squid
 		$this->HTCPPort = $HTCPPort;
 		$this->HTCPMulticastTTL = $HTCPMulticastTTL;
 	}
-	        
+
 	function purge($urlArr)
 	{
 		if(empty($urlArr)) {
@@ -39,53 +39,53 @@ class squid
 		unset($urlArr[0]);
 		$urlArr = array_values($urlArr);
 		$sockspersq =  max(ceil(count($urlArr) / $urlspersocket ),1);
-		if($sockspersq == 1) 
+		if($sockspersq == 1)
 		{
 			$urlspersocket = count($urlArr);
-		} 
-		elseif($sockspersq > $maxsocketspersquid) 
+		}
+		elseif($sockspersq > $maxsocketspersquid)
 		{
 			$urlspersocket = ceil(count($urlArr) / $maxsocketspersquid);
 			$sockspersq = $maxsocketspersquid;
 		}
 		$totalsockets = count($this->servers) * $sockspersq;
-		$sockets = array();
-		for ($ss=0; $ss < count($this->servers); $ss++) 
+		$sockets = [];
+		for ($ss=0; $ss < count($this->servers); $ss++)
 		{
 			$failed = false;
 			$so = 0;
-			while ($so < $sockspersq && !$failed) 
+			while ($so < $sockspersq && !$failed)
 			{
-				if ($so == 0) 
+				if ($so == 0)
 				{
 					@list($server, $port) = explode(':', $this->servers[$ss]);
 					if(!isset($port)) $port = 80;
 					$error = $errstr = false;
 					$socket = @fsockopen($server, $port, $error, $errstr, 3);
-					if (!$socket) 
+					if (!$socket)
 					{
 						$failed = true;
 						$totalsockets -= $sockspersq;
-					} 
-					else 
+					}
+					else
 					{
 						$msg = 'PURGE '.$firsturl." HTTP/1.0\r\n"."Connection: Keep-Alive\r\n\r\n";
 						@fputs($socket,$msg);
 						$res = @fread($socket,512);
-						if (strlen($res) > 250) 
+						if (strlen($res) > 250)
 						{
 							fclose($socket);
 							$failed = true;
 							$totalsockets -= $sockspersq;
-						} 
-						else 
+						}
+						else
 						{
 							@stream_set_blocking($socket,false);
 							$sockets[] = $socket;
 						}
 					}
-				} 
-				else 
+				}
+				else
 				{
 					list($server, $port) = explode(':', $this->servers[$ss]);
 					if(!isset($port)) $port = 80;
@@ -97,17 +97,17 @@ class squid
 			}
 		}
 
-		if ($urlspersocket > 0) 
+		if ($urlspersocket > 0)
 		{
-			for ($r = 0; $r < $urlspersocket; $r++) 
+			for ($r = 0; $r < $urlspersocket; $r++)
 			{
-				for ($s=0;$s < $totalsockets;$s++) 
+				for ($s=0;$s < $totalsockets;$s++)
 				{
-					if($r != 0) 
+					if($r != 0)
 					{
 						$res = '';
 						$esc = 0;
-						while (strlen($res) < 100 && $esc < 200  ) 
+						while (strlen($res) < 100 && $esc < 200  )
 						{
 							$res .= @fread($sockets[$s],512);
 							$esc++;
@@ -121,11 +121,11 @@ class squid
 				}
 			}
 		}
-		foreach ($sockets as $socket) 
+		foreach ($sockets as $socket)
 		{
 			$res = '';
 			$esc = 0;
-			while (strlen($res) < 100 && $esc < 200  ) 
+			while (strlen($res) < 100 && $esc < 200  )
 			{
 				$res .= @fread($socket,1024);
 				$esc++;
@@ -136,28 +136,28 @@ class squid
 		log::add($fname, 'DEBUG');
 	}
 
-	function HTCPPurge($urlArr) 
+	function HTCPPurge($urlArr)
 	{
 		$fname = '$this->HTCPPurge';
 		log::add($fname, 'DEBUG');
 		$htcpOpCLR = 4;
-		if( !defined( "IPPROTO_IP" ) ) 
+		if( !defined( "IPPROTO_IP" ) )
 		{
 			define( "IPPROTO_IP", 0 );
 			define( "IP_MULTICAST_LOOP", 34 );
 			define( "IP_MULTICAST_TTL", 33 );
 		}
 	    $conn = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-		if ($conn) 
+		if ($conn)
 		{
 			socket_set_option( $conn, IPPROTO_IP, IP_MULTICAST_LOOP, 0 );
 			if ($this->HTCPMulticastTTL != 1) {
                 socket_set_option($conn, IPPROTO_IP, IP_MULTICAST_TTL, $this->HTCPMulticastTTL);
             }
 
-			foreach ($urlArr as $url ) 
+			foreach ($urlArr as $url )
 			{
-				if( !is_string( $url ) ) 
+				if( !is_string( $url ) )
 				{
 					throw new ct_exception('Bad purge URL');
 				}
@@ -170,7 +170,7 @@ class squid
 				log::add("Purging URL $url via HTCP\n", 'DEBUG');
 				socket_sendto($conn, $htcpPacket, $htcpLen, 0, $this->HTCPMulticastAddress, $this->HTCPPort);
 			}
-		} 
+		}
 		else
 		{
 			$errstr = socket_strerror(socket_last_error());
@@ -178,10 +178,10 @@ class squid
 		}
 		log::add($fname, 'DEBUG');
 	}
-	
+
 	function expand($url)
 	{
-		if($url != '' && $url{0} == '/') 
+		if($url != '' && $url{0} == '/')
 		{
 			return $this->serverUrl.$url;
 		}

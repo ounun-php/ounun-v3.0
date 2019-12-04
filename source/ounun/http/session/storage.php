@@ -6,15 +6,15 @@
 abstract class session_storage extends object
 {
 	protected $options;
-	
-	function __construct($options = array())
+
+	function __construct($options = [])
 	{
 		$this->options = $options;
 	}
 
-	static function &get_instance($name = 'file', $options = array())
+	static function &get_instance($name = 'file', $options = [])
 	{
-		static $instances = array();
+		static $instances = [];
 		if (!isset($instances[$name]))
 		{
 			$class = 'session_storage_'.$name;
@@ -31,6 +31,13 @@ abstract class session_storage extends object
 
 	function register()
 	{
-		session_set_save_handler(array($this, 'open'), array($this, 'close'), array($this, 'read'), array($this, 'write'), array($this, 'destroy'), array($this, 'gc'));
+        session_set_save_handler(
+            [$this, 'open'],
+            [$this, 'close'],
+            [$this, 'read'],
+            [$this, 'write'],
+            [$this, 'destroy'],
+            [$this, 'gc']
+        );
 	}
 }

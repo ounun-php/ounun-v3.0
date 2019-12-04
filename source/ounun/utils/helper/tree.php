@@ -150,7 +150,7 @@ class tree
 		$data = $this->get_child($id, '*', 1);
 		if ($data)
 		{
-			$childids = array();
+			$childids = [];
 			foreach ($data as $r)
 			{
 				$childids[] = $r[$this->field_id];
@@ -189,23 +189,20 @@ class tree
 	{
 		$r = $this->get($id, $fields);
 		if (!$r) return false;
-		if ($is_start)
-		{
-			$data = array();
+		if ($is_start) {
+			$data = [];
 		}
-		else
-		{
+		else {
 			$data[] = $r;
 		}
-		if (!is_null($r[$this->field_parentid]))
-		{
+		if (!is_null($r[$this->field_parentid])) {
 			$data = array_merge($data, $this->get_parent($r[$this->field_parentid], $fields, 0));
 		}
 		if ($is_start) krsort($data);
 		return $data;
 	}
 
-	function sort($data = array())
+	function sort($data = [])
 	{
 		foreach ($data as $id=>$sort)
 		{

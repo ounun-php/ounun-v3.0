@@ -8,14 +8,14 @@ namespace ounun\utils\helper;
 class xmlrpc_client
 {
 	private $url, $method, $output_options;
-	
+
 	function __construct($url, $method = 'POST')
 	{
 		$this->url = $url;
 		$this->method = $method;
 	}
-	
-	function request($method, $params, $output_options = array())
+
+	function request($method, $params, $output_options = [])
 	{
 		$request = xmlrpc_encode_request($method, $params, $output_options);
 		$context = stream_context_create(array('http'=>array('method'=>$this->method, 'header'=>"Content-Type: text/xml", 'content'=>$request)));

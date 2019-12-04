@@ -159,7 +159,7 @@ if (!extension_loaded('xxtea')) {
                 return false;
             $n = $m;
         }
-        $s = array();
+        $s = [];
         for ($i = 0; $i < $len; $i++) {
             $s [$i] = pack("V", $v [$i]);
         }

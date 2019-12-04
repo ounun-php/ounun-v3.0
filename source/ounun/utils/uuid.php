@@ -13,7 +13,7 @@ class uuid
         if (!self::is_valid($namespace)) return false;
 
         // Get hexadecimal components of namespace
-        $nhex = str_replace(array('-', '{', '}'), '', $namespace);
+        $nhex = str_replace(['-', '{', '}'], '', $namespace);
 
         // Binary Value
         $nstr = '';
@@ -77,7 +77,7 @@ class uuid
         if (!self::is_valid($namespace)) return false;
 
         // Get hexadecimal components of namespace
-        $nhex = str_replace(array('-', '{', '}'), '', $namespace);
+        $nhex = str_replace(['-', '{', '}'], '', $namespace);
 
         // Binary Value
         $nstr = '';

@@ -94,7 +94,7 @@ class segment
 	function get_keywords($number = 3)
 	{
 		$this->set_multi(false);
-		$words = array();
+		$words = [];
 		$array = $this->get_tops($number, $attr);
 		if(!$array) return '';
 		foreach($array as $r)

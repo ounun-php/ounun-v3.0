@@ -27,7 +27,7 @@ class md_parse
     protected function textElements($text)
     {
         # make sure no definitions are set
-        $this->DefinitionData = array();
+        $this->DefinitionData = [];
 
         # standardize line breaks
         $text = str_replace(array("\r\n", "\r"), "\n", $text);
@@ -154,7 +154,7 @@ class md_parse
 
     protected function linesElements(array $lines)
     {
-        $Elements = array();
+        $Elements = [];
         $CurrentBlock = null;
 
         foreach ($lines as $line) {
@@ -515,7 +515,7 @@ class md_parse
                 ),
                 'element' => array(
                     'name' => $name,
-                    'elements' => array(),
+                    'elements' => [],
                 ),
             );
             $Block['data']['markerTypeRegex'] = preg_quote($Block['data']['markerType'], '/');
@@ -540,7 +540,7 @@ class md_parse
                 'name' => 'li',
                 'handler' => array(
                     'function' => 'li',
-                    'argument' => !empty($matches[3]) ? array($matches[3]) : array(),
+                    'argument' => !empty($matches[3]) ? array($matches[3]) : [],
                     'destination' => 'elements'
                 )
             );
@@ -773,7 +773,7 @@ class md_parse
             $this->DefinitionData['Reference'][$id] = $Data;
 
             $Block = array(
-                'element' => array(),
+                'element' => [],
             );
 
             return $Block;
@@ -802,7 +802,7 @@ class md_parse
             return;
         }
 
-        $alignments = array();
+        $alignments = [];
 
         $divider = $Line['text'];
 
@@ -833,7 +833,7 @@ class md_parse
 
         # ~
 
-        $HeaderElements = array();
+        $HeaderElements = [];
 
         $header = $Block['element']['handler']['argument'];
 
@@ -876,7 +876,7 @@ class md_parse
             'identified' => true,
             'element' => array(
                 'name' => 'table',
-                'elements' => array(),
+                'elements' => [],
             ),
         );
 
@@ -886,7 +886,7 @@ class md_parse
 
         $Block['element']['elements'] [] = array(
             'name' => 'tbody',
-            'elements' => array(),
+            'elements' => [],
         );
 
         $Block['element']['elements'][0]['elements'] [] = array(
@@ -904,7 +904,7 @@ class md_parse
         }
 
         if (count($Block['alignments']) === 1 or $Line['text'][0] === '|' or strpos($Line['text'], '|')) {
-            $Elements = array();
+            $Elements = [];
 
             $row = $Line['text'];
 
@@ -1002,17 +1002,17 @@ class md_parse
     # ~
     #
 
-    public function line($text, $nonNestables = array())
+    public function line($text, $nonNestables = [])
     {
         return $this->elements($this->lineElements($text, $nonNestables));
     }
 
-    protected function lineElements($text, $nonNestables = array())
+    protected function lineElements($text, $nonNestables = [])
     {
-        $Elements = array();
+        $Elements = [];
 
         $nonNestables = (empty($nonNestables)
-            ? array()
+            ? []
             : array_combine($nonNestables, $nonNestables)
         );
 
@@ -1103,7 +1103,7 @@ class md_parse
     {
         $Inline = array(
             'extent' => strlen($text),
-            'element' => array(),
+            'element' => [],
         );
 
         $safeText = self::escape($text, true);
@@ -1444,7 +1444,7 @@ class md_parse
     {
         if (isset($Element['handler'])) {
             if (!isset($Element['nonNestables'])) {
-                $Element['nonNestables'] = array();
+                $Element['nonNestables'] = [];
             }
 
             if (is_string($Element['handler'])) {
@@ -1642,7 +1642,7 @@ class md_parse
      */
     protected static function pregReplaceElements($regexp, $Elements, $text)
     {
-        $newElements = array();
+        $newElements = [];
 
         while (preg_match($regexp, $text, $matches, PREG_OFFSET_CAPTURE)) {
             $offset = $matches[0][1];
@@ -1752,7 +1752,7 @@ class md_parse
         return $instance;
     }
 
-    private static $instances = array();
+    private static $instances = [];
 
     #
     # Fields

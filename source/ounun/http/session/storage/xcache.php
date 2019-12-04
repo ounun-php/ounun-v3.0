@@ -6,7 +6,7 @@
 
 class session_storage_xcache extends session_storage
 {
-	function __construct($options = array())
+	function __construct($options = [])
 	{
 		if (!$this->test())
 		{

@@ -166,21 +166,21 @@ class FirePHP {
    *
    * @var array
    */
-  protected $options = array();
+  protected $options = [];
 
   /**
    * Filters used to exclude object members when encoding
    *
    * @var array
    */
-  protected $objectFilters = array();
+  protected $objectFilters = [];
 
   /**
    * A stack of objects used to detect recursion during object encoding
    *
    * @var object
    */
-  protected $objectStack = array();
+  protected $objectStack = [];
 
   /**
    * Flag to enable/disable logging
@@ -535,7 +535,7 @@ class FirePHP {
       return false;
     }
 
-    $meta = array();
+    $meta = [];
     $skipFinalObjectEncode = false;
 
     if($Object instanceof Exception) {
@@ -860,7 +860,7 @@ class FirePHP {
    */
   protected function encodeObject($Object, $ObjectDepth = 1, $ArrayDepth = 1)
   {
-    $return = array();
+    $return = [];
 
     if (is_resource($Object)) {
 
@@ -883,7 +883,7 @@ class FirePHP {
         $return['__className'] = $class = get_class($Object);
 
         $reflectionClass = new ReflectionClass($class);
-        $properties = array();
+        $properties = [];
         foreach( $reflectionClass->getProperties() as $property) {
           $properties[$property->getName()] = $property;
         }
@@ -1078,7 +1078,7 @@ class FirePHP {
   /**
    * Keep a list of objects as we descend into the array so we can detect recursion.
    */
-  private $json_objectStack = array();
+  private $json_objectStack = [];
 
 
  /**

@@ -26,7 +26,7 @@ class http
 		$this->error = '';
     }
 
-	public function post($url, $data = array(), $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
+	public function post($url, $data = [], $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
 	{
 		$this->method = 'POST';
 		$this->ContentType = "Content-Type: application/x-www-form-urlencoded\r\n";
@@ -46,7 +46,7 @@ class http
 		return $this->request($url, $referer, $limit, $timeout, $block);
 	}
 
-	public function upload($url, $data = array(), $files = array(), $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
+	public function upload($url, $data = [], $files = [], $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
 	{
 		$this->method = 'POST';
 		$boundary = "AaB03x";
@@ -54,23 +54,23 @@ class http
 		if($data) {
 			foreach($data as $k => $v) {
 				$this->post .= "--{$boundary}\r\n";
-				$this->post .= "Content-Disposition: form-data; name=\"".$k."\"\r\n"; 
-				$this->post .= "\r\n".$v."\r\n"; 
+				$this->post .= "Content-Disposition: form-data; name=\"".$k."\"\r\n";
+				$this->post .= "\r\n".$v."\r\n";
 				$this->post .= "--{$boundary}\r\n";
-			} 
+			}
 		}
 		foreach($files as $k=>$v)
 		{
             $this->post .= "--{$boundary}\r\n";
 			$this->post .= "Content-Disposition: file; name=\"{$k}\"; filename=\"".basename($v)."\"\r\n";
-			$this->post .= "Content-Type: ".$this->get_mime($v)."\r\n"; 
-			$this->post .= "\r\n".file_get_contents($v)."\r\n"; 
+			$this->post .= "Content-Type: ".$this->get_mime($v)."\r\n";
+			$this->post .= "\r\n".file_get_contents($v)."\r\n";
 			$this->post .= "--{$boundary}\r\n";
 		}
         $this->post .= "--{$boundary}--\r\n";
 		return $this->request($url, $referer, $limit, $timeout, $block);
 	}
-    
+
 	private function request($url, $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
 	{
 		$matches = parse_url($url);
@@ -156,7 +156,7 @@ class http
 
 	public function get_cookie()
 	{
-		$cookies = array();
+		$cookies = [];
 		if(preg_match_all("|Set-Cookie: ([^;]*);|", $this->header, $m))
 		{
 			foreach($m[1] as $c)

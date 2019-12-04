@@ -148,7 +148,7 @@ class file extends \ounun\cache\driver
             $this->read();
         }
         if (!$this->_data) {
-            $this->_data = array();
+            $this->_data = [];
         }
         $this->_data[$sub_key] = $sub_val;
     }

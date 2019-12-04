@@ -48,7 +48,7 @@ class xml
             extract($data);//We could use the array by itself, but this cooler.
 
             $result = $priority == 'tag' ? (empty($value) ? '' : $value) : array('name'=>$value);
-            $attributes_data = array();
+            $attributes_data = [];
 
             //Set the attributes too.
             if(isset($attributes) and $get_attributes) {
