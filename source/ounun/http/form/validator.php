@@ -25,20 +25,20 @@ class validator
         'varname'	=>	'/^[a-zA-Z][\w]{0,254}$/',	//变量名,函数名,控制器名等
         'integer'	=>	'/^[\d]+$/',			//整数验证
     ];
-	
+
 	public function __construct()
 	{
-		
+
 	}
 
-	public function execute($value, $validator = array())
+	public function execute($value, $validator = [])
 	{
 		if (empty($validator)) return true;
 		foreach ($validator as $rule => $args)
 		{
 			array_unshift($args, $value);
 			$error = array_pop($args);
-			
+
 			if (!$this->valid($rule, $args))
 			{
 				$this->error = $error;
@@ -47,7 +47,7 @@ class validator
 		}
 		return true;
 	}
-	
+
 	function valid($rule, $args)
 	{
 		if (method_exists($this, $rule))
@@ -72,7 +72,7 @@ class validator
 	{
 		return !empty($value);
 	}
-	
+
     static function min_length($value, $len)
     {
         return mb_strlen((string) $value, config('config', 'charset')) >= $len;
@@ -97,7 +97,7 @@ class validator
     {
         return !isset($value) || gettype($value) == $type;
     }
-	
+
     static function alnum($value)
     {
         return !isset($value) || ctype_alnum($value);
@@ -132,7 +132,7 @@ class validator
     {
         return !isset($value) || ctype_upper($value);
     }
-    
+
     static function lower($value)
     {
         return !isset($value) || ctype_lower($value);

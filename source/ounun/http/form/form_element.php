@@ -7,10 +7,10 @@ class form_element
 {
 	private static $enctype = 'application/x-www-form-urlencoded';
 	private $elements;
-	
+
 	function __construct()
 	{
-		
+
 	}
 
 	static public function &get_instance()
@@ -20,26 +20,26 @@ class form_element
 		$instance = new form_element();
 		return $instance;
 	}
-	
-	static function text($settings = array())
+
+	static function text($settings = [])
 	{
         $settings['type'] = 'text';
         return self::_input($settings);
 	}
-	
-	static function password($settings = array())
+
+	static function password($settings = [])
 	{
         $settings['type'] = 'password';
         return self::_input($settings);
 	}
 
-	static function hidden($settings = array())
+	static function hidden($settings = [])
 	{
         $settings['type'] = 'hidden';
         return self::_input($settings);
 	}
 
-	static function textarea($settings = array())
+	static function textarea($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name'])) return FALSE;
 		extract($settings);
@@ -54,7 +54,7 @@ class form_element
         return $html;
 	}
 
-	static function select($settings = array())
+	static function select($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name'])) return FALSE;
 		extract($settings);
@@ -73,19 +73,19 @@ class form_element
         return $html;
 	}
 
-	static function radio($settings = array())
+	static function radio($settings = [])
 	{
         $settings['type'] = 'radio';
         return self::_check($settings);
 	}
-	
-	static function checkbox($settings = array())
+
+	static function checkbox($settings = [])
 	{
         $settings['type'] = 'checkbox';
         return self::_check($settings);
 	}
 
-	static function file($settings = array())
+	static function file($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name'])) return FALSE;
 		extract($settings);
@@ -98,26 +98,26 @@ class form_element
 		self::$enctype = 'multipart/form-data';
 		return $html;
 	}
-	
-	static function button($settings = array())
+
+	static function button($settings = [])
 	{
         $settings['type'] = 'button';
         return self::_button($settings);
 	}
 
-	static function submit($settings = array())
+	static function submit($settings = [])
 	{
         $settings['type'] = 'submit';
         return self::_button($settings);
 	}
 
-	static function reset($settings = array())
+	static function reset($settings = [])
 	{
         $settings['type'] = 'reset';
         return self::_button($settings);
 	}
-	
-	static function image($settings = array())
+
+	static function image($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name']) || !isset($settings['src'])) return FALSE;
 		extract($settings);
@@ -129,8 +129,8 @@ class form_element
 		$html .= '/>';
 		return $html;
 	}
-	
-	private static function _input($settings = array())
+
+	private static function _input($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name']) || !isset($settings['type'])) return FALSE;
 		extract($settings);
@@ -144,7 +144,7 @@ class form_element
 		return $html;
 	}
 
-	private static function _check($settings = array())
+	private static function _check($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name']) || !isset($settings['type'])) return FALSE;
 		extract($settings);
@@ -161,7 +161,7 @@ class form_element
         return $html;
 	}
 
-	private static function _button($settings = array())
+	private static function _button($settings = [])
 	{
 		if(!is_array($settings) || !isset($settings['name']) || !isset($settings['value'])) return FALSE;
 		extract($settings);
@@ -170,8 +170,8 @@ class form_element
 		$html = "<input type=\"$type\" name=\"$name\" id=\"$id\" value=\"$value\" $attr />";
 		return $html;
 	}
-	
-	private static function _attribute($settings = array())
+
+	private static function _attribute($settings = [])
 	{
 		extract($settings);
 		$html = '';

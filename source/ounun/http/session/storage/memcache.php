@@ -6,7 +6,7 @@
 
 class session_storage_memcache extends session_storage
 {
-	function __construct($options = array())
+	function __construct($options = [])
 	{
 		if(!$this->test())
 		{
@@ -15,7 +15,7 @@ class session_storage_memcache extends session_storage
 		ini_set('session.save_handler', 'memcache');
 		ini_set('session.save_path', $options['memcache_servers']);
 	}
-	
+
 	function test()
 	{
 		return extension_loaded('memcache');

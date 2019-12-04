@@ -14,7 +14,7 @@ class file extends \ounun\dc\driver
         'expire'        => 0,
         'cache_subdir'  => true,
         'prefix'        => '',
-        'path'          => CACHE_PATH,
+        'path'          => Dir_Cache,
         'data_compress' => false,
     ];
 

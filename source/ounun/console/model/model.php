@@ -7,17 +7,17 @@ abstract class model
 {
 	protected   $db,
 				$_table = null,
-		        $_tablefields = array(),
+		        $_tablefields = [],
 	            $_primary = null,
-	            $_fields = array(),
-				$_readonly = array(),
-				$_create_autofill = array(),
-				$_update_autofill = array(),
-				$_filters_input = array(),
-				$_filters_output = array(),
-				$_validators = array(),
-				$_data = array(),
-				$_options = array(),
+	            $_fields = [],
+				$_readonly = [],
+				$_create_autofill = [],
+				$_update_autofill = [],
+				$_filters_input = [],
+				$_filters_output = [],
+				$_validators = [],
+				$_data = [],
+				$_options = [],
 		        $_fetch_style = self::FETCH_ASSOC;
 
     public      $_userid = null,
@@ -60,7 +60,7 @@ abstract class model
 
 	public function __call($method, $args)
 	{
-		if(in_array($method, array('field','where','order','limit','offset','having','group','distinct','data'), true)) 
+		if(in_array($method, array('field','where','order','limit','offset','having','group','distinct','data'), true))
 		{
             $this->_options[$method] = $args[0];
             return $this;
@@ -98,7 +98,7 @@ abstract class model
 		$this->_fetch_style = $style;
 	}
 
-	function select($where = null, $fields = '*', $order = null, $limit = null, $offset = null, $data = array(), $multiple = true)
+	function select($where = null, $fields = '*', $order = null, $limit = null, $offset = null, $data = [], $multiple = true)
 	{
 		if(!empty($this->_options))
 		{
@@ -111,11 +111,11 @@ abstract class model
 			$offset = isset($this->_options['offset']) ? $this->_options['offset'] : $offset;
 			$this->_options = array();
 		}
-		
+
 		if (is_array($fields)) $fields = '`'.implode('`,`', $fields).'`';
-		
+
 		$this->_where($where);
-		
+
 		if(!$this->_before_select($where)) return false;
 
 		$sql = "SELECT $fields FROM `$this->_table` ";
@@ -124,9 +124,9 @@ abstract class model
 		if ($group) $sql .= " GROUP BY $group ";
 		if ($having) $sql .= " HAVING $having ";
         if (is_null($limit) && !$multiple) $sql .= " LIMIT 1 ";
-        
+
 		$method = $multiple ? 'select' : 'get';
-			
+
 		$result = is_null($limit) ? $this->db->$method($sql, $data, $this->_fetch_style) : $this->db->limit($sql, $limit, $offset, $data, $this->_fetch_style);
 		if ($result === false)
 		{
@@ -211,15 +211,15 @@ abstract class model
 	function insert($data = array())
 	{
 		$this->_data($data);
-		
+
 		if(!$this->_before_insert($data)) return false;
-		
+
 		$this->_create_autofill($data);
-		
+
 		if (!$this->_validate($data)) return false;
 
 		$this->_data_input($data);
-		
+
 		$id = $this->db->insert("INSERT INTO `$this->_table` (`".implode('`,`', array_keys($data))."`) VALUES(".implode(',', array_fill(0, count($data), '?')).")", array_values($data));
 		if ($id === false)
 		{
@@ -257,15 +257,15 @@ abstract class model
 		}
 
 		$this->_data($data);
-		
+
 		$this->_where($where);
 
 		if(!$this->_before_update($data, $where)) return false;
 
 		$this->_update_autofill($data);
-		
+
 		$this->_readonly($data);
-		
+
 		if (!$this->_validate($data)) return false;
 
 		$this->_data_input($data);
@@ -275,7 +275,7 @@ abstract class model
 		if ($order) $sql .= " ORDER BY $order ";
 		if ($limit) $sql .= " LIMIT $limit ";
 		$result = $this->db->update($sql, array_values($data));
-        
+
 		if ($result === FALSE)
 		{
 			$this->error = $this->db->error();
@@ -349,7 +349,7 @@ abstract class model
 		return $this->delete("`$field`=?", $limit, $order, array($value));
 	}
 
-    private function _data_input(& $data) 
+    private function _data_input(& $data)
 	{
 		foreach ($data as $key=>$val)
 		{
@@ -440,11 +440,11 @@ abstract class model
 			if (isset($data[$field])) unset($data[$field]);
 		}
 	}
-	
+
 	private function _where(& $where)
 	{
 		if (empty($where) && isset($this->_data[$this->_primary])) $where = $this->_data[$this->_primary];
-		
+
 		if (is_numeric($where))
 		{
 			$where = "`$this->_primary`=$where";
@@ -452,13 +452,13 @@ abstract class model
 		elseif (is_array($where))
 		{
 			$where = array_map('addslashes', $where);
-			
+
 			if (isset($where[0]))
 			{
 				$ids = is_numeric($where[0]) ? implode_ids($where, ',') : "'".implode_ids($where, "','")."'";
 				$where = "`$this->_primary` IN($ids)";
 			}
-			else 
+			else
 			{
 				$condition = array();
 				foreach ($where as $field=>$value)
@@ -473,7 +473,7 @@ abstract class model
 			$where = strpos($where, ',') === false ? "`$this->_primary`='$where'" : "`$this->_primary` IN($where)";
 		}
 	}
-	
+
 	private function _data(& $data)
 	{
 		if(empty($data))

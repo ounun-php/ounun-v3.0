@@ -8,7 +8,7 @@ class session_storage_db extends session_storage
 {
 	private $db;
 
-	function __construct($options = array())
+	function __construct($options = [])
 	{
 		parent::__construct($options);
 		$this->register();
@@ -54,7 +54,7 @@ class session_storage_db extends session_storage
 		$sdb = $this->db->prepare("DELETE FROM $this->table WHERE `lastvisit`<?");
 		return $sdb->execute(array($expiretime));
 	}
-	
+
 	function _connect()
 	{
 		if ($this->options['db_issame'])
@@ -62,7 +62,7 @@ class session_storage_db extends session_storage
 			$this->db = & factory::db();
 			$table = $this->db->options['prefix'].'session';
 		}
-		else 
+		else
 		{
 			$this->db = & factory::db('db_session');
 			$table = $this->db->options['table'];

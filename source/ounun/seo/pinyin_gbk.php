@@ -65,7 +65,7 @@ class pinyin_gbk
      */
     public function head($string, $from_encoding = 'gbk')
     {
-        $rs = array();
+        $rs = [];
         $py = $this->pinyin($string, $from_encoding);
         foreach ($py as $v) {
             $rs[] = substr($v, 0, 1);

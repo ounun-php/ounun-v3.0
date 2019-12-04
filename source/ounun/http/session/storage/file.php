@@ -6,7 +6,7 @@
 
 class session_storage_file extends session_storage
 {
-	function __construct($options = array())
+	function __construct($options = [])
 	{
 		$path = $options['session_n'] > 0 ? $options['session_n'].';"'.$options['session_path'].'"' : $options['session_path'];
 		ini_set('session.save_handler', 'files');

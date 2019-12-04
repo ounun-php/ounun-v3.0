@@ -24,6 +24,8 @@
     "ext-gd": "*",
     "ext-xml": "*",
     "ext-apcu": "*",
+    "ext-fileinfo": "*",
+    "ext-sqlite": "*",
     "ext-xmlrpc": "*",
     "ext-imagick": "*",
     "ext-simplexml": "*",

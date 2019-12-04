@@ -72,7 +72,7 @@ class sqlite extends \ounun\dc\driver
     public function get($name, $default = false)
     {
         $name   = $this->cache_key_get($name);
-        $sql    = 'SELECT value FROM ' . $this->options['table'] . ' WHERE var=\'' . $name . '\' AND (expire=0 OR expire >' . $_SERVER['REQUEST_TIME'] . ') LIMIT 1';
+        $sql    = 'SELECT `value` FROM ' . $this->options['table'] . ' WHERE `var`=\'' . $name . '\' AND (`expire`=0 OR `expire` >' . $_SERVER['REQUEST_TIME'] . ') LIMIT 1';
         $result = sqlite_query($this->handler, $sql);
         if (sqlite_num_rows($result)) {
             $content = sqlite_fetch_single($result);
@@ -113,9 +113,9 @@ class sqlite extends \ounun\dc\driver
             $tag       = $this->tag;
             $this->tag = null;
         } else {
-            $tag = '';
+            $tag       = '';
         }
-        $sql = 'REPLACE INTO ' . $this->options['table'] . ' (var, value, expire, tag) VALUES (\'' . $name . '\', \'' . $value . '\', \'' . $expire . '\', \'' . $tag . '\')';
+        $sql = 'REPLACE INTO ' . $this->options['table'] . ' (`var`, `value`, `expire`, `tag`) VALUES (\'' . $name . '\', \'' . $value . '\', \'' . $expire . '\', \'' . $tag . '\')';
         if (sqlite_query($this->handler, $sql)) {
             return true;
         }
@@ -165,7 +165,7 @@ class sqlite extends \ounun\dc\driver
     public function rm($name)
     {
         $name = $this->cache_key_get($name);
-        $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE var=\'' . $name . '\'';
+        $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE `var`=\'' . $name . '\'';
         sqlite_query($this->handler, $sql);
         return true;
     }
@@ -180,7 +180,7 @@ class sqlite extends \ounun\dc\driver
     {
         if ($tag) {
             $name = sqlite_escape_string($tag);
-            $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE tag=\'' . $name . '\'';
+            $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE `tag`=\'' . $name . '\'';
             sqlite_query($this->handler, $sql);
             return true;
         }

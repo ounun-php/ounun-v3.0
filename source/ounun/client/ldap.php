@@ -28,9 +28,9 @@ class ldap
 			$vars = get_class_vars(get_class($this));
 			foreach (array_keys($vars) as $var)
 			{
-				if (substr($var, 0, 1) != '_') 
+				if (substr($var, 0, 1) != '_')
 				{
-					if ($param = $configObj->get($var)) 
+					if ($param = $configObj->get($var))
 					{
 						$this-> $var = $param;
 					}
@@ -45,54 +45,54 @@ class ldap
 		$this->_resource = ldap_connect($this->host, $this->port);
 		if ($this->_resource)
 		{
-			if ($this->use_ldapV3) 
+			if ($this->use_ldapV3)
 			{
-				if (!@ldap_set_option($this->_resource, LDAP_OPT_PROTOCOL_VERSION, 3)) 
+				if (!@ldap_set_option($this->_resource, LDAP_OPT_PROTOCOL_VERSION, 3))
 				{
 					return false;
 				}
 			}
-			if (!@ldap_set_option($this->_resource, LDAP_OPT_REFERRALS, intval($this->no_referrals))) 
+			if (!@ldap_set_option($this->_resource, LDAP_OPT_REFERRALS, intval($this->no_referrals)))
 			{
 				return false;
 			}
-			if ($this->negotiate_tls) 
+			if ($this->negotiate_tls)
 			{
-				if (!@ldap_start_tls($this->_resource)) 
+				if (!@ldap_start_tls($this->_resource))
 				{
 					return false;
 				}
 			}
 			return true;
-		} 
-		else 
+		}
+		else
 		{
 			return false;
 		}
 	}
 
-	function close() 
+	function close()
 	{
 		 ldap_close($this->_resource);
 	}
 
 	function setDN($username,$nosub = 0)
 	{
-		if ($this->users_dn == '' || $nosub) 
+		if ($this->users_dn == '' || $nosub)
 		{
 			$this->_dn = $username;
-		} 
-		else if(strlen($username)) 
+		}
+		else if(strlen($username))
 		{
 			$this->_dn = str_replace('[username]', $username, $this->users_dn);
-		} 
-		else 
+		}
+		else
 		{
 			$this->_dn = '';
 		}
 	}
 
-	function getDN() 
+	function getDN()
 	{
 		return $this->_dn;
 	}
@@ -105,11 +105,11 @@ class ldap
 
 	function bind($username = null, $password = null, $nosub = 0)
 	{
-		if (is_null($username)) 
+		if (is_null($username))
 		{
 			$username = $this->username;
 		}
-		if (is_null($password)) 
+		if (is_null($password))
 		{
 			$password = $this->password;
 		}
@@ -121,7 +121,7 @@ class ldap
 	function simple_search($search)
 	{
 		$results = explode(';', $search);
-		foreach($results as $key=>$result) 
+		foreach($results as $key=>$result)
 		{
 			$results[$key] = '('.$result.')';
 		}
@@ -130,12 +130,12 @@ class ldap
 
 	function search($filters, $dnoverride = null)
 	{
-		$attributes = array();
-		if ($dnoverride) 
+		$attributes = [];
+		if ($dnoverride)
 		{
 			$dn = $dnoverride;
-		} 
-		else 
+		}
+		else
 		{
 			$dn = $this->base_dn;
 		}
@@ -150,11 +150,11 @@ class ldap
 				for ($i = 0; $i < $count; $i++)
 				{
 					$attributes[$i] = Array ();
-					if (!$i) 
+					if (!$i)
 					{
 						$firstentry = @ldap_first_entry($resource, $search_result);
-					} 
-					else 
+					}
+					else
 					{
 						$firstentry = @ldap_next_entry($resource, $firstentry);
 					}
@@ -165,7 +165,7 @@ class ldap
 						{
 							$subcount = $ai['count'];
 							$attributes[$i][$ki] = Array ();
-							for ($k = 0; $k < $subcount; $k++) 
+							for ($k = 0; $k < $subcount; $k++)
 							{
 								$attributes[$i][$ki][$k] = $ai[$k];
 							}
@@ -178,7 +178,7 @@ class ldap
 		return $attributes;
 	}
 
-	function replace($dn, $attribute) 
+	function replace($dn, $attribute)
 	{
 		return @ldap_mod_replace($this->_resource, $dn, $attribute);
 	}
@@ -199,7 +199,7 @@ class ldap
 		return @ldap_compare($this->_resource, $dn, $attribute, $value);
 	}
 
-	function read($dn, $attribute = array())
+	function read($dn, $attribute = [])
 	{
 		$base = substr($dn,strpos($dn,',')+1);
 		$cn = substr($dn,0,strpos($dn,','));
@@ -245,10 +245,10 @@ class ldap
 		$parts = explode('.', $ip);
 		$address = '1#';
 
-		foreach ($parts as $int) 
+		foreach ($parts as $int)
 		{
 			$tmp = dechex($int);
-			if (strlen($tmp) != 2) 
+			if (strlen($tmp) != 2)
 			{
 				$tmp = '0' . $tmp;
 			}
@@ -262,7 +262,7 @@ class ldap
 		$addr = "";
 		$addrtype = intval(substr($networkaddress, 0, 1));
 		$networkaddress = substr($networkaddress, 2);
-		if (($addrtype == 8) || ($addrtype = 9)) 
+		if (($addrtype == 8) || ($addrtype = 9))
 		{
 			$networkaddress = substr($networkaddress, (strlen($networkaddress)-4));
 		}
@@ -290,17 +290,17 @@ class ldap
 			{
 				$byte = substr($networkaddress, $i, 1);
 				$addr .= ord($byte);
-				if ( ($addrtype == 1) || ($addrtype == 8) || ($addrtype = 9) ) 
+				if ( ($addrtype == 1) || ($addrtype == 8) || ($addrtype = 9) )
 				{
 					$addr .= ".";
 				}
 			}
-			if ( ($addrtype == 1) || ($addrtype == 8) || ($addrtype = 9) ) 
+			if ( ($addrtype == 1) || ($addrtype == 8) || ($addrtype = 9) )
 			{
 				$addr = substr($addr, 0, strlen($addr) - 1);
 			}
-		} 
-		else 
+		}
+		else
 		{
 			$addr .= "address not available.";
 		}

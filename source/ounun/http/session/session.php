@@ -6,12 +6,12 @@
 class session extends object
 {
 	protected $options, $started = false;
-	
-	function __construct($options = array())
+
+	function __construct($options = [])
 	{
         $this->options = $options;
 	}
-	
+
 	function start()
 	{
 		if (!$this->started)

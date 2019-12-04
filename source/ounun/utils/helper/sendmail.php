@@ -17,7 +17,7 @@ class sendmail
 	       $smtp_auth,
 	       $smtp_username,
 	       $smtp_password;
-	
+
 	function __construct($mailer = 1, $delimiter = 1, $charset = 'utf-8', $from = null, $sign = null, $smtp_host = null, $smtp_port = 25, $smtp_auth = true, $smtp_username = null, $smtp_password = null)
 	{
 		$this->mailer = $mailer;
@@ -31,7 +31,7 @@ class sendmail
 		$this->smtp_username = $smtp_username;
 		$this->smtp_password = $smtp_password;
 	}
-	
+
 	function execute($to, $subject, $message, $from = null)
 	{
 		$subject = '=?'.$this->charset.'?B?'.base64_encode(str_replace("\r", '', str_replace("\n", '', $subject))).'?=';
@@ -55,12 +55,12 @@ class sendmail
 		{
 			return $this->smtp($to, $subject, $message, $headers, $from);
 		}
-		else 
+		else
 		{
 			return $this->mail($to, $subject, $message, $headers, $from);
 		}
 	}
-	
+
 	function mail($to, $subject, $message, $headers, $from)
 	{
 		ini_set('SMTP', $this->smtp_host);
@@ -68,7 +68,7 @@ class sendmail
 		ini_set('sendmail_from', $from);
 		return @mail($to, $subject, $message, $headers);
 	}
-	
+
 	function smtp($to, $subject, $message, $headers, $from)
 	{
 		if(!$fp = fsockopen($this->smtp_host, $this->smtp_port, $errno, $errstr, 30))
@@ -77,7 +77,7 @@ class sendmail
 			$this->error = $errstr;
 			return false;
 		}
-		
+
 		stream_set_blocking($fp, true);
 		$lastmessage = fgets($fp, 512);
 		if(substr($lastmessage, 0, 3) != '220')
@@ -86,7 +86,7 @@ class sendmail
 			$this->error = $lastmessage;
 			return false;
 		}
-		
+
 		fputs($fp, ($this->smtp_auth ? 'EHLO' : 'HELO')." CmsTop\r\n");
 		$lastmessage = fgets($fp, 512);
 		if(substr($lastmessage, 0, 3) != 220 && substr($lastmessage, 0, 3) != 250)
@@ -96,13 +96,13 @@ class sendmail
 			return false;
 		}
 
-		while(1) 
+		while(1)
 		{
 			if(substr($lastmessage, 3, 1) != '-' || empty($lastmessage)) break;
 			$lastmessage = fgets($fp, 512);
 		}
 
-		if($this->smtp_auth) 
+		if($this->smtp_auth)
 		{
 			fputs($fp, "AUTH LOGIN\r\n");
 			$lastmessage = fgets($fp, 512);
@@ -121,7 +121,7 @@ class sendmail
 				$this->error = $lastmessage;
 				return false;
 			}
-			
+
 			fputs($fp, base64_encode($this->smtp_password)."\r\n");
 			$lastmessage = fgets($fp, 512);
 			if(substr($lastmessage, 0, 3) != 235)
@@ -146,15 +146,15 @@ class sendmail
 			}
 		}
 
-		$email_tos = array();
-		foreach(explode(',', $to) as $touser) 
+		$email_tos = [];
+		foreach(explode(',', $to) as $touser)
 		{
 			$touser = trim($touser);
-			if($touser) 
+			if($touser)
 			{
 				fputs($fp, "RCPT TO: <".preg_replace("/.*\<(.+?)\>.*/", "\\1", $touser).">\r\n");
 				$lastmessage = fgets($fp, 512);
-				if(substr($lastmessage, 0, 3) != 250) 
+				if(substr($lastmessage, 0, 3) != 250)
 				{
 					fputs($fp, "RCPT TO: <".preg_replace("/.*\<(.+?)\>.*/", "\\1", $touser).">\r\n");
 					$lastmessage = fgets($fp, 512);

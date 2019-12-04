@@ -8,7 +8,7 @@ namespace ounun\cache\driver;
 class redis extends \ounun\cache\driver
 {
     /** @var array Redis服务器配制 */
-    private $_redis_config = array();
+    private $_redis_config = [];
 
     /** @var \Redis */
     private $_redis = null;
@@ -41,7 +41,7 @@ class redis extends \ounun\cache\driver
     public function __construct($mod = 'def', $expire = 0, $large_scale = false, $format_string = false, $auth = null)
     {
         $this->_mod = $mod;
-        $this->_redis_config = array();
+        $this->_redis_config = [];
         $this->_redis = null;
         $this->_auth = $auth;
 
@@ -174,7 +174,7 @@ class redis extends \ounun\cache\driver
             $this->read();
         }
         if (!$this->_data) {
-            $this->_data = array();
+            $this->_data = [];
         }
         $this->_data[$sub_key] = $sub_val;
     }

@@ -9,7 +9,7 @@ namespace ounun\cache\driver;
 class memcache extends \ounun\cache\driver
 {
     /** @var array Memcache服务器配制 */
-    private $_mem_config = array();
+    private $_mem_config = [];
 
     /** @var \Memcache */
     private $_mem = null;
@@ -49,7 +49,7 @@ class memcache extends \ounun\cache\driver
     public function __construct($mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $zip_threshold = 5000, $zip_min_saving = 0.3, $flag = MEMCACHE_COMPRESSED)
     {
         $this->_mod = $mod;
-        $this->_mem_config = array();
+        $this->_mem_config = [];
         $this->_mem = null;
 
         $this->_expire = $expire;
@@ -175,7 +175,7 @@ class memcache extends \ounun\cache\driver
             $this->read();
         }
         if (!$this->_data) {
-            $this->_data = array();
+            $this->_data = [];
         }
         $this->_data[$sub_key] = $sub_val;
     }

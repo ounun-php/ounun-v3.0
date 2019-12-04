@@ -33,16 +33,16 @@ abstract class logic
     public $table = '';
     /** @var array 数据表结构 */
     public $table_options = [
-//        $_tablefields = array(),
+//        $_tablefields = [],
 //        $_primary = null,
-//        $_fields = array(),
-//        $_readonly = array(),
-//        $_create_autofill = array(),
-//        $_update_autofill = array(),
-//        $_filters_input = array(),
-//        $_filters_output = array(),
-//        $_validators = array(),
-//        $_options = array(),
+//        $_fields = [],
+//        $_readonly = [],
+//        $_create_autofill = [],
+//        $_update_autofill = [],
+//        $_filters_input = [],
+//        $_filters_output = [],
+//        $_validators = [],
+//        $_options = [],
 //        $_fetch_style = self::FETCH_ASSOC;
     ];
     /** @var array 数据 */
