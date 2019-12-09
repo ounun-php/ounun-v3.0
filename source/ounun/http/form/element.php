@@ -7,7 +7,7 @@ class element extends form_element
 {
 	public static function role($id, $value, $attribute = null)
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		$settings['attribute'] = $attribute;
@@ -17,15 +17,15 @@ class element extends form_element
 		}
 		return parent::select($settings);
 	}
-	
+
 	public static function department($dep_id = 0, $uni_id = 0, $disable = false)
 	{
-		$sel_arr = array();
+		$sel_arr = [];
 		$sel_arr['name'] = 'deparmentid';
 		$sel_arr['id'] = 'depid_'.$uni_id;
 		$sel_arr['value'] = $dep_id;
 		if($disable) $sel_arr['disabled'] = true;
-		$roles = array();
+		$roles = [];
 		foreach (table('department') as $value)
 		{
 			$roles[$value['deparmentid']] = $value['name'];
@@ -34,15 +34,15 @@ class element extends form_element
 		$roles = parent::select($sel_arr);
 		return $roles;
 	}
-	
+
 	public static function role_dropdown($name, $value=null, $departmentid = null, $attr = null, $tips = null)
 	{
-		$roles = array();
+		$roles = [];
 		if ($tips)
 		{
 			$roles[] = $tips;
 		}
-		
+
 		if ($departmentid)
 		{
 			$data = loader::model('admin/role','system')->getsByDepartmentid($departmentid);
@@ -65,7 +65,7 @@ class element extends form_element
 	       'attribute'=>$attr
 	    ));
 	}
-	
+
 	public static function department_dropdown($name, $value = null, $attr = null, $tips = '-------')
 	{
 		import('helper.treeview');
@@ -79,7 +79,7 @@ class element extends form_element
 
 	public static function sex($sex_id = MALE, $uni_id = 0, $disable = false)
 	{
-		$sel_arr = array();
+		$sel_arr = [];
 		$sel_arr['name'] = 'sex';
 		$sel_arr['id'] = 'sex_'.$uni_id;
 		$sel_arr['value'] = $sex_id ? $sex_id : FEMALE;
@@ -149,10 +149,10 @@ class element extends form_element
 	{
 		return "<input type=\"text\" name=\"$name\" id=\"$id\" value=\"$value\" size=\"$size\"/> <input type=\"button\" value=\"选择\" class=\"button_style_1\" onclick=\"psn.select('$id', '$type', '$value')\"/> <a href=\"javascript:;\" onclick=\"ct.assoc.open('?app=system&controller=psn&action=index','newtab')\">管理</a>";
 	}
-	
+
 	public static function dsn_select($id, $value = null, $attribute = null)
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		$settings['attribute'] = $attribute;
@@ -165,7 +165,7 @@ class element extends form_element
 
 	public static function psn_select($id, $value, $attribute = null)
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		$settings['attribute'] = $attribute;
@@ -178,7 +178,7 @@ class element extends form_element
 
 	public static function model($id, $name, $value, $attribute = null)
 	{
-		$settings = array();
+		$settings = [];
 		$settings['id'] = $id;
 		$settings['name'] = $name;
 		$settings['value'] = $value;
@@ -192,18 +192,18 @@ class element extends form_element
 		return parent::select($settings);
 	}
 
-	public static function model_checkbox($value = array(),$id = array())
+	public static function model_checkbox($value = [],$id = [])
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $id;
 		$settings['value'] = $value;
-		$options = array();
+		$options = [];
 		foreach (table('model') as $value)
 		{
 			$options[$value['modelid']] = $value['name'];
 		}
 		$settings['options'] = $options;
-		
+
 		return parent::checkbox($settings);
 	}
 
@@ -220,8 +220,8 @@ class element extends form_element
 
 	public static function guestbook_type_radio($value = 1, $id = 'typeid')
 	{
-		$settings = array();
-		$options = array();
+		$settings = [];
+		$options = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		foreach (table('guestbook_type') as $value) {
@@ -230,10 +230,10 @@ class element extends form_element
 		$settings['options'] = $options;
 		return parent::radio($settings);
 	}
-	
+
 	public static function workflow($id, $value, $attribute = null)
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		$settings['attribute'] = $attribute;
@@ -245,7 +245,7 @@ class element extends form_element
 		return parent::select($settings)." <a href=\"javascript:;\" onclick=\"ct.assoc.open('?app=system&controller=workflow&action=index','newtab')\">管理</a>";
 	}
 
-	public static function channel($name,  $checkeds = array())
+	public static function channel($name,  $checkeds = [])
 	{
 		$category = table('category');
 		import('helper.treeview');
@@ -283,7 +283,7 @@ class element extends form_element
 		});</script>';
 		return $html;
 	}
-	
+
 	public static function photo($name='photo',$value = '')
 	{
 		$photo = $value?$value:'nopic.jpg';
@@ -308,7 +308,7 @@ class element extends form_element
 
 	public static function state($value = 0, $id = 'state')
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		$settings['options'] = array(0=>'启用', 1=> '禁用');
@@ -317,7 +317,7 @@ class element extends form_element
 
 	public static function charset($value='utf8', $id = 'state')
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $value;
 		$settings['options'] = array('gbk'=>'GBK', 'gb2312'=>'gb2312', 'utf8'=>'UTF8','latin1'=>'latin1');
@@ -326,10 +326,10 @@ class element extends form_element
 
 	public static function member_groups($value = 5, $id='groupid',$defaultvalue = '')
 	{
-		$settings = array();
+		$settings = [];
 		$settings['name'] = $settings['id'] = $id;
 		$settings['value'] = $defaultvalue;
-		$options = array();
+		$options = [];
 		$member_group = table('member_group');
 		foreach ($member_group as $value) {
 			$options[$value['groupid']] = $value['name'];
@@ -432,19 +432,19 @@ class element extends form_element
 		$html .= '<script type="text/javascript">$(function(){$("#upsection").toggle($("#commend_text").html()!=""?true:false);})</script>';
 		return $html;
 	}
-	
+
 
 	public static function related($contentid = null)
 	{
         $related = loader::model('admin/related', 'system');
-      
+
         $relateds = $related->ls($contentid);
-      
+
         $html = '<div class="expand mar_l_8">';
-        
+
 	        $html .= '  <div class="div_show">';
 	        $html .= '    <input type="text" name="related_keywords" id="related_keywords" size="20" />';
-	        $html .= '    <input type="button" name="related" value="搜索" class="button_style_1" onclick="related_select($(\'#related_keywords\').val())" />';	
+	        $html .= '    <input type="button" name="related" value="搜索" class="button_style_1" onclick="related_select($(\'#related_keywords\').val())" />';
 	        $html .= '    <ul id="related_data">';
             foreach ($relateds as $i=>$d)
             {
@@ -452,7 +452,7 @@ class element extends form_element
             }
 	        $html .= '    </ul>';
 	        $html .= '  </div>';
-       
+
         $html .= '</div>';
         return $html;
 	}
@@ -461,14 +461,14 @@ class element extends form_element
 	{
 		return '<img src="images/question.gif" width="16" height="16" class="tips hand" tips="'.$message.'" align="absmiddle"/>';
 	}
-	
+
 	public static function weight($weight)
 	{
-		
+
 		$instance = new setting();
 		$setting = $instance->get('system');
 		$setting = explode("\n",$setting['weight']);
-		$points = array();
+		$points = [];
 		while (list($key,$value) = each($setting)) {
 			if($value) $temp = explode('|',trim($value));
 			else break;
@@ -517,10 +517,10 @@ class element extends form_element
             });
            </script>';
 	}
-	
+
 	public static function status($id, $name, $value, $attr = null)
 	{
-		$options = array();
+		$options = [];
 		$statuss = table('status');
 		foreach ($statuss as $status=>$r)
 		{
@@ -528,7 +528,7 @@ class element extends form_element
 		}
 		return parent::select(array('id'=>$id, 'name'=>$name, 'value'=>$value, 'attr'=>$attr, 'options'=>$options));
 	}
-	
+
 	public static function model_change($catid, $modelid)
 	{
 		$string = '<select id="changemodel" style="width:70px">';

@@ -12,8 +12,8 @@ class ZipArchive {
 	const CHECKCONS = 1;
 
 	private $handle = null;
-	public $entrylist = array();
-	
+	public $entrylist = [];
+
 	public function __construct()
 	{
 		if (!extension_loaded('zlib')) {
@@ -25,7 +25,7 @@ class ZipArchive {
 
 	public function open($filename, $flags=null)
 	{
-		$this->entrylist = array();
+		$this->entrylist = [];
 		$this->handle = @fopen($filename, 'rb');
 		return $this->handle;
 	}
@@ -42,7 +42,7 @@ class ZipArchive {
 		    return false;
 		}
 		@rewind($this->handle);
-		
+
 		$orig_magic_quotes_status = 0;
 		if (function_exists('get_magic_quotes_runtime')) {
 		    if (($orig_magic_quotes_status = get_magic_quotes_runtime()))
@@ -53,7 +53,7 @@ class ZipArchive {
 		if ($entries) {
 			$entries = (array) $entries;
 		}
-		
+
 		if (!($entries_info = $this->readEndCentralDir())) {
 		    return false;
 		}
@@ -68,7 +68,7 @@ class ZipArchive {
 			}
 			$entry['index'] = $i;
 			$pos_entry = ftell($this->handle);
-			
+
 			if ($entries && !in_array($entry['stored_filename'],$entries)) {
 				$go = 0;
 				foreach ($entries as $k) {
@@ -80,7 +80,7 @@ class ZipArchive {
 				}
 				if (!$go) continue;
 			}
-			
+
 			if (($entry['compression'] != 8) && ($entry['compression'] != 0)) {
 				$entry['status'] = 'unsupported_compression';
 			}
@@ -95,13 +95,13 @@ class ZipArchive {
 				$this->extractFile($entry, $destination);
 			}
 		}
-		
+
 		if ($orig_magic_quotes_status == 1) {
 		    @set_magic_quotes_runtime(1);
 		}
 		return true;
 	}
-	
+
 	private function checkDir($structure)
 	{
 		if (is_dir($structure) || $structure=='') {
@@ -191,7 +191,7 @@ class ZipArchive {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * rend central file header info
 	 *
@@ -240,7 +240,7 @@ class ZipArchive {
 		}
 		return $header;
 	}
-	
+
 	/**
 	 * read end central dir info
 	 *

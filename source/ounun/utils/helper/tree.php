@@ -110,7 +110,7 @@ class tree
 	{
 		$r = $this->get($id, $fields);
 		if (!$r) return false;
-		$data = array();
+		$data = [];
 		if (!is_null($r['parentids']))
 		{
 			$data = $this->db->select("SELECT $fields FROM `$this->table` WHERE `$this->field_id` IN(?)", array($r['parentids']));

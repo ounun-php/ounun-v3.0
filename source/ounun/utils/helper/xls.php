@@ -58,8 +58,8 @@ class XLS
 	{
 		$this->n=0;
 		$this->buffer='';
-		$this->sheets=array();
-		$this->styles=array();
+		$this->sheets=[];
+		$this->styles=[];
 		$this->state=0;
 		$this->FillColor='#FFFFFF';
 		$this->TextColor='#000000';
@@ -129,7 +129,7 @@ class XLS
 
 	function StyleSetFont($fontname=0, $size=0, $color=0, $bold=0, $italic=0, $underline=0)
 	{
-		$this->styles[$this->CurrentStyle]['Font']=array();
+		$this->styles[$this->CurrentStyle]['Font']=[];
 		if ($fontname)
 			$this->styles[$this->CurrentStyle]['Font']['FontName']=$fontname;
 		if ($size)
@@ -149,7 +149,7 @@ class XLS
 	function StyleSetAlignment($horizontal, $vertical=0)
 	{
 		if (!isset($this->styles[$this->CurrentStyle]['Alignment']))
-			$this->styles[$this->CurrentStyle]['Alignment']=array();
+			$this->styles[$this->CurrentStyle]['Alignment']=[];
 
 		if ($horizontal===1)
 			$this->styles[$this->CurrentStyle]['Alignment']['Horizontal']='Right';
@@ -187,7 +187,7 @@ class XLS
 			if ($thick>3)
 				$thick=3;
 			if (! isset($this->styles[$this->CurrentStyle]['Borders']))
-				$this->styles[$this->CurrentStyle]['Borders']=array();
+				$this->styles[$this->CurrentStyle]['Borders']=[];
 			$this->styles[$this->CurrentStyle]['Borders'][$position]=array('LineStyle'=>$style, 'Weight'=>$thick, 'Color'=>$color );
 			return 1;
 		}
@@ -336,7 +336,7 @@ class XLS
 	{
 		$this->sheet++;
 		$this->n=$this->sheet;
-		$this->sheets[$this->sheet]=array('name'=>"$name", 'cols'=>0, 'rows'=>0, 'rows_data'=>array(), 'col_widths'=>array());
+		$this->sheets[$this->sheet]=array('name'=>"$name", 'cols'=>0, 'rows'=>0, 'rows_data'=>[], 'col_widths'=>[]);
 		$this->state=2;
 	}
 

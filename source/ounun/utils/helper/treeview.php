@@ -10,7 +10,7 @@ class treeview
 	public $data = [];
 
     public $html = '';
-	       
+
 	public function __construct($data = [])
 	{
 		$this->data = $data;
@@ -43,7 +43,7 @@ class treeview
 		$html .= $space."</ul>\n".$space;
 		return $html;
 	}
-	
+
 	function select($id = null, $selectedid = null, $eval = '', $deep = 1)
 	{
 		$childs = $this->get_child($id);
@@ -61,7 +61,7 @@ class treeview
 		}
 		return $this->html;
 	}
-	
+
 	function pos($id, $eval = '')
 	{
 		if(!is_array($this->data) || !isset($this->data[$id])) return false;
@@ -80,13 +80,13 @@ class treeview
 	function get_parent($id)
 	{
 		if(!is_array($this->data) || !isset($this->data[$id])) return false;
-		static $parents = array();
+		static $parents = [];
 		$parentid = $this->data[$id]['parentid'];
         if (is_null($parentid))
         {
         	krsort($parents);
         }
-        else 
+        else
         {
         	$parents[] = $this->data[$parentid];
         	$this->get_parent($parentid);
@@ -98,7 +98,7 @@ class treeview
 	{
 		if(!is_array($this->data) || (!is_null($id) && !isset($this->data[$id]))) return false;
 		if (is_numeric($id)) $id = intval($id);
-		$childs = array();
+		$childs = [];
 		foreach($this->data as $k=>$r)
 		{
 			if (is_numeric($r['parentid'])) $r['parentid'] = intval($r['parentid']);
@@ -106,7 +106,7 @@ class treeview
 		}
 		return $childs;
 	}
-	
+
 	function haschild($id)
 	{
 		if(!is_array($this->data) || !isset($this->data[$id])) return false;

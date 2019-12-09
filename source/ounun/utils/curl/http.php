@@ -15,7 +15,7 @@ class http
      * @param int $timeout
      * @return array
      */
-    static public function stream_post(string $url, $data, $cookie = array(), $timeout = 3)
+    static public function stream_post(string $url, $data, $cookie = [], $timeout = 3)
     {
         $info = parse_url($url);
         $host = $info['host'];

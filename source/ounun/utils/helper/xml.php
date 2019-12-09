@@ -136,7 +136,7 @@ class xml
         if (false === ($contents = file_get_contents($file))
             || !($arr = static::xml2array($contents)))
         {
-            return array();
+            return [];
         }
         return $root ? $arr[$root] : $arr;
     }

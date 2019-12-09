@@ -234,7 +234,7 @@ class browser
         static $instances;
 
         if (!isset($instances)) {
-            $instances = array();
+            $instances = [];
         }
 
         $signature = serialize(array($userAgent, $accept));

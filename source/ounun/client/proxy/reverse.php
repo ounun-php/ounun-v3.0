@@ -110,11 +110,10 @@ class reverse
     public function check(bool $is_jump = false)
     {
         if (empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-
             if( 'GET' == $_SERVER['REQUEST_METHOD'] ){
-
+                return $this->connect_get();
             }elseif('POST' == $_SERVER['REQUEST_METHOD']) {
-
+                return $this->connect_post();
             }else{
                 return error('',1,404);
             }
@@ -127,6 +126,44 @@ class reverse
 
     }
 
+
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    protected function cache_filename(string $path)
+    {
+        if ($this->_cache_filename) {
+            return $this->_cache_filename;
+        }
+        $pathinfo  = parse_url($path);
+        $cachefile = strrchr($pathinfo['path'], "/") == "/" ? $pathinfo['path'] . "index.html" : $pathinfo['path'];
+        if ($pathinfo['query']) {
+            $cachefile .= "?" . $pathinfo['query'];
+        }
+        $this->_cache_filename = rtrim($this->_cache_pathroot, '/') . $cachefile;
+        return $this->_cache_filename;
+    }
+
+    /**
+     * @param string $filename
+     * @param mixed  $content
+     */
+    protected function cache_write(string $filename, $content)
+    {
+        $abs_cache = $this->cache_filename($filename);
+        mkdir(dirname($abs_cache), 0777, true);
+        if ($this->_data_replace) {
+            $content = str_replace($this->_data_replace[0], $this->_data_replace[1], $content);
+        }
+        file_put_contents($abs_cache, $content);
+        chmod($abs_cache, 0777);
+        header("FILE_CACHE: 404");
+        $this->content_type   = mime_content_type($abs_cache);
+        $this->_last_modified = gmdate("D, d M Y H:i:s", time());
+    }
+
     public function connect_get()
     {
         $url_remote  = $this->url();
@@ -135,7 +172,9 @@ class reverse
         if ($this->_cache_pathroot) {
             $this->content = $this->cache($this->_cache_pathroot);
         }
+        return succeed(304);
     }
+
     public function connect_post()
     {
         $ch          = curl_init();
@@ -182,64 +221,64 @@ class reverse
 
 
     //gets rid of mulitple ? in URL
-$translateURL = $this->url();
-$headers      = static::headers();
+    $translateURL = $this->url();
+    $headers      = static::headers();
 
-if ($this->is_get && $this->_cache_pathroot) {
-$this->content = $this->cache($this->translate_url);
-}
-if (!$this->content) {
-    curl_setopt($ch, CURLOPT_URL, $this->translate_url);
-    $proxyHeaders = [
-        "X-Forwarded-For: {$this->}",
-        "User-Agent: {$this->_http_user_agent}",
-        "Host: {$this->_host}"
-    ];
-
-    if (strlen($this->_http_x_requested_with) > 1) {
-        $proxyHeaders[] = "X-Requested-With: " . $this->_http_x_requested_with;
-        //echo print_r($proxyHeaders);
-    }
-
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $proxyHeaders);
-
-    $cookie = $this->cookie();
-    if ($cookie) {
-        curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-    }
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-    curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-    curl_setopt($ch, CURLOPT_HEADER, true);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $abs_cache = $this->cache_filename($this->translate_url);
     if ($this->is_get && $this->_cache_pathroot) {
-        curl_setopt($ch, CURLOPT_HEADER, false);
-        mkdir(dirname($abs_cache), 0777, true);
-        $fp = fopen($abs_cache, 'w+');
-        curl_setopt($ch, CURLOPT_FILE, $fp);
-        curl_exec($ch);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
-        fclose($fp);
-        chmod($abs_cache, 0777);
-        header("FILE_CACHE: 404");
-        $this->content = file_get_contents($abs_cache);
-        if ($this->_data_replace) {
-            $this->content = str_replace($this->_data_replace[0], $this->_data_replace[1], $this->content);
-            file_put_contents($abs_cache, $this->content);
-        }
-        if($this->_http_code == 200 && $this->content){
-            header("HTTP/1.1 200 OK");
-            header("Content-Type: " . $info["content_type"]);
-            echo($this->content);
-            exit;
-        }
-    }else {
-        $output = curl_exec($ch);
-        $info = curl_getinfo($ch);
-        curl_close($ch);
+        $this->content = $this->cache($this->translate_url);
     }
-    $this->connect_post($info, $output);
+    if (!$this->content) {
+        curl_setopt($ch, CURLOPT_URL, $this->translate_url);
+        $proxyHeaders = [
+            "X-Forwarded-For: {$this->_}",
+            "User-Agent: {$this->_http_user_agent}",
+            "Host: {$this->_host}"
+        ];
+
+        if (strlen($this->_http_x_requested_with) > 1) {
+            $proxyHeaders[] = "X-Requested-With: " . $this->_http_x_requested_with;
+            //echo print_r($proxyHeaders);
+        }
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $proxyHeaders);
+
+        $cookie = $this->cookie();
+        if ($cookie) {
+            curl_setopt($ch, CURLOPT_COOKIE, $cookie);
+        }
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
+        curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $abs_cache = $this->cache_filename($this->translate_url);
+        if ($this->is_get && $this->_cache_pathroot) {
+            curl_setopt($ch, CURLOPT_HEADER, false);
+            mkdir(dirname($abs_cache), 0777, true);
+            $fp = fopen($abs_cache, 'w+');
+            curl_setopt($ch, CURLOPT_FILE, $fp);
+            curl_exec($ch);
+            $info = curl_getinfo($ch);
+            curl_close($ch);
+            fclose($fp);
+            chmod($abs_cache, 0777);
+            header("FILE_CACHE: 404");
+            $this->content = file_get_contents($abs_cache);
+            if ($this->_data_replace) {
+                $this->content = str_replace($this->_data_replace[0], $this->_data_replace[1], $this->content);
+                file_put_contents($abs_cache, $this->content);
+            }
+            if($this->_http_code == 200 && $this->content){
+                header("HTTP/1.1 200 OK");
+                header("Content-Type: " . $info["content_type"]);
+                echo($this->content);
+                exit;
+            }
+        }else {
+            $output = curl_exec($ch);
+            $info = curl_getinfo($ch);
+            curl_close($ch);
+        }
+        $this->connect_post($info, $output);
 }
 
     }
@@ -259,13 +298,13 @@ if (!$this->content) {
                 if (!$this->content) {
                     curl_setopt($ch, CURLOPT_URL, $this->translate_url);
                     $proxyHeaders = [
-                        "X-Forwarded-For: {$this->}",
-                        "User-Agent: {$this->_http_user_agent}",
+                        "X-Forwarded-For: {$headers['X-Forwarded-For']}",
+                        "User-Agent: {$headers['User-Agent']}",
                         "Host: {$this->_host}"
                     ];
 
-                    if (strlen($this->_http_x_requested_with) > 1) {
-                        $proxyHeaders[] = "X-Requested-With: " . $this->_http_x_requested_with;
+                    if ($headers['X-Forwarded-For'] && strlen($headers['X-Forwarded-For']) > 1) {
+                        $proxyHeaders[] = "X-Requested-With: " . $headers['X-Forwarded-For'];
                         //echo print_r($proxyHeaders);
                     }
 
@@ -423,7 +462,7 @@ if (!$this->content) {
     }
 
     public function path_prefix_set(string $path_prefix = ''){
-        $this->_path_prefix  =  $path_prefix;
+        $this->_path_prefix   =  $path_prefix;
     }
 
     /**
@@ -513,41 +552,7 @@ if (!$this->content) {
         }
     }
 
-    /**
-     * @param $url
-     * @return string
-     */
-    public function cache_filename($url)
-    {
-        if ($this->_cache_filename) {
-            return $this->_cache_filename;
-        }
-        $pathinfo  = parse_url($url);
-        $cachefile = strrchr($pathinfo['path'], "/") == "/" ? $pathinfo['path'] . "index.html" : $pathinfo['path'];
-        if ($pathinfo['query']) {
-            $cachefile .= "?" . $pathinfo['query'];
-        }
-        $this->_cache_filename = rtrim($this->_cache_pathroot, '/') . $cachefile;
-        return $this->_cache_filename;
-    }
 
-    /**
-     * @param string $filename
-     * @param mixed  $content
-     */
-    public function cache_write(string $filename, $content)
-    {
-        $abs_cache = $this->cache_filename($filename);
-        mkdir(dirname($abs_cache), 0777, true);
-        if ($this->_data_replace) {
-            $content = str_replace($this->_data_replace[0], $this->_data_replace[1], $content);
-        }
-        file_put_contents($abs_cache, $content);
-        chmod($abs_cache, 0777);
-        header("FILE_CACHE: 404");
-        $this->content_type   = mime_content_type($abs_cache);
-        $this->_last_modified = gmdate("D, d M Y H:i:s", time());
-    }
 
 
 
@@ -846,9 +851,6 @@ if (!$this->content) {
         ob_end_clean();
         return $data;
     }
-
-
-
 
     /**
      * @param string $host

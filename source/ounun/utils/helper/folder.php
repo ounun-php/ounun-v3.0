@@ -187,12 +187,12 @@ class folder
         return true;
     }
 
-    static function find($path, $pattern, $mode = 'name', $deep = false, &$array = array())
+    static function find($path, $pattern, $mode = 'name', $deep = false, &$array = [])
     {
         if (!is_dir($path)) return false;
         $path = self::path($path);
         $items = glob($path.'*');
-        if (!is_array($items)) return array();
+        if (!is_array($items)) return [];
 
         if ($mode == 'name')
         {
@@ -286,7 +286,7 @@ class folder
         return $fileclass;
     }
 
-    static function tree($path, $mode = null, &$array = array())
+    static function tree($path, $mode = null, &$array = [])
     {
         if (!is_dir($path)) return false;
         $path = self::path($path);

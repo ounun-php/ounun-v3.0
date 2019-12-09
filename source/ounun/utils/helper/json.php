@@ -11,12 +11,12 @@ class json
     var $ch   = '';
     var $text = '';
     private $charset = 'utf-8';
-    
+
     function __construct($charset = 'utf-8')
     {
     	$this->charset = $charset;
     }
-    
+
     function encode($arg)
     {
     	if ($this->charset != 'utf-8') $arg = str_charset($this->charset, 'utf-8', $arg);
@@ -120,7 +120,7 @@ class json
         {
         	$result = json_decode($text, $assoc);
         }
-        else 
+        else
         {
             $this->at = 0;
             $this->ch   = '';
@@ -220,7 +220,7 @@ class json
 
     function arr()
     {
-        $a = array();
+        $a = [];
         if ($this->ch == '[')
         {
             $this->next();
@@ -286,7 +286,7 @@ class json
     function assoc()
     {
         $k = '';
-        $a = array();
+        $a = [];
         if ($this->ch == '<')
         {
             $this->next();

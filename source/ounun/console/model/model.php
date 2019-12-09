@@ -109,7 +109,7 @@ abstract class model
 			$group = isset($this->_options['group']) ? $this->_options['group'] : null;
 			$limit = isset($this->_options['limit']) ? $this->_options['limit'] : $limit;
 			$offset = isset($this->_options['offset']) ? $this->_options['offset'] : $offset;
-			$this->_options = array();
+			$this->_options = [];
 		}
 
 		if (is_array($fields)) $fields = '`'.implode('`,`', $fields).'`';
@@ -152,7 +152,7 @@ abstract class model
 	protected function _before_select(&$where) {return true;}
 	protected function _after_select(&$result, $multiple = true) {}
 
-	public function page($where = null, $fields = '*', $order = null, $page = 1, $size = 20, $data = array())
+	public function page($where = null, $fields = '*', $order = null, $page = 1, $size = 20, $data = [])
 	{
 		$offset = ($page-1)*$size;
 		return $this->select($where, $fields, $order, $size, $offset, $data, true);
@@ -160,7 +160,7 @@ abstract class model
 
 	public function get($where = null, $fields = '*', $order = null)
 	{
-		return $this->select($where, $fields, $order, null, null, array(), false);
+		return $this->select($where, $fields, $order, null, null, [], false);
 	}
 
 	public function get_by($field, $value, $fields = '*', $order = null)
@@ -173,15 +173,15 @@ abstract class model
 		return $this->select("`$field`=?", $fields, $order, $limit, $offset, array($value), true);
 	}
 
-	public function get_field($field, $where = null, $data = array())
+	public function get_field($field, $where = null, $data = [])
 	{
 		$r = $this->select($where, $field, null, null, null, $data, false);
 		return array_shift($r);
 	}
 
-	public function gets_field($field, $where = null, $data = array())
+	public function gets_field($field, $where = null, $data = [])
 	{
-		$result = array();
+		$result = [];
 		$data = $this->select($where, $field, null, null, null, $data, true);
 		foreach($data as $r)
 		{
@@ -190,7 +190,7 @@ abstract class model
 		return $result;
 	}
 
-	public function count($where = null, $data = array())
+	public function count($where = null, $data = [])
 	{
 		$this->_where($where);
 		if (!empty($where)) $where = " WHERE $where";
@@ -208,7 +208,7 @@ abstract class model
 		return $this->db->get("SELECT `$field` FROM `$this->_table` WHERE `$field`=?", array($value)) ? true : false;
 	}
 
-	function insert($data = array())
+	function insert($data = [])
 	{
 		$this->_data($data);
 
@@ -236,7 +236,7 @@ abstract class model
 	protected function _before_insert(&$data) {return true;}
 	protected function _after_insert(&$data) {}
 
-	public function copy_by_id($id, $data = array())
+	public function copy_by_id($id, $data = [])
 	{
 		$r = $this->db->get("SELECT * FROM `$this->_table` WHERE `$this->_primary`=?", array($id));
 		if (!$r) return false;
@@ -245,7 +245,7 @@ abstract class model
 		return $this->insert($r);
 	}
 
-	function update($data = array(), $where = null, $limit = null, $order = null)
+	function update($data = [], $where = null, $limit = null, $order = null)
 	{
 		if(!empty($this->_options))
 		{
@@ -253,7 +253,7 @@ abstract class model
 			$order = isset($this->_options['order']) ? $this->_options['order'] : $order;
 			$limit = isset($this->_options['limit']) ? $this->_options['limit'] : $limit;
 			$offset = isset($this->_options['offset']) ? $this->_options['offset'] : $offset;
-			$this->_options = array();
+			$this->_options = [];
 		}
 
 		$this->_data($data);
@@ -296,19 +296,19 @@ abstract class model
 		return $this->update(array($field=>$value), $where);
 	}
 
-	public function set_inc($field, $where = null, $step = 1, $data = array())
+	public function set_inc($field, $where = null, $step = 1, $data = [])
 	{
 		$this->_where($where);
 		return $this->db->update("UPDATE `$this->_table` SET `$field`=`$field`+$step WHERE $where", $data);
 	}
 
-	public function set_dec($field, $where = null, $step = 1, $data = array())
+	public function set_dec($field, $where = null, $step = 1, $data = [])
 	{
 		$this->_where($where);
 		return $this->db->update("UPDATE `$this->_table` SET `$field`=`$field`-$step WHERE $where", $data);
 	}
 
-	function delete($where = null, $limit = null, $order = null, $data = array())
+	function delete($where = null, $limit = null, $order = null, $data = [])
 	{
 		if(!empty($this->_options))
 		{
@@ -316,7 +316,7 @@ abstract class model
 			$order = isset($this->_options['order']) ? $this->_options['order'] : $order;
 			$limit = isset($this->_options['limit']) ? $this->_options['limit'] : $limit;
 			$offset = isset($this->_options['offset']) ? $this->_options['offset'] : $offset;
-			$this->_options = array();
+			$this->_options = [];
 		}
 
 		$this->_where($where);
@@ -460,7 +460,7 @@ abstract class model
 			}
 			else
 			{
-				$condition = array();
+				$condition = [];
 				foreach ($where as $field=>$value)
 				{
 					$condition[] = "`$field`='$value'";

@@ -308,7 +308,7 @@ class md
         //a footnote
         if (preg_match_all('#\[\^(.*?)\]#is', $doc, $footnotes)) {
             $footnoteTpl = '<a href="#fn:%s" id="fnref:%s" title="go to footnote" class="footnote">[%s]</a>';
-            $footnoteReplaced = array();
+            $footnoteReplaced = [];
             foreach ($footnotes[0] as $key => $value) {
                 $footnoteId = $footnotes[1][$key];
                 if (isset($footnoteReplaced[$footnoteId])) continue;
@@ -463,7 +463,7 @@ class md
         //a footnote
         if (preg_match_all('#\[\^(.*?)\]#is', $doc, $footnotes)) {
             $footnoteTpl = '<a href="#fn:%s" id="fnref:%s"  data-type="mip" title="go to footnote" class="footnote">[%s]</a>';
-            $footnoteReplaced = array();
+            $footnoteReplaced = [];
             foreach ($footnotes[0] as $key => $value) {
                 $footnoteId = $footnotes[1][$key];
                 if (isset($footnoteReplaced[$footnoteId])) continue;
