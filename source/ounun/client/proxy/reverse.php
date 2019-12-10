@@ -159,6 +159,9 @@ class reverse
                 return succeed(304);
             }
         }
+        if(empty($this->_server_url_root)){
+            return error('404',404,404);
+        }
         $server_url = $this->server_url();
         $this->content = http::file_get_contents_loop($server_url,'',1);
         if($this->content){
