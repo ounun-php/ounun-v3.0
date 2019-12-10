@@ -285,7 +285,7 @@ class reverse
      */
     public function server_url()
     {
-        return  $this->_server_url_root.'/'.$this->_server_path.'/'.$this->_server_file;
+        return  $this->_server_url_root.'/'.($this->_server_path?$this->_server_path.'/':'').$this->_server_file;
     }
 
     /**
