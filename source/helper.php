@@ -873,7 +873,7 @@ abstract class v
     {
         error404("<strong>method</strong>  --> ".__METHOD__." <br />\n  
                         <strong>mod</strong> ------> " . json_encode($mod,JSON_UNESCAPED_UNICODE) . " <br />\n  
-                        <strong>class</strong> ----> ".get_class($this));
+                        <strong>class</strong> ------> ".get_class($this));
     }
 
     /**

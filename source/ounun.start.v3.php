@@ -487,7 +487,7 @@ class ounun
         static::$page_base_file = $page_base_file;
         /** @var string URL Page */
         static::$page_url = $page_url;
-        
+
         /** @var string Www Page */
         $a = explode('/',static::$url_www,5);
         $p = $a[3]?"/{$a[3]}":'';
@@ -962,3 +962,5 @@ function start_task($argv)
 require __DIR__ . '/helper.php';
 /** 注册自动加载 */
 spl_autoload_register('\\ounun::load_class');
+/** 自动加载 src-4 \ounun  */
+\ounun::add_paths(Dir_Ounun, 'ounun', false);

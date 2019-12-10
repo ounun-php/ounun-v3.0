@@ -132,7 +132,7 @@ class http
             ],
         ];
         $context = stream_context_create($opts);
-        $cc      = file_get_contents($url, false, $context);
+        $cc      = @file_get_contents($url, false, $context);
         if($cc){
             if($is_unzip){
                 if(strpos($cc,'html') === false ){
@@ -164,7 +164,7 @@ class http
                 sleep($sleep_time_seconds);
             }
         } while ($loop_max > 0 && $c == false);
-        echo "url:{$url}\n";
+        // echo "url:{$url}\n";
         return false;
     }
 
