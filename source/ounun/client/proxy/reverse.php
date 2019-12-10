@@ -133,7 +133,7 @@ class reverse
                 // return $this->cache_post();
                 return $this->cache_get();
             }else{
-                return error('404',404,404);
+                return error('404-REQUEST_METHOD',404,404);
             }
         }else{
             return succeed(304);
@@ -160,7 +160,7 @@ class reverse
             }
         }
         if(empty($this->_server_url_root)){
-            return error('404',404,404);
+            return error('404-empty-server_url_root',404,404);
         }
         $server_url = $this->server_url();
         $this->content = http::file_get_contents_loop($server_url,'',1);
@@ -168,7 +168,7 @@ class reverse
             $this->write($local_filename,$this->content);
             return succeed(200);
         }
-        return error('404',404,404);
+        return error('404-error-file_get_contents',404,404);
     }
 
     /**
