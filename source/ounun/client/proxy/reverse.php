@@ -57,9 +57,6 @@ class reverse
     /** @var string  */
     protected $_http_if_modified_304 = '';
 
-    /** @var string 路径前缀   $path_forward  */
-    protected $_path_prefix         = '';
-
     /** @var array 替换数据[0],[1] */
     protected $_data_replace   = [];
 
@@ -297,196 +294,6 @@ class reverse
         return $this->_cache_path_root.$this->_cache_filename;
     }
 
-    /**
-     * @param array $data
-     */
-    public function data_replace_set(array $data = [])
-    {
-        $this->_data_replace  =  $data;
-    }
-
-    /**
-     * @param string $path_prefix
-     */
-    public function path_prefix_set(string $path_prefix = '')
-    {
-        $this->_path_prefix   =  $path_prefix;
-    }
-
-
-
-
-    public function connect()
-    {
-        if (empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-            if($_SERVER['REQUEST_METHOD'] == 'GET'){
-                //gets rid of mulitple ? in URL
-                $url_remote  = $this->url();
-                $headers     = static::headers();
-                $ch          = curl_init();
-
-                if ($this->_cache_path_root) {
-                    $this->content = $this->cache($this->_cache_path_root);
-                }
-                if (!$this->content) {
-                    curl_setopt($ch, CURLOPT_URL, $this->translate_url);
-                    $proxyHeaders = [
-                        "X-Forwarded-For: {$headers['X-Forwarded-For']}",
-                        "User-Agent: {$headers['User-Agent']}",
-                        "Host: {$this->_host}"
-                    ];
-
-                    if ($headers['X-Forwarded-For'] && strlen($headers['X-Forwarded-For']) > 1) {
-                        $proxyHeaders[] = "X-Requested-With: " . $headers['X-Forwarded-For'];
-                        //echo print_r($proxyHeaders);
-                    }
-
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $proxyHeaders);
-
-                    $cookie = $this->cookie();
-                    if ($cookie) {
-                        curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-                    }
-                    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-                    curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-                    curl_setopt($ch, CURLOPT_HEADER, true);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    $abs_cache = $this->cache_filename($this->translate_url);
-                    if ($this->is_get && $this->_cache_path_root) {
-                        curl_setopt($ch, CURLOPT_HEADER, false);
-                        mkdir(dirname($abs_cache), 0777, true);
-                        $fp = fopen($abs_cache, 'w+');
-                        curl_setopt($ch, CURLOPT_FILE, $fp);
-                        curl_exec($ch);
-                        $info = curl_getinfo($ch);
-                        curl_close($ch);
-                        fclose($fp);
-                        chmod($abs_cache, 0777);
-                        header("FILE_CACHE: 404");
-                        $this->content = file_get_contents($abs_cache);
-                        if ($this->_data_replace) {
-                            $this->content = str_replace($this->_data_replace[0], $this->_data_replace[1], $this->content);
-                            file_put_contents($abs_cache, $this->content);
-                        }
-                        if ($this->_http_code == '200' && $this->content) {
-                            header("HTTP/1.1 200 OK");
-                            header("Content-Type: " . $info["content_type"]);
-                            echo($this->content);
-                            exit;
-                        }
-                    }
-                }
-            }elseif($_SERVER['REQUEST_METHOD'] == 'POST') {
-                $ch          = curl_init();
-                curl_setopt($ch, CURLOPT_POST, 1);
-                $post_data   = [];
-                $post_file   = false;
-                $upload_path = $this->_cache_path_root.'upload';
-
-                if (count($_FILES) > 0) {
-                    if (!is_writable($upload_path)) {
-                        die('You cannot upload to the specified directory, please CHMOD it to 777.');
-                    }
-                    foreach ($_FILES as $key => $file) {
-                        copy($file["tmp_name"], $upload_path . $file["name"]);
-                        $proxy_location = "@" . $upload_path . $file["name"] . ";type=" . $file["type"];
-                        $post_data      = [$key => $proxy_location];
-                        $post_file      = true;
-                    }
-                }
-
-                foreach ($_POST as $key => $value) {
-                    if (!is_array($value)) {
-                        $post_data[$key] = $value;
-                    } else {
-                        $post_data[$key] = serialize($value);
-                    }
-                }
-
-                if (!$post_file) {
-                    $post_string  = '';
-                    $first_loop   = true;
-                    foreach ($post_data as $key => $value) {
-                        $parameterItem = urlencode($key) . "=" . urlencode($value);
-                        if ($first_loop) {
-                            $post_string .= $parameterItem;
-                        } else {
-                            $post_string .= "&" . $parameterItem;
-                        }
-                        $first_loop = false;
-                    }
-                    $post_data = $post_string;
-                }
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
-            }
-
-            //gets rid of mulitple ? in URL
-            $translateURL = $this->url();
-            $headers      = static::headers();
-
-            if ($this->is_get && $this->_cache_path_root) {
-                $this->content = $this->cache($this->translate_url);
-            }
-            if (!$this->content) {
-                curl_setopt($ch, CURLOPT_URL, $this->translate_url);
-                $proxyHeaders = [
-                    "X-Forwarded-For: {$headers['X-Forwarded-For']}",
-                    "User-Agent: {$headers['User-Agent']}",
-                    "Host: {$this->_host}"
-                ];
-
-                if (strlen($this->_http_x_requested_with) > 1) {
-                    $proxyHeaders[] = "X-Requested-With: " . $this->_http_x_requested_with;
-                    //echo print_r($proxyHeaders);
-                }
-
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $proxyHeaders);
-
-                $cookie = $this->cookie();
-                if ($cookie) {
-                    curl_setopt($ch, CURLOPT_COOKIE, $cookie);
-                }
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
-                curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-                curl_setopt($ch, CURLOPT_HEADER, true);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                $abs_cache = $this->cache_filename($this->translate_url);
-                if ($this->is_get && $this->_cache_path_root) {
-                    curl_setopt($ch, CURLOPT_HEADER, false);
-                    mkdir(dirname($abs_cache), 0777, true);
-                    $fp = fopen($abs_cache, 'w+');
-                    curl_setopt($ch, CURLOPT_FILE, $fp);
-                    curl_exec($ch);
-                    $info = curl_getinfo($ch);
-                    curl_close($ch);
-                    fclose($fp);
-                    chmod($abs_cache, 0777);
-                    header("FILE_CACHE: 404");
-                    $this->content = file_get_contents($abs_cache);
-                    if ($this->_data_replace) {
-                        $this->content = str_replace($this->_data_replace[0], $this->_data_replace[1], $this->content);
-                        file_put_contents($abs_cache, $this->content);
-                    }
-                    if($this->_http_code == 200 && $this->content){
-                        header("HTTP/1.1 200 OK");
-                        header("Content-Type: " . $info["content_type"]);
-                        echo($this->content);
-                        exit;
-                    }
-                }else {
-                    $output = curl_exec($ch);
-                    $info = curl_getinfo($ch);
-                    curl_close($ch);
-                }
-                $this->connect_post($info, $output);
-            }
-        } else {
-            $this->_last_modified = $_SERVER['HTTP_IF_MODIFIED_SINCE'];
-            $this->_http_if_modified_304 = true;
-        }
-    }
-
-
 
     /**
      * @return array
@@ -512,11 +319,8 @@ class reverse
         } else {
             $headers["X-Forwarded-For"] = $_SERVER['HTTP_X_FORWARDED_FOR'] . ", " . $_SERVER['REMOTE_ADDR'];
         }
-
-//      $this->_data_headers = $headers;
         return $headers;
     }
-
 
     /**
      * @return string

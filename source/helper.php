@@ -555,7 +555,7 @@ function short_url_decode(string $string = ''): int
  */
 function expires(int $expires = 0, string $etag = '', int $LastModified = 0)
 {
-    if ($expires) {
+    if ($expires > 0) {
         $time = time();
         header("Expires: " . gmdate("D, d M Y H:i:s", $time + $expires) . " GMT");
         header("Cache-Control: max-age=" . $expires);
@@ -572,7 +572,7 @@ function expires(int $expires = 0, string $etag = '', int $LastModified = 0)
         }
     } else {
         header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");
-        header("Cache-Control: no-cache, must-revalidate");
+        header("Cache-Control: no-cache, must-revalidate, max-age=0");
         header("Pragma: no-cache");
     }
 }

@@ -654,7 +654,7 @@ class ounun
 
         // 查找 PSR-4 prefix
         $filename = strtr($class, '\\', '/') . '.php';
-        $firsts = [explode('\\', $class)[0], ''];
+        $firsts   = [explode('\\', $class)[0], ''];
         foreach ($firsts as $first) {
             if (isset(static::$maps_paths[$first])) {
                 foreach (static::$maps_paths[$first] as $v) {
