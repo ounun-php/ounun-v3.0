@@ -13,26 +13,26 @@ namespace ounun;
 class agent
 {
     // 设备类型
-    const DEVICE_Mobile = 1;
-    const DEVICE_Desktop = 2;
-    const DEVICE_Unknown = -1;
+    const Device_Mobile = 1;
+    const Device_Desktop = 2;
+    const Device_Unknown = 0;
 
     // 浏览器类型
-    const Browser_Type_IPHONE = 1;
-    const Browser_Type_IPAD = 2;
-    const Browser_Type_IPOD = 3;
-    const Browser_Type_ANDROID = 4;
-    const Browser_Type_XzApp = 5;
-    const Browser_Type_Unknown = -1;
+    const Browser_Type_iPhone = 1;
+    const Browser_Type_iPad = 2;
+    const Browser_Type_iPod = 3;
+    const Browser_Type_Android = 4;
+    const Browser_Type_Xzh_App = 5;
+    const Browser_Type_Unknown = 0;
 
     // 系统类型
     const Os_Type_Ios = 1;
     const Os_Type_ANDROID = 2;
-    const Os_Type_Unknown = -1;
+    const Os_Type_Unknown = 0;
 
-    // 是否RETINA屏
-    const RETINA_TYPE_YES = 1;
-    const RETINA_TYPE_NOT = 0;
+    // 是否Retina屏
+    const Retina_Type_Yes = 1;
+    const Retina_Type_Not = 0;
 
     // 是否IOS6系统
     const Ios6_Yes = 1;
@@ -71,11 +71,11 @@ class agent
 
     const Display_Type_Welcome = 9;
 
-    const Display_Type_Lastvisit = 1;
+    const Display_Type_Last_Visit = 1;
 
     const Display_Type_Account = 2;
 
-    const Display_Type_Wxapp = 3;
+    const Display_Type_Wx_App = 3;
 
     const Display_Type_Webapp = 4;
 
@@ -85,58 +85,71 @@ class agent
 
     const Display_Type_Module = 7;
 
+
+
+    /**
+     * @param string $agent
+     * @return mixed|string
+     */
+    public static function agent_get($agent = '')
+    {
+        $agent = empty($agent) ? $_SERVER['HTTP_USER_AGENT'] : $agent;
+        return $agent;
+    }
+
+
     // 得到agent完整类型信息
     public static function device_info_get()
     {
         return [
-            'deviceType' => self::deviceType(),
-            'browserType' => self::browser_type(),
-            'isRetina' => self::isRetina(),
-            'osType' => self::osType(),
-            'isIos6' => self::is_ios6(),
+            'device_type'  => self::device_type(),
+            'browser_type' => self::browser_type(),
+            'is_retina'    => self::is_retina(),
+            'os_type'      => self::os_type(),
+            'is_ios6'      => self::is_ios6(),
         ];
     }
 
     // 浏览器类型
     public static function browser_type($agent = '')
     {
-        $agent = self::getAgent($agent);
+        $agent = self::agent_get($agent);
         if (stripos($agent, 'baiduboxapp') !== false) {
-            return self::Browser_Type_XzApp;
+            return self::Browser_Type_Xzh_App;
         }
 
         if (stripos($agent, 'iphone') !== false) {
-            return self::Browser_Type_IPHONE;
+            return self::Browser_Type_iPhone;
         }
 
         if (stripos($agent, 'ipad') !== false) {
-            return self::Browser_Type_IPAD;
+            return self::Browser_Type_iPad;
         }
 
         if (stripos($agent, 'ipod') !== false) {
-            return self::Browser_Type_IPOD;
+            return self::Browser_Type_iPod;
         }
 
         if (stripos($agent, 'android') !== false) {
-            return self::Browser_Type_ANDROID;
+            return self::Browser_Type_Android;
         }
 
         return self::Browser_Type_Unknown;
     }
 
     // 系统类型
-    public static function osType($agent = '')
+    public static function os_type($agent = '')
     {
-        $agent = self::getAgent($agent);
+        $agent = self::agent_get($agent);
         $browserType = self::browser_type($agent);
 
         switch ($browserType) {
-            case self::Browser_Type_IPHONE:
-            case self::Browser_Type_IPAD:
-            case self::Browser_Type_IPOD:
+            case self::Browser_Type_iPhone:
+            case self::Browser_Type_iPad:
+            case self::Browser_Type_iPod:
                 $osType = self::Os_Type_Ios;
                 break;
-            case self::Browser_Type_ANDROID:
+            case self::Browser_Type_Android:
                 $osType = self::Os_Type_ANDROID;
                 break;
             default:
@@ -147,32 +160,32 @@ class agent
     }
 
     // 设备类型
-    public static function deviceType()
+    public static function device_type()
     {
-        if (self::isMobile()) {
-            return self::DEVICE_Mobile;
+        if (self::is_mobile()) {
+            return self::Device_Mobile;
         } else {
-            return self::DEVICE_Desktop;
+            return self::Device_Desktop;
         }
     }
 
     // retina屏
-    public static function isRetina($agent = '')
+    public static function is_retina($agent = '')
     {
-        $agent = self::getAgent($agent);
-        $osType = self::osType($agent);
+        $agent = self::agent_get($agent);
+        $osType = self::os_type($agent);
 
         if (($osType == self::Os_Type_Ios) && (self::is_ios6($agent) != 1)) {
-            return self::RETINA_TYPE_YES;
+            return self::Retina_Type_Yes;
         } else {
-            return self::RETINA_TYPE_NOT;
+            return self::Retina_Type_Not;
         }
     }
 
     // ios6系统的手机(iphone4, iphone4s)
     public static function is_ios6($agent = '')
     {
-        $agent = self::getAgent($agent);
+        $agent = self::agent_get($agent);
 
         if (stripos($agent, 'iPhone OS 6')) {
             return self::Ios6_Yes;
@@ -182,9 +195,9 @@ class agent
     }
 
     // 检查是否在微信中打开
-    public static function is_micro_message($agent = '')
+    public static function is_wechat_message($agent = '')
     {
-        $agent = self::getAgent($agent);
+        $agent = self::agent_get($agent);
 
         if (stripos($agent, 'MicroMessenger') !== false) {
             return self::Wechat_Msg_Yes;
@@ -194,7 +207,7 @@ class agent
     }
 
     // 已安装APP
-    public static function isAppInstalled()
+    public static function is_app_installed()
     {
         if (isset($_GET['isappinstalled']) && ($_GET['isappinstalled'] == 1)) {
             return self::App_Installed_Yes;
@@ -207,7 +220,7 @@ class agent
      * 是移动设备访问
      * @return bool
      */
-    public static function isMobile()
+    public static function is_mobile()
     {
         // 如果有HTTP_X_WAP_PROFILE则一定是移动设备
         if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
@@ -239,15 +252,5 @@ class agent
             }
         }
         return false;
-    }
-
-    /**
-     * @param string $agent
-     * @return mixed|string
-     */
-    public static function getAgent($agent = '')
-    {
-        $agent = empty($agent) ? $_SERVER['HTTP_USER_AGENT'] : $agent;
-        return $agent;
     }
 }

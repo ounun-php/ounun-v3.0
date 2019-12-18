@@ -15,7 +15,7 @@ abstract class yar
     /**
      * 构造函数
      * Yar constructor.
-     * @throws \Exception
+     * @throws
      */
     public function __construct()
     {

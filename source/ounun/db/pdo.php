@@ -868,7 +868,7 @@ class pdo
      * @param int $param 值数据类型 PDO::PARAM_INT
      * @return bool
      */
-    public function is_repeat(string $field, string $value, int $param = \PDO::PARAM_STR): bool
+    public function exists(string $field, string $value, int $param = \PDO::PARAM_STR): bool
     {
         if ($field) {
             $k  = $this->_param2types($param);

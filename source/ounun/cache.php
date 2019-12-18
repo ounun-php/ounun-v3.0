@@ -34,7 +34,7 @@ class cache
     const Type_Memcached = 4;
 
     /**  @var \ounun\cache\driver */
-    private $_drive = null;
+    protected $_drive;
 
     /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
     protected $_type = 0;

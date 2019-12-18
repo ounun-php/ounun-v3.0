@@ -8,6 +8,10 @@ namespace ounun\config\driver;
 
 class ini
 {
+    /**
+     * @param $config
+     * @return array|false
+     */
     public function parse($config)
     {
         if (is_file($config)) {

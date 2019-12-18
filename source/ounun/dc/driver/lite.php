@@ -19,8 +19,6 @@ class lite extends \ounun\dc\driver
 
     /**
      * 构造函数
-     * @access public
-     *
      * @param array $options
      */
     public function __construct($options = [])
@@ -31,12 +29,10 @@ class lite extends \ounun\dc\driver
         if (substr($this->options['path'], -1) != '/') {
             $this->options['path'] .= '/';
         }
-
     }
 
     /**
      * 取得变量的存储文件名
-     * @access protected
      * @param string $name 缓存变量名
      * @return string
      */
@@ -47,7 +43,6 @@ class lite extends \ounun\dc\driver
 
     /**
      * 判断缓存是否存在
-     * @access public
      * @param string $name 缓存变量名
      * @return mixed
      */

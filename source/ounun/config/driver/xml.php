@@ -7,6 +7,10 @@ namespace ounun\config\driver;
 
 class xml
 {
+    /**
+     * @param $config
+     * @return array
+     */
     public function parse($config)
     {
         if (is_file($config)) {

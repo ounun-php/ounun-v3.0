@@ -12,6 +12,13 @@ namespace ounun\dc;
  */
 abstract class driver
 {
+    protected $_cache_time = -1;
+    protected $_cache_time_t = -1;
+    protected $_cache_size = -1;
+    protected $_cache_size_t = -1;
+
+    protected $_debug = false;
+
     protected $handler;
     /** @var array 配制数组 */
     protected $options = [];
@@ -159,7 +166,7 @@ abstract class driver
     public function tag($name, $keys = null, $overlay = false)
     {
         if (is_null($name)) {
-
+            return $this;
         } elseif (is_null($keys)) {
             $this->tag = $name;
         } else {
@@ -220,11 +227,10 @@ abstract class driver
     /**
      * 返回句柄对象，可执行其它高级方法
      * @access public
-     * @return object
+     * @return mixed
      */
     public function handler()
     {
         return $this->handler;
     }
-
 }

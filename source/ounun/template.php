@@ -13,9 +13,9 @@ namespace ounun;
 class template
 {
     /** @var string Api接口Rest */
-    const Type_Api_Rest = '';
+    const Type_Api_Rest = 'api';
     /** @var string Pc网页www */
-    const Type_Pc       = 'pc';
+    const Type_Www      = 'www';
     /** @var string H5网页wap */
     const Type_Wap      = 'wap';
     /** @var string Mip网页 */
@@ -25,11 +25,18 @@ class template
     /** @var array 模板类型 */
     const Types = [
         self::Type_Api_Rest ,
-        self::Type_Pc  ,
+        self::Type_Www  ,
         self::Type_Wap ,
         self::Type_Mip ,
         self::Type_Control ,
     ];
+
+    /** @var string 对应App目录 - 模板目录 */
+    const Tpl_Dir_Type_App   = 'app';
+    /** @var string 插件目录 - 模板目录 */
+    const Tpl_Dir_Type_Addon = 'addon';
+    /** @var string 应用根目录 - 模板目录 */
+    const Tpl_Dir_Type_Root  = 'root';
 
     /** @var bool 是否开启ob_start */
     static protected $_ob_start = false;
@@ -111,7 +118,7 @@ class template
         }
         foreach (\ounun::$tpl_dirs as $tpl_dir) {
             // print_r($tpl_dir);
-            if('root' == $tpl_dir['type']){
+            if(static::Tpl_Dir_Type_Root == $tpl_dir['type']){
                 // $styles
                 if($this->_style_default && $this->_style != $this->_style_default) {
                     $styles = [$this->_style, $this->_style_default];
@@ -130,7 +137,7 @@ class template
                         }
                     } // end $types
                 } // end $styles
-            }elseif ('app' == $tpl_dir['type']){
+            }elseif (static::Tpl_Dir_Type_App == $tpl_dir['type']){
                 foreach ($types as $type) {
                     $filename2 = "{$tpl_dir['path']}".\ounun::$app_name."/template/{$type}/{$addon_tag2}{$filename}";
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
@@ -141,7 +148,7 @@ class template
                         return $filename2;
                     }
                 }
-            // }elseif ('app' == $tpl_dir['type']){
+            // }elseif (static::Tpl_Dir_Type_Addon == $tpl_dir['type']){
             }else{
                 foreach ($types as $type) {
                     $filename2 = "{$tpl_dir['path']}{$addon_tag2}template/{$type}/{$filename}";

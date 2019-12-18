@@ -108,7 +108,7 @@ class bitcoin
     /**
      * @param string|null $certificate
      */
-    public function setSSL($certificate = null)
+    public function ssl_set($certificate = null)
     {
         $this->proto = 'https'; // force HTTPS
         $this->ca_certificate = $certificate;

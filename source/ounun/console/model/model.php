@@ -5,33 +5,31 @@
  */
 abstract class model
 {
-	protected   $db,
-				$_table = null,
-		        $_tablefields = [],
-	            $_primary = null,
-	            $_fields = [],
-				$_readonly = [],
-				$_create_autofill = [],
-				$_update_autofill = [],
-				$_filters_input = [],
-				$_filters_output = [],
-				$_validators = [],
-				$_data = [],
-				$_options = [],
-		        $_fetch_style = self::FETCH_ASSOC;
+	protected   $db;
+    protected   $_table = '';
+	protected   $_tablefields = [];
+	protected   $_primary = '';
+	protected   $_fields = [];
+	protected   $_readonly = [];
+	protected   $_create_autofill = [];
+	protected   $_update_autofill = [];
+	protected   $_filters_input = [];
+	protected   $_filters_output = [];
+	protected   $_validators = [];
+	protected   $_data = [];
+	protected   $_options = [];
+	protected   $_fetch_style = PDO::FETCH_ASSOC;
 
-    public      $_userid = null,
-				$_username = null,
-				$_groupid = null,
-				$_roleid = null;
+    public      $uid = 0;
+    public      $_username = null;
+	public      $_groupid = null;
+	public      $_roleid = null;
 
 	function __construct()
 	{
-		$this->db = & factory::db();
 		$current = online();
-		if ($current)
-		{
-			$this->_userid = $current['userid'];
+		if ($current) {
+			$this->uid = $current['userid'];
 			$this->_username = $current['username'];
 			$this->_groupid = $current['groupid'];
 			$this->_roleid = $current['roleid'];
@@ -60,8 +58,7 @@ abstract class model
 
 	public function __call($method, $args)
 	{
-		if(in_array($method, array('field','where','order','limit','offset','having','group','distinct','data'), true))
-		{
+		if(in_array($method, ['field','where','order','limit','offset','having','group','distinct','data'], true)) {
             $this->_options[$method] = $args[0];
             return $this;
         }
@@ -112,11 +109,15 @@ abstract class model
 			$this->_options = [];
 		}
 
-		if (is_array($fields)) $fields = '`'.implode('`,`', $fields).'`';
+		if (is_array($fields)) {
+		    $fields = '`'.implode('`,`', $fields).'`';
+        }
 
 		$this->_where($where);
 
-		if(!$this->_before_select($where)) return false;
+		if(!$this->_before_select($where)) {
+		    return false;
+        }
 
 		$sql = "SELECT $fields FROM `$this->_table` ";
 		if ($where) $sql .= " WHERE $where ";
@@ -128,19 +129,15 @@ abstract class model
 		$method = $multiple ? 'select' : 'get';
 
 		$result = is_null($limit) ? $this->db->$method($sql, $data, $this->_fetch_style) : $this->db->limit($sql, $limit, $offset, $data, $this->_fetch_style);
-		if ($result === false)
-		{
+		if ($result === false) {
 			$this->error = $this->db->error();
 			return false;
 		}
-		else
-		{
-			if ($multiple)
-			{
+		else {
+			if ($multiple) {
 				array_map(array(&$this, '_data_output'), $result);
 			}
-			else
-			{
+			else {
 				$this->_data_output($result);
 				$this->_data = $result;
 			}
@@ -149,7 +146,7 @@ abstract class model
 		}
 	}
 
-	protected function _before_select(&$where) {return true;}
+	protected function _before_select(&$where) { return true; }
 	protected function _after_select(&$result, $multiple = true) {}
 
 	public function page($where = null, $fields = '*', $order = null, $page = 1, $size = 20, $data = [])
@@ -193,7 +190,9 @@ abstract class model
 	public function count($where = null, $data = [])
 	{
 		$this->_where($where);
-		if (!empty($where)) $where = " WHERE $where";
+		if (!empty($where)) {
+		    $where = " WHERE $where";
+        }
 		$r = $this->db->get("SELECT count(*) as `count` FROM `$this->_table` $where", $data);
 		return $r ? $r['count'] : false;
 	}
@@ -212,7 +211,9 @@ abstract class model
 	{
 		$this->_data($data);
 
-		if(!$this->_before_insert($data)) return false;
+		if(!$this->_before_insert($data)) {
+		    return false;
+        }
 
 		$this->_create_autofill($data);
 
@@ -310,8 +311,7 @@ abstract class model
 
 	function delete($where = null, $limit = null, $order = null, $data = [])
 	{
-		if(!empty($this->_options))
-		{
+		if(!empty($this->_options)) {
 			$where = isset($this->_options['where']) ? $this->_options['where'] : $where;
 			$order = isset($this->_options['order']) ? $this->_options['order'] : $order;
 			$limit = isset($this->_options['limit']) ? $this->_options['limit'] : $limit;
@@ -321,7 +321,9 @@ abstract class model
 
 		$this->_where($where);
 
-		if(!$this->_before_delete($where)) return false;
+		if(!$this->_before_delete($where)) {
+		    return false;
+        }
 
 		$sql = "DELETE FROM `$this->_table`";
 		if ($where) $sql .= " WHERE $where ";
@@ -329,13 +331,11 @@ abstract class model
 		if ($limit) $sql .= " LIMIT $limit ";
 
 		$result = $this->db->delete($sql, $data);
-		if ($result === FALSE)
-		{
+		if ($result === FALSE) {
 			$this->error = $this->db->error();
 			return false;
 		}
-		else
-		{
+		else {
 			$this->_after_delete($where);
 			return $result;
 		}
@@ -349,23 +349,18 @@ abstract class model
 		return $this->delete("`$field`=?", $limit, $order, array($value));
 	}
 
-    private function _data_input(& $data)
+    protected function _data_input(& $data)
 	{
-		foreach ($data as $key=>$val)
-		{
-			if(!in_array($key, $this->_fields, true))
-			{
+		foreach ($data as $key=>$val) {
+			if(!in_array($key, $this->_fields, true)) {
 				unset($data[$key]);
 			}
-			elseif(is_scalar($val))
-			{
+			elseif(is_scalar($val)) {
 				$fieldtype = $this->_fieldtype($key);
-				if(strpos($fieldtype, 'int') !== false)
-				{
+				if(strpos($fieldtype, 'int') !== false) {
 					$data[$key] = intval($val);
 				}
-				elseif(strpos($fieldtype, 'float') !== false || strpos($fieldtype, 'double') !== false)
-				{
+				elseif(strpos($fieldtype, 'float') !== false || strpos($fieldtype, 'double') !== false) {
 					$data[$key] = floatval($val);
 				}
 			}
@@ -373,12 +368,13 @@ abstract class model
         return true;
     }
 
-	private function _data_output(& $data)
+    protected function _data_output(& $data)
 	{
-		if(empty($this->_filters_output) || !is_array($data)) return false;
+		if(empty($this->_filters_output) || !is_array($data)) {
+		    return false;
+        }
 		extract($data);
-		foreach ($this->_filters_output as $field=>$filter)
-		{
+		foreach ($this->_filters_output as $field=>$filter) {
 			eval("\$data[$field] = $filter;");
 		}
 		return true;
@@ -387,11 +383,9 @@ abstract class model
 	protected function _fieldtype($field)
 	{
 		static $fields;
-		if(is_null($fields) || !isset($fields[$this->_table]))
-		{
+		if(is_null($fields) || !isset($fields[$this->_table])) {
 			$data = $this->db->list_fields($this->_table);
-			foreach($data as $k=>$v)
-			{
+			foreach($data as $k=>$v) {
 				$fields[$v['Field']] = $v;
 			}
 		}
@@ -416,60 +410,63 @@ abstract class model
 
 	private function _create_autofill(& $data)
 	{
-		if (empty($this->_create_autofill)) return true;
-		foreach ($this->_create_autofill as $field=>$val)
-		{
+		if (empty($this->_create_autofill)) {
+		    return true;
+        }
+		foreach ($this->_create_autofill as $field=>$val) {
 			if (!isset($data[$field])) $data[$field] = $val;
 		}
 	}
 
 	private function _update_autofill(& $data)
 	{
-		if (empty($this->_update_autofill)) return true;
-		foreach ($this->_update_autofill as $field=>$val)
-		{
-			if (!isset($data[$field])) $data[$field] = $val;
+		if (empty($this->_update_autofill)) {
+		    return true;
+        }
+		foreach ($this->_update_autofill as $field=>$val) {
+			if (!isset($data[$field])) {
+			    $data[$field] = $val;
+            }
 		}
 	}
 
 	private function _readonly(& $data)
 	{
-		if (empty($this->_readonly)) return true;
-		foreach ($this->_readonly as $field=>$val)
-		{
-			if (isset($data[$field])) unset($data[$field]);
+		if (empty($this->_readonly)) {
+		    return true;
+        }
+		foreach ($this->_readonly as $field=>$val) {
+			if (isset($data[$field])) {
+			    unset($data[$field]);
+            }
 		}
 	}
 
 	private function _where(& $where)
 	{
-		if (empty($where) && isset($this->_data[$this->_primary])) $where = $this->_data[$this->_primary];
+		if (empty($where) && isset($this->_data[$this->_primary])) {
+		    $where = $this->_data[$this->_primary];
+        }
 
-		if (is_numeric($where))
-		{
+		if (is_numeric($where)) {
 			$where = "`$this->_primary`=$where";
 		}
-		elseif (is_array($where))
-		{
+		elseif (is_array($where)) {
 			$where = array_map('addslashes', $where);
 
-			if (isset($where[0]))
-			{
+			if (isset($where[0])) {
 				$ids = is_numeric($where[0]) ? implode_ids($where, ',') : "'".implode_ids($where, "','")."'";
 				$where = "`$this->_primary` IN($ids)";
 			}
-			else
-			{
+			else {
 				$condition = [];
-				foreach ($where as $field=>$value)
-				{
+				foreach ($where as $field=>$value) {
 					$condition[] = "`$field`='$value'";
 				}
 				$where = implode(' AND ', $condition);
 			}
 		}
-		elseif (preg_match("/^[0-9a-z\'\"\,\s]+$/i", $where))
-		{
+		elseif (preg_match("/^[0-9a-z\'\"\,\s]+$/i", $where)) {
 			$where = strpos($where, ',') === false ? "`$this->_primary`='$where'" : "`$this->_primary` IN($where)";
 		}
 	}

@@ -213,7 +213,7 @@ function go_note(string $url1, string $url2, string $note, bool $top = false): v
 }
 
 /**
- * @param $url
+ * @param string $url
  * @param bool $top
  * @param int $head_code
  * @param int $delay 延时跳转(单位秒)
@@ -429,7 +429,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
-            exit($jsonp_callback . '(' . json_encode($data, $json_options) . ');');
+            exit('try{'.$jsonp_callback . '(' . json_encode($data, $json_options) . ');}catch(err){}');
         // 返回可执行的js脚本
         case  \ounun\console\c::Format_JS :
         case  \ounun\console\c::Format_Eval :
@@ -482,7 +482,7 @@ function extend_decode_php(string $extend_string)
  * @param string $extend_string
  * @return array|mixed
  */
-function extend_decode_json(string $extend_string)
+function extend_decode_json(string $extend_string = '')
 {
     $extend = [];
     if ($extend_string) {
@@ -496,7 +496,7 @@ function extend_decode_json(string $extend_string)
  * @param string $string to encode
  * @return string
  */
-function base64_url_encode(string $string = null): string
+function base64_url_encode(string $string = ''): string
 {
     return strtr(base64_encode($string), '+/=', '-_~');
 }
@@ -506,7 +506,7 @@ function base64_url_encode(string $string = null): string
  * @param string $string to decode
  * @return string
  */
-function base64_url_decode(string $string = null): string
+function base64_url_decode(string $string = ''): string
 {
     return base64_decode(strtr($string, '-_~', '+/='));
 }
@@ -608,8 +608,8 @@ function error404(string $msg = ''): void
 }
 
 /**
- * Convert special characters to HTML safe entities.
  * 特殊字符转换成 HTML安全格式。
+ * Convert special characters to HTML safe entities.
  * @param string $string to encode
  * @return string
  */
@@ -619,6 +619,9 @@ function safe(string $string): string
 }
 
 /**
+ * 过滤一个有效的UTF-8字符串，使它只包含单词、数字、
+ * 破折号、下划线、句号和空格——所有这些都是安全的
+ * 文件名、URI、XML、JSON和(X)HTML中使用的字符。
  * Filter a valid UTF-8 string so that it contains only words, numbers,
  * dashes, underscores, periods, and spaces - all of which are safe
  * characters to use in file names, URI, XML, JSON, and (X)HTML.
@@ -629,11 +632,11 @@ function safe(string $string): string
 function sanitize(string $string, bool $spaces = true): string
 {
     $search = [
-        '/[^\w\-\. ]+/u',   // Remove non safe characters
-        '/\s\s+/',          // Remove extra whitespace
+        '/[^\w\-\. ]+/u',   // 删除非安全字符 Remove non safe characters
+        '/\s\s+/',          // 删除多余的空格 Remove extra whitespace
         '/\.\.+/',
         '/--+/',
-        '/__+/'             // Remove duplicate symbols
+        '/__+/'             // 删除重复的符号 Remove duplicate symbols
     ];
     $string = preg_replace($search, [' ', ' ', '.', '-', '_'], $string);
     if (!$spaces) {
@@ -643,6 +646,7 @@ function sanitize(string $string, bool $spaces = true): string
 }
 
 /**
+ * 从有效的UTF-8字符串创建一个SEO友好的URL字符串。
  * Create a SEO friendly URL string from a valid UTF-8 string.
  * @param string $string to filter
  * @return string
@@ -653,6 +657,7 @@ function sanitize_url(string $string): string
 }
 
 /**
+ * 过滤有效的UTF-8字符串以保证文件名安全。
  * Filter a valid UTF-8 string to be file name safe.
  * @param string $string to filter
  * @return string
@@ -863,6 +868,18 @@ abstract class v
         if (empty(static::$db_v)) {
             static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
         }
+    }
+
+    /**
+     * @param string $seo_title
+     * @param string $seo_keywords
+     * @param string $seo_description
+     * @param string $seo_h1
+     * @param string $etag
+     */
+    public function tkd_set(string $seo_title = '', string $seo_keywords = '', string $seo_description = '', string $seo_h1 = '', string $etag = '')
+    {
+        \ounun::template_page_tkd_set($seo_title,$seo_keywords,$seo_description,$seo_h1,$etag);
     }
 
     /**

@@ -21,18 +21,6 @@ abstract class storage
         return static::$_instance;
     }
 
-
-    protected $id, $handler;
-
-    public static function &get_instance($storage = 'dba', $handler = 'flatfile')
-    {
-        $class = 'dbkv_storage_'.$storage;
-        if (!class_exists($class)) {
-            require(dirname(__FILE__).'/'.'storage'.'/'.$storage.'.php');
-        }
-        return new $class($handler);
-    }
-
     abstract public function open($path, $mode = 'n');
 
     abstract public function popen($path, $mode = 'n');

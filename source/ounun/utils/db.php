@@ -151,7 +151,7 @@ class db
         $is_update = true;
         if ($id) {
             if ($is_update_force == false) {
-                $is_update = $db->table($table)->is_repeat($field, $id);
+                $is_update = $db->table($table)->exists($field, $id);
             }
         } else {
             $is_update = false;
@@ -175,7 +175,7 @@ class db
                     $id = $bind[$field2];
                 }
                 $db->table($table)->insert($bind);
-                $modify_cc = $db->table($table)->is_repeat($field, $id);
+                $modify_cc = $db->table($table)->exists($field, $id);
                 if ($modify_cc) {
                     return $id;
                 } else {

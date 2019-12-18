@@ -4,13 +4,11 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-/* <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
- * 文件:Mysqli.class.php
- * 用途:MYSQL類
+/**
+ * 用途:MYSQLi類
  * 作者:(dreamxyp@gmail.com)[QQ:31996798]
  * 更新:2007.7.10
- * <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> */
-
+ */
 namespace ounun\db;
 
 

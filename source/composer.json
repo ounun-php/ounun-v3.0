@@ -12,6 +12,7 @@
   "require": {
     "ext-json": "*",
     "ext-curl": "*",
+    "ext-ftp": "*",
     "ext-bcmath": "*",
     "ext-zlib": "*",
     "ext-mysqli": "*",
@@ -30,7 +31,7 @@
     "ext-imagick": "*",
     "ext-simplexml": "*",
     "ext-wincache": "*",
-    "php": ">=7.4"
+    "php": ">=7.2"
   },
   "require-dev": {
     "phpunit/phpunit": "8.1.*"

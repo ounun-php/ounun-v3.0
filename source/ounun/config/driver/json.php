@@ -8,12 +8,15 @@ namespace ounun\config\driver;
 
 class json
 {
+    /**
+     * @param $config
+     * @return mixed
+     */
     public function parse($config)
     {
         if (is_file($config)) {
             $config = file_get_contents($config);
         }
-        $result = json_decode($config, true);
-        return $result;
+        return json_decode($config, true);
     }
 }

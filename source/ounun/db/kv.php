@@ -8,7 +8,7 @@ namespace ounun\db;
 
 class kv
 {
-    private $handle;
+    protected $handle;
 
     function __construct($storage = 'dba', $handler = 'flatfile')
     {

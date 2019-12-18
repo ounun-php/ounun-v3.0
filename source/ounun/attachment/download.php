@@ -7,13 +7,13 @@ namespace ounun\attachment;
 
 class download extends driver
 {
-	
+
 	function __construct(string $dir = '', string $allow_exts = '', string $site_url = '')
     {
     	parent::__construct($dir);
     	$this->set($dir, $allow_exts, $site_url);
     }
-    
+
     public function set($dir, $allow_exts = null, $site_url = null)
     {
     	if (!is_null($site_url)) {
@@ -21,12 +21,12 @@ class download extends driver
         }
         parent::set($dir, $allow_exts);
     }
-    
+
     public function content($string)
     {
         return preg_replace('/(http:\/\/[^>]*?\.('.$this->allow_exts.'))/ie', "\$this->by_file_callback('\\1')", $string);
     }
-    
+
     private function file_callback($file)
     {
     	if (!preg_match("#^(".static::$url_site.")#", $file)) {
@@ -34,7 +34,7 @@ class download extends driver
     	}
     	return $file;
     }
-    
+
     public function file($file)
     {
     	if (is_array($file)) {
@@ -49,14 +49,14 @@ class download extends driver
 	    	return $info['filepath'].$info['filename'];
     	}
     }
-    
+
     public function dir($dir)
     {
     	$data = @scandir($dir);
     	if (!$data) {
             return false;
         }
-    	
+
     	$file = [];
     	foreach ($data as $v)
     	{
@@ -70,14 +70,36 @@ class download extends driver
 
 
     /**
+     * oss 图床
      * @param string $image_url
      * @param int $w
      * @param int $h
      * @param int $q
+     * @param string $ext
      * @return string
      */
     static public function image_oss_url(string $image_url,int $w,int $h,int $q = 90,string $ext='')
     {
         return "{$image_url}?x-oss-process=image/auto-orient,1/resize,m_fill,w_{$w},h_{$h}/quality,Q_{$q}{$ext}";
+    }
+
+    /**
+     * google 图床
+     * @param string $host
+     * @param string $path
+     * @param string $image_url
+     * @param int $w
+     * @param int $h
+     * @param string $ext
+     * @return string
+     */
+    static public function image_google_url(string $host ,string $path , string $image_url,int $w = 0 ,int $h = 0 ,string $ext='c')
+    {
+        if($w || $h){
+            $w = $w <=0 ? '-' : $w;
+            $h = $h <=0 ? '-' : $h;
+            return "https://{$host}/{$ext}{$w}x{$h}/{$path}/{$image_url}";
+        }
+        return "https://{$host}/{$path}/{$image_url}";
     }
 }

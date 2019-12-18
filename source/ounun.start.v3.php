@@ -26,8 +26,8 @@ class ounun
     const App_Name_Crontab = 'crontab';
     /** @var array 应用名称组 */
     const App_Names = [
-        self::App_Name_Web ,
-        self::App_Name_Api  ,
+        self::App_Name_Web     ,
+        self::App_Name_Api     ,
         self::App_Name_Control ,
         self::App_Name_Process ,
         self::App_Name_Crontab ,
@@ -48,9 +48,9 @@ class ounun
     static public $maps_class = [];
 
     /** @var string 根目录 */
-    static public $dir_root = '';
+    static public $dir_root  = '';
     /** @var string Data目录 */
-    static public $dir_data = '';
+    static public $dir_data  = '';
     /** @var string Ounun目录 */
     static public $dir_ounun = __DIR__ . '/';
     /** @var string 根目录(App) */
@@ -96,10 +96,10 @@ class ounun
     /** @var string 当前app之前通信内问key */
     static public $app_key_communication = '';
 
-    /** @var string 应用模板类型 pc  */
-    static public $tpl_type = 'pc';
+    /** @var string 应用模板类型 pc www  */
+    static public $tpl_type = 'www';
     /** @var string 应用模板类型[默认] */
-    static public $tpl_type_default = 'pc';
+    static public $tpl_type_default = 'www';
     /** @var string 模板-样式 */
     static public $tpl_style = 'default';
     /** @var string 模板-样式[默认] */
@@ -492,10 +492,12 @@ class ounun
         $a = explode('/',static::$url_www,5);
         $p = $a[3]?"/{$a[3]}":'';
         static::$page_www = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
+        
         /** @var string Mobile Page */
         $a = explode('/',static::$url_wap,5);
         $p = $a[3]?"/{$a[3]}":'';
         static::$page_wap = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
+
         /** @var string Mip Page */
         $a = explode('/',static::$url_mip,5);
         $p = $a[3]?"/{$a[3]}":'';
@@ -768,7 +770,6 @@ class ounun
     /**
      * 模块 快速路由
      * @param array $mod
-     * @param string $addon_tag
      * @return array
      */
     static public function routes_get(array $mod = [])
@@ -856,7 +857,7 @@ function start(array $mod, string $host)
     header('X-Powered-By: cms.cc v3.2.1; ounun.org v3.1.2;');
     // 设定 模块与方法(缓存)
     list($filename,$classname,$mod) = ounun::routes_get($mod);
-    // echo "\$filename:".__LINE__." -->:{$filename}\n";
+    // echo "\$filename:".__LINE__." -->\$filename:{$filename} \$classname:{$classname} \$mod:".json_encode_unescaped($mod)."\n";
     // 设定 模块与方法
     if(empty($filename)){
         if (is_array($mod) && $mod[0]) {
