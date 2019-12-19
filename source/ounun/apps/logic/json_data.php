@@ -26,7 +26,7 @@ class json_data extends \ounun\apps\logic
     public function lists(array $where, array $order, string $url, int $page, array $page_config, string $title = "", string $field = '*',string $table = '', bool $end_index = true)
     {
         if(empty($table)){
-            $table = $this->table;
+            $table = $this->_table;
         }
         if(empty($table)){
             exit('数据表:$table无数据');
@@ -66,7 +66,7 @@ class json_data extends \ounun\apps\logic
     public function lists_simple(int $count = 4, int $start = 0, array $order = [], array $where = [],string $fields = '*',string $table = '')
     {
         if(empty($table)){
-            $table = $this->table;
+            $table = $this->_table;
         }
         if(empty($table)){
             exit('数据表:$table无数据');
@@ -100,20 +100,20 @@ class json_data extends \ounun\apps\logic
      * @param string $extend_field
      * @param bool   $is_multi
      */
-    public function _lists_decode(array &$rs ,string $extend_field = '', bool $is_multi = true)
+    protected function _lists_decode(array &$rs ,string $extend_field = '', bool $is_multi = true)
     {
         if($is_multi) {
             foreach ($rs as &$v) {
                 $this->_lists_decode($v,false);
             }
         }else{
-            if($rs['contents']){
+            if($rs['contents']) {
                 $rs['contents'] = json_decode_array($rs['contents']);
             }
-            if($rs['extend']){
+            if($rs['extend']) {
                 $rs['extend'] = json_decode_array($rs['extend']);
             }
-            if($extend_field && $rs[$extend_field]){
+            if($extend_field && $rs[$extend_field]) {
                 $rs[$extend_field] = json_decode_array($rs[$extend_field]);
             }
         }

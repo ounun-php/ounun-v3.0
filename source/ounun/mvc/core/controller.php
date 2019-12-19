@@ -80,12 +80,12 @@ class controller implements icontroller
      *
      * This <b>icontroller</b> implementation is a Multiton,
      * so you should not call the constructor
-     * directly, but instead call the static <b>getInstance() Factory</b> method,
+     * directly, but instead call the static <b>i() Factory</b> method,
      * passing the unique key for this instance.
      *
      * ex:
      * <code>
-     * $myController = MyController::getInstance( 'myMultitonKey' );
+     * $myController = MyController::i( 'myMultitonKey' );
      * </code>
      *
      * @param string $key Unique key for this instance.
@@ -116,7 +116,7 @@ class controller implements icontroller
      * // ensure that the Controller is talking to my IView implementation
      * public function initializeController( )
      * {
-     *     $this->view = MyView::getInstance('myViewName');
+     *     $this->view = MyView::i('myViewName');
      * }
      * </code>
      *

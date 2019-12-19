@@ -85,8 +85,12 @@ class pdo
     protected $_group = [];
     /** @var string limit条件 */
     protected $_limit = '';
-    /** @var string 条件 */
+    /** @var string 滤掉name和id两个字段都重复的记录  */
+    protected $_distinct = '';
+    /** @var string where条件 */
     protected $_where = '';
+    /** @var string having条件 */
+    protected $_having = '';
     /** @var string 返回关联数据 assoc */
     protected $_assoc = '';
     /** @var array 条件参数keys */
@@ -361,7 +365,7 @@ class pdo
     {
         if (null == $this->_stmt || $force_prepare) {
             $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
-            $this->_prepare('SELECT ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ;')
+            $this->_prepare('SELECT '.$this->_distinct.' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' '.$this->_having.' ;')
                 ->_execute($this->_bind_param);
         }
         return $this->_stmt->columnCount();
@@ -375,7 +379,7 @@ class pdo
     {
         if (null == $this->_stmt || $force_prepare) {
             $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
-            $this->_prepare('SELECT ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
+            $this->_prepare('SELECT '.$this->_distinct.' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' '.$this->_having.' ' . $this->_order_get() . ' ' . $this->_limit . ';')
                 ->_execute($this->_bind_param);
         }
         return $this->_stmt->fetch(\PDO::FETCH_ASSOC);
@@ -390,7 +394,7 @@ class pdo
     {
         if (null == $this->_stmt || $force_prepare) {
             $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
-            $this->_prepare('SELECT ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
+            $this->_prepare('SELECT '.$this->_distinct.' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' '.$this->_having.' ' . $this->_order_get() . ' ' . $this->_limit . ';')
                 ->_execute($this->_bind_param);
         }
         if ($this->_assoc) {
@@ -483,6 +487,17 @@ class pdo
     public function option(string $option = ''): self
     {
         $this->_option = $option;
+        return $this;
+    }
+
+    /**
+     * 滤掉name和id等字段都重复的记录
+     * @param string $distinct
+     * @return $this
+     */
+    public function distinct(string $distinct = 'distinct'):self
+    {
+        $this->_distinct = $distinct;
         return $this;
     }
 
@@ -586,9 +601,9 @@ class pdo
     }
 
     /**
-     * 条件
+     * where条件
      * @param string $where 条件
-     * @param array $param 条件参数
+     * @param array  $param 条件参数
      * @return $this
      */
     public function where(string $where = '', array $param = []): self
@@ -598,6 +613,28 @@ class pdo
                 $this->_where = $this->_where . ' ' . $where;
             } else {
                 $this->_where = 'WHERE ' . $where;
+            }
+            if ($param && is_array($param)) {
+                $param = $this->_values_parse($param);
+                $this->_bind_param = array_merge($this->_bind_param, $param);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * having条件
+     * @param string $having 条件
+     * @param array  $param 条件参数
+     * @return $this
+     */
+    public function having(string $having = '', array $param = []): self
+    {
+        if ($having) {
+            if ($this->_having) {
+                $this->_having = $this->_having . ' ' . $having;
+            } else {
+                $this->_having = 'HAVING ' . $having;
             }
             if ($param && is_array($param)) {
                 $param = $this->_values_parse($param);
@@ -1107,14 +1144,18 @@ class pdo
         $this->_stmt = null;
 
         $this->_option = '';
+        $this->_distinct = '';
         $this->_fields = [];
         $this->_order = [];
         $this->_group = [];
         $this->_limit = '';
         $this->_where = '';
+        $this->_having= '';
         $this->_assoc = '';
+
         $this->_bind_keys = [];
         $this->_bind_param = [];
+
         $this->_duplicate = [];
         $this->_duplicate_ext = '';
         $this->_join = '';

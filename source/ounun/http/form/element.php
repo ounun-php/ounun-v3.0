@@ -1,10 +1,26 @@
 <?php
+namespace ounun\http\form;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 class element extends form_element
 {
+    /** @var self */
+    protected static $_instance;
+
+    /**
+     * @return self
+     */
+    static public function i():self
+    {
+        if(empty(static::$_instance)){
+            static::$_instance = new static();
+        }
+        return static::$_instance;
+    }
+
+
 	public static function role($id, $value, $attribute = null)
 	{
 		$settings = [];
@@ -287,8 +303,8 @@ class element extends form_element
 	public static function photo($name='photo',$value = '')
 	{
 		$photo = $value?$value:'nopic.jpg';
-		$sid = str_replace('.','_',microtime(true));
-		$html = '<div class="thumb_cell">
+		$sid   = str_replace('.','_',microtime(true));
+		$html  = '<div class="thumb_cell">
 			<img width="120" id="preview_'.$sid.'" src="'.UPLOAD_URL.'avatar/'.$photo.'"/>
 			<input type="hidden" name="'.$name.'" id="photo_'.$sid.'"
 				upbtn="#upbtn_'.$sid.'"
@@ -297,7 +313,7 @@ class element extends form_element
 			value="'.$value.'"/>
 			<div id="upbtn_'.$sid.'"></div>
 			<input class="button_style_1" type="button" id="editbtn_'.$sid.'" value="编辑"/>
-		</div><script type="text/javascript">$(function(){
+		</div><script>$(function(){
 			setTimeout(function (){
 				$("#photo_'.$sid.'").photoInput();
 			}, 10);
@@ -465,8 +481,8 @@ class element extends form_element
 	public static function weight($weight)
 	{
 
-		$instance = new setting();
-		$setting = $instance->get('system');
+		$setting_instance = new setting();
+		$setting = $setting_instance->get('system');
 		$setting = explode("\n",$setting['weight']);
 		$points = [];
 		while (list($key,$value) = each($setting)) {
@@ -481,7 +497,7 @@ class element extends form_element
             <input type="text" style="ime-mode: disabled;float:left" name="weight" value="'.($weight*100).'" size="3" />
             <div id="weight" style="width:600px;height:20px;position:absolute;left:56px;top:1px;"></div>
         </div>
-		<script type="text/javascript">
+		<script>
 		$(function(){
             $("#weight").slider({
             	isStep     : false,

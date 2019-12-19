@@ -152,7 +152,7 @@ class FirePHP {
    *
    * @var FirePHP
    */
-  protected static $instance = null;
+  protected static $_instance;
 
   /**
    * Wildfire protocol message index
@@ -214,11 +214,11 @@ class FirePHP {
    * @param boolean $AutoCreate
    * @return FirePHP
    */
-  public static function getInstance($AutoCreate=false) {
-    if($AutoCreate===true && !self::$instance) {
+  public static function i($AutoCreate=false) {
+    if($AutoCreate===true && !self::$_instance) {
       self::init();
     }
-    return self::$instance;
+    return self::$_instance;
   }
 
   /**
@@ -227,7 +227,7 @@ class FirePHP {
    * @return FirePHP
    */
   public static function init() {
-    return self::$instance = new self();
+    return self::$_instance = new self();
   }
 
   /**

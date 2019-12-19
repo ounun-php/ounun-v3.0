@@ -27,6 +27,7 @@
     "ext-apcu": "*",
     "ext-fileinfo": "*",
     "ext-sqlite": "*",
+    "ext-ctype": "*",
     "ext-xmlrpc": "*",
     "ext-imagick": "*",
     "ext-simplexml": "*",

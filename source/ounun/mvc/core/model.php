@@ -66,7 +66,7 @@ class model implements imodel
      *
      * ex:
      * <code>
-     * Model::getInstance( 'multitonKey' )
+     * Model::i( 'multitonKey' )
      * </code>
      *
      * @param string $key Unique key for this instance.

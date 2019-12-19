@@ -8,18 +8,26 @@ namespace ounun\http;
 class request
 {
     public static $_request_url;
+
     public static $_request_uri;
+
     public static $_request_base;
+
     public static $_pathinfo;
 
-    public static function &i()
+
+    /** @var $this */
+    protected static $_instance;
+
+    /**
+     * @return $this
+     */
+    static public function i()
     {
-        static $instance;
-        if (!is_null($instance)) {
-            return $instance;
+        if(empty(static::$_instance)){
+            static::$_instance = new static();
         }
-        $instance = new self();
-        return $instance;
+        return static::$_instance;
     }
 
     public static function method_get()
@@ -29,7 +37,9 @@ class request
 
     public static function base_get()
     {
-        if (!is_null(self::$_request_base)) return self::$_request_base;
+        if (!is_null(self::$_request_base)) {
+            return self::$_request_base;
+        }
         $base = self::is_ssl() ? 'https://' : 'http://';
         $base .= self::get_host();
         self::$_request_base = $base;
@@ -39,7 +49,7 @@ class request
     public static function url_get()
     {
         if (!is_null(self::$_request_url)) return self::$_request_url;
-        $url = self::is_ssl() ? 'https://' : 'http://';
+        $url  = self::is_ssl() ? 'https://' : 'http://';
         $url .= self::get_host();
         $url .= self::uri_get();
         self::$_request_url = $url;

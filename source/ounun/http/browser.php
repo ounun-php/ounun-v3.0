@@ -178,7 +178,7 @@ class browser
      *
      * @var array
      */
-    var $_quirks = array(
+    var $_quirks = [
         'avoid_popup_windows'           => false,
         'break_disposition_header'      => false,
         'break_disposition_filename'    => false,
@@ -195,7 +195,7 @@ class browser
         'scrollbar_in_way'              => false,
         'scroll_tds'                    => false,
         'windowed_controls'             => false,
-    );
+    ];
 
     /**
      * List of viewable image MIME subtypes.
@@ -206,44 +206,41 @@ class browser
     var $_images = array('jpeg', 'gif', 'png', 'pjpeg', 'x-png', 'bmp');
 
 
-    /**
-     * Create a browser instance (Constructor).
-     *
-     * @param string $userAgent  The browser string to parse.
-     * @param string $accept     The HTTP_ACCEPT settings to use.
-     */
-    function __construct($userAgent = null, $accept = null)
-    {
-        $this->match($userAgent, $accept);
-    }
+    /** @var self */
+    protected static $_instances = [];
 
     /**
      * Returns a reference to the global Browser object, only creating it
      * if it doesn't already exist.
      *
      * This method must be invoked as:
-     *      <pre>  $browser = &JBrowser::getInstance([$userAgent[, $accept]]);</pre>
+     *      <pre>  $browser = &JBrowser::i([$userAgent[, $accept]]);</pre>
      *
      * @access public
      * @param string $userAgent  The browser string to parse.
      * @param string $accept     The HTTP_ACCEPT settings to use.
-     * @return JBrowser  The Browser object.
+     * @return self  The Browser object.
      */
-    function &getInstance($userAgent = null, $accept = null)
+    public static function i($userAgent = null, $accept = null)
     {
-        static $instances;
-
-        if (!isset($instances)) {
-            $instances = [];
-        }
-
         $signature = serialize(array($userAgent, $accept));
 
-        if (empty($instances[$signature])) {
-            $instances[$signature] = new JBrowser($userAgent, $accept);
+        if (empty(static::$_instances[$signature])) {
+            static::$_instances[$signature] = new static($userAgent, $accept);
         }
 
-        return $instances[$signature];
+        return static::$_instances[$signature];
+    }
+
+    /**
+     * Create a browser instance (Constructor).
+     *
+     * @param string $userAgent  The browser string to parse.
+     * @param string $accept     The HTTP_ACCEPT settings to use.
+     */
+    public function __construct($userAgent = null, $accept = null)
+    {
+        $this->match($userAgent, $accept);
     }
 
    /**
@@ -253,7 +250,7 @@ class browser
      * @param string $userAgent  The browser string to parse.
      * @param string $accept     The HTTP_ACCEPT settings to use.
      */
-    function match($userAgent = null, $accept = null)
+    public function match($userAgent = null, $accept = null)
     {
         // Set our agent string.
         if (is_null($userAgent)) {
@@ -616,7 +613,7 @@ class browser
      * to let us tell what line breaks to send, so it's good enough
      * for its purpose.
      */
-    function _setPlatform()
+    public function _setPlatform()
     {
         if (strpos($this->_lowerAgent, 'wind') !== false) {
             $this->_platform = 'win';
@@ -632,7 +629,7 @@ class browser
      *
      * @return string  The user's platform.
      */
-    function getPlatform()   {
+    public function getPlatform()   {
         return $this->_platform;
     }
 
@@ -641,7 +638,7 @@ class browser
      *
      * @param string $browser  The browser to set as current.
      */
-    function setBrowser($browser) {
+    public function setBrowser($browser) {
         $this->_browser = $browser;
     }
 
@@ -650,7 +647,7 @@ class browser
      *
      * @return string  The current browser.
      */
-    function getBrowser()    {
+    public function getBrowser()    {
         return $this->_browser;
     }
 

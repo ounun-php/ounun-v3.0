@@ -1,25 +1,29 @@
 <?php
+namespace ounun\http\form;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 class form_element
 {
-	private static $enctype = 'application/x-www-form-urlencoded';
-	private $elements;
+	protected static $enctype = 'application/x-www-form-urlencoded';
 
-	function __construct()
-	{
+    protected static $elements;
 
-	}
 
-	static public function &get_instance()
-	{
-		static $instance;
-		if (!is_null($instance)) return $instance;
-		$instance = new form_element();
-		return $instance;
-	}
+    /** @var $this */
+    protected static $_instance;
+
+    /**
+     * @return $this
+     */
+    static public function i()
+    {
+        if(empty(static::$_instance)){
+            static::$_instance = new static();
+        }
+        return static::$_instance;
+    }
 
 	static function text($settings = [])
 	{
@@ -41,15 +45,25 @@ class form_element
 
 	static function textarea($settings = [])
 	{
-		if(!is_array($settings) || !isset($settings['name'])) return FALSE;
+		if(!is_array($settings) || !isset($settings['name'])) {
+		    return false;
+        }
 		extract($settings);
 		$html  = "<textarea name=\"$name\" id=\"$id\" ";
-		if(isset($rows)) $html .= " rows=\"$rows\" ";
-		if(isset($cols)) $html .= " cols=\"$cols\" ";
-		if(isset($wrap)) $html .= " wrap=\"$wrap\" ";
+		if(isset($rows)) {
+		    $html .= " rows=\"$rows\" ";
+        }
+		if(isset($cols)) {
+		    $html .= " cols=\"$cols\" ";
+        }
+		if(isset($wrap)) {
+		    $html .= " wrap=\"$wrap\" ";
+        }
         $html .= self::_attribute($settings);
 		$html .= " >";
-		if(isset($value)) $html .= htmlspecialchars($value);
+		if(isset($value)) {
+		    $html .= htmlspecialchars($value);
+        }
 		$html .= "</textarea>";
         return $html;
 	}
@@ -151,11 +165,12 @@ class form_element
 		$attr = self::_attribute($settings);
 		$html = '';
 		$i = 1;
-		foreach ($options as $v=>$label)
-		{
+		foreach ($options as $v=>$label) {
 			$checked = $v == $value ? ' checked="checked"' : '';
 		    $html .= "<label><input type=\"$type\" name=\"$name\" id=\"{$name}_{$i}\" value=\"$v\" $checked $attr /> $label </label>\n";
-		    if (isset($br)) $html .= '<br />';
+		    if (isset($br)) {
+		        $html .= '<br />';
+            }
 		    $i++;
 		}
         return $html;
@@ -163,9 +178,13 @@ class form_element
 
 	private static function _button($settings = [])
 	{
-		if(!is_array($settings) || !isset($settings['name']) || !isset($settings['value'])) return FALSE;
+		if(!is_array($settings) || !isset($settings['name']) || !isset($settings['value'])) {
+		    return false;
+        }
 		extract($settings);
-		if (!isset($id)) $id = $name;
+		if (!isset($id)) {
+		    $id = $name;
+        }
 		$attr = self::_attribute($settings);
 		$html = "<input type=\"$type\" name=\"$name\" id=\"$id\" value=\"$value\" $attr />";
 		return $html;
@@ -175,13 +194,27 @@ class form_element
 	{
 		extract($settings);
 		$html = '';
-		if(isset($readonly)) $html .= " readonly";
-		if(isset($disabled)) $html .= " disabled";
-		if(isset($alt)) $html .= " alt=\"$alt\" ";
-		if(isset($tabindex)) $html .= " tabindex=\"$tabindex\" ";
-		if(isset($accesskey)) $html .= " accesskey=\"$accesskey\" ";
-		if(isset($class)) $html .= " class=\"$class\" ";
-		if(isset($attribute)) $html .= " $attribute ";
+		if(isset($readonly)) {
+		    $html .= " readonly";
+        }
+		if(isset($disabled)) {
+		    $html .= " disabled";
+        }
+		if(isset($alt)) {
+		    $html .= " alt=\"$alt\" ";
+        }
+		if(isset($tabindex)) {
+		    $html .= " tabindex=\"$tabindex\" ";
+        }
+		if(isset($accesskey)) {
+		    $html .= " accesskey=\"$accesskey\" ";
+        }
+		if(isset($class)) {
+		    $html .= " class=\"$class\" ";
+        }
+		if(isset($attribute)) {
+		    $html .= " $attribute ";
+        }
 		return $html;
 	}
 }

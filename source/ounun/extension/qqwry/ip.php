@@ -31,17 +31,17 @@ class ip
     const Dir_Plugins = __DIR__ . '/';
 
     /** @var self    实例 */
-    protected static $instance;
+    protected static $_instance;
 
     /**
      * 返回数据库连接对像
      */
     public static function i($charset = 'gbk'): self
     {
-        if (empty(static::$instance)) {
-            static::$instance = new static($charset);
+        if (empty(static::$_instance)) {
+            static::$_instance = new static($charset);
         }
-        return static::$instance;
+        return static::$_instance;
     }
 
     /**

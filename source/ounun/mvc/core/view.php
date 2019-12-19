@@ -71,7 +71,7 @@ class view implements iview
      * Factory method.
      *
      * <code>
-     * View::getInstance( 'multitonKey' );
+     * View::i( 'multitonKey' );
      * </code>
      *
      * @param string $key Unique key for this instance.

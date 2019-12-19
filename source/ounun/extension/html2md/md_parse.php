@@ -1739,20 +1739,22 @@ class md_parse
         }
     }
 
-    static public function instance($name = 'default')
+    /** @var self */
+    protected static $_instances = [];
+
+    /**
+     * @param string $name
+     * @return static
+     */
+    static public function instance($name = 'default'):self
     {
-        if (isset(self::$instances[$name])) {
-            return self::$instances[$name];
+        if (empty(self::$_instances[$name])) {
+            self::$_instances[$name] = new static();
         }
-
-        $instance = new static();
-
-        self::$instances[$name] = $instance;
-
-        return $instance;
+        return self::$_instances[$name];
     }
 
-    private static $instances = [];
+
 
     #
     # Fields
@@ -1763,27 +1765,27 @@ class md_parse
     #
     # Read-Only
 
-    protected $specialCharacters = array(
+    protected $specialCharacters = [
         '\\', '`', '*', '_', '{', '}', '[', ']', '(', ')', '>', '#', '+', '-', '.', '!', '|', '~'
-    );
+    ];
 
-    protected $StrongRegex = array(
+    protected $StrongRegex = [
         '*' => '/^[*]{2}((?:\\\\\*|[^*]|[*][^*]*+[*])+?)[*]{2}(?![*])/s',
         '_' => '/^__((?:\\\\_|[^_]|_[^_]*+_)+?)__(?!_)/us',
-    );
+    ];
 
-    protected $EmRegex = array(
+    protected $EmRegex = [
         '*' => '/^[*]((?:\\\\\*|[^*]|[*][*][^*]+?[*][*])+?)[*](?![*])/s',
         '_' => '/^_((?:\\\\_|[^_]|__[^_]*__)+?)_(?!_)\b/us',
-    );
+    ];
 
     protected $regexHtmlAttribute = '[a-zA-Z_:][\w:.-]*+(?:\s*+=\s*+(?:[^"\'=<>`\s]+|"[^"]*+"|\'[^\']*+\'))?+';
 
-    protected $voidElements = array(
+    protected $voidElements = [
         'area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source',
-    );
+    ];
 
-    protected $textLevelElements = array(
+    protected $textLevelElements = [
         'a', 'br', 'bdo', 'abbr', 'blink', 'nextid', 'acronym', 'basefont',
         'b', 'em', 'big', 'cite', 'small', 'spacer', 'listing',
         'i', 'rp', 'del', 'code', 'strike', 'marquee',
@@ -1793,5 +1795,5 @@ class md_parse
         'sup', 'ruby',
         'var', 'span',
         'wbr', 'time',
-    );
+    ];
 }

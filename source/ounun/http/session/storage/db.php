@@ -1,69 +1,76 @@
 <?php
+namespace ounun\http\session\storage;
+use ounun\db\pdo;
+use ounun\http\session\storage;
+
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-class session_storage_db extends session_storage
+class db extends storage
 {
-	private $db;
+	/** @var pdo */
+	protected $db;
 
-	function __construct($options = [])
+	/**
+	 * db constructor.
+	 * @param array $options
+	 */
+    public function __construct($options = [])
 	{
 		parent::__construct($options);
 		$this->register();
 	}
 
-	function open($save_path, $session_name)
+	public function open($save_path, $session_name)
 	{
         $this->_connect();
 		return true;
 	}
 
-	function close()
+	public function close()
 	{
 		return $this->gc(ini_get("session.gc_maxlifetime"));
 	}
 
-	function read($id)
+	public function read($id)
 	{
 		$sdb = $this->db->prepare("SELECT `data` FROM $this->table WHERE `sessionid`=?");
 		if($sdb->execute(array($id)))
 		{
-			$r = $sdb->fetch(PDO::FETCH_ASSOC);
+			$r = $sdb->fetch(\PDO::FETCH_ASSOC);
 			return $r['data'];
 		}
 		return false;
 	}
 
-	function write($id, $data)
+	public function write($id, $data)
 	{
 		$sdb = $this->db->prepare("REPLACE INTO $this->table (`sessionid`, `lastvisit`, `data`) VALUES(?, ?, ?)");
 		return $sdb->execute(array($id, TIME, $data));
 	}
 
-	function destroy($id)
+	public function destroy($id)
 	{
 		$sdb = $this->db->prepare("DELETE FROM $this->table WHERE `sessionid`=?");
 		return $sdb->execute(array($id));
 	}
 
-	function gc($maxlifetime)
+	public function gc($maxlifetime)
 	{
 		$expiretime = TIME - $maxlifetime;
 		$sdb = $this->db->prepare("DELETE FROM $this->table WHERE `lastvisit`<?");
 		return $sdb->execute(array($expiretime));
 	}
 
-	function _connect()
+	public function _connect()
 	{
-		if ($this->options['db_issame'])
-		{
+		if ($this->options['db_issame']) {
 			$this->db = & factory::db();
 			$table = $this->db->options['prefix'].'session';
 		}
-		else
-		{
+		else {
 			$this->db = & factory::db('db_session');
 			$table = $this->db->options['table'];
 		}
@@ -71,4 +78,3 @@ class session_storage_db extends session_storage
 		$this->table = "`$dbname`.`$table`";
 	}
 }
-?>

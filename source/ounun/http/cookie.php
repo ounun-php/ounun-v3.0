@@ -8,14 +8,14 @@ namespace ounun\http;
 
 class cookie
 {
-    private $_prefix = '';
-    private $_path = '/';
-    private $_domain = '';
+    protected $_prefix = '';
+    protected $_path = '/';
+    protected $_domain = '';
 
     public function __construct($prefix = 'cc_', $path = '/', $domain = '')
     {
         $this->_prefix = $prefix;
-        $this->_path = $path;
+        $this->_path   = $path;
         $this->_domain = $domain;
     }
 

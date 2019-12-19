@@ -18,11 +18,16 @@ class uri
     public $_fragment = null;
     public $_vars = [];
 
-    static public function &i($uri = null)
+    /** @var $this */
+    protected static $_instances = [];
+
+    /**
+     * @return $this
+     */
+    static public function i(string $uri = '')
     {
-        static $instances = [];
-        if(!isset($instances[$uri])) {
-            if($uri === null) {
+        if(empty(static::$_instances[$uri])){
+            if(empty($uri)) {
                 $https = (isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) != 'off')) ? 's://' : '://';
                 if (!empty($_SERVER['PHP_SELF']) && !empty ($_SERVER['REQUEST_URI'])) {
                     $uri = 'http'.$https.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
@@ -34,9 +39,9 @@ class uri
                 $uri = str_replace(array('"', '<', '>'), array('&quot;', '&lt;', '&gt;'), $uri);
                 $uri = preg_replace(array('/eval\((.*)\)/', '/[\\\"\\\'][\\s]*javascript:(.*)[\\\"\\\']/'), array('', '""'), $uri);
             }
-            $instances[$uri] = new uri($uri);
+            static::$_instances[$uri] = new static();
         }
-        return $instances[$uri];
+        return static::$_instances[$uri];
     }
 
     static public function base($is_full = true)
@@ -62,7 +67,7 @@ class uri
 			$root['prefix'] = $uri->toString( array('scheme', 'host', 'port') );
 			$root['path']   = rtrim($uri->toString( array('path') ), '/\\');
 		}
-		
+
 		if(isset($path)) {
 			$root['path']    = $path;
 		}
@@ -104,7 +109,7 @@ class uri
 		if($_parts = parse_url($uri)) {
 			$retval = true;
 		}
-		
+
 		if(isset($_parts['query']) && strpos($_parts['query'], '&amp;')) {
 			$_parts['query'] = str_replace('&amp;', '&', $_parts['query']);
 		}
@@ -259,12 +264,12 @@ class uri
 	}
 
 
-	
-	
+
+
 	function _clean_path($path)
 	{
 		$path = preg_replace('#(/+)#', '/', $path);
-		if(strpos($path, '.') === false) return $path; 
+		if(strpos($path, '.') === false) return $path;
 		$path = explode('/', $path);
 		for ($i = 0; $i < count($path); $i++) {
 			if ($path[$i] == '.') {

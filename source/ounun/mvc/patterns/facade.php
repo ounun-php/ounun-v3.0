@@ -59,7 +59,7 @@ class facade implements ifacade
      * passing the unique key for this instance
      *
      * <code>
-     * Facade::getInstance( 'multitonKey' )
+     * Facade::i( 'multitonKey' )
      * </code>
      *
      * @param string $key Unique key for this instance.
@@ -398,7 +398,7 @@ class facade implements ifacade
      * Set the Multiton key for this facade instance.
      *
      * Not called directly, but instead from the
-     * constructor when getInstance is invoked.
+     * constructor when i is invoked.
      * It is necessary to be public in order to
      * implement INotifier.
      *

@@ -1,18 +1,25 @@
 <?php
+namespace ounun\http\session\storage;
+use ounun\http\session\storage;
 
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-class session_storage_apc extends session_storage
+class apc extends storage
 {
-	function __construct($options = [])
+    /**
+     * session_storage_apc constructor.
+     * @param array $options
+     * @throws
+     */
+    public function __construct($options = [])
 	{
-		if (!$this->test())
-		{
-            throw new Exception("The apc extension isn't available");
+		if (!$this->test()) {
+            throw new \Exception("The apc extension isn't available");
         }
+        parent::__construct($options);
         $this->register();
 	}
 

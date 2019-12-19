@@ -1,9 +1,9 @@
 <?php
+namespace ounun\http\session;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\session;
 
 
 use ounun\db\pdo;
@@ -116,7 +116,7 @@ class session_handler implements \SessionHandlerInterface, \SessionUpdateTimesta
     {
         // print_r(['$data'=>$data]);
         $time = time() + 3600;
-        $uid  = $data?(int)$data['uid']:0;
+        $uid  = (int)$data['uid'];
         $data = $data?json_encode_unescaped($data):'';
         $bind = [
             'session_id'=>$session_id,
@@ -260,8 +260,7 @@ class session_handler implements \SessionHandlerInterface, \SessionUpdateTimesta
 //            $stmt->bindParam(':sess_id', $session_id);
 //            $stmt->execute();
             return true;
-        }
-        catch (PDOException $e) {
+        } catch (\PDOException $e) {
 //            error_log('Error reading the session data table in the session reading method.',3,"C:\wamp\www\universal_empires\test_log.txt");
 //            error_log(" Query with error: $sql",3,"C:\wamp\www\universal_empires\test_log.txt");
 //            error_log(" Reason given: $e->getMessage()",3,"C:\wamp\www\universal_empires\test_log.txt");
@@ -299,7 +298,7 @@ class session_handler implements \SessionHandlerInterface, \SessionUpdateTimesta
     /**
      * @return string
      */
-    public function create_sid()
+    public function create_session_id()
     {
         if ($this->_session_id) {
             return $this->_session_id;
@@ -308,7 +307,7 @@ class session_handler implements \SessionHandlerInterface, \SessionUpdateTimesta
         } elseif ($_COOKIE[$this->_session_name] && 32 == strlen($_COOKIE[$this->_session_name])) {
             $this->_session_id = $_COOKIE[$this->_session_name];
         } else {
-            $this->_session_id = utils\str::uniqid();
+            $this->_session_id = \ounun\utils\str::uniqid();
         }
         return $this->_session_id;
     }
