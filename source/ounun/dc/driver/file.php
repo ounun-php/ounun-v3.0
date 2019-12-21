@@ -55,12 +55,12 @@ class file extends \ounun\dc\driver
         $key = md5($key);
         if ($this->_options['large_scale']) {
             // false:少量(不使用子目录)    true:大量(使用子目录)
-            $key = substr($key, 0, 2) . '/'.substr($key, 2, 2).'/' . substr($key, 4);
+            $key  = substr($key, 0, 1) . '/'.substr($key, 1, 1).'/' . substr($key, 2);
         }
         if ($this->_options['prefix']) {
-            $key = $this->_options['prefix'] . '/' . $key;
+            $key  = $this->_options['prefix'] . '/' . $key;
         }
-        $filename = $this->_options['path'] . $key . '.php';
+        $filename = $this->_options['path'] . $key . '.c';
         $dir      = dirname($filename);
 
         if (!is_dir($dir)) {
@@ -118,7 +118,7 @@ class file extends \ounun\dc\driver
      * @param int       $expire  有效时间（秒）
      * @return boolean
      */
-    public function set($key, $value, $expire = 0)
+    public function set(string $key, $value, int $expire = 0)
     {
         if (empty($expire)) {
             $expire = $this->_options['expire'];
@@ -129,10 +129,9 @@ class file extends \ounun\dc\driver
         }
         $data = serialize($value);
         if ($this->_options['data_compress'] && function_exists('gzcompress')) {
-            //数据压缩
+            // 数据压缩
             $data = gzcompress($data, 3);
         }
-        $data   = "<?php\n//" . sprintf('%012d', $expire) . "\n" . $data;
         $result = file_put_contents($filename, $data);
         if ($result) {
             isset($first) && $this->tag_items_set($filename);
@@ -174,7 +173,7 @@ class file extends \ounun\dc\driver
         $files = (array) glob($this->_options['path'] . ($this->_options['prefix'] ? $this->_options['prefix'] . '/' : '') . '*');
         foreach ($files as $path) {
             if (is_dir($path)) {
-                $matches = glob($path . '/*.php');
+                $matches = glob($path . '/*.c');
                 if (is_array($matches)) {
                     array_map('unlink', $matches);
                 }

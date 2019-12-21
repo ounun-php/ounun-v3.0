@@ -63,7 +63,7 @@ abstract class driver
     abstract public function delete(string $key);
 
     /**
-     * 清除缓存
+     * 清除所有缓存
      * @param string $tag 标签名
      * @return boolean
      */
@@ -86,22 +86,13 @@ abstract class driver
     }
 
     /**
-     * 取得 File:文件名  Memcache|Redis:缓存KEY
-     * @return string
-     */
-//    public function filename()
-//    {
-//        return $this->_options['filename'];
-//    }
-
-    /**
      * 获取实际的缓存标识
      * @param  string $key 缓存名
      * @return string
      */
     public function cache_key_get(string $key): string
     {
-        return $this->_options['prefix'] . $key;
+        return $this->_options['prefix'] .':'. $key;
     }
 
     /**
@@ -121,18 +112,19 @@ abstract class driver
 
     /**
      * 追加（数组）缓存
-     * @param  string $key    缓存变量名
-     * @param  mixed  $value  存储数据
+     * @param  string $key         缓存变量名
+     * @param  mixed  $value       存储数据
+     * @param  int    $max_length  最大长度
      * @return void
      */
-    public function push(string $key, $value): void
+    public function push(string $key, $value, int $max_length = 1000): void
     {
         $item = $this->get($key, []);
         if (!is_array($item)) {
             throw new \InvalidArgumentException('only array cache can be push');
         }
         $item[] = $value;
-        if (count($item) > 1000) {
+        if (count($item) > $max_length) {
             array_shift($item);
         }
         $item = array_unique($item);

@@ -19,7 +19,7 @@ class tags
      */
     public function __construct(array $tag, driver $driver)
     {
-        $this->_tags     = $tag;
+        $this->_tags    = $tag;
         $this->_driver  = $driver;
     }
 
