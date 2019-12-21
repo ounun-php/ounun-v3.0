@@ -8,12 +8,29 @@ namespace ounun\dc\driver;
 
 class memcached extends \ounun\dc\driver
 {
-    protected $options = [
-        'host'     => '127.0.0.1',
-        'port'     => 11211,
-        'expire'   => 0,
+    /** @var string memcached类型 */
+    const Type          = 'memcached';
+
+    /** @var \Memcached  */
+    protected $_handler;
+
+    /** @var array 配制 */
+    protected $_options = [
+        // 'module'     => '', // 模块名称   转 prefix
+        // 'filename'   => '', // 文件名
+        'expire'        => 0,  // 有效时间 0为永久
+        'serialize'     => ['json_encode_unescaped','json_decode_array'], // encode decode
+
+        'format_string' => false, // bool false:混合数据 true:字符串
+        'large_scale'   => false, // bool false:少量    true:大量
+        'prefix'        => '',    // 模块名称
+        'prefix_tag'    => 't_',
+
+        'servers'      => [
+            ['127.0.0.1',11211,100],
+            // ['127.0.0.1',11211,100]
+        ],
         'timeout'  => 0, // 超时时间（单位：毫秒）
-        'prefix'   => '',
         'username' => '', //账号
         'password' => '', //密码
         'option'   => [],
@@ -22,7 +39,6 @@ class memcached extends \ounun\dc\driver
     /**
      * 构造函数
      * @param array $options 缓存参数
-     * @access public
      */
     public function __construct($options = [])
     {
@@ -30,19 +46,19 @@ class memcached extends \ounun\dc\driver
             throw new \BadFunctionCallException('not support: memcached');
         }
         if (!empty($options)) {
-            $this->options = array_merge($this->options, $options);
+            $this->_options = array_merge($this->_options, $options);
         }
-        $this->handler = new \Memcached;
-        if (!empty($this->options['option'])) {
-            $this->handler->setOptions($this->options['option']);
+        $this->_handler = new \Memcached;
+        if (!empty($this->_options['option'])) {
+            $this->_handler->setOptions($this->_options['option']);
         }
         // 设置连接超时时间（单位：毫秒）
-        if ($this->options['timeout'] > 0) {
-            $this->handler->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $this->options['timeout']);
+        if ($this->_options['timeout'] > 0) {
+            $this->_handler->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $this->_options['timeout']);
         }
         // 支持集群
-        $hosts = explode(',', $this->options['host']);
-        $ports = explode(',', $this->options['port']);
+        $hosts = explode(',', $this->_options['host']);
+        $ports = explode(',', $this->_options['port']);
         if (empty($ports[0])) {
             $ports[0] = 11211;
         }
@@ -51,60 +67,57 @@ class memcached extends \ounun\dc\driver
         foreach ((array) $hosts as $i => $host) {
             $servers[] = [$host, (isset($ports[$i]) ? $ports[$i] : $ports[0]), 1];
         }
-        $this->handler->addServers($servers);
-        if ('' != $this->options['username']) {
-            $this->handler->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
-            $this->handler->setSaslAuthData($this->options['username'], $this->options['password']);
+        $this->_handler->addServers($servers);
+        if ('' != $this->_options['username']) {
+            $this->_handler->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
+            $this->_handler->setSaslAuthData($this->_options['username'], $this->_options['password']);
         }
     }
 
     /**
      * 判断缓存
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return bool
      */
-    public function has($name)
+    public function has($key)
     {
-        $key = $this->cache_key_get($name);
-        return $this->handler->get($key) ? true : false;
+        $key = $this->cache_key_get($key);
+        return $this->_handler->get($key) ? true : false;
     }
 
     /**
      * 读取缓存
-     * @access public
      * @param string $name 缓存变量名
      * @param mixed  $default 默认值
      * @return mixed
      */
     public function get($name, $default = false)
     {
-        $result = $this->handler->get($this->cache_key_get($name));
+        $result = $this->_handler->get($this->cache_key_get($name));
         return false !== $result ? $result : $default;
     }
 
     /**
      * 写入缓存
-     * @access public
-     * @param string            $name 缓存变量名
+     * @param string            $key 缓存变量名
      * @param mixed             $value  存储数据
      * @param integer|\DateTime $expire  有效时间（秒）
      * @return bool
      */
-    public function set($name, $value, $expire = null)
+    public function set($key, $value, $expire = null)
     {
         if (is_null($expire)) {
-            $expire = $this->options['expire'];
+            $expire = $this->_options['expire'];
         }
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        if ($this->tag && !$this->has($name)) {
+        if ($this->_tags && !$this->has($key)) {
             $first = true;
         }
-        $key    = $this->cache_key_get($name);
+        $key    = $this->cache_key_get($key);
         $expire = 0 == $expire ? 0 : $_SERVER['REQUEST_TIME'] + $expire;
-        if ($this->handler->set($key, $value, $expire)) {
+        if ($this->_handler->set($key, $value, $expire)) {
             isset($first) && $this->tag_item_set($key);
             return true;
         }
@@ -113,32 +126,30 @@ class memcached extends \ounun\dc\driver
 
     /**
      * 自增缓存（针对数值缓存）
-     * @access public
      * @param string    $name 缓存变量名
      * @param int       $step 步长
      * @return false|int
      */
-    public function inc($name, $step = 1)
+    public function increase($name, $step = 1)
     {
         $key = $this->cache_key_get($name);
-        if ($this->handler->get($key)) {
-            return $this->handler->increment($key, $step);
+        if ($this->_handler->get($key)) {
+            return $this->_handler->increment($key, $step);
         }
-        return $this->handler->set($key, $step);
+        return $this->_handler->set($key, $step);
     }
 
     /**
      * 自减缓存（针对数值缓存）
-     * @access public
      * @param string    $name 缓存变量名
      * @param int       $step 步长
      * @return false|int
      */
-    public function dec($name, $step = 1)
+    public function decrease($name, $step = 1)
     {
         $key   = $this->cache_key_get($name);
-        $value = $this->handler->get($key) - $step;
-        $res   = $this->handler->set($key, $value);
+        $value = $this->_handler->get($key) - $step;
+        $res   = $this->_handler->set($key, $value);
         if (!$res) {
             return false;
         } else {
@@ -148,33 +159,32 @@ class memcached extends \ounun\dc\driver
 
     /**
      * 删除缓存
-     * @param    string  $name 缓存变量名
+     * @param    string  $key 缓存变量名
      * @param bool|false $ttl
      * @return bool
      */
-    public function rm($name, $ttl = false)
+    public function delete($key, $ttl = false)
     {
-        $key = $this->cache_key_get($name);
-        return false === $ttl ?
-        $this->handler->delete($key) :
-        $this->handler->delete($key, $ttl);
+        $key = $this->cache_key_get($key);
+        return false === $ttl
+                ? $this->_handler->delete($key)
+                : $this->_handler->delete($key, $ttl);
     }
 
     /**
      * 清除缓存
-     * @access public
      * @param string $tag 标签名
      * @return bool
      */
-    public function clear($tag = null)
+    public function clear(string $tag = '')
     {
         if ($tag) {
             // 指定标签清除
             $keys = $this->tag_item_get($tag);
-            $this->handler->deleteMulti($keys);
+            $this->_handler->deleteMulti($keys);
             $this->rm('tag_' . md5($tag));
             return true;
         }
-        return $this->handler->flush();
+        return $this->_handler->flush();
     }
 }

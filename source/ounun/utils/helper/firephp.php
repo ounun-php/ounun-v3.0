@@ -1090,7 +1090,6 @@ class FirePHP {
   *
   * @param    string  $utf8   UTF-8 character
   * @return   string  UTF-16 character
-  * @access   private
   */
   private function json_utf82utf16($utf8)
   {
@@ -1134,7 +1133,6 @@ class FirePHP {
   *                           to be in ASCII or UTF-8 format!
   *
   * @return   mixed   JSON string representation of input var or an error if a problem occurs
-  * @access   public
   */
   private function json_encode($var)
   {
@@ -1349,7 +1347,6 @@ class FirePHP {
   * @param    mixed   $value  reference to an array element to be encoded
   *
   * @return   string  JSON-formatted name-value pair, like '"name":value'
-  * @access   private
   */
   private function json_name_value($name, $value)
   {

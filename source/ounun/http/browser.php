@@ -216,7 +216,6 @@ class browser
      * This method must be invoked as:
      *      <pre>  $browser = &JBrowser::i([$userAgent[, $accept]]);</pre>
      *
-     * @access public
      * @param string $userAgent  The browser string to parse.
      * @param string $accept     The HTTP_ACCEPT settings to use.
      * @return self  The Browser object.

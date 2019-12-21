@@ -36,7 +36,6 @@ class test
 
     /**
      * 日志写入接口
-     * @access public
      * @param array $log 日志信息
      * @return bool
      */

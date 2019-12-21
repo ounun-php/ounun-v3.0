@@ -11,16 +11,26 @@ namespace ounun\dc\driver;
  */
 class wincache extends \ounun\dc\driver
 {
-    protected $options = [
-        'prefix' => '',
-        'expire' => 0,
+    /** @var string wincache类型 */
+    const Type          = 'wincache';
+
+    /** @var array 配制 */
+    protected $_options = [
+        // 'module'     => '', // 模块名称   转 prefix
+        // 'filename'   => '', // 文件名
+        'expire'        => 0,     // 有效时间 0为永久
+        'serialize'     => ['json_encode_unescaped','json_decode_array'], // encode decode
+
+        'format_string' => false, // bool false:混合数据 true:字符串
+        'large_scale'   => false, // bool false:少量    true:大量
+        'prefix'        => '',    // 模块名称
+        'prefix_tag'    => 't_',
     ];
 
     /**
      * 构造函数
      * @param array $options 缓存参数
-     * @throws \BadFunctionCallException
-     * @access public
+     * @throws
      */
     public function __construct($options = [])
     {
@@ -28,25 +38,23 @@ class wincache extends \ounun\dc\driver
             throw new \BadFunctionCallException('not support: WinCache');
         }
         if (!empty($options)) {
-            $this->options = array_merge($this->options, $options);
+            $this->_options = array_merge($this->_options, $options);
         }
     }
 
     /**
      * 判断缓存
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return bool
      */
-    public function has($name)
+    public function has($key)
     {
-        $key = $this->cache_key_get($name);
+        $key = $this->cache_key_get($key);
         return wincache_ucache_exists($key);
     }
 
     /**
      * 读取缓存
-     * @access public
      * @param string $name 缓存变量名
      * @param mixed  $default 默认值
      * @return mixed
@@ -59,82 +67,53 @@ class wincache extends \ounun\dc\driver
 
     /**
      * 写入缓存
-     * @access public
-     * @param string            $name 缓存变量名
+     * @param string            $key 缓存变量名
      * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire  有效时间（秒）
+     * @param int               $expire  有效时间（秒）
      * @return boolean
      */
-    public function set($name, $value, $expire = null)
+    public function set($key, $value, $expire = null)
     {
         if (is_null($expire)) {
-            $expire = $this->options['expire'];
+            $expire = $this->_options['expire'];
         }
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        $key = $this->cache_key_get($name);
-        if ($this->tag && !$this->has($name)) {
+        $key = $this->cache_key_get($key);
+        if ($this->_tags && !$this->has($key)) {
             $first = true;
         }
         if (wincache_ucache_set($key, $value, $expire)) {
-            isset($first) && $this->tag_item_set($key);
+            isset($first) && $this->tag_items_set($key);
             return true;
         }
         return false;
     }
 
     /**
-     * 自增缓存（针对数值缓存）
-     * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
-     * @return false|int
-     */
-    public function inc($name, $step = 1)
-    {
-        $key = $this->cache_key_get($name);
-        return wincache_ucache_inc($key, $step);
-    }
-
-    /**
-     * 自减缓存（针对数值缓存）
-     * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
-     * @return false|int
-     */
-    public function dec($name, $step = 1)
-    {
-        $key = $this->cache_key_get($name);
-        return wincache_ucache_dec($key, $step);
-    }
-
-    /**
      * 删除缓存
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return boolean
      */
-    public function rm($name)
+    public function delete($key)
     {
-        return wincache_ucache_delete($this->cache_key_get($name));
+        return wincache_ucache_delete($this->cache_key_get($key));
     }
 
     /**
      * 清除缓存
-     * @access public
      * @param string $tag 标签名
      * @return boolean
      */
     public function clear($tag = null)
     {
         if ($tag) {
-            $keys = $this->tag_item_get($tag);
+            $keys = $this->tag_items_get($tag);
             foreach ($keys as $key) {
                 wincache_ucache_delete($key);
             }
-            $this->rm('tag_' . md5($tag));
+            $this->delete('tag_' . md5($tag));
             return true;
         } else {
             return wincache_ucache_clear();

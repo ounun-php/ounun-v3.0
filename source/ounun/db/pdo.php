@@ -122,7 +122,7 @@ class pdo
      * @param array $config
      * @return $this 返回数据库连接对像
      */
-    public static function instance(string $tag = '', array $config = []): self
+    public static function i(string $tag = '', array $config = []): self
     {
         if (empty($tag)) {
             $tag = \ounun::database_default_get();

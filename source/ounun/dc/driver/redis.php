@@ -14,21 +14,35 @@ namespace ounun\dc\driver;
  */
 class redis extends \ounun\dc\driver
 {
-    protected $options = [
+    /** @var string redis类型 */
+    const Type          = 'redis';
+
+    /** @var \Redis  */
+    protected $_handler;
+
+    /** @var array 配制 */
+    protected $_options = [
+        // 'module'     => '', // 模块名称   转 prefix
+        // 'filename'   => '', // 文件名
+        'expire'        => 0,  // 有效时间 0为永久
+        'serialize'     => ['json_encode_unescaped','json_decode_array'], // encode decode
+
+        'format_string' => false, // bool false:混合数据 true:字符串
+        'large_scale'   => false, // bool false:少量    true:大量
+        'prefix'        => '',    // 模块名称
+        'prefix_tag'    => 't_',
+
         'host'       => '127.0.0.1',
         'port'       => 6379,
         'password'   => '',
         'select'     => 0,
         'timeout'    => 0,
-        'expire'     => 0,
         'persistent' => false,
-        'prefix'     => '',
     ];
 
     /**
      * 构造函数
      * @param array $options 缓存参数
-     * @access public
      */
     public function __construct($options = [])
     {
@@ -36,45 +50,43 @@ class redis extends \ounun\dc\driver
             throw new \BadFunctionCallException('not support: redis');
         }
         if (!empty($options)) {
-            $this->options = array_merge($this->options, $options);
+            $this->_options = array_merge($this->_options, $options);
         }
-        $this->handler = new \Redis;
-        if ($this->options['persistent']) {
-            $this->handler->pconnect($this->options['host'], $this->options['port'], $this->options['timeout'], 'persistent_id_' . $this->options['select']);
+        $this->_handler = new \Redis;
+        if ($this->_options['persistent']) {
+            $this->_handler->pconnect($this->_options['host'], $this->_options['port'], $this->_options['timeout'], 'persistent_id_' . $this->_options['select']);
         } else {
-            $this->handler->connect($this->options['host'], $this->options['port'], $this->options['timeout']);
+            $this->_handler->connect($this->_options['host'], $this->_options['port'], $this->_options['timeout']);
         }
 
-        if ('' != $this->options['password']) {
-            $this->handler->auth($this->options['password']);
+        if ('' != $this->_options['password']) {
+            $this->_handler->auth($this->_options['password']);
         }
 
-        if (0 != $this->options['select']) {
-            $this->handler->select($this->options['select']);
+        if (0 != $this->_options['select']) {
+            $this->_handler->select($this->_options['select']);
         }
     }
 
     /**
      * 判断缓存
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return bool
      */
-    public function has($name)
+    public function has($key)
     {
-        return $this->handler->get($this->cache_key_get($name)) ? true : false;
+        return $this->_handler->get($this->cache_key_get($key)) ? true : false;
     }
 
     /**
      * 读取缓存
-     * @access public
      * @param string $name 缓存变量名
      * @param mixed  $default 默认值
      * @return mixed
      */
     public function get($name, $default = false)
     {
-        $value = $this->handler->get($this->cache_key_get($name));
+        $value = $this->_handler->get($this->cache_key_get($name));
         if (is_null($value) || false === $value) {
             return $default;
         }
@@ -90,91 +102,54 @@ class redis extends \ounun\dc\driver
 
     /**
      * 写入缓存
-     * @access public
-     * @param string            $name 缓存变量名
+     * @param string            $key 缓存变量名
      * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire  有效时间（秒）
+     * @param int       $expire  有效时间（秒）
      * @return boolean
      */
-    public function set($name, $value, $expire = null)
+    public function set(string $key, $value, int $expire = 0)
     {
-        if (is_null($expire)) {
-            $expire = $this->options['expire'];
-        }
-        if ($expire instanceof \DateTime) {
-            $expire = $expire->getTimestamp() - time();
-        }
-        if ($this->tag && !$this->has($name)) {
+        if ($this->_tags && !$this->has($key)) {
             $first = true;
         }
-        $key   = $this->cache_key_get($name);
+        $key   = $this->cache_key_get($key);
         $value = is_scalar($value) ? $value : 'think_serialize:' . serialize($value);
         if ($expire) {
-            $result = $this->handler->setex($key, $expire, $value);
+            $result = $this->_handler->setex($key, $expire, $value);
         } else {
-            $result = $this->handler->set($key, $value);
+            $result = $this->_handler->set($key, $value);
         }
         isset($first) && $this->tag_item_set($key);
         return $result;
     }
 
     /**
-     * 自增缓存（针对数值缓存）
-     * @access public
-     * @param  string    $name 缓存变量名
-     * @param  int       $step 步长
-     * @return false|int
-     */
-    public function inc($name, $step = 1)
-    {
-        $key = $this->cache_key_get($name);
-
-        return $this->handler->incrby($key, $step);
-    }
-
-    /**
-     * 自减缓存（针对数值缓存）
-     * @access public
-     * @param  string    $name 缓存变量名
-     * @param  int       $step 步长
-     * @return false|int
-     */
-    public function dec($name, $step = 1)
-    {
-        $key = $this->cache_key_get($name);
-
-        return $this->handler->decrby($key, $step);
-    }
-
-    /**
      * 删除缓存
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return boolean
      */
-    public function rm($name)
+    public function delete($key)
     {
-        return $this->handler->delete($this->cache_key_get($name));
+        return $this->_handler->del($this->cache_key_get($key));
     }
 
     /**
      * 清除缓存
-     * @access public
      * @param string $tag 标签名
      * @return boolean
      */
-    public function clear($tag = null)
+    public function clear(string $tag = '')
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->tag_item_get($tag);
+            $keys = $this->tag_items_get($tag);
             foreach ($keys as $key) {
-                $this->handler->delete($key);
+                $this->_handler->del($key);
             }
-            $this->rm('tag_' . md5($tag));
+            $this->delete('tag_' . md5($tag));
             return true;
         }
-        return $this->handler->flushDB();
+        return $this->_handler->flushDB();
     }
 
 }

@@ -24,7 +24,6 @@ class pinyin_gbk
      * loads the Router class early on so it's not available
      * normally as other classes are.
      *
-     * @access    public
      */
     public function __construct()
     {

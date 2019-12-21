@@ -10,68 +10,60 @@ namespace ounun\dc\driver;
  */
 class file extends \ounun\dc\driver
 {
-    protected $options = [
-        'expire'        => 0,
-        'cache_subdir'  => true,
-        'prefix'        => '',
+    /** @var string file类型 */
+    const Type          = 'file';
+
+    /** @var array 配制 */
+    protected $_options = [
+        // 'module'     => '', // 模块名称   转 prefix
+        // 'filename'   => '', // 文件名
+        'expire'        => 0,  // 有效时间 0为永久
+        'serialize'     => ['json_encode_unescaped','json_decode_array'], // encode decode
+
+        'format_string' => false, // bool false:混合数据 true:字符串
+        'large_scale'   => false, // bool false:少量    true:大量
+        'prefix'        => '',    // 模块名称
+        'prefix_tag'    => 't_',
+
+        // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
         'data_compress' => false,
     ];
-
-    protected $expire;
 
     /**
      * 构造函数
      * @param array $options
      */
-    public function __construct($options = [])
+    public function __construct(array $options = [])
     {
         if (!empty($options)) {
-            $this->options = array_merge($this->options, $options);
+            $this->_options = array_merge($this->_options, $options);
         }
-        if (substr($this->options['path'], -1) != '/') {
-            $this->options['path'] .= '/';
-        }
-        $this->init();
-    }
-
-    /**
-     * 初始化检查
-     * @access private
-     * @return boolean
-     */
-    private function init()
-    {
         // 创建项目缓存目录
-        if (!is_dir($this->options['path'])) {
-            if (mkdir($this->options['path'], 0755, true)) {
-                return true;
-            }
+        if (!is_dir($this->_options['path'])) {
+            mkdir($this->_options['path'], 0755, true);
         }
-        return false;
     }
 
     /**
      * 取得变量的存储文件名
-     * @access protected
-     * @param  string $name 缓存变量名
-     * @param  bool   $auto 是否自动创建目录
+     * @param  string $key 缓存变量名
      * @return string
      */
-    protected function cache_key_get($name, $auto = false)
+    public function cache_key_get(string $key): string
     {
-        $name = md5($name);
-        if ($this->options['cache_subdir']) {
-            // 使用子目录
-            $name = substr($name, 0, 2) . '/' . substr($name, 2);
+        $key = md5($key);
+        if ($this->_options['large_scale']) {
+            // false:少量(不使用子目录)    true:大量(使用子目录)
+            $key = substr($key, 0, 2) . '/'.substr($key, 2, 2).'/' . substr($key, 4);
         }
-        if ($this->options['prefix']) {
-            $name = $this->options['prefix'] . '/' . $name;
+        if ($this->_options['prefix']) {
+            $key = $this->_options['prefix'] . '/' . $key;
         }
-        $filename = $this->options['path'] . $name . '.php';
+        $filename = $this->_options['path'] . $key . '.php';
         $dir      = dirname($filename);
 
-        if ($auto && !is_dir($dir)) {
+        if (!is_dir($dir)) {
             mkdir($dir, 0755, true);
         }
         return $filename;
@@ -79,18 +71,16 @@ class file extends \ounun\dc\driver
 
     /**
      * 判断缓存是否存在
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return bool
      */
-    public function has($name)
+    public function has($key)
     {
-        return $this->get($name) ? true : false;
+        return $this->get($key) ? true : false;
     }
 
     /**
      * 读取缓存
-     * @access public
      * @param string $name 缓存变量名
      * @param mixed  $default 默认值
      * @return mixed
@@ -101,16 +91,16 @@ class file extends \ounun\dc\driver
         if (!is_file($filename)) {
             return $default;
         }
-        $content      = file_get_contents($filename);
-        $this->expire = null;
+        $content                  = file_get_contents($filename);
+        $this->_options['expire'] = 0;
         if (false !== $content) {
             $expire = (int) substr($content, 8, 12);
             if (0 != $expire && time() > filemtime($filename) + $expire) {
                 return $default;
             }
-            $this->expire = $expire;
-            $content      = substr($content, 32);
-            if ($this->options['data_compress'] && function_exists('gzcompress')) {
+            $this->_options['expire'] =  $expire;
+            $content                  = substr($content, 32);
+            if ($this->_options['data_compress'] && function_exists('gzcompress')) {
                 //启用数据压缩
                 $content = gzuncompress($content);
             }
@@ -123,33 +113,29 @@ class file extends \ounun\dc\driver
 
     /**
      * 写入缓存
-     * @access public
-     * @param string            $name 缓存变量名
-     * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire  有效时间（秒）
+     * @param string    $key     缓存变量名
+     * @param mixed     $value   存储数据
+     * @param int       $expire  有效时间（秒）
      * @return boolean
      */
-    public function set($name, $value, $expire = null)
+    public function set($key, $value, $expire = 0)
     {
-        if (is_null($expire)) {
-            $expire = $this->options['expire'];
+        if (empty($expire)) {
+            $expire = $this->_options['expire'];
         }
-        if ($expire instanceof \DateTime) {
-            $expire = $expire->getTimestamp() - time();
-        }
-        $filename = $this->cache_key_get($name, true);
-        if ($this->tag && !is_file($filename)) {
+        $filename = $this->cache_key_get($key);
+        if ($this->_tags && !is_file($filename)) {
             $first = true;
         }
         $data = serialize($value);
-        if ($this->options['data_compress'] && function_exists('gzcompress')) {
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
             //数据压缩
             $data = gzcompress($data, 3);
         }
-        $data   = "<?php\n//" . sprintf('%012d', $expire) . "\n exit();?>\n" . $data;
+        $data   = "<?php\n//" . sprintf('%012d', $expire) . "\n" . $data;
         $result = file_put_contents($filename, $data);
         if ($result) {
-            isset($first) && $this->tag_item_set($filename);
+            isset($first) && $this->tag_items_set($filename);
             clearstatcache();
             return true;
         } else {
@@ -157,76 +143,35 @@ class file extends \ounun\dc\driver
         }
     }
 
-    /**
-     * 自增缓存（针对数值缓存）
-     * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
-     * @return false|int
-     */
-    public function inc($name, $step = 1)
-    {
-        if ($this->has($name)) {
-            $value  = $this->get($name) + $step;
-            $expire = $this->expire;
-        } else {
-            $value  = $step;
-            $expire = 0;
-        }
-
-        return $this->set($name, $value, $expire) ? $value : false;
-    }
-
-    /**
-     * 自减缓存（针对数值缓存）
-     * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
-     * @return false|int
-     */
-    public function dec($name, $step = 1)
-    {
-        if ($this->has($name)) {
-            $value  = $this->get($name) - $step;
-            $expire = $this->expire;
-        } else {
-            $value  = -$step;
-            $expire = 0;
-        }
-
-        return $this->set($name, $value, $expire) ? $value : false;
-    }
 
     /**
      * 删除缓存
-     * @access public
-     * @param string $name 缓存变量名
+     * @param string $key 缓存变量名
      * @return boolean
      */
-    public function rm($name)
+    public function delete(string $key)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->cache_key_get($key);
         return $this->unlink($filename);
     }
 
     /**
      * 清除缓存
-     * @access public
      * @param string $tag 标签名
      * @return boolean
      */
-    public function clear($tag = null)
+    public function clear(string $tag = '')
     {
         if ($tag) {
             // 指定标签清除
-            $keys = $this->tag_item_get($tag);
+            $keys = $this->tag_items_get($tag);
             foreach ($keys as $key) {
                 $this->unlink($key);
             }
-            $this->rm('tag_' . md5($tag));
+            $this->delete('tag_' . md5($tag));
             return true;
         }
-        $files = (array) glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . '/' : '') . '*');
+        $files = (array) glob($this->_options['path'] . ($this->_options['prefix'] ? $this->_options['prefix'] . '/' : '') . '*');
         foreach ($files as $path) {
             if (is_dir($path)) {
                 $matches = glob($path . '/*.php');
@@ -234,7 +179,7 @@ class file extends \ounun\dc\driver
                     array_map('unlink', $matches);
                 }
                 // rmdir($path);
-                $this->deldir($path);
+                $this->rmdir($path);
             } else {
                 unlink($path);
             }
@@ -247,23 +192,23 @@ class file extends \ounun\dc\driver
      * 清空文件夹函数和清空文件夹后删除空文件夹函数的处理
      * @param $path
      */
-    private function deldir($path)
+    protected function rmdir($path)
     {
-        //如果是目录则继续
+        // 如果是目录则继续
         if(is_dir($path)){
-            //扫描一个文件夹内的所有文件夹和文件并返回数组
+            // 扫描一个文件夹内的所有文件夹和文件并返回数组
             $p = scandir($path);
             foreach($p as $val){
-                //排除目录中的.和..
+                // 排除目录中的.和..
                 if($val !="." && $val !=".."){
-                    //如果是目录则递归子目录，继续操作
+                    // 如果是目录则递归子目录，继续操作
                     if(is_dir($path.$val)){
-                        //子目录中操作删除文件夹和文件
-                        $this->deldir($path.$val.'/');
-                        //目录清空后删除空文件夹
+                        // 子目录中操作删除文件夹和文件
+                        $this->rmdir($path.$val.'/');
+                        // 目录清空后删除空文件夹
                         @rmdir($path.$val.'/');
                     }else{
-                        //如果是文件直接删除
+                        // 如果是文件直接删除
                         unlink($path.'/'.$val);
                     }
                 }
@@ -277,7 +222,7 @@ class file extends \ounun\dc\driver
      * @return bool
      * @return boolean
      */
-    private function unlink($path)
+    protected function unlink($path)
     {
         return is_file($path) && unlink($path);
     }

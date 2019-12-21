@@ -72,7 +72,6 @@ class ip
 
     /**
      * 返回读取的长整型数
-     * @access private
      * @return int
      */
     private function long()
@@ -84,7 +83,6 @@ class ip
 
     /**
      * 返回读取的3个字节的长整型数
-     * @access private
      * @return int
      */
     private function long3()
@@ -96,8 +94,7 @@ class ip
 
     /**
      * 返回压缩后可进行比较的IP地址
-     * @access private
-     * @param string $ip
+     * @param  string $ip
      * @return string
      */
     private function packip($ip)
@@ -109,7 +106,6 @@ class ip
 
     /**
      * 返回读取的字符串
-     * @access private
      * @param string $data
      * @return string
      */
@@ -125,8 +121,6 @@ class ip
 
     /**
      * 返回地区信息
-     *
-     * @access private
      * @return string
      */
     private function area()
@@ -150,7 +144,6 @@ class ip
 
     /**
      * 根据所给 IP 地址或域名返回所在地区信息
-     * @access public
      * @param string $ip
      * @return array
      */
