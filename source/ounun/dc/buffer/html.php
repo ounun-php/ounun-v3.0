@@ -202,17 +202,17 @@ class html
         // 写文件
         \ounun\debug::header('xypm_size',$filesize,$this->_is_debug,__FUNCTION__,__LINE__);
         if ($filesize > self::Cache_Mini_Size) {
-            \ounun\debug::header('xypm_ok',$this->_cache_driver->filename(),$this->_is_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('xypm_ok',$this->filename(),$this->_is_debug,__FUNCTION__,__LINE__);
 
             $buffer = template::trim($buffer,$this->_is_trim);
             $buffer = gzencode($buffer, 9);
-            $this->_cache_driver->cache_html($buffer);
-            $this->_cache_time = $this->_cache_driver->cache_time();
+            $this->cache_html($buffer);
+            $this->_cache_time = $this->cache_time();
             if ($output) {
                 $this->run_output();
             }
         } else {
-            $this->_cache_driver->delete();
+            $this->clean();
             \ounun\debug::header('xypm_noc','nocache',$this->_is_debug,__FUNCTION__,__LINE__);
             if ($output) {
                 header('Content-Length: ' . $filesize);

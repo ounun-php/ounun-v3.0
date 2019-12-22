@@ -132,7 +132,7 @@ class ounun
             static::$lang = $lang;
         }
         $lang_default && self::$lang_default = $lang_default;
-        $i18ns = ['app\\' . static::$app_name . '\\i18n', 'extend\\i18n', 'ounun\\apps\\i18n'];
+        $i18ns = ['app\\' . static::$app_name . '\\i18n', 'utils\\i18n', 'ounun\\apps\\i18n'];
         if ($lang != static::$lang_default) {
             array_unshift($i18ns, 'app\\' . static::$app_name . '\\i18n\\' . $lang);
         }
@@ -492,7 +492,7 @@ class ounun
         $a = explode('/',static::$url_www,5);
         $p = $a[3]?"/{$a[3]}":'';
         static::$page_www = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
-        
+
         /** @var string Mobile Page */
         $a = explode('/',static::$url_wap,5);
         $p = $a[3]?"/{$a[3]}":'';

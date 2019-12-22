@@ -19,7 +19,7 @@ class config
      * @param string $config_key
      * @return $this
      */
-    static public function instance(string $tag = 'tag', array $config = [], \ounun\db\pdo $db = null)
+    static public function i(string $tag = 'tag', array $config = [], \ounun\db\pdo $db = null)
     {
         if (empty(static::$_inst[$tag])) {
             static::$_inst[$tag] = new static($tag, $config,  $db);
