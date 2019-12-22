@@ -90,7 +90,7 @@ class redis extends \ounun\dc\driver
         if (is_null($value) || false === $value) {
             return $default;
         }
-
+        $this->_times['read']     = (int)$this->_times['read'] + 1;
         try {
             $result = 0 === strpos($value, 'think_serialize:') ? unserialize(substr($value, 16)) : $value;
         } catch (\Exception $e) {
@@ -109,7 +109,8 @@ class redis extends \ounun\dc\driver
      */
     public function set(string $key, $value, int $expire = 0)
     {
-        if ($this->_tags && !$this->has($key)) {
+        $this->_times['write']  = (int)$this->_times['write'] + 1;
+        if ($this->_tagset && !$this->has($key)) {
             $first = true;
         }
         $key   = $this->cache_key_get($key);

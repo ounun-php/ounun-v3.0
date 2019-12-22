@@ -61,27 +61,23 @@ class wincache extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $key = $this->cache_key_get($name);
+        $this->_times['read']  = (int)$this->_times['read'] + 1;
+        $key                   = $this->cache_key_get($name);
         return wincache_ucache_exists($key) ? wincache_ucache_get($key) : $default;
     }
 
     /**
      * 写入缓存
-     * @param string            $key 缓存变量名
-     * @param mixed             $value  存储数据
+     * @param string            $key     缓存变量名
+     * @param mixed             $value   存储数据
      * @param int               $expire  有效时间（秒）
      * @return boolean
      */
-    public function set($key, $value, $expire = null)
+    public function set($key, $value,int $expire = 0)
     {
-        if (is_null($expire)) {
-            $expire = $this->_options['expire'];
-        }
-        if ($expire instanceof \DateTime) {
-            $expire = $expire->getTimestamp() - time();
-        }
-        $key = $this->cache_key_get($key);
-        if ($this->_tags && !$this->has($key)) {
+        $this->_times['write']  = (int)$this->_times['write'] + 1;
+        $key                    = $this->cache_key_get($key);
+        if ($this->_tagset && !$this->has($key)) {
             $first = true;
         }
         if (wincache_ucache_set($key, $value, $expire)) {
@@ -106,7 +102,7 @@ class wincache extends \ounun\dc\driver
      * @param string $tag 标签名
      * @return boolean
      */
-    public function clear($tag = null)
+    public function clear($tag = '')
     {
         if ($tag) {
             $keys = $this->tag_items_get($tag);

@@ -93,7 +93,8 @@ class memcached extends \ounun\dc\driver
      */
     public function get($name, $default = false)
     {
-        $result = $this->_handler->get($this->cache_key_get($name));
+        $this->_times['read']  = (int)$this->_times['read'] + 1;
+        $result                = $this->_handler->get($this->cache_key_get($name));
         return false !== $result ? $result : $default;
     }
 
@@ -106,19 +107,16 @@ class memcached extends \ounun\dc\driver
      */
     public function set($key, $value, $expire = null)
     {
-        if (is_null($expire)) {
-            $expire = $this->_options['expire'];
-        }
-        if ($expire instanceof \DateTime) {
-            $expire = $expire->getTimestamp() - time();
-        }
-        if ($this->_tags && !$this->has($key)) {
+        $this->_times['write']  = (int)$this->_times['write'] + 1;
+        if ($this->_tagset && !$this->has($key)) {
             $first = true;
         }
         $key    = $this->cache_key_get($key);
         $expire = 0 == $expire ? 0 : $_SERVER['REQUEST_TIME'] + $expire;
         if ($this->_handler->set($key, $value, $expire)) {
-            isset($first) && $this->tag_item_set($key);
+            if($first){
+                $this->_tagset->append($key);
+            }
             return true;
         }
         return false;
@@ -182,7 +180,7 @@ class memcached extends \ounun\dc\driver
             // 指定标签清除
             $keys = $this->tag_item_get($tag);
             $this->_handler->deleteMulti($keys);
-            $this->rm('tag_' . md5($tag));
+            $this->delete($this->tag_key_get($tag));
             return true;
         }
         return $this->_handler->flush();

@@ -91,6 +91,7 @@ class file extends \ounun\dc\driver
         if (!is_file($filename)) {
             return $default;
         }
+        $this->_times['read']     = (int)$this->_times['read'] + 1;
         $content                  = file_get_contents($filename);
         $this->_options['expire'] = 0;
         if (false !== $content) {
@@ -120,11 +121,9 @@ class file extends \ounun\dc\driver
      */
     public function set(string $key, $value, int $expire = 0)
     {
-        if (empty($expire)) {
-            $expire = $this->_options['expire'];
-        }
-        $filename = $this->cache_key_get($key);
-        if ($this->_tags && !is_file($filename)) {
+        $this->_times['write']  = (int)$this->_times['write'] + 1;
+        $filename               = $this->cache_key_get($key);
+        if ($this->_tagset && !is_file($filename)) {
             $first = true;
         }
         $data = serialize($value);
@@ -134,7 +133,7 @@ class file extends \ounun\dc\driver
         }
         $result = file_put_contents($filename, $data);
         if ($result) {
-            isset($first) && $this->tag_items_set($filename);
+            isset($first) && $this->_tagset->append($key);
             clearstatcache();
             return true;
         } else {

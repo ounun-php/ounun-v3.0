@@ -14,6 +14,10 @@ abstract class driver
 {
     /** @var mixed 驱动句柄 */
     protected $_handler;
+    /** @var tagset 缓存标签集 */
+    protected $_tagset;
+    /** @var string 缓存标签(标识名) */
+    protected $_tag     = '';
 
     /** @var array 缓存 read:读取次数 write:写入次数 */
     protected $_times   = [ 'read'  => 0, 'write' => 0, ];
@@ -33,9 +37,6 @@ abstract class driver
 
     /** @var array 数据 */
     protected $_data    = [];
-
-    /** @var array 缓存标签(标识名) */
-    protected $_tags    = [];
 
 
     /**
@@ -165,31 +166,31 @@ abstract class driver
 
     /**
      * 缓存标签
-     * @param  string|array $name 标签名
-     * @return tags
+     * @param  string $tag 标签名
+     * @return tagset
      */
-    public function tag($name)
+    public function tag(string $tag = '')
     {
-        $name = (array) $name;
-        $key  = implode('-', $name);
-        if (!isset($this->_tags[$key])) {
-            $name = array_map(function ($val) {
-                return $this->tag_key_get($val);
-            }, $name);
-            $this->_tags[$key] = new tags($name, $this);
+        if(empty($tag) && $this->_tagset){
+            return $this->_tagset;
+        }elseif($tag == $this->_tag && $this->_tagset){
+            return $this->_tagset;
         }
-        return $this->_tags[$key];
+        $this->_tag    = $tag;
+        $this->_tagset = new tagset($tag, $this);
+        return $this->_tagset;
     }
 
     /**
      * 删除缓存标签
-     * @param  array  $keys 缓存标识列表
+     * @param  string $tag 标签标识
      * @return void
      */
-    public function tag_clear(array $keys): void
+    public function tag_clear(string $tag): void
     {
+        $keys = $this->tag_items_get($tag);
         // 指定标签清除
-        $this->_handler->del($keys);
+        $this->multiple_delete($keys);
     }
 
     /**
