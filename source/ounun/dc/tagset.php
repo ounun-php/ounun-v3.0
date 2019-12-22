@@ -9,60 +9,36 @@ class tagset
     /** @var string  标签的缓存Key */
     protected $_tag   = '';
 
+    /** @var string  最大长度 */
+    protected $_max_length   = 0;
+
     /** @var driver 缓存句柄 */
     protected $_driver;
 
     /**
      * 架构函数
-     * @param  string $tag    缓存标签
-     * @param  driver $driver 缓存对象
+     * @param  string $tag         缓存标签
+     * @param  driver $driver      缓存对象
+     * @param  int    $max_length  最大长度
      */
-    public function __construct(string $tag, driver $driver)
+    public function __construct(string $tag, driver $driver, int $max_length = 10000)
     {
-        $this->_tag     = $tag;
-        $this->_driver  = $driver;
+        $this->_tag        = $tag;
+        $this->_driver     = $driver;
+        $this->_max_length = $max_length;
     }
 
     /**
      * 追加缓存标识到标签
-     * @param  string $key 缓存变量名
-     * @return void
+     * @param string $key       缓存变量名
+     * @param bool $add_prefix  是否活加前缀
      */
-    public function append(string $key, bool $): void
+    public function append(string $key, bool $add_prefix = true): void
     {
-        $key = $this->_driver->cache_key_get($key);
-        $this->_driver->push($this->_tag, $key);
-    }
-
-    /**
-     * 写入缓存
-     * @param  iterable   $values  缓存数据
-     * @param  int        $expire  有效时间 0为永久
-     * @return bool
-     */
-    public function multiple_set($values,int $expire = 0): bool
-    {
-        foreach ($values as $key => $val) {
-            $result = $this->set($key, $val, $expire);
-            if (false === $result) {
-                return false;
-            }
+        if($add_prefix){
+            $key = $this->_driver->tag_key_get($key);
         }
-        return true;
-    }
-
-    /**
-     * 如果不存在则写入缓存
-     * @param  string $key    缓存变量名
-     * @param  mixed  $value   存储数据
-     * @param  int    $expire  有效时间 0为永久
-     * @return mixed
-     */
-    public function remember(string $key, $value, int $expire = 0)
-    {
-        $result = $this->_driver->remember($key, $value, $expire);
-        $this->append($key);
-        return $result;
+        $this->_driver->push($this->_tag, $key,$this->_max_length,0,true);
     }
 
     /**

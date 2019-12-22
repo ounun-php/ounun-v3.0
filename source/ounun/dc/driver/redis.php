@@ -30,7 +30,7 @@ class redis extends \ounun\dc\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't_',
+        'prefix_tag'    => 't',
 
         'host'       => '127.0.0.1',
         'port'       => 6379,
@@ -69,87 +69,96 @@ class redis extends \ounun\dc\driver
     }
 
     /**
-     * 判断缓存
-     * @param string $key 缓存变量名
+     * 写入缓存
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $value       存储数据
+     * @param  int       $expire      有效时间（秒）
+     * @param  bool      $add_prefix  是否活加前缀
      * @return bool
      */
-    public function has($key)
+    public function set(string $key, $value,int $expire = 0, bool $add_prefix = true)
     {
-        return $this->_handler->get($this->cache_key_get($key)) ? true : false;
-    }
-
-    /**
-     * 读取缓存
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
-     * @return mixed
-     */
-    public function get($name, $default = false)
-    {
-        $value = $this->_handler->get($this->cache_key_get($name));
-        if (is_null($value) || false === $value) {
-            return $default;
+        $this->_times['write']  = ((int)$this->_times['write']) + 1;
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
         }
-        $this->_times['read']     = (int)$this->_times['read'] + 1;
-        try {
-            $result = 0 === strpos($value, 'think_serialize:') ? unserialize(substr($value, 16)) : $value;
-        } catch (\Exception $e) {
-            $result = $default;
-        }
-
-        return $result;
-    }
-
-    /**
-     * 写入缓存
-     * @param string            $key 缓存变量名
-     * @param mixed             $value  存储数据
-     * @param int       $expire  有效时间（秒）
-     * @return boolean
-     */
-    public function set(string $key, $value, int $expire = 0)
-    {
-        $this->_times['write']  = (int)$this->_times['write'] + 1;
+        // first
+        $first     = false;
         if ($this->_tagset && !$this->has($key)) {
             $first = true;
         }
-        $key   = $this->cache_key_get($key);
-        $value = is_scalar($value) ? $value : 'think_serialize:' . serialize($value);
+        if(!$this->_options['format_string']){
+            $value = $this->serialize($value);
+        }
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $value = gzcompress($value, 3);
+        }
+        // 写
         if ($expire) {
             $result = $this->_handler->setex($key, $expire, $value);
         } else {
             $result = $this->_handler->set($key, $value);
         }
-        isset($first) && $this->tag_item_set($key);
+        if($result){
+            if($first){
+                $this->_tagset->append($key,false);
+            }
+        }
         return $result;
     }
 
     /**
-     * 删除缓存
-     * @param string $key 缓存变量名
-     * @return boolean
+     * 读取缓存
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $default     默认值
+     * @param  bool      $add_prefix  是否活加前缀
+     * @return mixed
      */
-    public function delete($key)
+    public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        return $this->_handler->del($this->cache_key_get($key));
+        $this->_times['read']  = ((int)$this->_times['read']) + 1;
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
+        }
+
+        $content = $this->_handler->get($key);
+        if (empty($content)) {
+            return $default;
+        }
+
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $content = gzuncompress($content);
+        }
+        // 解析
+        if($this->_options['format_string']){
+            return $content;
+        }else{
+            return $this->unserialize($content);
+        }
     }
 
     /**
-     * 清除缓存
-     * @param string $tag 标签名
-     * @return boolean
+     * 删除缓存
+     * @param  string $key         缓存变量名
+     * @param  bool   $add_prefix  是否活加前缀
+     * @return bool
      */
-    public function clear(string $tag = '')
+    public function delete(string $key, bool $add_prefix = true)
     {
-        if ($tag) {
-            // 指定标签清除
-            $keys = $this->tag_items_get($tag);
-            foreach ($keys as $key) {
-                $this->_handler->del($key);
-            }
-            $this->delete('tag_' . md5($tag));
-            return true;
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
         }
+        return $this->_handler->del($key);
+    }
+
+    /**
+     * 清除所有缓存
+     * @return bool
+     */
+    public function clear()
+    {
         return $this->_handler->flushDB();
     }
 

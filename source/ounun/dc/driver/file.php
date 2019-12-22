@@ -5,6 +5,8 @@
  */
 namespace ounun\dc\driver;
 
+use ounun\utils\time;
+
 /**
  * 文件类型缓存类
  */
@@ -23,7 +25,7 @@ class file extends \ounun\dc\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't_',
+        'prefix_tag'    => 't',
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
@@ -46,8 +48,8 @@ class file extends \ounun\dc\driver
     }
 
     /**
-     * 取得变量的存储文件名
-     * @param  string $key 缓存变量名
+     * 获取实际的缓存标识
+     * @param  string $key 缓存名
      * @return string
      */
     public function cache_key_get(string $key): string
@@ -60,116 +62,130 @@ class file extends \ounun\dc\driver
         if ($this->_options['prefix']) {
             $key  = $this->_options['prefix'] . '/' . $key;
         }
-        $filename = $this->_options['path'] . $key . '.c';
-        $dir      = dirname($filename);
-
-        if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
-        }
-        return $filename;
-    }
-
-    /**
-     * 判断缓存是否存在
-     * @param string $key 缓存变量名
-     * @return bool
-     */
-    public function has($key)
-    {
-        return $this->get($key) ? true : false;
-    }
-
-    /**
-     * 读取缓存
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
-     * @return mixed
-     */
-    public function get($name, $default = false)
-    {
-        $filename = $this->cache_key_get($name);
-        if (!is_file($filename)) {
-            return $default;
-        }
-        $this->_times['read']     = (int)$this->_times['read'] + 1;
-        $content                  = file_get_contents($filename);
-        $this->_options['expire'] = 0;
-        if (false !== $content) {
-            $expire = (int) substr($content, 8, 12);
-            if (0 != $expire && time() > filemtime($filename) + $expire) {
-                return $default;
-            }
-            $this->_options['expire'] =  $expire;
-            $content                  = substr($content, 32);
-            if ($this->_options['data_compress'] && function_exists('gzcompress')) {
-                //启用数据压缩
-                $content = gzuncompress($content);
-            }
-            $content = unserialize($content);
-            return $content;
-        } else {
-            return $default;
-        }
+        return $this->_options['path'] . $key . '.c';
     }
 
     /**
      * 写入缓存
-     * @param string    $key     缓存变量名
-     * @param mixed     $value   存储数据
-     * @param int       $expire  有效时间（秒）
-     * @return boolean
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $value       存储数据
+     * @param  int       $expire      有效时间（秒）
+     * @param  bool      $add_prefix  是否活加前缀
+     * @return bool
      */
-    public function set(string $key, $value, int $expire = 0)
+    public function set(string $key, $value,int $expire = 0, bool $add_prefix = true)
     {
-        $this->_times['write']  = (int)$this->_times['write'] + 1;
-        $filename               = $this->cache_key_get($key);
-        if ($this->_tagset && !is_file($filename)) {
+        $this->_times['write']  = ((int)$this->_times['write']) + 1;
+        if($add_prefix){
+            $filename = $this->cache_key_get($key);
+        }else{
+            $filename = $key;
+        }
+        $first     = false;
+        if ($this->_tagset && $this->has($filename,false)) {
             $first = true;
         }
-        $data = serialize($value);
-        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
-            // 数据压缩
-            $data = gzcompress($data, 3);
+        if(!$this->_options['format_string']){
+            $value = $this->serialize($value);
         }
-        $result = file_put_contents($filename, $data);
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $value = gzcompress($value, 3);
+        }
+        // 创建目录
+        $dir      = dirname($filename);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+        // 写文件
+        $result = file_put_contents($filename, $value);
         if ($result) {
-            isset($first) && $this->_tagset->append($key);
-            clearstatcache();
+            if($first){
+                $this->_tagset->append($key,false);
+            }
             return true;
         } else {
             return false;
         }
     }
 
-
     /**
-     * 删除缓存
-     * @param string $key 缓存变量名
-     * @return boolean
+     * 读取缓存
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $default     默认值
+     * @param  bool      $add_prefix  是否活加前缀
+     * @return mixed
      */
-    public function delete(string $key)
+    public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        $filename = $this->cache_key_get($key);
-        return $this->unlink($filename);
+        $this->_times['read']  = ((int)$this->_times['read']) + 1;
+        if($add_prefix){
+            $filename = $this->cache_key_get($key);
+        }else{
+            $filename = $key;
+        }
+        if (!$this->has($filename,false)) {
+            return $default;
+        }
+        // 看是否过期
+        if($this->_options['expire'] > 0 ){
+            $mtime     = filemtime($filename);
+            if(time() >  $this->_options['expire'] + $mtime){
+                return $default;
+            }
+        }
+        // 读
+        $content    = file_get_contents($filename);
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $content = gzuncompress($content);
+        }
+        // 解析
+        if($this->_options['format_string']){
+            return $content;
+        }else{
+            return $this->unserialize($content);
+        }
     }
 
     /**
-     * 清除缓存
-     * @param string $tag 标签名
-     * @return boolean
+     * 判断缓存是否存在
+     * @param  string $key         缓存变量名
+     * @param  bool   $add_prefix  是否活加前缀
+     * @return bool
      */
-    public function clear(string $tag = '')
+    public function has(string $key, bool $add_prefix = true)
     {
-        if ($tag) {
-            // 指定标签清除
-            $keys = $this->tag_items_get($tag);
-            foreach ($keys as $key) {
-                $this->unlink($key);
-            }
-            $this->delete('tag_' . md5($tag));
+        if($add_prefix){
+            $key = $this->cache_key_get($key);
+        }
+        if (is_file($key)) {
             return true;
         }
-        $files = (array) glob($this->_options['path'] . ($this->_options['prefix'] ? $this->_options['prefix'] . '/' : '') . '*');
+        return false;
+    }
+
+    /**
+     * 删除缓存
+     * @param  string $key         缓存变量名
+     * @param  bool   $add_prefix  是否活加前缀
+     * @return boolean
+     */
+    public function delete(string $key, bool $add_prefix = true)
+    {
+        if($add_prefix){
+            $key = $this->cache_key_get($key);
+        }
+        return $this->unlink($key);
+    }
+
+    /**
+     * 清除所有缓存
+     * @return boolean
+     */
+    public function clear()
+    {
+        $files = glob($this->_options['path'] . ($this->_options['prefix'] ? $this->_options['prefix'] . '/' : '') . '*');
         foreach ($files as $path) {
             if (is_dir($path)) {
                 $matches = glob($path . '/*.c');
@@ -188,9 +204,9 @@ class file extends \ounun\dc\driver
 
     /**
      * 清空文件夹函数和清空文件夹后删除空文件夹函数的处理
-     * @param $path
+     * @param string $path
      */
-    protected function rmdir($path)
+    protected function rmdir(string $path)
     {
         // 如果是目录则继续
         if(is_dir($path)){
@@ -216,13 +232,12 @@ class file extends \ounun\dc\driver
 
     /**
      * 判断文件是否存在后，删除
-     * @param $path
+     * @param string $filename
      * @return bool
-     * @return boolean
      */
-    protected function unlink($path)
+    protected function unlink(string $filename)
     {
-        return is_file($path) && unlink($path);
+        return is_file($filename) && unlink($filename);
     }
 
 }

@@ -24,7 +24,7 @@ class wincache extends \ounun\dc\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't_',
+        'prefix_tag'    => 't',
     ];
 
     /**
@@ -42,78 +42,108 @@ class wincache extends \ounun\dc\driver
         }
     }
 
-    /**
-     * 判断缓存
-     * @param string $key 缓存变量名
-     * @return bool
-     */
-    public function has($key)
-    {
-        $key = $this->cache_key_get($key);
-        return wincache_ucache_exists($key);
-    }
 
-    /**
-     * 读取缓存
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
-     * @return mixed
-     */
-    public function get($name, $default = false)
-    {
-        $this->_times['read']  = (int)$this->_times['read'] + 1;
-        $key                   = $this->cache_key_get($name);
-        return wincache_ucache_exists($key) ? wincache_ucache_get($key) : $default;
-    }
 
     /**
      * 写入缓存
-     * @param string            $key     缓存变量名
-     * @param mixed             $value   存储数据
-     * @param int               $expire  有效时间（秒）
-     * @return boolean
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $value       存储数据
+     * @param  int       $expire      有效时间（秒）
+     * @param  bool      $add_prefix  是否活加前缀
+     * @return bool
      */
-    public function set($key, $value,int $expire = 0)
+    public function set(string $key, $value,int $expire = 0, bool $add_prefix = true)
     {
-        $this->_times['write']  = (int)$this->_times['write'] + 1;
-        $key                    = $this->cache_key_get($key);
+        $this->_times['write']  = ((int)$this->_times['write']) + 1;
+        if($add_prefix){
+            $key   = $this->cache_key_get($key);
+        }
+        // first
+        $first     = false;
         if ($this->_tagset && !$this->has($key)) {
             $first = true;
         }
+        if(!$this->_options['format_string']){
+            $value = $this->serialize($value);
+        }
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $value = gzcompress($value, 3);
+        }
+        // 写
         if (wincache_ucache_set($key, $value, $expire)) {
-            isset($first) && $this->tag_items_set($key);
+            if($first){
+                $this->_tagset->append($key,false);
+            }
             return true;
         }
         return false;
     }
 
     /**
-     * 删除缓存
-     * @param string $key 缓存变量名
-     * @return boolean
+     * 读取缓存
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $default     默认值
+     * @param  bool      $add_prefix  是否活加前缀
+     * @return mixed
      */
-    public function delete($key)
+    public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        return wincache_ucache_delete($this->cache_key_get($key));
-    }
-
-    /**
-     * 清除缓存
-     * @param string $tag 标签名
-     * @return boolean
-     */
-    public function clear($tag = '')
-    {
-        if ($tag) {
-            $keys = $this->tag_items_get($tag);
-            foreach ($keys as $key) {
-                wincache_ucache_delete($key);
-            }
-            $this->delete('tag_' . md5($tag));
-            return true;
-        } else {
-            return wincache_ucache_clear();
+        $this->_times['read']  = ((int)$this->_times['read']) + 1;
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
+        }
+        if($this->has($key,false)){
+            return $default;
+        }
+        // 读
+        $content    =  wincache_ucache_get($key);
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $content = gzuncompress($content);
+        }
+        // 解析
+        if($this->_options['format_string']){
+            return $content;
+        }else{
+            return $this->unserialize($content);
         }
     }
 
+    /**
+     * 判断缓存是否存在
+     * @param  string $key         缓存变量名
+     * @param  bool   $add_prefix  是否活加前缀
+     * @return bool
+     */
+    public function has(string $key, bool $add_prefix = true)
+    {
+        if($add_prefix){
+            $key   = $this->cache_key_get($key);
+        }
+        return wincache_ucache_exists($key);
+    }
+
+    /**
+     * 删除缓存
+     * @param  string $key         缓存变量名
+     * @param  bool   $add_prefix  是否活加前缀
+     * @return bool
+     */
+    public function delete(string $key, bool $add_prefix = true)
+    {
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
+        }
+        return wincache_ucache_delete($key);
+    }
+
+    /**
+     * 清除所有缓存
+     * @return bool
+     */
+    public function clear()
+    {
+        return wincache_ucache_clear();
+    }
 }

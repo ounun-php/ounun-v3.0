@@ -24,7 +24,7 @@ class memcached extends \ounun\dc\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't_',
+        'prefix_tag'    => 't',
 
         'servers'      => [
             ['127.0.0.1',11211,100],
@@ -56,18 +56,9 @@ class memcached extends \ounun\dc\driver
         if ($this->_options['timeout'] > 0) {
             $this->_handler->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $this->_options['timeout']);
         }
-        // 支持集群
-        $hosts = explode(',', $this->_options['host']);
-        $ports = explode(',', $this->_options['port']);
-        if (empty($ports[0])) {
-            $ports[0] = 11211;
-        }
-        // 建立连接
-        $servers = [];
-        foreach ((array) $hosts as $i => $host) {
-            $servers[] = [$host, (isset($ports[$i]) ? $ports[$i] : $ports[0]), 1];
-        }
-        $this->_handler->addServers($servers);
+        // 建立连接 / 支持集群
+        $this->_handler->addServers($this->_options['servers']);
+        // 受权
         if ('' != $this->_options['username']) {
             $this->_handler->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
             $this->_handler->setSaslAuthData($this->_options['username'], $this->_options['password']);
@@ -75,47 +66,36 @@ class memcached extends \ounun\dc\driver
     }
 
     /**
-     * 判断缓存
-     * @param string $key 缓存变量名
-     * @return bool
-     */
-    public function has($key)
-    {
-        $key = $this->cache_key_get($key);
-        return $this->_handler->get($key) ? true : false;
-    }
-
-    /**
-     * 读取缓存
-     * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
-     * @return mixed
-     */
-    public function get($name, $default = false)
-    {
-        $this->_times['read']  = (int)$this->_times['read'] + 1;
-        $result                = $this->_handler->get($this->cache_key_get($name));
-        return false !== $result ? $result : $default;
-    }
-
-    /**
      * 写入缓存
-     * @param string            $key 缓存变量名
-     * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire  有效时间（秒）
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $value       存储数据
+     * @param  int       $expire      有效时间（秒）
+     * @param  bool      $add_prefix  是否活加前缀
      * @return bool
      */
-    public function set($key, $value, $expire = null)
+    public function set(string $key, $value,int $expire = 0, bool $add_prefix = true)
     {
-        $this->_times['write']  = (int)$this->_times['write'] + 1;
-        if ($this->_tagset && !$this->has($key)) {
-            $first = true;
+        $this->_times['write']  = ((int)$this->_times['write']) + 1;
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
         }
-        $key    = $this->cache_key_get($key);
-        $expire = 0 == $expire ? 0 : $_SERVER['REQUEST_TIME'] + $expire;
+        // first
+        $first      = false;
+        if ($this->_tagset && !$this->has($key,$add_prefix)) {
+            $first  = true;
+        }
+        if(!$this->_options['format_string']){
+            $value = $this->serialize($value);
+        }
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $value = gzcompress($value, 3);
+        }
+        // 写
+        $expire = 0 == $expire ? 0 : time() + $expire;
         if ($this->_handler->set($key, $value, $expire)) {
             if($first){
-                $this->_tagset->append($key);
+                $this->_tagset->append($key,false);
             }
             return true;
         }
@@ -123,66 +103,57 @@ class memcached extends \ounun\dc\driver
     }
 
     /**
-     * 自增缓存（针对数值缓存）
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
-     * @return false|int
+     * 读取缓存
+     * @param  string    $key         缓存变量名
+     * @param  mixed     $default     默认值
+     * @param  bool      $add_prefix  是否活加前缀
+     * @return mixed
      */
-    public function increase($name, $step = 1)
+    public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        $key = $this->cache_key_get($name);
-        if ($this->_handler->get($key)) {
-            return $this->_handler->increment($key, $step);
+        $this->_times['read']  = ((int)$this->_times['read']) + 1;
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
         }
-        return $this->_handler->set($key, $step);
-    }
-
-    /**
-     * 自减缓存（针对数值缓存）
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
-     * @return false|int
-     */
-    public function decrease($name, $step = 1)
-    {
-        $key   = $this->cache_key_get($name);
-        $value = $this->_handler->get($key) - $step;
-        $res   = $this->_handler->set($key, $value);
-        if (!$res) {
-            return false;
-        } else {
-            return $value;
+        $content     = $this->_handler->get($key);
+        if (empty($content)) {
+            return $default;
+        }
+        // 数据压缩
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+            $content = gzuncompress($content);
+        }
+        // 解析
+        if($this->_options['format_string']){
+            return $content;
+        }else{
+            return $this->unserialize($content);
         }
     }
 
     /**
      * 删除缓存
-     * @param    string  $key 缓存变量名
-     * @param bool|false $ttl
+     * @param    string  $key         缓存变量名
+     * @param    bool    $add_prefix  是否活加前缀
+     * @param    bool    $ttl
      * @return bool
      */
-    public function delete($key, $ttl = false)
+    public function delete(string $key, bool $add_prefix = true, $ttl = false)
     {
-        $key = $this->cache_key_get($key);
+        if($add_prefix){
+            $key    = $this->cache_key_get($key);
+        }
         return false === $ttl
                 ? $this->_handler->delete($key)
                 : $this->_handler->delete($key, $ttl);
     }
 
     /**
-     * 清除缓存
-     * @param string $tag 标签名
+     * 清除所有缓存
      * @return bool
      */
-    public function clear(string $tag = '')
+    public function clear()
     {
-        if ($tag) {
-            // 指定标签清除
-            $keys = $this->tag_item_get($tag);
-            $this->_handler->deleteMulti($keys);
-            $this->delete($this->tag_key_get($tag));
-            return true;
-        }
         return $this->_handler->flush();
     }
 }
