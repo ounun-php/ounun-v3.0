@@ -14,12 +14,11 @@ class base
     /** @var string 随机码 */
     public $code = '';
 
-    /** @var null 图片句柄 */
-    protected $_img = null;
+    /** @var resource 图片句柄 */
+    protected $_img;
 
     /**
      * 生成图片
-     *
      * @param int $img_width
      * @param int $img_height
      * @param int $img_lenght
@@ -52,7 +51,7 @@ class base
             $this->code .= dechex(mt_rand(0, 9));
         }
         $number_img = imagecreatetruecolor($img_width + 10, $img_height);
-        $white = imagecolorallocate($number_img, 255, 255, 255);
+        $white      = imagecolorallocate($number_img, 255, 255, 255);
         imagefilledrectangle($number_img, 0, 0, $img_width + 10 - 1, $img_height - 1, $white);
         for ($i = 1; $i <= 100; $i++) {
             \imagefttext($number_img, mt_rand(5, 10), mt_rand(0, 60), mt_rand(1, $img_width), mt_rand(1, $img_height), imagecolorallocate($number_img, mt_rand(180, 255), mt_rand(180, 255), mt_rand(180, 255)), $font[mt_rand(0, 2)], "*");
@@ -67,12 +66,13 @@ class base
         $this->_img = $number_img;
     }
 
-    /** 输出图片 */
+    /**
+     * 输出图片
+     */
     public function output()
     {
         header("Content-type: image/png");
         imagepng($this->_img);
         imagedestroy($this->_img);
     }
-
 }

@@ -10,7 +10,7 @@ namespace ounun;
  * Class agent
  * @package ounun
  */
-class agent
+class client
 {
     // 设备类型
     const Device_Mobile = 1;
@@ -86,7 +86,6 @@ class agent
     const Display_Type_Module = 7;
 
 
-
     /**
      * @param string $agent
      * @return mixed|string
@@ -98,7 +97,10 @@ class agent
     }
 
 
-    // 得到agent完整类型信息
+    /**
+     * 得到agent完整类型信息
+     * @return array
+     */
     public static function device_info_get()
     {
         return [
@@ -110,7 +112,11 @@ class agent
         ];
     }
 
-    // 浏览器类型
+    /**
+     * 浏览器类型
+     * @param string $agent
+     * @return int
+     */
     public static function browser_type($agent = '')
     {
         $agent = self::agent_get($agent);
@@ -137,7 +143,11 @@ class agent
         return self::Browser_Type_Unknown;
     }
 
-    // 系统类型
+    /**
+     * 系统类型
+     * @param string $agent
+     * @return int
+     */
     public static function os_type($agent = '')
     {
         $agent = self::agent_get($agent);
@@ -159,7 +169,10 @@ class agent
         return $osType;
     }
 
-    // 设备类型
+    /**
+     * 设备类型
+     * @return int
+     */
     public static function device_type()
     {
         if (self::is_mobile()) {
@@ -169,7 +182,11 @@ class agent
         }
     }
 
-    // retina屏
+    /**
+     * retina屏
+     * @param string $agent
+     * @return int
+     */
     public static function is_retina($agent = '')
     {
         $agent = self::agent_get($agent);
@@ -182,7 +199,11 @@ class agent
         }
     }
 
-    // ios6系统的手机(iphone4, iphone4s)
+    /**
+     * ios6系统的手机(iphone4, iphone4s)
+     * @param string $agent
+     * @return int
+     */
     public static function is_ios6($agent = '')
     {
         $agent = self::agent_get($agent);
@@ -194,7 +215,11 @@ class agent
         }
     }
 
-    // 检查是否在微信中打开
+    /**
+     * 检查是否在微信中打开
+     * @param string $agent
+     * @return int
+     */
     public static function is_wechat_message($agent = '')
     {
         $agent = self::agent_get($agent);
@@ -206,7 +231,10 @@ class agent
         }
     }
 
-    // 已安装APP
+    /**
+     * 已安装APP
+     * @return int
+     */
     public static function is_app_installed()
     {
         if (isset($_GET['isappinstalled']) && ($_GET['isappinstalled'] == 1)) {

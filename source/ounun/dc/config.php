@@ -10,7 +10,7 @@ use ounun\dc;
 class config
 {
     /** @var array<\ounun\cache\config> */
-    static protected $_inst = [];
+    static protected $_instance = [];
 
     /**
      * @param \ounun\db\pdo $db
@@ -21,14 +21,14 @@ class config
      */
     static public function i(string $tag = 'tag', array $config = [], \ounun\db\pdo $db = null)
     {
-        if (empty(static::$_inst[$tag])) {
-            static::$_inst[$tag] = new static($tag, $config,  $db);
+        if (empty(static::$_instance[$tag])) {
+            static::$_instance[$tag] = new static($tag, $config,  $db);
         }
-        return static::$_inst[$tag];
+        return static::$_instance[$tag];
     }
 
     /** @var array */
-    protected $_cache_value = [];
+    protected $_value = [];
 
     /** @var dc */
     protected $_dc;
@@ -65,8 +65,8 @@ class config
      */
     protected function _clean($tag_key)
     {
-        $this->_cache_value[$tag_key] = null;
-        unset($this->_cache_value[$tag_key]);
+        $this->_value[$tag_key] = null;
+        unset($this->_value[$tag_key]);
         $this->_dc->fast_del($tag_key);
     }
 
@@ -79,7 +79,7 @@ class config
     protected function _data($tag_key, $mysql_method, $args = null)
     {
 
-        if (!$this->_cache_value[$tag_key]) {
+        if (!$this->_value[$tag_key]) {
             $this->_dc->set_key($tag_key);
             $c = $this->_dc->get();
             //$this->_cd[$tag_key]->mtime = time();
@@ -87,20 +87,20 @@ class config
             //debug_header('$this_mtime',$this->_cd[$tag_key]->mtime,true);
             if ($c == null) {
                 //debug_header('$this_mtime2',222,true);
-                $this->_cache_value[$tag_key] = $this->$mysql_method($args);
+                $this->_value[$tag_key] = $this->$mysql_method($args);
                 $this->_dc->set_key($tag_key);
-                $this->_dc->set_value(['t' => time(), 'v' => $this->_cache_value[$tag_key]]);
+                $this->_dc->set_value(['t' => time(), 'v' => $this->_value[$tag_key]]);
                 $this->_dc->set();
             } elseif (!is_array($c) || (int)$c['t'] < $this->_last_time) {
                 // debug_header('$this_mtime3',3333,true);
-                $this->_cache_value[$tag_key] = $this->$mysql_method($args);
+                $this->_value[$tag_key] = $this->$mysql_method($args);
                 $this->_dc->set_key($tag_key);
-                $this->_dc->set_value(['t' => time(), 'v' => $this->_cache_value[$tag_key]]);
+                $this->_dc->set_value(['t' => time(), 'v' => $this->_value[$tag_key]]);
                 $this->_dc->set();
             } else {
-                $this->_cache_value[$tag_key] = $c['v'];
+                $this->_value[$tag_key] = $c['v'];
             }
         }
-        return $this->_cache_value[$tag_key];
+        return $this->_value[$tag_key];
     }
 }

@@ -6,7 +6,7 @@
 namespace ounun\apps\logic;
 
 
-use ounun\config\driver\ini;
+use ounun\config\parse\ini;
 
 class user extends \ounun\apps\logic
 {

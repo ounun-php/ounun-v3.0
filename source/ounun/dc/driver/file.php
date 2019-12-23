@@ -5,6 +5,7 @@
  */
 namespace ounun\dc\driver;
 
+use ounun\dc\code;
 use ounun\utils\time;
 
 /**
@@ -29,6 +30,7 @@ class file extends \ounun\dc\driver
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
+        'data_code'     => false,
         'data_compress' => false,
     ];
 
@@ -66,6 +68,25 @@ class file extends \ounun\dc\driver
     }
 
     /**
+     * 获取实际标签名
+     * @param  string $tagset_tag 标签名
+     * @return string
+     */
+    public function tagset_key_get(string $tagset_tag): string
+    {
+        if($this->_options['prefix_tag']){
+            if($this->_options['prefix']){
+                return $this->_options['path'].$this->_options['prefix'] .'/'.$this->_options['prefix_tag'].'/'. $tagset_tag.'.c';
+            }
+            return $this->_options['path'].'c/'.$this->_options['prefix_tag']. '/' . $tagset_tag.'.c';
+        }
+        if($this->_options['prefix']){
+            return $this->_options['path'].$this->_options['prefix'] .'/t/'. $tagset_tag .'.c';
+        }
+        return $this->_options['path'].'c/t/'.$tagset_tag. '.c';
+    }
+
+    /**
      * 写入缓存
      * @param  string    $key         缓存变量名
      * @param  mixed     $value       存储数据
@@ -85,20 +106,24 @@ class file extends \ounun\dc\driver
         if ($this->_tagset && $this->has($filename,false)) {
             $first = true;
         }
-        if(!$this->_options['format_string']){
-            $value = $this->serialize($value);
+        if($this->_options['data_code']){
+            $result =  code::write($filename,$value,true);
+        }else{
+            if(!$this->_options['format_string']){
+                $value = $this->serialize($value);
+            }
+            // 数据压缩
+            if ($this->_options['data_compress'] && function_exists('gzcompress')) {
+                $value = gzcompress($value, 3);
+            }
+            // 创建目录
+            $dir      = dirname($filename);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0777, true);
+            }
+            // 写文件
+            $result = file_put_contents($filename, $value);
         }
-        // 数据压缩
-        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
-            $value = gzcompress($value, 3);
-        }
-        // 创建目录
-        $dir      = dirname($filename);
-        if (!is_dir($dir)) {
-            mkdir($dir, 0777, true);
-        }
-        // 写文件
-        $result = file_put_contents($filename, $value);
         if ($result) {
             if($first){
                 $this->_tagset->append($key,false);
@@ -135,6 +160,9 @@ class file extends \ounun\dc\driver
             }
         }
         // 读
+        if($this->_options['data_compress']){
+            return code::read($filename);
+        }
         $content    = file_get_contents($filename);
         // 数据压缩
         if ($this->_options['data_compress'] && function_exists('gzcompress')) {

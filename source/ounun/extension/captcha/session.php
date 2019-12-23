@@ -8,30 +8,30 @@ namespace ounun\extension\captcha;
 class session
 {
     /** @var int */
-    public $maxAngle = 15;
+    public $max_angle  = 15;
 
     /** @var int */
-    public $maxOffset = 5;
+    public $max_offset = 5;
 
     /** @var string */
     public $phrase = '';
 
     /** @var resource */
-    private $image;
+    protected $_image;
 
     /** @var null */
-    private $maxFrontLines;
+    protected $_max_front_lines;
 
     /**
      * @param $width
      * @param $height
-     * @return $this
+     * @return $this|array
      */
     public function build($width, $height)
     {
         $image = imagecreatetruecolor($width, $height);
         if (empty($image)) {
-            return error('1', 'Not supplied GD');
+            return error( 'Not supplied GD','1');
         }
         $bg = imagecolorallocate($image, $this->rand(200, 255), $this->rand(200, 255), $this->rand(200, 255));
         imagefill($image, 0, 0, $bg);
@@ -46,35 +46,44 @@ class session
 
         $square = $width * $height;
         $effects = $this->rand($square / 3000, $square / 2000);
-        if ($this->maxFrontLines !== 0) {
+        if ($this->_max_front_lines !== 0) {
             for ($e = 0; $e < $effects; $e++) {
                 $this->drawLine($image, $width, $height, $color);
             }
         }
 
         $image = $this->distort($image, $width, $height, $bg);
-        $this->image = $image;
+        $this->_image = $image;
         return $this;
     }
 
+    /**
+     * @param int $quality
+     */
     public function output($quality = 90)
     {
         header('content-type: image/png');
-        imagepng($this->image, null, $quality);
-        imagedestroy($this->image);
+        imagepng($this->_image, null, $quality);
+        imagedestroy($this->_image);
     }
 
-//    protected function phrase()
-//    {
-//        return random(4, true);
-//    }
-
+    /**
+     * @param $min
+     * @param $max
+     * @return int
+     */
     protected function rand($min, $max)
     {
         mt_srand((double)microtime() * 1000000);
         return mt_rand($min, $max);
     }
 
+    /**
+     * @param $image
+     * @param $width
+     * @param $height
+     * @param null $tcol
+     */
     protected function drawLine($image, $width, $height, $tcol = null)
     {
         if ($tcol === null) {
@@ -112,8 +121,8 @@ class session
         for ($i = 0; $i < $length; $i++) {
             $box = imagettfbbox($size, 0, $font, $phrase[$i]);
             $w = $box[2] - $box[0];
-            $angle = $this->rand(-$this->maxAngle, $this->maxAngle);
-            $offset = $this->rand(-$this->maxOffset, $this->maxOffset);
+            $angle = $this->rand(-$this->max_angle, $this->max_angle);
+            $offset = $this->rand(-$this->max_offset, $this->max_offset);
             imagettftext($image, $size, $angle, $x, $y + $offset, $col, $font, $phrase[$i]);
             $x += $w;
         }
@@ -146,10 +155,10 @@ class session
                 $p = $this->interpolate(
                     $nX - floor($nX),
                     $nY - floor($nY),
-                    $this->getCol($image, floor($nX), floor($nY), $bg),
-                    $this->getCol($image, ceil($nX), floor($nY), $bg),
-                    $this->getCol($image, floor($nX), ceil($nY), $bg),
-                    $this->getCol($image, ceil($nX), ceil($nY), $bg)
+                    $this->col_get($image, floor($nX), floor($nY), $bg),
+                    $this->col_get($image, ceil($nX), floor($nY), $bg),
+                    $this->col_get($image, floor($nX), ceil($nY), $bg),
+                    $this->col_get($image, ceil($nX), ceil($nY), $bg)
                 );
 
                 if ($p == 0) {
@@ -165,10 +174,10 @@ class session
 
     protected function interpolate($x, $y, $nw, $ne, $sw, $se)
     {
-        list($r0, $g0, $b0) = $this->getRGB($nw);
-        list($r1, $g1, $b1) = $this->getRGB($ne);
-        list($r2, $g2, $b2) = $this->getRGB($sw);
-        list($r3, $g3, $b3) = $this->getRGB($se);
+        list($r0, $g0, $b0) = $this->rgb_get($nw);
+        list($r1, $g1, $b1) = $this->rgb_get($ne);
+        list($r2, $g2, $b2) = $this->rgb_get($sw);
+        list($r3, $g3, $b3) = $this->rgb_get($se);
 
         $cx = 1.0 - $x;
         $cy = 1.0 - $y;
@@ -188,7 +197,11 @@ class session
         return ($r << 16) | ($g << 8) | $b;
     }
 
-    protected function getRGB($col)
+    /**
+     * @param $col
+     * @return array
+     */
+    protected function rgb_get($col)
     {
         return array(
             (int)($col >> 16) & 0xff,
@@ -197,7 +210,14 @@ class session
         );
     }
 
-    protected function getCol($image, $x, $y, $background)
+    /**
+     * @param $image
+     * @param $x
+     * @param $y
+     * @param $background
+     * @return false|int
+     */
+    protected function col_get($image, $x, $y, $background)
     {
         $L = imagesx($image);
         $H = imagesy($image);
@@ -208,8 +228,11 @@ class session
         return imagecolorat($image, $x, $y);
     }
 
+    /**
+     * @return string
+     */
     protected function font()
     {
-        return IA_ROOT . '/web/resource/fonts/captcha.ttf';
+        return __DIR__ . '/res/font/a.ttf';
     }
 }

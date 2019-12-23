@@ -32,9 +32,9 @@ class json_data extends \ounun\apps\logic
             exit('数据表:$table无数据');
         }
         /** 分页 */
-        $pg  = new \ounun\page\base_max( $this->db, $table, $url, $where, $page_config);
+        $pg  = new \ounun\page\base_max( $this->_db, $table, $url, $where, $page_config);
         $ps  = $pg->init($page, $title,$end_index);
-        $db  = $this->db->table($table);
+        $db  = $this->_db->table($table);
         if($field){
             $db->field($field);
         }
@@ -72,7 +72,7 @@ class json_data extends \ounun\apps\logic
             exit('数据表:$table无数据');
         }
         /** 分页 */
-        $db = $this->db->table($table)->field($fields);
+        $db = $this->_db->table($table)->field($fields);
         if($order && is_array($order)){
             foreach ($order as $v){
                 $db->order($v['field'],$v['order']);

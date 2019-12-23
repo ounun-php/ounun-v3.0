@@ -21,28 +21,28 @@ class converter
      *
      * @var string parseHTML
      */
-    protected $parser;
+    protected $_parser;
 
     /**
      * markdown output
      *
      * @var string
      */
-    protected $output;
+    protected $_output;
 
     /**
      * stack with tags which where not converted to html
      *
      * @var array<string>
      */
-    protected $notConverted = [];
+    protected $_not_converted = [];
 
     /**
      * skip conversion to markdown
      *
      * @var bool
      */
-    protected $skipConversion = false;
+    protected $_skip_conversion = false;
 
     /* options */
 
@@ -51,7 +51,7 @@ class converter
      *
      * @var bool
      */
-    protected $keepHTML = false;
+    protected $_keep_html = false;
 
     /**
      * wrap output, set to 0 to skip wrapping
@@ -74,9 +74,10 @@ class converter
      * @var int
      */
     protected $linkPosition;
-    const LINK_AFTER_CONTENT = 0;
+
+    const LINK_AFTER_CONTENT   = 0;
     const LINK_AFTER_PARAGRAPH = 1;
-    const LINK_IN_PARAGRAPH = 2;
+    const LINK_IN_PARAGRAPH    = 2;
 
     /**
      * stores current buffers
@@ -243,7 +244,7 @@ class converter
     public function __construct($linkPosition = self::LINK_AFTER_CONTENT, $bodyWidth = MDFY_BODYWIDTH, $keepHTML = MDFY_KEEPHTML)
     {
         $this->linkPosition = $linkPosition;
-        $this->keepHTML = $keepHTML;
+        $this->_keep_html = $keepHTML;
 
         if ($bodyWidth > $this->minBodyWidth) {
             $this->bodyWidth = intval($bodyWidth);
@@ -251,8 +252,8 @@ class converter
             $this->bodyWidth = false;
         }
 
-        $this->parser = new converter_parser;
-        $this->parser->noTagsInCode = true;
+        $this->_parser = new converter_parser;
+        $this->_parser->noTagsInCode = true;
 
         // we don't have to do this every time
         $search = [];
@@ -277,10 +278,10 @@ class converter
     {
         $this->resetState();
 
-        $this->parser->html = $html;
+        $this->_parser->html = $html;
         $this->parse();
 
-        return $this->output;
+        return $this->_output;
     }
 
     /**
@@ -300,9 +301,9 @@ class converter
      * @param bool $linkPosition
      * @return void
      */
-    public function setKeepHTML($keepHTML)
+    public function setKeepHtml($_keep_html)
     {
-        $this->keepHTML = $keepHTML;
+        $this->_keep_html = $_keep_html;
     }
 
     /**
@@ -314,18 +315,18 @@ class converter
      */
     protected function parse()
     {
-        $this->output = '';
+        $this->_output = '';
         // drop tags
-        $this->parser->html = preg_replace('#<(' . implode('|', $this->drop) . ')[^>]*>.*</\\1>#sU', '', $this->parser->html);
-        while ($this->parser->nextNode()) {
-            switch ($this->parser->nodeType) {
+        $this->_parser->html = preg_replace('#<(' . implode('|', $this->drop) . ')[^>]*>.*</\\1>#sU', '', $this->_parser->html);
+        while ($this->_parser->nextNode()) {
+            switch ($this->_parser->nodeType) {
                 case 'doctype':
                     break;
                 case 'pi':
                 case 'comment':
-                    if ($this->keepHTML) {
+                    if ($this->_keep_html) {
                         $this->flushLinebreaks();
-                        $this->out($this->parser->node);
+                        $this->out($this->_parser->node);
                         $this->setLineBreaks(2);
                     }
                     // else drop
@@ -334,50 +335,50 @@ class converter
                     $this->handleText();
                     break;
                 case 'tag':
-                    if (in_array($this->parser->tagName, $this->ignore)) {
+                    if (in_array($this->_parser->tagName, $this->ignore)) {
                         break;
                     }
                     // If the previous tag was not a block element, we simulate a paragraph tag
-                    if ($this->parser->isBlockElement && $this->parser->isNextToInlineContext && !in_array($this->parent(), $this->allowMixedChildren)) {
+                    if ($this->_parser->isBlockElement && $this->_parser->isNextToInlineContext && !in_array($this->parent(), $this->allowMixedChildren)) {
                         $this->setLineBreaks(2);
                     }
-                    if ($this->parser->isStartTag) {
+                    if ($this->_parser->isStartTag) {
                         $this->flushLinebreaks();
                     }
-                    if ($this->skipConversion) {
+                    if ($this->_skip_conversion) {
                         $this->isMarkdownable(); // update notConverted
                         $this->handleTagToText();
                         continue;
                     }
 
                     // block elements
-                    if (!$this->parser->keepWhitespace && $this->parser->isBlockElement) {
+                    if (!$this->_parser->keepWhitespace && $this->_parser->isBlockElement) {
                         $this->fixBlockElementSpacing();
                     }
 
                     // inline elements
-                    if (!$this->parser->keepWhitespace && $this->parser->isInlineContext) {
+                    if (!$this->_parser->keepWhitespace && $this->_parser->isInlineContext) {
                         $this->fixInlineElementSpacing();
                     }
 
                     if ($this->isMarkdownable()) {
-                        if ($this->parser->isBlockElement && $this->parser->isStartTag && !$this->lastWasBlockTag && !empty($this->output)) {
+                        if ($this->_parser->isBlockElement && $this->_parser->isStartTag && !$this->lastWasBlockTag && !empty($this->_output)) {
                             if (!empty($this->buffer)) {
                                 $str =& $this->buffer[count($this->buffer) - 1];
                             } else {
-                                $str =& $this->output;
+                                $str =& $this->_output;
                             }
                             if (substr($str, -strlen($this->indent) - 1) != "\n" . $this->indent) {
                                 $str .= "\n" . $this->indent;
                             }
                         }
-                        $func = 'handleTag_' . $this->parser->tagName;
+                        $func = 'handleTag_' . $this->_parser->tagName;
                         $this->$func();
-                        if ($this->linkPosition == self::LINK_AFTER_PARAGRAPH && $this->parser->isBlockElement && !$this->parser->isStartTag && empty($this->parser->openTags)) {
+                        if ($this->linkPosition == self::LINK_AFTER_PARAGRAPH && $this->_parser->isBlockElement && !$this->_parser->isStartTag && empty($this->_parser->openTags)) {
                             $this->flushFootnotes();
                         }
-                        if (!$this->parser->isStartTag) {
-                            $this->lastClosedTag = $this->parser->tagName;
+                        if (!$this->_parser->isStartTag) {
+                            $this->lastClosedTag = $this->_parser->tagName;
                         }
                     } else {
                         $this->handleTagToText();
@@ -388,7 +389,7 @@ class converter
                     trigger_error('invalid node type', E_USER_ERROR);
                     break;
             }
-            $this->lastWasBlockTag = $this->parser->nodeType == 'tag' && $this->parser->isStartTag && $this->parser->isBlockElement;
+            $this->lastWasBlockTag = $this->_parser->nodeType == 'tag' && $this->_parser->isStartTag && $this->_parser->isBlockElement;
         }
         if (!empty($this->buffer)) {
             // trigger_error('buffer was not flushed, this is a bug. please report!', E_USER_WARNING);
@@ -397,7 +398,7 @@ class converter
             }
         }
         // cleanup
-        $this->output = rtrim(str_replace('&amp;', '&', str_replace('&lt;', '<', str_replace('&gt;', '>', $this->output))));
+        $this->_output = rtrim(str_replace('&amp;', '&', str_replace('&lt;', '<', str_replace('&gt;', '>', $this->_output))));
         // end parsing, flush stacked tags
         $this->flushFootnotes();
         $this->stack = [];
@@ -411,23 +412,23 @@ class converter
      */
     protected function isMarkdownable()
     {
-        if (!isset($this->isMarkdownable[$this->parser->tagName])) {
+        if (!isset($this->isMarkdownable[$this->_parser->tagName])) {
             // simply not markdownable
 
             return false;
         }
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $return = true;
-            if ($this->keepHTML) {
-                $diff = array_diff(array_keys($this->parser->tagAttributes), array_keys($this->isMarkdownable[$this->parser->tagName]));
+            if ($this->_keep_html) {
+                $diff = array_diff(array_keys($this->_parser->tagAttributes), array_keys($this->isMarkdownable[$this->_parser->tagName]));
                 if (!empty($diff)) {
                     // non markdownable attributes given
                     $return = false;
                 }
             }
             if ($return) {
-                foreach ($this->isMarkdownable[$this->parser->tagName] as $attr => $type) {
-                    if ($type == 'required' && !isset($this->parser->tagAttributes[$attr])) {
+                foreach ($this->isMarkdownable[$this->_parser->tagName] as $attr => $type) {
+                    if ($type == 'required' && !isset($this->_parser->tagAttributes[$attr])) {
                         // required markdown attribute not given
                         $return = false;
                         break;
@@ -435,13 +436,13 @@ class converter
                 }
             }
             if (!$return) {
-                array_push($this->notConverted, $this->parser->tagName . '::' . implode('/', $this->parser->openTags));
+                array_push($this->_not_converted, $this->_parser->tagName . '::' . implode('/', $this->_parser->openTags));
             }
 
             return $return;
         } else {
-            if (!empty($this->notConverted) && end($this->notConverted) === $this->parser->tagName . '::' . implode('/', $this->parser->openTags)) {
-                array_pop($this->notConverted);
+            if (!empty($this->_not_converted) && end($this->_not_converted) === $this->_parser->tagName . '::' . implode('/', $this->_parser->openTags)) {
+                array_pop($this->_not_converted);
 
                 return false;
             }
@@ -493,7 +494,7 @@ class converter
      */
     protected function flushLinebreaks()
     {
-        if ($this->lineBreaks && !empty($this->output)) {
+        if ($this->lineBreaks && !empty($this->_output)) {
             $this->out(str_repeat("\n" . $this->indent, $this->lineBreaks), true);
         }
         $this->lineBreaks = 0;
@@ -507,57 +508,57 @@ class converter
      */
     protected function handleTagToText()
     {
-        if (!$this->keepHTML) {
-            if (!$this->parser->isStartTag && $this->parser->isBlockElement) {
+        if (!$this->_keep_html) {
+            if (!$this->_parser->isStartTag && $this->_parser->isBlockElement) {
                 $this->setLineBreaks(2);
             }
         } else {
             // don't convert to markdown inside this tag
             /** TODO: markdown extra **/
-            if (!$this->parser->isEmptyTag) {
-                if ($this->parser->isStartTag) {
-                    if (!$this->skipConversion) {
-                        $this->skipConversion = $this->parser->tagName . '::' . implode('/', $this->parser->openTags);
+            if (!$this->_parser->isEmptyTag) {
+                if ($this->_parser->isStartTag) {
+                    if (!$this->_skip_conversion) {
+                        $this->_skip_conversion = $this->_parser->tagName . '::' . implode('/', $this->_parser->openTags);
                     }
                 } else {
-                    if ($this->skipConversion == $this->parser->tagName . '::' . implode('/', $this->parser->openTags)) {
-                        $this->skipConversion = false;
+                    if ($this->_skip_conversion == $this->_parser->tagName . '::' . implode('/', $this->_parser->openTags)) {
+                        $this->_skip_conversion = false;
                     }
                 }
             }
 
-            if ($this->parser->isBlockElement) {
-                if ($this->parser->isStartTag) {
+            if ($this->_parser->isBlockElement) {
+                if ($this->_parser->isStartTag) {
                     // looks like ins or del are block elements now
                     if (in_array($this->parent(), ['ins', 'del'])) {
                         $this->out("\n", true);
                         $this->indent('  ');
                     }
                     // don't indent inside <pre> tags
-                    if ($this->parser->tagName == 'pre') {
-                        $this->out($this->parser->node);
+                    if ($this->_parser->tagName == 'pre') {
+                        $this->out($this->_parser->node);
                         static $indent;
                         $indent = $this->indent;
                         $this->indent = '';
                     } else {
-                        $this->out($this->parser->node . "\n" . $this->indent);
-                        if (!$this->parser->isEmptyTag) {
+                        $this->out($this->_parser->node . "\n" . $this->indent);
+                        if (!$this->_parser->isEmptyTag) {
                             $this->indent('  ');
                         } else {
                             $this->setLineBreaks(1);
                         }
-                        $this->parser->html = ltrim($this->parser->html);
+                        $this->_parser->html = ltrim($this->_parser->html);
                     }
                 } else {
-                    if (!$this->parser->keepWhitespace) {
-                        $this->output = rtrim($this->output);
+                    if (!$this->_parser->keepWhitespace) {
+                        $this->_output = rtrim($this->_output);
                     }
-                    if ($this->parser->tagName != 'pre') {
+                    if ($this->_parser->tagName != 'pre') {
                         $this->indent('  ');
-                        $this->out("\n" . $this->indent . $this->parser->node);
+                        $this->out("\n" . $this->indent . $this->_parser->node);
                     } else {
                         // reset indentation
-                        $this->out($this->parser->node);
+                        $this->out($this->_parser->node);
                         static $indent;
                         $this->indent = $indent;
                     }
@@ -567,17 +568,17 @@ class converter
                         $this->out("\n");
                         $this->indent('  ');
                     }
-                    if ($this->parser->tagName == 'li') {
+                    if ($this->_parser->tagName == 'li') {
                         $this->setLineBreaks(1);
                     } else {
                         $this->setLineBreaks(2);
                     }
                 }
             } else {
-                $this->out($this->parser->node);
+                $this->out($this->_parser->node);
             }
-            if (in_array($this->parser->tagName, ['code', 'pre'])) {
-                if ($this->parser->isStartTag) {
+            if (in_array($this->_parser->tagName, ['code', 'pre'])) {
+                if ($this->_parser->isStartTag) {
                     $this->buffer();
                 } else {
                     // add stuff so cleanup just reverses this
@@ -595,20 +596,20 @@ class converter
      */
     protected function handleText()
     {
-        if ($this->hasParent('pre') && strpos($this->parser->node, "\n") !== false) {
-            $this->parser->node = str_replace("\n", "\n" . $this->indent, $this->parser->node);
+        if ($this->hasParent('pre') && strpos($this->_parser->node, "\n") !== false) {
+            $this->_parser->node = str_replace("\n", "\n" . $this->indent, $this->_parser->node);
         }
         if (!$this->hasParent('code') && !$this->hasParent('pre')) {
             // entity decode
-            $this->parser->node = $this->decode($this->parser->node);
-            if (!$this->skipConversion) {
+            $this->_parser->node = $this->decode($this->_parser->node);
+            if (!$this->_skip_conversion) {
                 // escape some chars in normal Text
-                $this->parser->node = preg_replace($this->escapeInText['search'], $this->escapeInText['replace'], $this->parser->node);
+                $this->_parser->node = preg_replace($this->escapeInText['search'], $this->escapeInText['replace'], $this->_parser->node);
             }
         } else {
-            $this->parser->node = str_replace(['&quot;', '&apos'], ['"', '\''], $this->parser->node);
+            $this->_parser->node = str_replace(['&quot;', '&apos'], ['"', '\''], $this->_parser->node);
         }
-        $this->out($this->parser->node);
+        $this->out($this->_parser->node);
         $this->lastClosedTag = '';
     }
 
@@ -718,7 +719,7 @@ class converter
      */
     protected function handleHeader($level)
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->out(str_repeat('#', $level) . ' ', true);
         } else {
             $this->setLineBreaks(2);
@@ -733,7 +734,7 @@ class converter
      */
     protected function handleTag_p()
     {
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             $this->setLineBreaks(2);
         }
     }
@@ -746,7 +747,7 @@ class converter
      */
     protected function handleTag_a()
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->buffer();
             $this->handleTag_a_parser();
             $this->stack();
@@ -766,12 +767,12 @@ class converter
      */
     protected function handleTag_a_parser()
     {
-        if (isset($this->parser->tagAttributes['title'])) {
-            $this->parser->tagAttributes['title'] = $this->decode($this->parser->tagAttributes['title']);
+        if (isset($this->_parser->tagAttributes['title'])) {
+            $this->_parser->tagAttributes['title'] = $this->decode($this->_parser->tagAttributes['title']);
         } else {
-            $this->parser->tagAttributes['title'] = null;
+            $this->_parser->tagAttributes['title'] = null;
         }
-        $this->parser->tagAttributes['href'] = $this->decode(trim($this->parser->tagAttributes['href']));
+        $this->_parser->tagAttributes['href'] = $this->decode(trim($this->_parser->tagAttributes['href']));
     }
 
     /**
@@ -832,39 +833,39 @@ class converter
      */
     protected function handleTag_img()
     {
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             return; // just to be sure this is really an empty tag...
         }
 
-        if (isset($this->parser->tagAttributes['title'])) {
-            $this->parser->tagAttributes['title'] = $this->decode($this->parser->tagAttributes['title']);
+        if (isset($this->_parser->tagAttributes['title'])) {
+            $this->_parser->tagAttributes['title'] = $this->decode($this->_parser->tagAttributes['title']);
         } else {
-            $this->parser->tagAttributes['title'] = null;
+            $this->_parser->tagAttributes['title'] = null;
         }
-        if (isset($this->parser->tagAttributes['alt'])) {
-            $this->parser->tagAttributes['alt'] = $this->decode($this->parser->tagAttributes['alt']);
+        if (isset($this->_parser->tagAttributes['alt'])) {
+            $this->_parser->tagAttributes['alt'] = $this->decode($this->_parser->tagAttributes['alt']);
         } else {
-            $this->parser->tagAttributes['alt'] = null;
+            $this->_parser->tagAttributes['alt'] = null;
         }
 
-        if (empty($this->parser->tagAttributes['src'])) {
+        if (empty($this->_parser->tagAttributes['src'])) {
             // support for "empty" images... dunno if this is really needed
             // but there are some test cases which do that...
-            if (!empty($this->parser->tagAttributes['title'])) {
-                $this->parser->tagAttributes['title'] = ' ' . $this->parser->tagAttributes['title'] . ' ';
+            if (!empty($this->_parser->tagAttributes['title'])) {
+                $this->_parser->tagAttributes['title'] = ' ' . $this->_parser->tagAttributes['title'] . ' ';
             }
-            $this->out('![' . $this->parser->tagAttributes['alt'] . '](' . $this->parser->tagAttributes['title'] . ')', true);
+            $this->out('![' . $this->_parser->tagAttributes['alt'] . '](' . $this->_parser->tagAttributes['title'] . ')', true);
 
             return;
         } else {
-            $this->parser->tagAttributes['src'] = $this->decode($this->parser->tagAttributes['src']);
+            $this->_parser->tagAttributes['src'] = $this->decode($this->_parser->tagAttributes['src']);
         }
 
-        $out = '![' . $this->parser->tagAttributes['alt'] . ']';
+        $out = '![' . $this->_parser->tagAttributes['alt'] . ']';
         if ($this->linkPosition == self::LINK_IN_PARAGRAPH) {
-            $out .= '(' . $this->parser->tagAttributes['src'];
-            if ($this->parser->tagAttributes['title']) {
-                $out .= ' "' . $this->parser->tagAttributes['title'] . '"';
+            $out .= '(' . $this->_parser->tagAttributes['src'];
+            if ($this->_parser->tagAttributes['title']) {
+                $out .= ' "' . $this->_parser->tagAttributes['title'] . '"';
             }
             $out .= ')';
             $this->out($out, true);
@@ -875,8 +876,8 @@ class converter
         $link_id = false;
         if (!empty($this->footnotes)) {
             foreach ($this->footnotes as $tag) {
-                if ($tag['href'] == $this->parser->tagAttributes['src']
-                    && $tag['title'] === $this->parser->tagAttributes['title']
+                if ($tag['href'] == $this->_parser->tagAttributes['src']
+                    && $tag['title'] === $this->_parser->tagAttributes['title']
                 ) {
                     $link_id = $tag['linkID'];
                     break;
@@ -886,9 +887,9 @@ class converter
         if (!$link_id) {
             $link_id = count($this->footnotes) + 1;
             $tag = [
-                'href' => $this->parser->tagAttributes['src'],
+                'href' => $this->_parser->tagAttributes['src'],
                 'linkID' => $link_id,
-                'title' => $this->parser->tagAttributes['title']
+                'title' => $this->_parser->tagAttributes['title']
             ];
             array_push($this->footnotes, $tag);
         }
@@ -910,7 +911,7 @@ class converter
 
             return;
         }
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->buffer();
         } else {
             $buffer = $this->unbuffer();
@@ -944,9 +945,9 @@ class converter
      */
     protected function handleTag_pre()
     {
-        if ($this->keepHTML && $this->parser->isStartTag) {
+        if ($this->_keep_html && $this->_parser->isStartTag) {
             // check if a simple <code> follows
-            if (!preg_match('#^\s*<code\s*>#Us', $this->parser->html)) {
+            if (!preg_match('#^\s*<code\s*>#Us', $this->_parser->html)) {
                 // this is no standard markdown code block
                 $this->handleTagToText();
 
@@ -954,10 +955,10 @@ class converter
             }
         }
         $this->indent('    ');
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             $this->setLineBreaks(2);
         } else {
-            $this->parser->html = ltrim($this->parser->html);
+            $this->_parser->html = ltrim($this->_parser->html);
         }
     }
 
@@ -980,14 +981,14 @@ class converter
      */
     protected function handleTag_ul()
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->stack();
-            if (!$this->keepHTML && $this->lastClosedTag == $this->parser->tagName) {
+            if (!$this->_keep_html && $this->lastClosedTag == $this->_parser->tagName) {
                 $this->out("\n" . $this->indent . '<!-- -->' . "\n" . $this->indent . "\n" . $this->indent);
             }
         } else {
             $this->unstack();
-            if ($this->parent() != 'li' || preg_match('#^\s*(</li\s*>\s*<li\s*>\s*)?<(p|blockquote)\s*>#sU', $this->parser->html)) {
+            if ($this->parent() != 'li' || preg_match('#^\s*(</li\s*>\s*<li\s*>\s*)?<(p|blockquote)\s*>#sU', $this->_parser->html)) {
                 // don't make Markdown add unneeded paragraphs
                 $this->setLineBreaks(2);
             }
@@ -1003,7 +1004,7 @@ class converter
     protected function handleTag_ol()
     {
         // same as above
-        $this->parser->tagAttributes['num'] = 0;
+        $this->_parser->tagAttributes['num'] = 0;
         $this->handleTag_ul();
     }
 
@@ -1017,17 +1018,17 @@ class converter
     {
         if ($this->parent() == 'ol') {
             $parent =& $this->getStacked('ol');
-            if ($this->parser->isStartTag) {
+            if ($this->_parser->isStartTag) {
                 $parent['num']++;
                 $this->out(str_repeat(' ', 3 - strlen($parent['num'])) . $parent['num'] . '. ', true);
             }
         } else {
-            if ($this->parser->isStartTag) {
+            if ($this->_parser->isStartTag) {
                 $this->out('  * ', true);
             }
         }
         $this->indent('    ', false);
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             $this->setLineBreaks(1);
         }
     }
@@ -1040,7 +1041,7 @@ class converter
      */
     protected function handleTag_hr()
     {
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             return; // just to be sure this really is an empty tag
         }
         $this->out('* * *', true);
@@ -1056,7 +1057,7 @@ class converter
     protected function handleTag_br()
     {
         $this->out("  \n" . $this->indent, true);
-        $this->parser->html = ltrim($this->parser->html);
+        $this->_parser->html = ltrim($this->_parser->html);
     }
 
     /**
@@ -1068,10 +1069,10 @@ class converter
      */
     protected function stack()
     {
-        if (!isset($this->stack[$this->parser->tagName])) {
-            $this->stack[$this->parser->tagName] = [];
+        if (!isset($this->stack[$this->_parser->tagName])) {
+            $this->stack[$this->_parser->tagName] = [];
         }
-        array_push($this->stack[$this->parser->tagName], $this->parser->tagAttributes);
+        array_push($this->stack[$this->_parser->tagName], $this->_parser->tagAttributes);
     }
 
     /**
@@ -1082,11 +1083,11 @@ class converter
      */
     protected function unstack()
     {
-        if (!isset($this->stack[$this->parser->tagName]) || !is_array($this->stack[$this->parser->tagName])) {
+        if (!isset($this->stack[$this->_parser->tagName]) || !is_array($this->stack[$this->_parser->tagName])) {
             trigger_error('Trying to unstack from empty stack. This must not happen.', E_USER_ERROR);
         }
 
-        return array_pop($this->stack[$this->parser->tagName]);
+        return array_pop($this->stack[$this->_parser->tagName]);
     }
 
     /**
@@ -1153,20 +1154,20 @@ class converter
         if (!empty($this->buffer)) {
             $this->buffer[count($this->buffer) - 1] .= $put;
         } else {
-            if ($this->bodyWidth && !$this->parser->keepWhitespace) { // wrap lines
+            if ($this->bodyWidth && !$this->_parser->keepWhitespace) { // wrap lines
                 // get last line
-                $pos = strrpos($this->output, "\n");
+                $pos = strrpos($this->_output, "\n");
                 if ($pos === false) {
-                    $line = $this->output;
+                    $line = $this->_output;
                 } else {
-                    $line = substr($this->output, $pos);
+                    $line = substr($this->_output, $pos);
                 }
 
                 if ($nowrap) {
                     if ($put[0] != "\n" && $this->strlen($line) + $this->strlen($put) > $this->bodyWidth) {
-                        $this->output .= "\n" . $this->indent . $put;
+                        $this->_output .= "\n" . $this->indent . $put;
                     } else {
-                        $this->output .= $put;
+                        $this->_output .= $put;
                     }
 
                     return;
@@ -1178,19 +1179,19 @@ class converter
                         $put = substr($put, $pos + 1);
                         $putLen = $this->strlen($putLine);
                         if ($lineLen + $putLen < $this->bodyWidth) {
-                            $this->output .= $putLine;
+                            $this->_output .= $putLine;
                             $lineLen = $putLen;
                         } else {
                             $split = preg_split('#^(.{0,' . ($this->bodyWidth - $lineLen) . '})\b#', $putLine, 2, PREG_SPLIT_OFFSET_CAPTURE | PREG_SPLIT_DELIM_CAPTURE);
-                            $this->output .= rtrim($split[1][0]) . "\n" . $this->indent . $this->wordwrap(ltrim($split[2][0]), $this->bodyWidth, "\n" . $this->indent, false);
+                            $this->_output .= rtrim($split[1][0]) . "\n" . $this->indent . $this->wordwrap(ltrim($split[2][0]), $this->bodyWidth, "\n" . $this->indent, false);
                         }
                     }
-                    $this->output = substr($this->output, 0, -1);
+                    $this->_output = substr($this->_output, 0, -1);
 
                     return;
                 }
             } else {
-                $this->output .= $put;
+                $this->_output .= $put;
             }
         }
     }
@@ -1204,7 +1205,7 @@ class converter
      */
     protected function indent($str, $output = true)
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->indent .= $str;
             if ($output) {
                 $this->out($str, true);
@@ -1319,7 +1320,7 @@ class converter
      */
     protected function hasParent($tagName)
     {
-        return in_array($tagName, $this->parser->openTags);
+        return in_array($tagName, $this->_parser->openTags);
     }
 
     /**
@@ -1330,7 +1331,7 @@ class converter
      */
     protected function parent()
     {
-        return end($this->parser->openTags);
+        return end($this->_parser->openTags);
     }
 
     /**
@@ -1338,8 +1339,8 @@ class converter
      */
     protected function fixBlockElementSpacing()
     {
-        if ($this->parser->isStartTag) {
-            $this->parser->html = ltrim($this->parser->html);
+        if ($this->_parser->isStartTag) {
+            $this->_parser->html = ltrim($this->_parser->html);
         }
     }
 
@@ -1355,23 +1356,23 @@ class converter
      */
     protected function fixInlineElementSpacing()
     {
-        if ($this->parser->isStartTag && !$this->parser->isEmptyTag) {
+        if ($this->_parser->isStartTag && !$this->_parser->isEmptyTag) {
             // move spaces after the start element to before the element
-            if (preg_match('~^(\s+)~', $this->parser->html, $matches)) {
+            if (preg_match('~^(\s+)~', $this->_parser->html, $matches)) {
                 $this->out($matches[1]);
-                $this->parser->html = ltrim($this->parser->html, " \t\0\x0B");
+                $this->_parser->html = ltrim($this->_parser->html, " \t\0\x0B");
             }
         } else {
             if (!empty($this->buffer)) {
                 $str =& $this->buffer[count($this->buffer) - 1];
             } else {
-                $str =& $this->output;
+                $str =& $this->_output;
             }
 
             // move spaces before the end element to after the element
             if (preg_match('~(\s+)$~', $str, $matches)) {
                 $str = rtrim($str, " \t\0\x0B");
-                $this->parser->html = $matches[1] . $this->parser->html;
+                $this->_parser->html = $matches[1] . $this->_parser->html;
             }
         }
     }
@@ -1382,8 +1383,8 @@ class converter
      */
     protected function resetState()
     {
-        $this->notConverted = [];
-        $this->skipConversion = false;
+        $this->_not_converted = [];
+        $this->_skip_conversion = false;
         $this->buffer = [];
         $this->indent = '';
         $this->stack = [];

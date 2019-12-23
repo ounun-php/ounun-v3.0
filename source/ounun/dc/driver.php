@@ -17,10 +17,10 @@ abstract class driver
     /** @var tagset 缓存标签集 */
     protected $_tagset;
     /** @var string 缓存标签(标识名) */
-    protected $_tag     = '';
+    protected $_tagset_tag  = '';
 
     /** @var array 缓存 read:读取次数 write:写入次数 */
-    protected $_times   = [ 'read'  => 0, 'write' => 0, ];
+    protected $_times       = [ 'read'  => 0, 'write' => 0, ];
 
     /** @var array 缓存参数(配制数组) */
     protected $_options = [
@@ -179,62 +179,68 @@ abstract class driver
 
     /**
      * 缓存标签
-     * @param  string $tag 标签名
+     * @param  string $tagset_tag  标签名
      * @param  int    $max_length  最大长度
      * @return tagset
      */
-    public function tag(string $tag = '',int $max_length = 10000)
+    public function tagset(string $tagset_tag = '', int $max_length = 10000)
     {
-        if(empty($tag) && $this->_tagset){
+        if(empty($tagset_tag) && $this->_tagset){
             return $this->_tagset;
-        }elseif($tag == $this->_tag && $this->_tagset){
+        }elseif($tagset_tag == $this->_tagset_tag && $this->_tagset){
             return $this->_tagset;
         }
-        $this->_tag    = $tag;
-        $this->_tagset = new tagset($tag, $this,$max_length);
+        $this->_tagset_tag    = $tagset_tag;
+        $this->_tagset = new tagset($tagset_tag, $this,$max_length);
         return $this->_tagset;
     }
 
     /**
      * 删除缓存标签
-     * @param  string   $tag         标签标识
+     * @param  string   $tagset_tag  标签标识
      * @param  bool     $add_prefix  是否活加前缀
      * @return void
      */
-    public function tag_clear(string $tag, bool $add_prefix = true): void
+    public function tagset_clear(string $tagset_tag, bool $add_prefix = true): void
     {
-        $keys = $this->tag_items_get($tag,$add_prefix);
+        $keys = $this->tagset_items_get($tagset_tag,$add_prefix);
         // 指定标签清除
         $this->multiple_delete($keys,false);
 
-        $this->delete($this->tag_key_get($tag),false);
+        $this->delete($this->tagset_key_get($tagset_tag),false);
     }
 
     /**
      * 获取标签包含的缓存标识
-     * @param  string   $tag         标签标识
+     * @param  string   $tagset_tag         标签标识
      * @param  bool     $add_prefix  是否活加前缀
      * @return array
      */
-    public function tag_items_get(string $tag, bool $add_prefix = true): array
+    public function tagset_items_get(string $tagset_tag, bool $add_prefix = true): array
     {
         if($add_prefix){
-            $tag = $this->tag_key_get($tag);
+            $tagset_tag = $this->tagset_key_get($tagset_tag);
         }
-        return $this->get($tag, [],false);
+        return $this->get($tagset_tag, [],false);
     }
 
     /**
      * 获取实际标签名
-     * @param  string $tag 标签名
+     * @param  string $tagset_tag 标签名
      * @return string
      */
-    public function tag_key_get(string $tag): string
+    public function tagset_key_get(string $tagset_tag): string
     {
         if($this->_options['prefix_tag']){
-            return $this->_options['prefix_tag']. ':' . $tag;
+            if($this->_options['prefix']){
+                return $this->_options['prefix'] .':'.$this->_options['prefix_tag'].':'. $tagset_tag;
+            }
+            return 'c:'.$this->_options['prefix_tag']. ':' . $tagset_tag;
         }
-        return $tag;
+        if($this->_options['prefix']){
+            return $this->_options['prefix'] .':t:'. $tagset_tag;
+        }
+        return 'c:t:'.$tagset_tag;
     }
 
     /**

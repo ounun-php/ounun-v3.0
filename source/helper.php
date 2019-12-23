@@ -687,7 +687,7 @@ function environment()
             \ounun::environment_set($ini);
         }
     } else {
-        $GLOBALS['_environment_'] = '2';
+        exit("{$env_file}:not exist");
     }
     return $GLOBALS['_environment_'];
 }

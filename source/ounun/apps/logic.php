@@ -33,37 +33,9 @@ abstract class logic
     protected $_data = [];
 
     /** @var \ounun\db\pdo */
-    public $db;
-
-    /** @var array 数据表结构 */
-    public $table_options = [
-//        $_tablefields = [],
-//        $_primary = null,
-//        $_fields = [],
-//        $_readonly = [],
-//        $_create_autofill = [],
-//        $_update_autofill = [],
-//        $_filters_input = [],
-//        $_filters_output = [],
-//        $_validators = [],
-//        $_options = [],
-//        $_fetch_style = self::FETCH_ASSOC;
-    ];
-
+    protected $_db;
     /** @var string  */
     protected $_table        = '';
-    protected $_table_fields = [];
-    protected $_options      = [];
-
-    protected $_primary          = '';
-    protected $_fields           = [];
-    protected $_readonly         = [];
-    protected $_create_auto_fill = [];
-    protected $_update_auto_fill = [];
-    protected $_filters_input    = [];
-    protected $_filters_output   = [];
-    protected $_validators       = [];
-
 
     /**
      * cms constructor.
@@ -72,7 +44,7 @@ abstract class logic
     public function __construct(\ounun\db\pdo $db = null)
     {
         if ($db) {
-            $this->db = $db;
+            $this->_db = $db;
         }
         static::$_instance = $this;
     }

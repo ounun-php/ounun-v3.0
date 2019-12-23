@@ -77,15 +77,15 @@ class converter_extra extends converter
         $this->isMarkdownable['fn'] = [
             'name' => 'required',
         ];
-        $this->parser->blockElements['fnref'] = false;
-        $this->parser->blockElements['fn'] = true;
-        $this->parser->blockElements['footnotes'] = true;
+        $this->_parser->blockElements['fnref'] = false;
+        $this->_parser->blockElements['fn'] = true;
+        $this->_parser->blockElements['footnotes'] = true;
         // abbr
         $this->isMarkdownable['abbr'] = [
             'title' => 'required',
         ];
         // build RegEx lookahead to decide wether table can pe parsed or not
-        $inlineTags = array_keys($this->parser->blockElements, false);
+        $inlineTags = array_keys($this->_parser->blockElements, false);
         $colContents = '(?:[^<]|<(?:' . implode('|', $inlineTags) . '|[^a-z]))*';
         $this->tableLookaheadHeader = '{
     ^\s*(?:<thead\s*>)?\s*                                  # open optional thead
@@ -116,8 +116,8 @@ class converter_extra extends converter
      */
     protected function handleHeader($level)
     {
-        if ($this->parser->isStartTag) {
-            $this->parser->tagAttributes['cssSelector'] = $this->getCurrentCssSelector();
+        if ($this->_parser->isStartTag) {
+            $this->_parser->tagAttributes['cssSelector'] = $this->getCurrentCssSelector();
             $this->stack();
         } else {
             $tag = $this->unstack();
@@ -138,7 +138,7 @@ class converter_extra extends converter
     protected function handleTag_a_parser()
     {
         parent::handleTag_a_parser();
-        $this->parser->tagAttributes['cssSelector'] = $this->getCurrentCssSelector();
+        $this->_parser->tagAttributes['cssSelector'] = $this->getCurrentCssSelector();
     }
 
     /**
@@ -167,7 +167,7 @@ class converter_extra extends converter
      */
     protected function handleTag_abbr()
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->stack();
             $this->buffer();
         } else {
@@ -217,10 +217,10 @@ class converter_extra extends converter
      */
     protected function handleTag_table()
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             // check if upcoming table can be converted
-            if ($this->keepHTML) {
-                if (preg_match($this->tableLookaheadHeader, $this->parser->html, $matches)) {
+            if ($this->_keep_html) {
+                if (preg_match($this->tableLookaheadHeader, $this->_parser->html, $matches)) {
                     // header seems good, now check body
                     // get align & number of cols
                     preg_match_all('#<th(?:\s+align=("|\')(left|right|center)\1)?\s*>#si', $matches[0], $cols);
@@ -243,7 +243,7 @@ class converter_extra extends converter
                         $regEx .= $td . $this->tdSubstitute;
                     }
                     $regEx = sprintf($this->tableLookaheadBody, $regEx);
-                    if (preg_match($regEx, $this->parser->html, $matches, null, strlen($matches[0]))) {
+                    if (preg_match($regEx, $this->_parser->html, $matches, null, strlen($matches[0]))) {
                         // this is a markdownable table tag!
                         $this->table = [
                             'rows' => [],
@@ -275,7 +275,7 @@ class converter_extra extends converter
             }
             // seperator with correct align identifiers
             foreach ($this->table['aligns'] as $col => $align) {
-                if (!$this->keepHTML && !isset($this->table['col_widths'][$col])) {
+                if (!$this->_keep_html && !isset($this->table['col_widths'][$col])) {
                     break;
                 }
                 $left = ' ';
@@ -348,7 +348,7 @@ class converter_extra extends converter
      */
     protected function handleTag_tr()
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->col = -1;
         } else {
             $this->row++;
@@ -363,7 +363,7 @@ class converter_extra extends converter
      */
     protected function handleTag_td()
     {
-        if ($this->parser->isStartTag) {
+        if ($this->_parser->isStartTag) {
             $this->col++;
             if (!isset($this->table['col_widths'][$this->col])) {
                 $this->table['col_widths'][$this->col] = 0;
@@ -387,9 +387,9 @@ class converter_extra extends converter
      */
     protected function handleTag_th()
     {
-        if (!$this->keepHTML && !isset($this->table['rows'][1]) && !isset($this->table['aligns'][$this->col + 1])) {
-            if (isset($this->parser->tagAttributes['align'])) {
-                $this->table['aligns'][$this->col + 1] = $this->parser->tagAttributes['align'];
+        if (!$this->_keep_html && !isset($this->table['rows'][1]) && !isset($this->table['aligns'][$this->col + 1])) {
+            if (isset($this->_parser->tagAttributes['align'])) {
+                $this->table['aligns'][$this->col + 1] = $this->_parser->tagAttributes['align'];
             } else {
                 $this->table['aligns'][$this->col + 1] = '';
             }
@@ -405,7 +405,7 @@ class converter_extra extends converter
      */
     protected function handleTag_dl()
     {
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             $this->setLineBreaks(2);
         }
     }
@@ -418,7 +418,7 @@ class converter_extra extends converter
      **/
     protected function handleTag_dt()
     {
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             $this->setLineBreaks(1);
         }
     }
@@ -431,18 +431,18 @@ class converter_extra extends converter
      */
     protected function handleTag_dd()
     {
-        if ($this->parser->isStartTag) {
-            if (substr(ltrim($this->parser->html), 0, 3) == '<p>') {
+        if ($this->_parser->isStartTag) {
+            if (substr(ltrim($this->_parser->html), 0, 3) == '<p>') {
                 // next comes a paragraph, so we'll need an extra line
                 $this->out("\n" . $this->indent);
-            } elseif (substr($this->output, -2) == "\n\n") {
-                $this->output = substr($this->output, 0, -1);
+            } elseif (substr($this->_output, -2) == "\n\n") {
+                $this->_output = substr($this->_output, 0, -1);
             }
             $this->out(':   ');
             $this->indent('    ', false);
         } else {
             // lookahead for next dt
-            if (substr(ltrim($this->parser->html), 0, 4) == '<dt>') {
+            if (substr(ltrim($this->_parser->html), 0, 4) == '<dt>') {
                 $this->setLineBreaks(2);
             } else {
                 $this->setLineBreaks(1);
@@ -459,7 +459,7 @@ class converter_extra extends converter
      */
     protected function handleTag_fnref()
     {
-        $this->out('[^' . $this->parser->tagAttributes['target'] . ']');
+        $this->out('[^' . $this->_parser->tagAttributes['target'] . ']');
     }
 
     /**
@@ -471,8 +471,8 @@ class converter_extra extends converter
      */
     protected function handleTag_fn()
     {
-        if ($this->parser->isStartTag) {
-            $this->out('[^' . $this->parser->tagAttributes['name'] . ']:');
+        if ($this->_parser->isStartTag) {
+            $this->out('[^' . $this->_parser->tagAttributes['name'] . ']:');
             $this->setLineBreaks(1);
         } else {
             $this->setLineBreaks(2);
@@ -489,7 +489,7 @@ class converter_extra extends converter
      */
     protected function handleTag_footnotes()
     {
-        if (!$this->parser->isStartTag) {
+        if (!$this->_parser->isStartTag) {
             $this->setLineBreaks(2);
         }
     }
@@ -561,11 +561,11 @@ class converter_extra extends converter
     protected function getCurrentCssSelector()
     {
         $cssSelector = '';
-        if (isset($this->parser->tagAttributes['id'])) {
-            $cssSelector .= '#' . $this->decode($this->parser->tagAttributes['id']);
+        if (isset($this->_parser->tagAttributes['id'])) {
+            $cssSelector .= '#' . $this->decode($this->_parser->tagAttributes['id']);
         }
-        if (isset($this->parser->tagAttributes['class'])) {
-            $classes = explode(' ', $this->decode($this->parser->tagAttributes['class']));
+        if (isset($this->_parser->tagAttributes['class'])) {
+            $classes = explode(' ', $this->decode($this->_parser->tagAttributes['class']));
             $classes = array_filter($classes);
             $cssSelector .= '.' . join('.', $classes);
         }
