@@ -15,7 +15,7 @@ class config
     /**
      * @param \ounun\db\pdo $db
      * @param string $tag
-     * @param array $config
+     * @param array  $config
      * @param string $config_key
      * @return $this
      */

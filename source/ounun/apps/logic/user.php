@@ -6,8 +6,6 @@
 namespace ounun\apps\logic;
 
 
-use ounun\config\parse\ini;
-
 class user extends \ounun\apps\logic
 {
     /** @var int 登录时间有误(比现在还晚) */

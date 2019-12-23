@@ -18,9 +18,14 @@ abstract class driver
 
     public $filesize_max = 1024;
 
+    /** @var string 目录名称 */
 	protected $_dir;
 
-	protected $_filename;
+	/** @var int 错误代码 */
+	protected $_error_code = 0;
+
+	/** @var string 文件名称 */
+	protected $_filename = '';
 
 	protected $_source;
 
@@ -28,6 +33,7 @@ abstract class driver
 
 	protected $_time;
 
+	/** @var array 文件列表 */
 	protected $_files = [];
 
     /**
@@ -122,7 +128,7 @@ abstract class driver
 		if (is_null($file)) {
             $file = $this->_target;
         }
-		
+
 		$info = [];
 		$pathinfo = pathinfo($file);
 		$info['file_path'] = $this->format($pathinfo['dirname'], false).'/';

@@ -56,20 +56,23 @@ class console
         self::Color_Purple,
         self::Color_Brown,
     ];
+
     /** @var int 深度的颜色数量 */
     const Depth_Colors_Count = 7;
 
     /** @var string 命令名称 */
     public $name;
+
     /** @var string 命令版本 */
     public $version;
+
     /** @var task_driver[] 命令 */
     public $commands = [];
 
     /** @var array  默认提供的命令 */
     protected static $default_cmds = [
-        "ounun\\cmd\\def\\help",
-        "ounun\\cmd\\def\\test",
+        "task\\base\\help",
+        "task\\base\\test",
     ];
 
     /**
@@ -81,7 +84,7 @@ class console
     public function __construct(array $cmds, string $name = 'Ounun CMD', string $version = '0.1')
     {
         // echo "\\ounun\\cmd\\def\\help::class:".\ounun\cmd\def\help::class;
-        $this->name = $name;
+        $this->name    = $name;
         $this->version = $version;
 
         $cmds = array_merge(static::$default_cmds, $cmds);
