@@ -34,7 +34,6 @@ class observer implements iobserver
     protected $_notify;
 
     /**
-     *
      * @var mixed
      */
     protected $_context;

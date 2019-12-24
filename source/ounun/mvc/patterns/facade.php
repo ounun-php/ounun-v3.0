@@ -42,13 +42,33 @@ class facade implements ifacade
      * The Multiton Key for this Core
      * @var string
      */
-    protected $_multiton_key;
+    protected $_core_tag;
 
     /**
      * The Multiton Facade instances stack.
      * @var array
      */
-    protected static $_instance_map = [];
+    protected static $_instances = [];
+
+    /**
+     * <b>Facade</b> Multiton Factory method
+     *
+     * This <b>IFacade</b> implementation is a Multiton,
+     * so you MUST not call the constructor
+     * directly, but instead call this static Factory method,
+     * passing the unique key for this instance
+     *
+     * @param string $core_tag Unique key for this instance.
+     * @return ifacade Instance for this key
+     * @throws
+     */
+    public static function i($core_tag )
+    {
+        if (!isset( self::$_instances[ $core_tag ] ) ) {
+            self::$_instances[ $core_tag ] = new facade( $core_tag );
+        }
+        return self::$_instances[ $core_tag ];
+    }
 
     /**
      * Instance constructor
@@ -62,17 +82,17 @@ class facade implements ifacade
      * Facade::i( 'multitonKey' )
      * </code>
      *
-     * @param string $key Unique key for this instance.
+     * @param string $core_tag Unique key for this instance.
      * @throws \Exception if instance for this key has already been constructed.
      */
-    protected function __construct( $key )
+    protected function __construct(string $core_tag )
     {
-        if (isset(self::$_instance_map[ $key ])) {
+        if (isset(self::$_instances[ $core_tag ])) {
             throw new \Exception(static::Multiton_Msg);
         }
-        $this->initialize( $key );
-        self::$_instance_map[ $this->_multiton_key ] = $this;
-        $this->initializeFacade();
+        $this->initialize( $core_tag );
+        self::$_instances[ $this->_core_tag ] = $this;
+        $this->initialize_facade();
     }
 
     /**
@@ -84,32 +104,14 @@ class facade implements ifacade
      *
      * @return void
      */
-    protected function initializeFacade(  )
+    protected function initialize_facade(  )
     {
         $this->initialize_model();
         $this->initialize_controller();
         $this->initialize_view();
     }
 
-    /**
-     * <b>Facade</b> Multiton Factory method
-     *
-     * This <b>IFacade</b> implementation is a Multiton,
-     * so you MUST not call the constructor
-     * directly, but instead call this static Factory method,
-     * passing the unique key for this instance
-     *
-     * @param string $key Unique key for this instance.
-     * @return ifacade Instance for this key
-     * @throws
-     */
-    public static function i($key )
-    {
-        if (!isset( self::$_instance_map[ $key ] ) ) {
-            self::$_instance_map[ $key ] = new Facade( $key );
-        }
-        return self::$_instance_map[ $key ];
-    }
+
 
     /**
      * Initialize the <b>Controller</b>.
@@ -133,7 +135,7 @@ class facade implements ifacade
         if ( isset( $this->_controller ) ) {
             return;
         }
-        $this->_controller = controller::i( $this->_multiton_key );
+        $this->_controller = controller::i( $this->_core_tag );
     }
 
     /**
@@ -167,7 +169,7 @@ class facade implements ifacade
             return;
         }
 
-        $this->_model = model::i( $this->_multiton_key );
+        $this->_model = model::i( $this->_core_tag );
     }
 
 
@@ -201,7 +203,7 @@ class facade implements ifacade
             return;
         }
 
-        $this->_view = view::i( $this->_multiton_key );
+        $this->_view = view::i( $this->_core_tag );
     }
 
     /**
@@ -402,23 +404,23 @@ class facade implements ifacade
      * It is necessary to be public in order to
      * implement INotifier.
      *
-     * @param string $key Unique key for this instance.
+     * @param string $core_tag Unique key for this instance.
      * @return void
      */
-    public function initialize(string $key )
+    public function initialize(string $core_tag )
     {
-        $this->_multiton_key = $key;
+        $this->_core_tag = $core_tag;
     }
 
     /**
      * Check if a Core is registered or not
      *
-     * @param string $key the multiton key for the Core in question
+     * @param string $core_tag the multiton key for the Core in question
      * @return bool Whether a Core is registered with the given <code>key</code>.
      */
-    public static function core_has(string $key )
+    public static function core_has(string $core_tag )
     {
-        return ( isset( self::$_instance_map[ $key ] ) );
+        return ( isset( self::$_instances[ $core_tag ] ) );
     }
 
     /**
@@ -427,17 +429,17 @@ class facade implements ifacade
      * Remove the Model, View, Controller and Facade
      * instances for the given key.
      *
-     * @param string $key MultitonKey of the Core to remove
+     * @param string $core_tag MultitonKey of the Core to remove
      * @return void
      */
-    public static function core_remove(string $key )
+    public static function core_remove(string $core_tag )
     {
-        if ( !self::core_has( $key ) ) {
+        if ( !self::core_has( $core_tag ) ) {
             return;
         }
-        model::model_remove( $key );
-        view::view_remove( $key );
-        controller::controller_remove( $key );
-        self::$_instance_map[ $key ] = null;
+        model::model_remove( $core_tag );
+        view::view_remove( $core_tag );
+        controller::controller_remove( $core_tag );
+        self::$_instances[ $core_tag ] = null;
     }
 }

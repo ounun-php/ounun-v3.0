@@ -49,8 +49,8 @@ interface inotifier
      * facade will fail until after this method
      * has been called.
      *
-     * @param string $key The multitonKey for this <b>inotifier</b> to use.
+     * @param string $core_tag The multitonKey for this <b>inotifier</b> to use.
      */
-    public function initialize(string $key );
+    public function initialize(string $core_tag );
 
 }

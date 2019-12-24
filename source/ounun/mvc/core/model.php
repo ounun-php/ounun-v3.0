@@ -49,13 +49,32 @@ class model implements imodel
      * The Multiton Key for this Core
      * @var string
      */
-    protected $_multiton_key;
+    protected $_core_tag;
 
     /**
      * The Multiton instances stack
      * @var array
      */
-    protected static $_instance_map = [];
+    protected static $_instances = [];
+
+    /**
+     * Model Factory method.
+     *
+     * This <b>IModel</b> implementation is a Multiton so
+     * this method MUST be used to get acces, or create, <b>IModel</b>s.
+     *
+     * @param string $core_tag Unique key for this instance.
+     * @return imodel The instance for this Multiton key
+     * @throws
+     */
+    public static function i(string $core_tag )
+    {
+        if ( !isset( self::$_instances[ $core_tag ] ) ) {
+            self::$_instances[$core_tag] = new model( $core_tag );
+        }
+
+        return self::$_instances[$core_tag];
+    }
 
     /**
      * Instance constructor
@@ -69,18 +88,18 @@ class model implements imodel
      * Model::i( 'multitonKey' )
      * </code>
      *
-     * @param string $key Unique key for this instance.
+     * @param string $core_tag Unique key for this instance.
      * @throws \Exception if instance for this key has already been constructed
      */
-    protected function __construct( $key )
+    protected function __construct(string $core_tag )
     {
-        if ( isset( self::$_instance_map[ $key ] ) ) {
+        if ( isset( self::$_instances[ $core_tag ] ) ) {
             throw new \Exception(self::Multiton_Msg);
         }
-        $this->_multiton_key = $key;
-        $this->_proxy_map    = [];
-        self::$_instance_map[ $this->_multiton_key ] = $this;
-        $this->initializeModel();
+        $this->_core_tag  = $core_tag;
+        $this->_proxy_map = [];
+        self::$_instances[ $this->_core_tag ] = $this;
+        $this->initialize_model();
     }
 
     /**
@@ -92,27 +111,8 @@ class model implements imodel
      *
      * @return void
      */
-    protected function initializeModel(  )
+    protected function initialize_model(  )
     {
-    }
-
-    /**
-     * Model Factory method.
-     *
-     * This <b>IModel</b> implementation is a Multiton so
-     * this method MUST be used to get acces, or create, <b>IModel</b>s.
-     *
-     * @param string $key Unique key for this instance.
-     * @return imodel The instance for this Multiton key
-     * @throws
-     */
-    public static function i($key )
-    {
-        if ( !isset( self::$_instance_map[ $key ] ) ) {
-            self::$_instance_map[$key] = new model( $key );
-        }
-
-        return self::$_instance_map[$key];
     }
 
     /**
@@ -125,7 +125,7 @@ class model implements imodel
      */
     public function proxy_register(iproxy $proxy )
     {
-        $proxy->initialize( $this->_multiton_key );
+        $proxy->initialize( $this->_core_tag );
         $this->_proxy_map[ $proxy->proxy_name_get() ] = $proxy;
         $proxy->register();
     }
@@ -138,7 +138,7 @@ class model implements imodel
      * @param string $proxy_name Name of the <b>iproxy</b> instance to be retrieved.
      * @return iproxy The <b>iproxy</b> previously regisetered by <var>proxyName</var> with the <b>Model</b>.
      */
-    public function proxy_retrieve($proxy_name )
+    public function proxy_retrieve(string $proxy_name )
     {
         return ( $this->proxy_has( $proxy_name ) ? $this->_proxy_map[ $proxy_name ] : null);
     }
@@ -151,7 +151,7 @@ class model implements imodel
      * @param string $proxy_name Name of the <b>proxy</b> to check for.
      * @return bool Whether a <b>proxy</b> is currently registered with the given <var>proxyName</var>.
      */
-    public function proxy_has($proxy_name )
+    public function proxy_has(string $proxy_name )
     {
         return isset( $this->_proxy_map[ $proxy_name ] );
     }
@@ -164,7 +164,7 @@ class model implements imodel
      * @param string $proxy_name Name of the <b>iproxy</b> to remove from the <b>Model</b>.
      * @return iproxy The <b>iproxy</b> that was removed from the <b>Model</b>.
      */
-    public function proxy_remove($proxy_name )
+    public function proxy_remove(string $proxy_name )
     {
         $proxy = $this->proxy_retrieve( $proxy_name );
         if ($proxy )
@@ -180,12 +180,12 @@ class model implements imodel
      *
      * Remove an <b>IModel</b> instance by key.
      *
-     * @param string $key The multitonKey of IModel instance to remove
+     * @param string $core_tag The multitonKey of IModel instance to remove
      * @return void
      */
-    public static function model_remove($key )
+    public static function model_remove(string $core_tag )
     {
-        unset( self::$_instance_map[ $key ] );
+        unset( self::$_instances[ $core_tag ] );
     }
 
 }

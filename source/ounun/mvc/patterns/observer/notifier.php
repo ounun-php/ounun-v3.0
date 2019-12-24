@@ -53,7 +53,7 @@ class notifier implements inotifier
      * The Multiton Key for this Core
      * @var string
      */
-    protected $_multiton_key = '';
+    protected $_core_tag = '';
 
 
     /**
@@ -90,12 +90,12 @@ class notifier implements inotifier
      * in their constructors, since this method will not
      * yet have been called.
      *
-     * @param string $key The multitonKey for this <b>inotifier</b> to use.
+     * @param string $core_tag The multitonKey for this <b>inotifier</b> to use.
      * @return void
      */
-    public function initialize(string $key )
+    public function initialize(string $core_tag )
     {
-        $this->_multiton_key = $key;
+        $this->_core_tag = $core_tag;
     }
 
     /**
@@ -107,11 +107,11 @@ class notifier implements inotifier
      */
     protected function facade()
     {
-        if ( !isset( $this->_multiton_key ) )
+        if ( !isset( $this->_core_tag ) )
         {
             throw new \Exception( self::Multiton_Msg );
         }
-        return facade::i( $this->_multiton_key );
+        return facade::i( $this->_core_tag );
     }
 
 }

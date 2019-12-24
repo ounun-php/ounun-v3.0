@@ -54,13 +54,13 @@ class view implements iview
      * The Multiton Key for this Core
      * @var string
      */
-    protected $_multiton_key = NULL;
+    protected $_core_tag = '';
 
     /**
      * The Multiton instances stack
      * @var array
      */
-    protected static $_instance_map = [];
+    protected static $_instances = [];
 
     /**
      * Constructor.
@@ -74,21 +74,21 @@ class view implements iview
      * View::i( 'multitonKey' );
      * </code>
      *
-     * @param string $key Unique key for this instance.
+     * @param string $core_tag Unique key for this instance.
      * @throws \Exception if instance for this key has already been constructed.
      */
-    protected function __construct( string $key )
+    protected function __construct( string $core_tag )
     {
-        if ( isset( self::$_instance_map[ $key ] ) )
+        if ( isset( self::$_instances[ $core_tag ] ) )
         {
             throw new \Exception(self::Multiton_Msg);
         }
-        $this->_multiton_key = $key;
+        $this->_core_tag = $core_tag;
 
         $this->_mediator_map = [];
         $this->_observer_map = [];
 
-        self::$_instance_map[ $this->_multiton_key ] = $this;
+        self::$_instances[ $this->_core_tag ] = $this;
         $this->initialize();
     }
 
@@ -118,11 +118,11 @@ class view implements iview
      */
     public static function i(string $key )
     {
-        if ( !isset( self::$_instance_map[ $key ] ) )
+        if ( !isset( self::$_instances[ $key ] ) )
         {
-            self::$_instance_map[ $key ] = new view( $key );
+            self::$_instances[ $key ] = new view( $key );
         }
-        return self::$_instance_map[ $key ];
+        return self::$_instances[ $key ];
     }
 
     /**
@@ -244,7 +244,7 @@ class view implements iview
         // do not allow re-registration (you must to removeMediator fist)
         if ( $this->mediator_has( $mediator->mediator_name_get() ) ) return;
 
-        $mediator->initialize( $this->_multiton_key );
+        $mediator->initialize( $this->_core_tag );
 
         // Register the Mediator for retrieval by name
         $this->_mediator_map[ $mediator->mediator_name_get() ] = $mediator;
@@ -341,7 +341,7 @@ class view implements iview
      */
     public static function view_remove(string $key )
     {
-        unset( self::$_instance_map[ $key ] );
+        unset( self::$_instances[ $key ] );
     }
 
 }

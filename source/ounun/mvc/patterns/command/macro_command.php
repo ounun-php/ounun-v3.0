@@ -106,11 +106,11 @@ class macro_command extends notifier implements icommand
     public final function execute( inotification $notification )
     {
         while ( count($this->_sub_commands) > 0) {
-            $commandClassName = array_shift( $this->_sub_commands );
-            /** @var icommand $commandInstance */
-            $commandInstance = new $commandClassName();
-            $commandInstance->initialize( $this->_multiton_key );
-            $commandInstance->execute( $notification );
+            $command_class_name = array_shift( $this->_sub_commands );
+            /** @var icommand $command_instance */
+            $command_instance = new $command_class_name();
+            $command_instance->initialize( $this->_core_tag );
+            $command_instance->execute( $notification );
         }
     }
 

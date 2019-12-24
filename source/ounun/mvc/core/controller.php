@@ -67,13 +67,34 @@ class controller implements icontroller
      * The Multiton Key for this Core
      * @var string
      */
-    protected $_multiton_key;
+    protected $_core_tag;
 
     /**
      * The Multiton instances stack
      * @var array
      */
-    protected static $_instance_map = [];
+    protected static $_instances = [];
+
+
+    /**
+     * Controller Factory method.
+     *
+     * This <b>icontroller</b> implementation is a Multiton so
+     * this method MUST be used to get acces, or create, <b>icontroller</b>s.
+     *
+     * @param string $core_tag Unique key for this instance.
+     * @return icontroller The instance for this Multiton key.
+     * @throws
+     */
+    public static function i(string $core_tag )
+    {
+        if ( !isset( self::$_instances[ $core_tag ] ) )
+        {
+            self::$_instances[ $core_tag ] = new Controller( $core_tag );
+        }
+
+        return self::$_instances[ $core_tag ];
+    }
 
     /**
      * Instance constructor
@@ -88,18 +109,18 @@ class controller implements icontroller
      * $myController = MyController::i( 'myMultitonKey' );
      * </code>
      *
-     * @param string $key Unique key for this instance.
+     * @param string $core_tag Unique key for this instance.
      * @throws \Exception if instance for this key has already been constructed.
      */
-    protected function __construct( $key )
+    protected function __construct(string $core_tag )
     {
-        if ( isset( self::$_instance_map[ $key ] ) )
+        if ( isset( self::$_instances[ $core_tag ] ) )
         {
             throw new \Exception(self::Multiton_Msg);
         }
-        $this->_multiton_key = $key;
+        $this->_core_tag = $core_tag;
         $this->_command_map  = [];
-        self::$_instance_map[ $this->_multiton_key ] = $this;
+        self::$_instances[ $this->_core_tag ] = $this;
         $this->initialize();
     }
 
@@ -124,28 +145,10 @@ class controller implements icontroller
      */
     protected function initialize(  )
     {
-        $this->_view = view::i( $this->_multiton_key );
+        $this->_view = view::i( $this->_core_tag );
     }
 
-    /**
-     * Controller Factory method.
-     *
-     * This <b>icontroller</b> implementation is a Multiton so
-     * this method MUST be used to get acces, or create, <b>icontroller</b>s.
-     *
-     * @param string $key Unique key for this instance.
-     * @return icontroller The instance for this Multiton key.
-     * @throws
-     */
-    public static function i($key )
-    {
-        if ( !isset( self::$_instance_map[ $key ] ) )
-        {
-            self::$_instance_map[ $key ] = new Controller( $key );
-        }
 
-        return self::$_instance_map[ $key ];
-    }
 
     /**
      * Execute Command
@@ -164,7 +167,7 @@ class controller implements icontroller
             $command_class_name = $this->_command_map[ $notification->name_get() ];
             /** @var icommand $command_class_ref */
             $command_class_ref    = new $command_class_name();
-            $command_class_ref->initialize($this->_multiton_key);
+            $command_class_ref->initialize($this->_core_tag);
             $command_class_ref->execute( $notification );
         }
     }
@@ -186,10 +189,10 @@ class controller implements icontroller
      * @param string $command_class_name Class name of the <b>icommand</b> implementation to register.
      * @return void
      */
-    public function register($notification_name, $command_class_name )
+    public function register(string $notification_name,string $command_class_name )
     {
         if ( !$this->has( $notification_name ) ) {
-            $this->_view->observer_register( $notification_name, new observer( "executeCommand", $this ) );
+            $this->_view->observer_register( $notification_name, new observer( "execute_command", $this ) );
         }
         $this->_command_map[ $notification_name ] = $command_class_name;
     }
@@ -215,7 +218,7 @@ class controller implements icontroller
      * @param string $notification_name Name of the <b>inotification</b> to remove the <b>icommand</b> mapping for.
      * @return void
      */
-    public function remove($notification_name )
+    public function remove(string $notification_name )
     {
         // if the Command is registered...
         if ( $this->has( $notification_name ) )
@@ -233,12 +236,12 @@ class controller implements icontroller
      *
      * Remove an <b>icontroller</b> instance identified by it's <b>key</b>
      *
-     * @param string $key multitonKey of <b>icontroller</b> instance to remove
+     * @param string $core_tag multitonKey of <b>icontroller</b> instance to remove
      * @return void
      */
-    public static function controller_remove($key )
+    public static function controller_remove(string $core_tag )
     {
-        unset( self::$_instance_map[ $key ] );
+        unset( self::$_instances[ $core_tag ] );
     }
 
 }
