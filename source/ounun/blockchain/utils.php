@@ -14,7 +14,7 @@ class utils
     static public  function base58_encode($string)
     {
         $alphabet = '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ';
-        $base = strlen($alphabet);
+        $base     = strlen($alphabet);
         if (is_string($string) === false) {
             return false;
         }
@@ -78,8 +78,8 @@ class utils
         }
         $output = '';
         while ($decimal > 0) {
-            $byte = bcmod($decimal, 256);
-            $output = pack('C', $byte) . $output;
+            $byte    = bcmod($decimal, 256);
+            $output  = pack('C', $byte) . $output;
             $decimal = bcdiv($decimal, 256, 0);
         }
         foreach ($chars as $char) {

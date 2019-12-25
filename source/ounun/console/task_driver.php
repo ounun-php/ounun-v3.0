@@ -63,8 +63,8 @@ abstract class task_driver
     /**
      * 执行指令
      * @param array $argc_input
-     * @return null|int
-     * @throws \LogicException
+     * @return int
+     * @throws
      */
     abstract public function execute(array $argc_input);
 

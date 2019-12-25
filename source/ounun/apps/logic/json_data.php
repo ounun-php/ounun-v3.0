@@ -97,14 +97,14 @@ class json_data extends \ounun\apps\logic
     /**
      * json数据decode
      * @param array  $rs
-     * @param string $extend_field
+     * @param array  $extend_fields
      * @param bool   $is_multi
      */
-    protected function _lists_decode(array &$rs ,string $extend_field = '', bool $is_multi = true)
+    protected function _lists_decode(array &$rs ,array $extend_fields = [], bool $is_multi = true)
     {
         if($is_multi) {
             foreach ($rs as &$v) {
-                $this->_lists_decode($v,false);
+                $this->_lists_decode($v,$extend_fields,false);
             }
         }else{
             if($rs['contents']) {
@@ -113,8 +113,12 @@ class json_data extends \ounun\apps\logic
             if($rs['extend']) {
                 $rs['extend'] = json_decode_array($rs['extend']);
             }
-            if($extend_field && $rs[$extend_field]) {
-                $rs[$extend_field] = json_decode_array($rs[$extend_field]);
+            if($extend_fields && is_array($extend_fields)){
+                foreach ($extend_fields as $field){
+                    if($field && $rs[$field]){
+                        $rs[$field] = json_decode_array($rs[$field]);
+                    }
+                }
             }
         }
     }

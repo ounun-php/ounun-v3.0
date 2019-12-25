@@ -10,24 +10,24 @@ namespace ounun\apps;
 class i18n
 {
     /** 语言标识 */
-    const lang              = 'zh_cn';
+    const Lang              = 'zh_cn';
     /** 语言名称 */
-    const lang_name         = '简本中文';
+    const Lang_Name         = '简本中文';
 
     /** @var string 根据域名 得到对应模板 */
-    const tpl_style         = 'default';
+    const Tpl_Style         = 'default';
     /** @var string 模板(默认) */
-    const tpl_style_default = '';
+    const Tpl_Style_Default = '';
 
     /** @var string 根据域名 得到对应模板 */
-    const tpl_type          = 'pc';
+    const Tpl_Type          = 'pc';
     /** @var string 模板(默认) */
-    const tpl_type_default  = '';
+    const Tpl_Type_Default  = '';
 
     /** 网站标题 */
-    const title             = 'CMS.cc开源移动内容管理系统';
+    const Title             = 'CMS.cc开源移动内容管理系统';
 
-    const keywords          = 'CMS.cc开源移动内容管理系统';
+    const Keywords          = 'CMS.cc开源移动内容管理系统';
 
-    const description       = 'CMS.cc开源移动内容管理系统';
+    const Description       = 'CMS.cc开源移动内容管理系统';
 }

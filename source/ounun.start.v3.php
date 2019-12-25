@@ -15,9 +15,9 @@ class ounun
     const def_method = 'index';
 
     /** @var string web 网页 */
-    const App_Name_Web = 'web';
+    const App_Name_Web     = 'web';
     /** @var string api 数据API接口 */
-    const App_Name_Api = 'api';
+    const App_Name_Api     = 'api';
     /** @var string control 控制后台 */
     const App_Name_Control = 'control';
     /** @var string process 异步进程 */
@@ -303,7 +303,7 @@ class ounun
             static::$tpl_style = $tpl_style;
         } else {
             if (static::$i18n && empty(static::$tpl_style)) {
-                static::$tpl_style = static::i18n_get()::tpl_style;
+                static::$tpl_style = static::i18n_get()::Tpl_Style;
             }
         }
         // 风格(默认)
@@ -311,7 +311,7 @@ class ounun
             static::$tpl_style_default = $tpl_style_default;
         } else {
             if (static::$i18n && empty(static::$tpl_style_default)) {
-                static::$tpl_style_default = static::i18n_get()::tpl_style_default;
+                static::$tpl_style_default = static::i18n_get()::Tpl_Style_Default;
             }
         }
 
@@ -320,7 +320,7 @@ class ounun
             static::$tpl_type = $tpl_type;
         } else {
             if (static::$i18n && empty(static::$tpl_type)) {
-                static::$tpl_type = static::i18n_get()::tpl_type;
+                static::$tpl_type = static::i18n_get()::Tpl_Type;
             }
         }
         // 类型(默认)
@@ -328,7 +328,7 @@ class ounun
             static::$tpl_type_default = $tpl_type_default;
         } else {
             if (static::$i18n && empty(static::$tpl_type_default)) {
-                static::$tpl_type_default = static::i18n_get()::tpl_type_default;
+                static::$tpl_type_default = static::i18n_get()::Tpl_Type_Default;
             }
         }
     }
@@ -407,7 +407,7 @@ class ounun
             '{$app}' => static::$app_name,
             '{$domain}' => static::$app_domain,
 
-            '{$sitename}' => static::i18n_get()::title,
+            '{$sitename}' => static::i18n_get()::Title,
 
             '{$res}' => static::$url_res,
             '{$static}' => static::$url_static,

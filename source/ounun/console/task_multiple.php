@@ -5,7 +5,6 @@
  */
 namespace ounun\console;
 
-
 use ounun\console;
 
 abstract class task_multiple extends task_driver
@@ -21,7 +20,6 @@ abstract class task_multiple extends task_driver
     /** @var int 执行次数 */
     protected $_time_run_count = 0;
 
-
     /**
      * @param array $argc_input
      * @return int
@@ -32,8 +30,8 @@ abstract class task_multiple extends task_driver
         ini_set('memory_limit', -1);
 
         // 设定参数
-        $input_new = [];
-        $input_len = 0;
+        $input_new     = [];
+        $input_len     = 0;
         if ($argc_input && is_array($argc_input)) {
             $input_len = count($argc_input);
         }
@@ -59,8 +57,8 @@ abstract class task_multiple extends task_driver
         do {
             console::echo("Execute multiple  \$sleep:" . str_pad($this->_time_argc_sleep, 5) .
                                                  " \$count:" . str_pad($this->_time_run_count, 5) .
-                                                 " \$past:" . str_pad($this->_time_past, 5) .
-                                                 " \$live:" . str_pad($this->_time_argc_live, 5) .' ---------- ', console::Color_Light_Red, __FILE__, __LINE__);
+                                                 " \$past:"  . str_pad($this->_time_past, 5) .
+                                                 " \$live:"  . str_pad($this->_time_argc_live, 5) .' ---------- ', console::Color_Light_Red, __FILE__, __LINE__);
             $do = $this->execute_do($input_new);
             if($do){
                return $do;
