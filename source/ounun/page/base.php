@@ -5,9 +5,10 @@
  */
 namespace ounun\page;
 
+
 /**
- * 分頁
- * Class base
+ * 主要功能: 分頁,有問題問我吧,沒時間寫注
+ * Class base_max
  * @package ounun\page
  */
 class base
@@ -15,17 +16,24 @@ class base
     /** @var string  提示串 */
     protected $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
     /** @var array   默认页 */
-    protected $_config_default = ['<li>', '</li>'];
+    protected $_config_page_tag_default = ['<li>', '</li>',''];
     /** @var array   当前页面时 */
-    protected $_config_now = ['<li class="now">', '</li>'];
+    protected $_config_page_tag_curr = ['<li class="now">', '</li>',''];
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
-    protected $_config_tag = ['第一页', '上一页', '下一页', '最后一页'];
+    protected $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
     /** @var int     最多显示几页 */
-    protected $_config_max = 7;
+    protected $_config_show_max = 9;
     /** @var int     一页显示几条数据 */
     protected $_config_rows = 20;
     /** @var array   第一页 */
-    protected $_config_index = [];
+    protected $_config_index     = [];
+    /** @var string  获取数据总数 */
+    protected $_config_count_sql = 'count(*)';
+
+    /** @var string */
+    protected $_where_str  = '';
+    /** @var array */
+    protected $_where_bind = [];
 
     /** @var \ounun\db\pdo */
     protected $_db;
@@ -33,22 +41,18 @@ class base
     protected $_table;
     /** @var string */
     protected $_url;
-    /** @var string */
-    protected $_where_str = '';
-    /** @var array */
-    protected $_where_bind = [];
-    /** @var string */
-    protected $_sql_count;
-
 
     /** @var int 数量总量 */
     protected $_total;
-    /** @var int 页数总量 */
-    protected $_total_page = 1;
+    /** @var int 页数总量(除去首页) */
+    protected $_total_page = 0;
+    /** @var int 页数总量(总数) */
+    protected $_total_page_real = 1;
+
     /** @var int 当前所在页数 */
-    protected $_page = 1;
+    protected $_page_curr = 1;
     /** @var bool 翻页排序  false:1...max  true:max...1 */
-    protected $_page_max = false;
+    protected $_page_end_index = false;
 
     /**
      * 创建一个分页类
@@ -56,27 +60,25 @@ class base
      * @param \ounun\db\pdo $db
      * @param string $table
      * @param string $url
-     * @param string $where_str
-     * @param array $where_bind
-     * @param string $sql_count
+     * @param array $where
      * @param array $config
      */
-    public function __construct(\ounun\db\pdo $db, string $table, string $url, string $where_str = '', array $where_bind = [], string $sql_count = 'count(*)', array $config = [], int $rows = 0)
+    public function __construct(\ounun\db\pdo $db, string $table, string $url, array $where = [], array $config = [])
     {
         $this->_db = $db;
         $this->_table = $table;
         $this->_url = $url;
-        $this->_where_str = $where_str;
-        $this->_where_bind = $where_bind;
-        $this->_sql_count = $sql_count;
 
-        if ($config) {
-            $this->config_set($config);
+        if($where && is_array($where)){
+            foreach (['str','bind'] as $key){
+                if($where[$key]){
+                    $m = "_where_{$key}";
+                    $this->$m = $where[$key];
+                }
+            }
         }
 
-        if ($rows) {
-            $this->_config_rows = $rows;
-        }
+        $this->config_set($config);
     }
 
     /**
@@ -85,33 +87,14 @@ class base
      */
     public function config_set(array $config)
     {
-        // 提示串
-        if ($config['note']) {
-            $this->_config_note = $config['note'];
-        }
-        // 默认页
-        if ($config['default']) {
-            $this->_config_default = $config['default'];
-        }
-        // 当前页面时
-        if ($config['now']) {
-            $this->_config_now = $config['now'];
-        }
-        // 第一页 上一页 下一页 最后一页
-        if ($config['tag']) {
-            $this->_config_tag = $config['tag'];
-        }
-        // 最多显示几页
-        if ($config['max']) {
-            $this->_config_max = $config['max'];
-        }
-        // 一页显示几条数据
-        if ($config['rows']) {
-            $this->_config_rows = $config['rows'];
-        }
-        // 第一页
-        if ($config['index']) {
-            $this->_config_index = $config['index'];
+        // print_r($config);
+        if($config && is_array($config)){
+            foreach (['note','page_tag_default','page_tag_curr','page_tag_name','show_max','rows','index','count_sql'] as $key){
+                if($config[$key]){
+                    $m = "_config_{$key}";
+                    $this->$m = $config[$key];
+                }
+            }
         }
     }
 
@@ -119,99 +102,113 @@ class base
      * 得到分页数据
      * @param int $page
      * @param string $title
-     * @param bool $default_end
+     * @param bool $end_index
      * @return array
      */
-    public function init(int $page = 0, string $title = "", bool $default_end = false): array
+    public function initialize(int $page = 0, string $title = "", bool $end_index = false): array
     {
-        $page_default = $this->_config_default;
-        $page_now = $this->_config_now;
-        $cfg_tag = $this->_config_tag;
+        $tag_default = $this->_config_page_tag_default;
+        $tag_curr    = $this->_config_page_tag_curr;
+        $tag_name    = $this->_config_page_tag_name;
+
         $title = $title ? "{$title}-" : '';
+        $pages = [];
 
-        $rs_page = [];
-
-        $data = $this->data($page, $default_end);
-        $rs_note = $this->_note_set($this->_total, $this->_total_page, $this->_page);
+        $data = $this->_data($page, $end_index);
+        $note = $this->_note_set();
 
         $url_prev = '';
         $url_next = '';
         foreach ($data as $v) {
             if ($v['begin']) {
-                $rs_page[] = $page_default[0] . '<a href="' . $this->_url_set($v['begin']) . '" title="' . $title . '第' . $v['begin'] . '页">' . $cfg_tag[0] . '</a>' . $page_default[1];
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['begin']) . '" title="' . $title . '第' . $v['begin'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[0]) . '</a>' . $tag_default[1];
             } elseif ($v['previous']) {
                 $url_prev = $this->_url_set($v['previous']);
-                $rs_page[] = $page_default[0] . '<a href="' . $url_prev . '" title="' . $title . '第' . $v['previous'] . '页">' . $cfg_tag[1] . '</a>' . $page_default[1];
+                $pages[] = $tag_default[0] . '<a href="' . $url_prev . '" title="' . $title . '第' . $v['previous'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[1]) . '</a>' . $tag_default[1];
             } elseif ($v['next']) {
                 $url_next = $this->_url_set($v['next']);
-                $rs_page[] = $page_default[0] . '<a href="' . $url_next . '" title="' . $title . '第' . $v['next'] . '页">' . $cfg_tag[2] . '</a>' . $page_default[1];
+                $pages[] = $tag_default[0] . '<a href="' . $url_next . '" title="' . $title . '第' . $v['next'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[2]) . '</a>' . $tag_default[1];
             } elseif ($v['end']) {
-                $rs_page[] = $page_default[0] . '<a href="' . $this->_url_set($v['end']) . '" title="' . $title . '第' . $v['end'] . '页">' . $cfg_tag[3] . '</a>' . $page_default[1];
-            } elseif ($v['def']) {
-                if ($this->_page == $v['def']) {
-                    $rs_page[] = $page_now[0] . '<a href="' . $this->_url_set($v['def']) . '" title="' . $title . '第' . $v['def'] . '页" ' . $page_now[2] . ' onclick="return false">' . $v['def'] . '</a>' . $page_now[1];
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['end']) . '" title="' . $title . '第' . $v['end'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[3]) . '</a>' . $tag_default[1];
+            } elseif ($v['default']) {
+                if ($this->_page_curr == $v['default']) {
+                    $pages[] = $tag_curr[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" '.$tag_curr[2].' onclick="return false">' . $v['default'] . '</a>' . $tag_curr[1];
                 } else {
-                    $rs_page[] = $page_default[0] . '<a href="' . $this->_url_set($v['def']) . '" title="' . $title . '第' . $v['def'] . '页">' . $v['def'] . '</a>' . $page_now[1];
+                    $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" '.$tag_default[2].'>' . $v['default'] . '</a>' . $tag_default[1];
                 }
+            } elseif ($v['index']) {
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set(0) . '" title="' . $title .$tag_name[4]. '" '.$tag_default[2].'>' . htmlspecialchars($tag_name[4]) . '</a>' . $tag_default[1];
             }
         }
         return [
             'url_prev' => $url_prev,
             'url_next' => $url_next,
+
             'page_total' => $this->_total_page,
-            'page_now' => $this->_page,
-            'note' => $rs_note,
-            'page' => $rs_page
+            'page_curr'  => $this->_page_curr,
+
+            'note' => $note,
+            'page' => $pages
         ];
     }
 
     /**
      * 算出分页数据
-     * @param int $page
-     * @param bool $default_end
+     * @param int $page_curr
+     * @param bool $end_index
      * @return array
      */
-    public function data(int $page = 0, bool $default_end = false): array
+    protected function _data(int $page_curr = 0, bool $end_index = false): array
     {
-        $m = ceil($this->_config_max / 2);
-        $this->_total = $this->total();
-        $this->_total_page = ceil($this->_total / $this->_config_rows);
-        $page = $default_end
-            ? ($page < 1 ? $this->_total_page : $page)
-            : ($page < 1 ? 1 : $page);
-        $this->_page = $page;
-        $this->_page_max = $default_end;
+        $page_middle            = ceil($this->_config_show_max / 2);
 
-        if ($this->_total_page > $this->_config_max) {
-            $sub_total = $this->_config_max;
+        $this->_total           = $this->total_size();
+        $this->_total_page_real = ceil($this->_total / $this->_config_rows);
+        if($end_index){
+            $this->_total_page  = $this->_total_page_real - 1;
+        }else{
+            $this->_total_page  = $this->_total_page_real;
+        }
+
+        $page_curr = $end_index ? ($page_curr < 1 ? 0 : $page_curr) : ($page_curr < 1 ? 1 : $page_curr);
+        $page_curr = $page_curr > $this->_total_page ? $this->_total_page : $page_curr;
+
+        $this->_page_curr      = $page_curr;
+        $this->_page_end_index = $end_index;
+
+        if ($this->_total_page > $this->_config_show_max) {
+            $sub_total = $this->_config_show_max;
             $sub_begin = true;
-            $sub_end = true;
-            if ($page <= $m) {
-                $sub_start = 1;
+            $sub_end   = true;
+            if ($page_curr <= $page_middle) {
                 $sub_begin = false;
-            } elseif ($this->_total_page - $page < $m) {
-                $sub_start = $this->_total_page - $this->_config_max + 1;
-                $sub_end = false;
+                $sub_start = 1;
+            } elseif ($this->_total_page - $page_curr < $page_middle) {
+                $sub_end   = false;
+                $sub_start = $this->_total_page - $this->_config_show_max + 1;
             } else {
-                $sub_start = $page - $m + 1;
+                $sub_start = $page_curr - $page_middle + 1;
             }
         } else {
-            $sub_total = $this->_total_page; //
+            $sub_total = $this->_total_page;
             $sub_begin = false;
-            $sub_end = false;
+            $sub_end   = false;
             $sub_start = 1;
         }
-        $sub_next = ($page != $this->_total_page && $this->_total_page > 1) ? true : false;
-        $sub_previous = ($page != 1 && $this->_total_page > 1) ? true : false;
+        $sub_index = $page_curr > 0 ? true : false;
+        $sub_next = ($page_curr < $this->_total_page && $this->_total_page > 1) ? true : false;
+        $sub_previous = ($page_curr > 1 && $this->_total_page > 1) ? true : false;
+
         // 载入np数据
         $rs = [];
+        $sub_index && $rs[] = ['index' => 100000000];
         $sub_begin && $rs[] = ['begin' => 1];
-        $sub_previous && $rs[] = ['previous' => $page - 1];
+        $sub_previous && $rs[] = ['previous' => $page_curr - 1];
         for ($i = $sub_start; $i < $sub_start + $sub_total; $i++) {
-            $rs[] = ['def' => $i];
+            $rs[] = ['default' => $i];
         }
-        $sub_next && $rs[] = ['next' => $page + 1];
-        $sub_end && $rs[] = ['end' => $this->_total_page];
+        $sub_next && $rs[] = ['next' => $page_curr + 1];
+        $sub_end && $rs[]  = ['end'  => $this->_total_page];
         return $rs;
     }
 
@@ -219,7 +216,7 @@ class base
      * 得到数据总行数
      * @return int
      */
-    public function total(): int
+    public function total_size(): int
     {
         if ($this->_total) {
             return $this->_total;
@@ -241,18 +238,18 @@ class base
      * 当前所在页数
      * @return int
      */
-    public function page(): int
+    public function page_curr(): int
     {
-        return $this->_page;
+        return $this->_page_curr;
     }
 
     /**
      * 翻页排序  false:1...max  true:max...1
      * @return int
      */
-    public function page_max(): int
+    public function page_end_index(): int
     {
-        return $this->_page_max;
+        return $this->_page_end_index;
     }
 
     /**
@@ -266,24 +263,24 @@ class base
     /**
      * @return int
      */
-    public function limit_start(): int
+    public function limit_offset(): int
     {
-        if ($this->_page_max && $this->_page == $this->_total_page) {
+        if ($this->_page_end_index && $this->_page_curr == 0 ) {
             $start = $this->_total - $this->_config_rows;
         } else {
-            $start = ($this->_page - 1) * $this->_config_rows;
+            $start = ($this->_page_curr - 1) * $this->_config_rows;
         }
         return $start < 0 ? 0 : $start;
     }
 
     /**
      * 设定字符串
-     * @param array $arr
      * @return string
      */
-    private function _note_set(int $total, int $total_page, int $page): string
+    private function _note_set(): string
     {
-        return str_replace(['{total}', '{total_page}', '{page}'], [$total, $total_page, $page], $this->_config_note);
+        $replace = [$this->_total, $this->_total_page_real, $this->_page_curr];
+        return str_replace(['{total}', '{total_page}', '{page}'], $replace, $this->_config_note);
     }
 
     /**
@@ -293,23 +290,28 @@ class base
      */
     protected function _url_set(int $page): string
     {
-        $url = str_replace('{page}', $page, $this->_url);
+        $search  = [];
+        $replace = [];
+        $url     = str_replace('{page}', $page, $this->_url);
         if ($this->_config_index) {
-            if ($this->_page_max && $page == $this->_total_page) {
-                if (is_array($this->_config_index)) {
-                    $cfg_index = str_replace('{total_page}', $page, $this->_config_index[0]);
-                    $url = str_replace($cfg_index, $this->_config_index[1], $url);
-                } else {
-                    $cfg_index = str_replace('{total_page}', $page, $this->_config_index);
-                    $url = str_replace($cfg_index, '', $url);
+            if ($this->_page_end_index ) {
+                if( $page == 0 ){
+                    foreach ($this->_config_index as $v){
+                        $search[]  = str_replace('{total_page}', $this->_total_page, $v[0]);
+                        $replace[] = $v[1];
+                    }
                 }
-            } elseif (1 == $page) {
-                if (is_array($this->_config_index)) {
-                    $url = str_replace($this->_config_index[0], $this->_config_index[1], $url);
-                } else {
-                    $url = str_replace($this->_config_index, '', $url);
+            } else {
+                if (1 == $page){
+                    foreach ($this->_config_index as $v){
+                        $search[]  = $v[0];
+                        $replace[] = $v[1];
+                    }
                 }
             }
+        }
+        if($search){
+            $url = str_replace($search, $replace, $url);
         }
         return $url;
     }
@@ -321,8 +323,9 @@ class base
     protected function _total_get(): int
     {
         $rs = $this->_db->table($this->_table)
-            ->field(' ' . $this->_sql_count . ' as `cc` ')
+            ->field(' ' . $this->_config_count_sql . ' as `cc` ')
             ->where($this->_where_str, $this->_where_bind)->column_one();
+
         if ($rs && $rs['cc']) {
             return (int)$rs['cc'];
         }

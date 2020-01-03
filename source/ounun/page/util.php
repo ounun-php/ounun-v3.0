@@ -8,17 +8,17 @@ namespace ounun\page;
 class util
 {
     /**
-     * @param array $paras
-     * @param array $page_paras
+     * @param array $paras_gets
+     * @param array $paras_page
      * @param string $url_original
      * @return string
      */
-    static public function url(array $paras = [], array $page_paras = [], string $url_original = '')
+    static public function url(array $paras_gets = [], array $paras_page = [], string $url_original = '')
     {
-        $paras = $paras ? $paras : $_GET;
-        $page_paras = $page_paras ? $page_paras : ['page' => '{page}'];
+        $paras_gets   = $paras_gets ? $paras_gets : $_GET;
+        $paras_page   = $paras_page ? $paras_page : ['page' => '{page}'];
         $url_original = $url_original ? $url_original : url_original();
-        $url = url_build_query($url_original, $paras, $page_paras);
+        $url          = url_build_query($url_original, $paras_gets, $paras_page);
         self::page_set($_SERVER['REQUEST_URI']);
         return $url;
     }
@@ -30,7 +30,7 @@ class util
      */
     static public function page_set(string $url, string $url_key = 'p')
     {
-        self::val_set($url_key, $url);
+        self::value_set($url_key, $url);
     }
 
     /**
@@ -39,18 +39,18 @@ class util
      * @param string $url_key
      * @return mixed
      */
-    static public function page(string $default_url, string $url_key = 'p')
+    static public function page_get(string $default_url, string $url_key = 'p')
     {
-        return self::val($url_key, $default_url);
+        return self::value_get($url_key, $default_url);
     }
 
     /**
      * 设定当前页
      * @param int $page 页数
      */
-    static public function cur_set(int $page = 1, string $page_key = 'page')
+    static public function curr_set(int $page = 1, string $page_key = 'page')
     {
-        self::val_set($page_key, $page);
+        self::value_set($page_key, $page);
     }
 
     /**
@@ -60,9 +60,9 @@ class util
      * @param int $default_page 默认忽略 的页数
      * @return string
      */
-    static public function cur(string $pre = '?', string $page_key = 'page', int $default_page = 1)
+    static public function curr_get(string $pre = '?', string $page_key = 'page', int $default_page = 1)
     {
-        $page = self::val($page_key, $default_page);
+        $page = self::value_get($page_key, $default_page);
         if ($page == $default_page) {
             return '';
         }
@@ -74,7 +74,7 @@ class util
      * @param string $key
      * @param mixed $value
      */
-    static public function val_set(string $key, $value)
+    static public function value_set(string $key, $value)
     {
         setcookie("pu_{$key}", $value, time() * 1.2, '/');
     }
@@ -85,7 +85,7 @@ class util
      * @param mixed $default_value 如值为空，返回本值
      * @return mixed
      */
-    static public function val(string $key, $default_value)
+    static public function value_get(string $key, $default_value)
     {
         $val = $_COOKIE["pu_{$key}"];
         return $val ? $val : $default_value;

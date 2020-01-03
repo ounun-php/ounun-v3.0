@@ -19,7 +19,7 @@ class xmlrpc_client
 	{
 		$request = xmlrpc_encode_request($method, $params, $output_options);
 		$context = stream_context_create(array('http'=>array('method'=>$this->method, 'header'=>"Content-Type: text/xml", 'content'=>$request)));
-		$data = @file_get_contents($this->url, false, $context);
+		$data    = @file_get_contents($this->url, false, $context);
 		if(!$data)
 		{
 			$this->error = 'can not get webservice response';

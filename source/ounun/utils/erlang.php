@@ -105,17 +105,16 @@ class erlang
 
 
     /**
-     *
      * @param string $mod
      * @param string $fun 方法
      * @param string $data 数据
-     * @return string
+     * @return array
      */
     protected function _port(string $mod, string $fun, string $data = "[]")
     {
-        $host = "http://{$this->_host}:{$this->_port}/";
+        $url   = "http://{$this->_host}:{$this->_port}/";
         $model = "{{$mod},{$fun},{$data}}";
-        return http::stream_post($host, $model, [], 600);
+        return http::stream_post($url, $model, [], 600);
     }
 }
 

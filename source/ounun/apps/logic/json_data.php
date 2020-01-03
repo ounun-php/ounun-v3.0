@@ -32,8 +32,8 @@ class json_data extends \ounun\apps\logic
             exit('数据表:$table无数据');
         }
         /** 分页 */
-        $pg  = new \ounun\page\base_max( $this->_db, $table, $url, $where, $page_config);
-        $ps  = $pg->init($page, $title,$end_index);
+        $pg  = new \ounun\page\base( $this->_db, $table, $url, $where, $page_config);
+        $ps  = $pg->initialize($page, $title,$end_index);
         $db  = $this->_db->table($table);
         if($field){
             $db->field($field);
@@ -46,7 +46,7 @@ class json_data extends \ounun\apps\logic
                 $db->order($v['field'], $v['order']);
             }
         }
-        $datas = $db->limit($pg->limit_rows(), $pg->limit_start() )->column_all();
+        $datas = $db->limit($pg->limit_rows(), $pg->limit_offset() )->column_all();
 
         $this->_lists_decode($datas);
         // echo $this->db->sql()."\n";
