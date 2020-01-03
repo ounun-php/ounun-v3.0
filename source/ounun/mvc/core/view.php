@@ -137,13 +137,11 @@ class view implements iview
      */
     public function observer_register (string $notification_name, iobserver $observer)
     {
-        if( isset( $this->_observer_map[ $notification_name ] ) )
-        {
+        if( isset( $this->_observer_map[ $notification_name ] ) ) {
             array_push($this->_observer_map[ $notification_name ], $observer );
         }
-        else
-        {
-            $this->_observer_map[ $notification_name ] = array( $observer );
+        else {
+            $this->_observer_map[ $notification_name ] = [$observer];
         }
     }
 
@@ -162,23 +160,20 @@ class view implements iview
      */
     public function notify_observers(inotification $notification )
     {
-        if( isset( $this->_observer_map[ $notification->name_get() ] ) )
-        {
+        if( isset( $this->_observer_map[ $notification->name_get() ] ) ) {
             // Get a reference to the observers list for this notification name
             $observers_ref = $this->_observer_map[ $notification->name_get() ];
 
             // Copy observers from reference array to working array,
             // since the reference array may change during the notification loop
             $observers = [];
-            foreach($observers_ref as $observer)
-            {
+            foreach($observers_ref as $observer) {
                 array_push( $observers, $observer );
             }
 
             // Notify Observers from the working array
-            foreach($observers as $observer)
-            {
-                $observer->notifyObserver( $notification );
+            foreach($observers as $observer) {
+                $observer->notify_observer( $notification );
             }
         }
     }
@@ -195,16 +190,16 @@ class view implements iview
     public function observer_remove(string $notification_name, $notify_context )
     {
         //Is there registered Observers for the notification under inspection
-        if( !isset( $this->_observer_map[ $notification_name ] )) return;
+        if( !isset( $this->_observer_map[ $notification_name ] )) {
+            return;
+        }
 
         // the observer list for the notification under inspection
         $observers = $this->_observer_map[ $notification_name ];
 
         // find the observer for the notifyContext
-        for ( $i = 0; $i < count( $observers ); $i++ )
-        {
-            if ( $observers[$i]->compareNotifyContext( $notify_context ) == true )
-            {
+        for ( $i = 0; $i < count( $observers ); $i++ ) {
+            if ( $observers[$i]->compareNotifyContext( $notify_context ) == true ) {
                 // there can only be one Observer for a given notifyContext
                 // in any given Observer list, so remove it and break
                 array_splice($observers,$i,1);
@@ -214,8 +209,7 @@ class view implements iview
 
         // Also, when a Notification's Observer list length falls to
         // zero, delete the notification key from the observer map
-        if ( count( $observers ) == 0 )
-        {
+        if ( count( $observers ) == 0 ) {
             unset($this->_observer_map[ $notification_name ]);
         }
     }
@@ -242,7 +236,9 @@ class view implements iview
     {
 
         // do not allow re-registration (you must to removeMediator fist)
-        if ( $this->mediator_has( $mediator->mediator_name_get() ) ) return;
+        if ( $this->mediator_has( $mediator->mediator_name_get() ) ) {
+            return;
+        }
 
         $mediator->initialize( $this->_core_tag );
 
@@ -254,14 +250,12 @@ class view implements iview
         $interests = $mediator->notification_list_interests();
 
         // Register Mediator as an observer for each notification of interests
-        if ( count( $interests ) > 0 )
-        {
+        if ( count( $interests ) > 0 ) {
             // Create Observer referencing this mediator's handlNotification method
             $observer = new observer( "handleNotification", $mediator );
 
             // Register Mediator as Observer for its list of Notification interests
-            for ( $i = 0;  $i < count( $interests ); $i++ )
-            {
+            for ( $i = 0;  $i < count( $interests ); $i++ ) {
                 $this->observer_register( $interests[$i],  $observer );
             }
         }
@@ -297,12 +291,10 @@ class view implements iview
         // Retrieve the named mediator
         $mediator = $this->mediator_retrieve( $mediator_name );
 
-        if ( $mediator )
-        {
+        if ( $mediator ) {
             // for every notification this mediator is interested in...
             $interests = $mediator->notification_list_interests();
-            for ( $i = 0; $i < count( $interests ); $i++ )
-            {
+            for ( $i = 0; $i < count( $interests ); $i++ ) {
                 // remove the observer linking the mediator
                 // to the notification interest
                 $this->observer_remove( $interests[$i], $mediator );

@@ -107,8 +107,7 @@ class notifier implements inotifier
      */
     protected function facade()
     {
-        if ( !isset( $this->_core_tag ) )
-        {
+        if ( !isset( $this->_core_tag ) ) {
             throw new \Exception( self::Multiton_Msg );
         }
         return facade::i( $this->_core_tag );

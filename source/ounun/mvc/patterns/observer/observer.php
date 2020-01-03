@@ -106,7 +106,7 @@ class observer implements iobserver
     public function notify_observer(inotification $notification )
     {
         $interested = $this->notify_context_get();
-        $method = $this->notify_method_get();
+        $method     = $this->notify_method_get();
 
         $interested->$method($notification);
     }

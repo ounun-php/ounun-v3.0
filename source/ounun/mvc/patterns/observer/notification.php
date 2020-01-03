@@ -133,5 +133,4 @@ class notification implements inotification
         $msg .= "\nType:".( is_null( $this->_type ) ? "null" : $this->_type );
         return $msg;
     }
-
 }

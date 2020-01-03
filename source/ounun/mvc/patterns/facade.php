@@ -168,7 +168,6 @@ class facade implements ifacade
         if ( isset( $this->_model ) ) {
             return;
         }
-
         $this->_model = model::i( $this->_core_tag );
     }
 
@@ -202,7 +201,6 @@ class facade implements ifacade
         if ( isset( $this->_view ) ) {
             return;
         }
-
         $this->_view = view::i( $this->_core_tag );
     }
 
@@ -271,8 +269,7 @@ class facade implements ifacade
      */
     public function command_register($notification_name, $command_class_name)
     {
-        if( isset( $this->_controller ) )
-        {
+        if( isset( $this->_controller ) ) {
             $this->_controller->register( $notification_name, $command_class_name );
         }
     }
@@ -312,8 +309,7 @@ class facade implements ifacade
      */
     public function mediator_register(imediator $mediator )
     {
-        if ( isset( $this->_view ) )
-        {
+        if ( isset( $this->_view ) ) {
             $this->_view->mediator_register( $mediator );
         }
     }
@@ -390,8 +386,7 @@ class facade implements ifacade
      */
     public function notify_observers (inotification $notification )
     {
-        if ( isset( $this->_view ) )
-        {
+        if ( isset( $this->_view ) ) {
             $this->_view->notify_observers( $notification );
         }
     }
