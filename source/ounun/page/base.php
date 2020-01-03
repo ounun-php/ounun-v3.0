@@ -255,7 +255,7 @@ class base
     /**
      * @return int
      */
-    public function limit_rows(): int
+    public function limit_length(): int
     {
         return $this->_config_rows;
     }
