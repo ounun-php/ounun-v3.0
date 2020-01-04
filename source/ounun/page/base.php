@@ -13,6 +13,21 @@ namespace ounun\page;
  */
 class base
 {
+    /** 翻页配制 */
+    const Config = [
+        'default' => ['', ''],
+        'now'     => ['<b>', '</b>', ' '],
+        'tag'     => ['第一页', '上一页', '下一页', '最后一页'],
+        'index'   => ['/list_{total_page}.html', '/']
+    ];
+    /** 翻页配制li */
+    const Config_Li = [
+        'default' => ['<li>', '</li>'],
+        'now'     => ['<li class="active">', '</li>', ' '],
+        'tag'     => ['第一页', '上一页', '下一页', '最后一页'],
+        'index'   => ['/list_{total_page}.html', '/']
+    ];
+
     /** @var string  提示串 */
     protected $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
     /** @var array   默认页 */
