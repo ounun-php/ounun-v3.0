@@ -6,6 +6,8 @@
 namespace ounun\utils;
 
 
+use ounun\utils\curl\http_proxy;
+
 class caiji
 {
     /**
@@ -43,8 +45,8 @@ class caiji
     static public function rand_views()
     {
         $ip_long = [
-            [1000 ,100000], 
-            [5000 ,500000],  
+            [1000 ,100000],
+            [5000 ,500000],
             [20000,100000],
             [30000,150000],
             [20000,200000],
@@ -61,5 +63,146 @@ class caiji
         ];
         $rand_key = mt_rand(0, 14);
         return mt_rand($ip_long[$rand_key][0], $ip_long[$rand_key][1]);
+    }
+
+    /**
+     * 获取html代码
+     * @param $url
+     * @param null $headers       键值对形式
+     * @param array $options
+     * @param string $from_encode
+     * @param null $post_data    通过isset判断是否是post模式
+     * @return bool|string|null
+     */
+    static public function html_get($url, $headers=null, $options=[], $from_encode='auto', $post_data=null){
+        $headers=is_array($headers)?$headers:[];
+        $options=is_array($options)?$options:[];
+        if(!isset($options['useragent'])){
+            $options['useragent']='Mozilla/5.0 (Windows NT 6.2; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70 Safari/537.36';
+        }
+        $options['timeout']=$options['timeout']>0?$options['timeout']:30;
+        $curl_headers=[];
+        foreach ($headers as $k=>$v){
+            $curl_headers[]=$k.': '.$v;
+        }
+        $headers=$curl_headers;
+        unset($curl_headers);
+        if(!preg_match('/^\w+\:\/\//', $url)){
+            $url='http://'.$url;
+        }
+        $curl=null;
+        try {
+            if(!isset($post_data)){
+                $allow_get=true;
+                if(!empty($options['max_bytes'])){
+                    $max_bytes=intval($options['max_bytes']);
+                    unset($options['max_bytes']);
+                    $curl=http_proxy::head($url,$headers,$options);
+                    if(preg_match('/\bContent-Length\s*:\s*(\d+)/i', $curl->header,$contLen)){
+                        $contLen=intval($contLen[1]);
+                        if($contLen>=$max_bytes){
+                            $allow_get=false;
+                        }
+                    }
+                }
+                if($allow_get){
+                    $curl=http_proxy::get($url,$headers,$options);
+                }else{
+                    $curl=null;
+                }
+            }else{
+
+                if(!empty($post_data)&&!empty($from_encode)&&!in_array(strtolower($from_encode), array('auto','utf-8','utf8'))){
+
+                    if(!is_array($post_data)){
+                        if(preg_match_all('/([^\&]+?)\=([^\&]*)/',$post_data,$m_post_data)){
+                            $new_post_data=array();
+                            foreach($m_post_data[1] as $k=>$v){
+                                $new_post_data[$v]=rawurldecode($m_post_data[2][$k]);
+                            }
+                            $post_data=$new_post_data;
+                        }else{
+                            $post_data=array();
+                        }
+                    }
+                    $post_data=is_array($post_data)?$post_data:array();
+                    foreach ($post_data as $k=>$v){
+                        $post_data[$k] = mb_convert_encoding($v,'utf-8//IGNORE',$from_encode);
+                        // $post_data[$k] = iconv ( 'utf-8', $fromEncode.'//IGNORE', $v );
+                    }
+                }
+
+                $curl=http_proxy::post($url,$headers,$options,$post_data);
+            }
+        } catch (\Exception $e) {
+            $curl=null;
+        }
+        $html=null;
+
+        if(!empty($curl)){
+            if($curl->isOk){
+
+                $html=$curl->body;
+                if ($from_encode == 'auto') {
+                    $htmlCharset='';
+                    if(preg_match ( '/<meta[^<>]*?content=[\'\"]text\/html\;\s*charset=(?P<charset>[^\'\"\<\>]+?)[\'\"]/i', $html, $htmlCharset ) || preg_match ( '/<meta[^<>]*?charset=[\'\"](?P<charset>[^\'\"\<\>]+?)[\'\"]/i', $html, $htmlCharset )){
+                        $htmlCharset=strtolower(trim($htmlCharset['charset']));
+                        if('utf8'==$htmlCharset){
+                            $htmlCharset='utf-8';
+                        }
+                    }else{
+                        $htmlCharset='';
+                    }
+                    $headerCharset='';
+                    if(preg_match('/\bContent-Type\s*:[^\r\n]*charset=(?P<charset>[\w\-]+)/i', $curl->header,$headerCharset)){
+                        $headerCharset=strtolower(trim($headerCharset['charset']));
+                        if('utf8'==$headerCharset){
+                            $headerCharset='utf-8';
+                        }
+                    }else{
+                        $headerCharset='';
+                    }
+                    if(!empty($htmlCharset)&&!empty($headerCharset)&&strcasecmp($htmlCharset,$headerCharset)!==0){
+
+                        $zhCharset=array('gb18030','gbk','gb2312');
+                        if(in_array($htmlCharset,$zhCharset)&&in_array($headerCharset,$zhCharset)){
+                            $from_encode='gb18030';
+                        }else{
+                            $autoEncode = mb_detect_encoding($html, ['ASCII','UTF-8','GB2312','GBK','BIG5']);
+                            if(strcasecmp($htmlCharset,$autoEncode)==0){
+                                $from_encode=$htmlCharset;
+                            }elseif(strcasecmp($headerCharset,$autoEncode)==0){
+                                $from_encode=$headerCharset;
+                            }else{
+                                $from_encode=$autoEncode;
+                            }
+                        }
+                    }elseif(!empty($htmlCharset)){
+                        $from_encode=$htmlCharset;
+                    }elseif(!empty($headerCharset)){
+                        $from_encode=$headerCharset;
+                    }else{
+                        $from_encode = mb_detect_encoding($html, array('ASCII','UTF-8','GB2312','GBK','BIG5'));
+                    }
+                    $from_encode=empty($from_encode)?null:$from_encode;
+                }
+                $from_encode=trim($from_encode);
+
+                if(!empty($from_encode)){
+                    $from_encode=strtolower($from_encode);
+                    switch ($from_encode){
+                        case 'utf8'   :$from_encode='utf-8';break;
+                        case 'cp936'  :$from_encode='gbk';break;
+                        case 'cp20936':$from_encode='gb2312';break;
+                        case 'cp950'  :$from_encode='big5';break;
+                    }
+                    if ($from_encode!='utf-8'){
+                        $html = mb_convert_encoding($html,'utf-8//IGNORE',$from_encode);
+                        // $html = iconv ( $fromEncode, 'utf-8//IGNORE', $html );
+                    }
+                }
+            }
+        }
+        return isset($html)?$html:false;
     }
 }

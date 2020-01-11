@@ -35,7 +35,7 @@ use ounun\mvc\patterns\facade;
  *  - on a Mediator is registered with the View
  *  - on a Proxy is registered with the Model.
  *
- * @see proxy
+ * @see http_proxy
  * @see facade
  * @see mediator
  * @see macro_command

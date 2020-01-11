@@ -23,8 +23,6 @@
     "ext-xml": "*",
     "ext-fileinfo": "*",
     "ext-ctype": "*",
-    "ext-xmlrpc": "*",
-    "ext-simplexml": "*",
 
     "textalk/websocket": "^1.2",
     "php": ">=7.2"
