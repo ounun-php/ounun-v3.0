@@ -8,12 +8,12 @@ class session
 {
 	protected $options, $started = false;
 
-	function __construct($options = [])
+	public function __construct($options = [])
 	{
         $this->options = $options;
 	}
 
-	function start()
+    public function start()
 	{
 		if (!$this->started) {
 			ini_set('session.gc_maxlifetime', $this->options['maxlifetime']);

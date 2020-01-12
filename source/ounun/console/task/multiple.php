@@ -3,11 +3,11 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\console;
+namespace ounun\console\task;
 
 use ounun\console;
 
-abstract class task_multiple extends task_driver
+abstract class multiple extends simple
 {
     /** @var int 间隔(秒,默认5秒) */
     protected $_time_argc_sleep = 5;
@@ -18,7 +18,7 @@ abstract class task_multiple extends task_driver
     /** @var int 过去的时间 */
     protected $_time_past = 0;
     /** @var int 执行次数 */
-    protected $_time_run_count = 0;
+    protected $_execute_count = 0;
 
     /**
      * @param array $argc_input
@@ -45,7 +45,7 @@ abstract class task_multiple extends task_driver
         $this->_time_argc_live  = ($input_len >= 4) ? ((int)array_shift($argc_input)) : 59;
         $this->_time_curr       = time();
         $this->_time_past       = 0;
-        $this->_time_run_count  = 0;
+        $this->_execute_count   = 0;
         if($input_len >= 5){
             while ($argc_input){
                 $input_new[] =  array_shift($argc_input);
@@ -56,14 +56,14 @@ abstract class task_multiple extends task_driver
         $do = 0;
         do {
             console::echo("Execute multiple  \$sleep:" . str_pad($this->_time_argc_sleep, 5) .
-                                                 " \$count:" . str_pad($this->_time_run_count, 5) .
+                                                 " \$count:" . str_pad($this->_execute_count, 5) .
                                                  " \$past:"  . str_pad($this->_time_past, 5) .
                                                  " \$live:"  . str_pad($this->_time_argc_live, 5) .' ---------- ', console::Color_Light_Red, __FILE__, __LINE__);
-            $do = $this->execute_do($input_new);
+            $do = $this->execute_multi($input_new);
             if($do){
                return $do;
             }
-            $this->_time_run_count++;
+            $this->_execute_count++;
             if (0 == $do) {
                 sleep($this->_time_argc_sleep);
             }
@@ -76,7 +76,7 @@ abstract class task_multiple extends task_driver
      * @param array $argc_input
      * @return int
      */
-    public function execute_do(array $argc_input)
+    public function execute_multi(array $argc_input)
     {
         echo __METHOD__ . " \$input:".json_encode_unescaped($argc_input)."\n";
         return 0;

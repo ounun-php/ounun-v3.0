@@ -3,7 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\console;
+namespace ounun\console\task;
 
 use ounun\console;
 use ounun\db\pdo;
@@ -257,7 +257,7 @@ class manage
 
     /**
      * 当前执行中的任务
-     * @return task_driver
+     * @return simple
      */
     public function task_curr_get()
     {
@@ -488,7 +488,7 @@ class manage
      * ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='任务列表' ROW_FORMAT=COMPACT;
      */
 
-    /** @var task_driver 当前执行中的任务 */
+    /** @var simple 当前执行中的任务 */
     protected $_task_curr;
 
     /** @var array<task_id,task> 所有触发的任务Map */
@@ -535,11 +535,11 @@ class manage
     {
         // 实例对像
         $struct = new struct([]);
-        /** @var task_driver $task */
+        /** @var simple $task */
         $task = new $task_class($struct);
         if (is_subclass_of($task, "cmd\\task\\task_base")) {
             $this->_task_curr = $task;
-            $task->execute_do($argc_input);
+            $task->execute_multi($argc_input);
         }else{
             console::echo("error --> class:{$task_class} not subclass:task\\task_base", console::Color_Red, __FILE__, __LINE__, time());
         }
@@ -569,13 +569,13 @@ class manage
         $this->init();
         $tasks = $this->tasks();
         console::echo("Start   host:" . gethostname() . "  task_parallel_max:" . \ounun::$global['task_parallel_max'] . "    \$tasks_count:" . str_pad(count($tasks), 5) .
-                           ' ----------------- ', consol::Color_Purple, __FILE__, __LINE__);
-        /** @var task_driver $task */
+            ' ----------------- ', consol::Color_Purple, __FILE__, __LINE__);
+        /** @var simple $task */
         foreach ($tasks as $task) {
             // var_dump(['$task'=>$task]);
             if ($task && is_subclass_of($task, "cmd\\task\\task_base")) {
                 $this->_task_curr = $task;
-                $do = $this->_task_curr->execute_do($argc_input, $this->_argc_mode, $is_pass_check);
+                $do = $this->_task_curr->execute_multi($argc_input, $this->_argc_mode, $is_pass_check);
                 if($do){
                     return $do;
                 }
@@ -627,7 +627,7 @@ class manage
                     $cls = '\\' . $v['task_class'];
                     if (class_exists($cls)) {
                         $struct = new struct($v);
-                        /** @var task_driver $task */
+                        /** @var simple $task */
                         $task = new $cls($struct);
                         // console::echo($cls, console::Color_Blue, __FILE__, __LINE__, time());
                         if (is_subclass_of($task, "cmd\\task\\task_base")) {

@@ -7,16 +7,16 @@ namespace ounun\http;
 
 class uri
 {
-    public $_uri = null;
-    public $_scheme = null;
-    public $_host = null;
-    public $_port = null;
-    public $_user = null;
-    public $_pass = null;
-    public $_path = null;
-    public $_query = null;
-    public $_fragment = null;
-    public $_vars = [];
+    protected $_uri = '';
+    protected $_scheme = '';
+    protected $_host = '';
+    protected $_port = 80;
+    protected $_user = '';
+    protected $_pass = '';
+    protected $_path = null;
+    protected $_query = null;
+    protected $_fragment = null;
+    protected $_vars = [];
 
     /** @var $this */
     protected static $_instances = [];
@@ -127,10 +127,10 @@ class uri
 		return $retval;
 	}
 
-    public function toString($parts = array('scheme', 'user', 'pass', 'host', 'port', 'path', 'query', 'fragment'))
+    public function toString($parts = ['scheme', 'user', 'pass', 'host', 'port', 'path', 'query', 'fragment'])
 	{
 		$query = $this->get_query();
-		$uri = '';
+		$uri   = '';
 		$uri .= in_array('scheme', $parts)  ? (!empty($this->_scheme) ? $this->_scheme.'://' : '') : '';
 		$uri .= in_array('user', $parts)	? $this->_user : '';
 		$uri .= in_array('pass', $parts)	? (!empty($this->_pass) ? ':' : '') .$this->_pass. (!empty($this->_user) ? '@' : '') : '';

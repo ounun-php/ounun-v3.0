@@ -41,7 +41,9 @@ class ldap
 
 	function connect()
 	{
-		if ($this->host == '') return false;
+		if ($this->host == '') {
+		    return false;
+        }
 		$this->_resource = ldap_connect($this->host, $this->port);
 		if ($this->_resource)
 		{

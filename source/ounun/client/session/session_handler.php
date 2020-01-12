@@ -75,46 +75,15 @@ class session_handler implements \SessionHandlerInterface, \SessionUpdateTimesta
             return json_decode_array($rs['data']);
         }
         return '';
-
-//        if (!isset($session_id)) {
-//            $session_id='';
-//        }
-//
-//        try {
-//            $sql="
-//                SELECT
-//                    sess_data
-//                FROM
-//                    ue_user_session
-//                WHERE
-//                    sess_id = :sess_id
-//            ";
-//            $stmt = $this->db->prepare($sql);
-//            $stmt->bindParam(':sess_id', $session_id);
-//            $stmt->execute();
-//            $res = $stmt->fetchAll(PDO::FETCH_ASSOC);
-//            if (count($res) <> 1 ) {
-//                return false;
-//            } else {
-//                return $res[0]['sess_data'];
-//            }
-//        }
-//        catch (PDOException $e) {
-//            error_log('Error reading the session data table in the session reading method.',3,"C:\wamp\www\universal_empires\test_log.txt");
-//            error_log(" Query with error: $sql",3,"C:\wamp\www\universal_empires\test_log.txt");
-//            error_log(" Reason given: $e->getMessage()",3,"C:\wamp\www\universal_empires\test_log.txt");
-//            return false;
-//        }
     }
 
     /**
      * @param string $session_id
-     * @param string $data
+     * @param array  $data
      * @return bool
      */
     public function write($session_id, $data)
     {
-        // print_r(['$data'=>$data]);
         $time = time() + 3600;
         $uid  = (int)$data['uid'];
         $data = $data?json_encode_unescaped($data):'';

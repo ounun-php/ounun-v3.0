@@ -3,14 +3,13 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\console;
+namespace ounun\console\task;
 
 use ounun\console;
-use ounun\db\pdo;
 
-abstract class task_driver
+abstract class simple
 {
-    /** @var pdo */
+    /** @var \ounun\db\pdo */
     public static $db;
 
     /** @var console 控制台 */

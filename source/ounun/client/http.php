@@ -13,8 +13,10 @@ class http
     public $header;
     public $ContentType;
     public $data;
-    public $errno;
-    public $error;
+    /** @var int 错误代码 */
+    public $error_code;
+    /** @var string 错误信息 */
+    public $error_msg;
 
     function __construct()
     {
@@ -22,11 +24,11 @@ class http
 		$this->cookie = '';
 		$this->post = '';
 		$this->header = '';
-		$this->errno = 0;
-		$this->error = '';
+		$this->error_code = 0;
+		$this->error_msg = '';
     }
 
-	public function post($url, $data = [], $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
+	public function post($url, $data = [], $referer = '', $limit = 0, $timeout = 30, $block = true)
 	{
 		$this->method = 'POST';
 		$this->ContentType = "Content-Type: application/x-www-form-urlencoded\r\n";
@@ -101,8 +103,8 @@ class http
 		$fp = @fsockopen($host, $port, $errno, $error, $timeout);
 		if(!$fp)
 		{
-			$this->errno = $errno;
-			$this->error = $error;
+			$this->error_code = $errno;
+			$this->error_msg = $error;
 			return false;
 		}
 		else
@@ -197,8 +199,8 @@ class http
 		$status = $this->get_status();
 		if(intval($status[0]) != 200)
 		{
-			$this->errno = $status[0];
-			$this->error = $status[1];
+			$this->error_code = $status[0];
+			$this->error_msg = $status[1];
 			return false;
 		}
 		return true;
