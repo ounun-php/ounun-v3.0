@@ -208,19 +208,20 @@ class translator
     }
 
     /*腾讯翻译接口*/
-    public static function api_qq($q,$from,$to){
-        $apiConf=$GLOBALS['_sc']['c']['translate']['qq'];
+    public static function api_qq($q,$from,$to)
+    {
+        $api_conf   = \ounun::$global['translate']['qq'];
 
-        $SecretId=$apiConf['secretid'];
-        $SecretKey=$apiConf['secretkey'];
+        $secret_id  = $api_conf['secretid'];
+        $secret_key = $api_conf['secretkey'];
 
 
 
-        $param=array();
+        $param=[];
         $param["Nonce"] = rand();
         $param["Timestamp"] = time();
         $param["Region"] = "ap-shanghai";
-        $param["SecretId"] = $SecretId;
+        $param["SecretId"] = $secret_id;
         $param["Action"] = "TextTranslate";
         $param["Version"] = "2018-03-21";
         $param["SourceText"] = $q;
@@ -231,17 +232,16 @@ class translator
 
         ksort($param);
 
-
-        $signStr = "GETtmt.ap-shanghai.tencentcloudapi.com/?";
+        $sign_str = "GETtmt.ap-shanghai.tencentcloudapi.com/?";
         foreach ( $param as $key => $value ) {
-            $signStr = $signStr . $key . "=" . $value . "&";
+            $sign_str = $sign_str . $key . "=" . $value . "&";
         }
-        $signStr = substr($signStr, 0, -1);
+        $sign_str = substr($sign_str, 0, -1);
 
 
-        $param['Signature'] = base64_encode(hash_hmac("sha1", $signStr,$SecretKey, true));
+        $param['Signature'] = base64_encode(hash_hmac("sha1", $sign_str,$secret_key, true));
 
-        $return=array('success'=>false);
+        $return = ['success'=>false];
 
 
         ksort($param);
@@ -266,7 +266,6 @@ class translator
         if(!empty($allowLangs)&&is_array($allowLangs)){
             foreach($allowLangs as $k=>$v){
                 if(empty(self::$all_langs[$k])){
-
                     unset($allowLangs[$k]);
                 }else{
                     $allowLangs[$k]=self::$all_langs[$k];

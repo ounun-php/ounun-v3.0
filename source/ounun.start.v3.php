@@ -363,7 +363,7 @@ class ounun
      * 设定模板替换
      * @param array $data
      */
-    static public function template_array_set(array $data)
+    static public function template_array_set(?array $data)
     {
         if ($data && is_array($data)) {
             foreach ($data as $key => $value) {

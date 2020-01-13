@@ -100,7 +100,7 @@ class tls_sig_api
      * @return string 按标准格式生成的用于签名的字符串 失败时返回false
      * @throws Exception
      */
-    private function genSignContent(array $json)
+    private function gen_sign_content(array $json)
     {
         static $members = Array(
             'TLS.appid_at_3rd',
@@ -170,8 +170,8 @@ class tls_sig_api
             'TLS.time' => (string)time()
         );
         $err = '';
-        $content = $this->genSignContent($json, $err);
-        $signature = $this->sign($content, $err);
+        $content = $this->gen_sign_content($json);
+        $signature = $this->sign($content);
         $json['TLS.sig'] = base64_encode($signature);
         if ($json['TLS.sig'] === false) {
             throw new Exception('base64_encode error');
@@ -217,7 +217,7 @@ class tls_sig_api
             if ($json['TLS.sdk_appid'] != $this->appid) {
                 throw new Exception("appid error sigappid:{$json['TLS.appid']} thisappid:{$this->appid}");
             }
-            $content = $this->genSignContent($json);
+            $content = $this->gen_sign_content($json);
             $signature = base64_decode($json['TLS.sig']);
             if ($signature == false) {
                 throw new Exception('sig json_decode error');

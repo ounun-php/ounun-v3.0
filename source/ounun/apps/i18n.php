@@ -20,14 +20,21 @@ class i18n
     const Tpl_Style_Default = '';
 
     /** @var string 根据域名 得到对应模板 */
-    const Tpl_Type          = 'pc';
+    const Tpl_Type          = 'www';
     /** @var string 模板(默认) */
     const Tpl_Type_Default  = '';
 
+    /** @var string 网站名简 */
+    const Sitename        = '创梦思开源CMS.CC';
+    /** @var string 网站简称 */
+    const Sitename_Short  = '创梦思';
+
     /** 网站标题 */
-    const Title             = 'CMS.cc开源移动内容管理系统';
-
-    const Keywords          = 'CMS.cc开源移动内容管理系统';
-
-    const Description       = 'CMS.cc开源移动内容管理系统';
+    const Title           = 'CMS.cc开源移动内容管理系统';
+    /** @var string 网站关健词 */
+    const Keywords        = 'CMS.cc开源移动内容管理系统';
+    /** @var string 网站简称 */
+    const Description     = 'CMS.cc开源移动内容管理系统';
+    /** @var string 口号 */
+    const Slogan          = '创梦思开源CMS.CC,移动内容管理系统';
 }
