@@ -15,17 +15,21 @@ class base
 {
     /** 翻页配制 */
     const Config = [
-        'default' => ['', ''],
-        'now'     => ['<b>', '</b>', ' '],
-        'tag'     => ['第一页', '上一页', '下一页', '最后一页'],
-        'index'   => ['/list_{total_page}.html', '/']
+        'page_tag_default'  => ['', ''],
+        'page_tag_curr'     => ['<b>', '</b>', ' '],
+        'page_tag_name'     => ['第一页', '上一页', '下一页', '最后一页'],
+        'index'             => [
+                                    ['/list_{total_page}.html', '/']
+                               ]
     ];
     /** 翻页配制li */
     const Config_Li = [
-        'default' => ['<li>', '</li>'],
-        'now'     => ['<li class="active">', '</li>', ' '],
-        'tag'     => ['第一页', '上一页', '下一页', '最后一页'],
-        'index'   => ['/list_{total_page}.html', '/']
+        'page_tag_default'  => ['<li>', '</li>'],
+        'page_tag_curr'     => ['<li class="active">', '</li>', ' '],
+        'page_tag_name'     => ['第一页', '上一页', '下一页', '最后一页'],
+        'index'             => [
+                                    ['/list_{total_page}.html', '/']
+                               ]
     ];
 
     /** @var string  提示串 */
@@ -37,13 +41,15 @@ class base
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
     protected $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
     /** @var int     最多显示几页 */
-    protected $_config_show_max = 9;
+    protected $_config_show_max  = 9;
     /** @var int     一页显示几条数据 */
-    protected $_config_rows = 20;
+    protected $_config_rows      = 20;
     /** @var array   第一页 */
     protected $_config_index     = [];
     /** @var string  获取数据总数 */
     protected $_config_count_sql = 'count(*)';
+    /** @var bool 是否最后一页为首页  false:第一页为首页  true:最后一页为首页 */
+    protected $_page_end_index = false;
 
     /** @var string */
     protected $_where_str  = '';
@@ -60,14 +66,12 @@ class base
     /** @var int 数量总量 */
     protected $_total;
     /** @var int 页数总量(除去首页) */
-    protected $_total_page = 0;
+    protected $_total_page      = 0;
     /** @var int 页数总量(总数) */
     protected $_total_page_real = 1;
 
     /** @var int 当前所在页数 */
-    protected $_page_curr = 1;
-    /** @var bool 翻页排序  false:1...max  true:max...1 */
-    protected $_page_end_index = false;
+    protected $_page_curr      = 1;
 
     /**
      * 创建一个分页类
@@ -129,8 +133,8 @@ class base
         $title = $title ? "{$title}-" : '';
         $pages = [];
 
-        $data = $this->_data($page, $end_index);
-        $note = $this->_note_set();
+        $data  = $this->_data($page, $end_index);
+        $note  = $this->_note_set();
 
         $url_prev = '';
         $url_next = '';

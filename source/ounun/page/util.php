@@ -13,13 +13,15 @@ class util
      * @param string $url_original
      * @return string
      */
-    static public function url(array $paras_gets = [], array $paras_page = [], string $url_original = '')
+    static public function url(array $paras_gets = [], array $paras_page = [], string $url_original = '',string $url_key = 'p')
     {
         $paras_gets   = $paras_gets ? $paras_gets : $_GET;
         $paras_page   = $paras_page ? $paras_page : ['page' => '{page}'];
         $url_original = $url_original ? $url_original : url_original();
         $url          = url_build_query($url_original, $paras_gets, $paras_page);
-        self::page_set($_SERVER['REQUEST_URI']);
+        // print_r(['$url_original'=>$url_original,'$url'=>$url,'$paras_gets'=>$paras_gets,'$paras_page'=>$paras_page]);
+        // exit();
+        self::page_set($_SERVER['REQUEST_URI'],$url_key);
         return $url;
     }
 
