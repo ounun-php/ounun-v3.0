@@ -144,7 +144,7 @@ class caiji
 
                 $html=$curl->body;
                 if ($from_encode == 'auto') {
-                    $htmlCharset='';
+                    $htmlCharset= [];
                     if(preg_match ( '/<meta[^<>]*?content=[\'\"]text\/html\;\s*charset=(?P<charset>[^\'\"\<\>]+?)[\'\"]/i', $html, $htmlCharset ) || preg_match ( '/<meta[^<>]*?charset=[\'\"](?P<charset>[^\'\"\<\>]+?)[\'\"]/i', $html, $htmlCharset )){
                         $htmlCharset=strtolower(trim($htmlCharset['charset']));
                         if('utf8'==$htmlCharset){
@@ -153,7 +153,7 @@ class caiji
                     }else{
                         $htmlCharset='';
                     }
-                    $headerCharset='';
+                    $headerCharset= [];
                     if(preg_match('/\bContent-Type\s*:[^\r\n]*charset=(?P<charset>[\w\-]+)/i', $curl->header,$headerCharset)){
                         $headerCharset=strtolower(trim($headerCharset['charset']));
                         if('utf8'==$headerCharset){

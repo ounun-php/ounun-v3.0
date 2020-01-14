@@ -23,6 +23,7 @@ defined('Dir_Cache') || define('Dir_Cache', Dir_Data . 'cache/');
 defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
 defined('Environment') || define('Environment', environment());
+/** 开始调试 开始时间戳、内存量 */
 if(Environment){
     /** 开始时间戳 **/
     define('Ounun_Start_Time', microtime(true));
@@ -412,27 +413,27 @@ function succeed_data($data)
 function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
-        $type = \ounun\console\c::Format_Json;
+        $type = \ounun\c::Format_Json;
     }
     switch ($type) {
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\console\c::Format_Json :
+        case \ounun\c::Format_Json :
             header('Content-Type:application/json; charset=utf-8');
             exit(json_encode($data, $json_options));
         // 返回xml格式数据
-        case \ounun\console\c::Format_Xml :
+        case \ounun\c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
             exit(\ounun\utils\db::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\console\c::Format_Jsonp:
+        case \ounun\c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
             exit('try{'.$jsonp_callback . '(' . json_encode($data, $json_options) . ');}catch(err){}');
         // 返回可执行的js脚本
-        case  \ounun\console\c::Format_JS :
-        case  \ounun\console\c::Format_Eval :
+        case  \ounun\c::Format_JS :
+        case  \ounun\c::Format_Eval :
             header('Content-Type:application/javascript; charset=utf-8');
             exit($data);
         // 返回可执行的js脚本
@@ -551,16 +552,16 @@ function short_url_decode(string $string = ''): int
  * HTTP缓存控制
  * @param int $expires 缓存时间 0:为不缓存 单位:s
  * @param string $etag ETag
- * @param int $LastModified 最后更新时间
+ * @param int $last_modified 最后更新时间
  */
-function expires(int $expires = 0, string $etag = '', int $LastModified = 0)
+function expires(int $expires = 0, string $etag = '', int $last_modified = 0)
 {
     if ($expires > 0) {
         $time = time();
         header("Expires: " . gmdate("D, d M Y H:i:s", $time + $expires) . " GMT");
         header("Cache-Control: max-age=" . $expires);
-        if ($LastModified) {
-            header("Last-Modified: " . gmdate("D, d M Y H:i:s", $LastModified) . " GMT");
+        if ($last_modified) {
+            header("Last-Modified: " . gmdate("D, d M Y H:i:s", $last_modified) . " GMT");
         }
         if ($etag) {
             if ($etag == $_SERVER["HTTP_IF_NONE_MATCH"]) {
@@ -605,66 +606,6 @@ function error404(string $msg = ''): void
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->' . "\n");
-}
-
-/**
- * 特殊字符转换成 HTML安全格式。
- * Convert special characters to HTML safe entities.
- * @param string $string to encode
- * @return string
- */
-function safe(string $string): string
-{
-    return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
-}
-
-/**
- * 过滤一个有效的UTF-8字符串，使它只包含单词、数字、
- * 破折号、下划线、句号和空格——所有这些都是安全的
- * 文件名、URI、XML、JSON和(X)HTML中使用的字符。
- * Filter a valid UTF-8 string so that it contains only words, numbers,
- * dashes, underscores, periods, and spaces - all of which are safe
- * characters to use in file names, URI, XML, JSON, and (X)HTML.
- * @param string $string to clean
- * @param bool $spaces TRUE to allow spaces
- * @return string
- */
-function sanitize(string $string, bool $spaces = true): string
-{
-    $search = [
-        '/[^\w\-\. ]+/u',   // 删除非安全字符 Remove non safe characters
-        '/\s\s+/',          // 删除多余的空格 Remove extra whitespace
-        '/\.\.+/',
-        '/--+/',
-        '/__+/'             // 删除重复的符号 Remove duplicate symbols
-    ];
-    $string = preg_replace($search, [' ', ' ', '.', '-', '_'], $string);
-    if (!$spaces) {
-        $string = preg_replace('/--+/', '-', str_replace(' ', '-', $string));
-    }
-    return trim($string, '-._ ');
-}
-
-/**
- * 从有效的UTF-8字符串创建一个SEO友好的URL字符串。
- * Create a SEO friendly URL string from a valid UTF-8 string.
- * @param string $string to filter
- * @return string
- */
-function sanitize_url(string $string): string
-{
-    return urlencode(mb_strtolower(sanitize($string, false)));
-}
-
-/**
- * 过滤有效的UTF-8字符串以保证文件名安全。
- * Filter a valid UTF-8 string to be file name safe.
- * @param string $string to filter
- * @return string
- */
-function sanitize_filename(string $string): string
-{
-    return sanitize($string, false);
 }
 
 /**

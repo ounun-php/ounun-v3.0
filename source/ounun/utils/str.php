@@ -11,7 +11,7 @@ class str
      * 格式化字节大小
      * @param number $size 字节数
      * @param string $delimiter 数字和单位分隔符
-     * @return string            格式化后的带单位的大小
+     * @return string  格式化后的带单位的大小
      */
     static public function format_bytes($size, $delimiter = '')
     {
@@ -184,10 +184,7 @@ class str
 
     /**
      * 随机生成一组字符串
-     * @param int $number
-     * @param int $length
-     * @param int $mode
-     * @return array
+     * @return string
      */
     static public function uniqid(): string
     {
@@ -424,6 +421,7 @@ class str
 
     /**
      * @param string $card
+     * @return string
      */
     static public function hide_card(string $card)
     {
@@ -432,6 +430,7 @@ class str
 
     /**
      * @param string $mobile
+     * @return string
      */
     static public function hide_mobile(string $mobile)
     {
@@ -440,6 +439,7 @@ class str
 
     /**
      * @param string $email
+     * @return string
      */
     static public function hide_email(string $email)
     {
@@ -449,9 +449,82 @@ class str
 
     /**
      * @param string $name
+     * @return string
      */
     static public function hide_name(string $name)
     {
         return '**' . mb_substr($name, -1, null, 'utf-8');
+    }
+
+    /**
+     * IP隐藏第3段
+     * @param $ip
+     * @return string
+     */
+    static public function hide_ipv4($ip)
+    {
+        $ip = explode('.', $ip);
+        $ip[2] = '*';
+        return implode('.', $ip);
+    }
+
+    /**
+     * 特殊字符转换成 HTML安全格式。
+     * Convert special characters to HTML safe entities.
+     * @param string $string to encode
+     * @return string
+     */
+    static public function safe(string $string): string
+    {
+        return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
+    }
+
+    /**
+     * 过滤一个有效的UTF-8字符串，使它只包含单词、数字、
+     * 破折号、下划线、句号和空格——所有这些都是安全的
+     * 文件名、URI、XML、JSON和(X)HTML中使用的字符。
+     * Filter a valid UTF-8 string so that it contains only words, numbers,
+     * dashes, underscores, periods, and spaces - all of which are safe
+     * characters to use in file names, URI, XML, JSON, and (X)HTML.
+     * @param string $string to clean
+     * @param bool $spaces TRUE to allow spaces
+     * @return string
+     */
+    static public function sanitize(string $string, bool $spaces = true): string
+    {
+        $search = [
+            '/[^\w\-\. ]+/u',   // 删除非安全字符 Remove non safe characters
+            '/\s\s+/',          // 删除多余的空格 Remove extra whitespace
+            '/\.\.+/',
+            '/--+/',
+            '/__+/'             // 删除重复的符号 Remove duplicate symbols
+        ];
+        $string = preg_replace($search, [' ', ' ', '.', '-', '_'], $string);
+        if (!$spaces) {
+            $string = preg_replace('/--+/', '-', str_replace(' ', '-', $string));
+        }
+        return trim($string, '-._ ');
+    }
+
+    /**
+     * 从有效的UTF-8字符串创建一个SEO友好的URL字符串。
+     * Create a SEO friendly URL string from a valid UTF-8 string.
+     * @param string $string to filter
+     * @return string
+     */
+    static public function sanitize_url(string $string): string
+    {
+        return urlencode(mb_strtolower(sanitize($string, false)));
+    }
+
+    /**
+     * 过滤有效的UTF-8字符串以保证文件名安全。
+     * Filter a valid UTF-8 string to be file name safe.
+     * @param string $string to filter
+     * @return string
+     */
+    static public function sanitize_filename(string $string): string
+    {
+        return sanitize($string, false);
     }
 }

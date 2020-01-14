@@ -6,6 +6,7 @@
 namespace ounun\console\task;
 
 use ounun\console;
+use ounun\console\c;
 
 abstract class multiple extends simple
 {
@@ -58,7 +59,7 @@ abstract class multiple extends simple
             console::echo("Execute multiple  \$sleep:" . str_pad($this->_time_argc_sleep, 5) .
                                                  " \$count:" . str_pad($this->_execute_count, 5) .
                                                  " \$past:"  . str_pad($this->_time_past, 5) .
-                                                 " \$live:"  . str_pad($this->_time_argc_live, 5) .' ---------- ', console::Color_Light_Red, __FILE__, __LINE__);
+                                                 " \$live:"  . str_pad($this->_time_argc_live, 5) .' ---------- ', c::Color_Light_Red, __FILE__, __LINE__);
             $do = $this->execute_multi($input_new);
             if($do){
                return $do;

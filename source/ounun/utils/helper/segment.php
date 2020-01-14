@@ -5,6 +5,8 @@
  */
 namespace ounun\utils\helper;
 
+define('RESOURCE_PATH', __DIR__.'/'.'cmstop'.'/'.'resources'.'/'.'scws'.'/');
+
 class segment
 {
 	private $scws;
@@ -17,8 +19,6 @@ class segment
 		}
 		elseif (file_exists(FW_PATH.'helper'.'/'.'pscws4.php'))
 		{
-			import('helper.pscws4');
-			define('RESOURCE_PATH', ROOT_PATH.'/'.'cmstop'.'/'.'resources'.'/'.'scws'.'/');
 			$this->scws = new PSCWS4('utf8');
 			$this->scws->set_dict(RESOURCE_PATH.'dict.utf8.xdb');
 			$this->scws->set_rule(RESOURCE_PATH.'rules.ini');

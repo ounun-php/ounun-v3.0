@@ -19,22 +19,22 @@ class seccode
 	{
 		$session = & factory::session();
 		$session->start();
-		$this->fonts = CMSTOP_PATH.'resources/fonts/couri.ttf';
+		$this->fonts = __DIR__.'/res/fonts/couri.ttf';
 	}
-	
+
 	function image()
 	{
 		$string = $this->_string();
 		$this->_image($string);
 	}
-	
+
 	function valid($destroy = false)
 	{
 		$result = (isset($_SESSION['seccode']) && $_REQUEST['seccode'] === $_SESSION['seccode']) ? true : false;
 		if ($destroy) unset($_SESSION['seccode']);
 		return $result;
 	}
-	
+
 	function _string()
 	{
 		$constslen = strlen($this->consts) - 1;
@@ -47,7 +47,7 @@ class seccode
 		$_SESSION['seccode'] = $string;
 		return $_SESSION['seccode'];
 	}
-	
+
 	function _image($string)
 	{
 		ob_clean();
@@ -57,7 +57,7 @@ class seccode
 
 		//背景
 		imagefill($im, 0, 0, imagecolorallocate($im, 255, 255, 255));
-		
+
 		//角度旋转写入
 		$fontColor = imagecolorallocate($im, 0, 0, 192);
 		for($i=0; $i<strlen($string); $i++)
@@ -66,12 +66,12 @@ class seccode
 			$fontsize = mt_rand(12, 16);	//字体大小随机
 			imagefttext ($im , $fontsize , $angle , 2+$i*11 , 18 , $fontColor, $this->fonts , $string[$i]);
 		}
-		
-		
+
+
 		//扭曲
-		$dstim = imagecreatetruecolor ($imageX , $imageY);       
+		$dstim = imagecreatetruecolor ($imageX , $imageY);
 		imagefill($dstim, 0, 0, imagecolorallocate($dstim,255,255,255) );
-		
+
 		$this->contort = mt_rand(1, $this->contort);
 		$funcs = array('sin', 'cos');
 		$func = $funcs[mt_rand(0, 1)];
@@ -82,11 +82,11 @@ class seccode
 				imagesetpixel($dstim, $i+$amend, $j, $rgb);
 			}
 		}
-		
+
 		//边框
 		$border = imagecolorallocate($dstim, 133, 153, 193);
 		imagerectangle($dstim, 0, 0, $imageX - 1, $imageY - 1, $border);
-		
+
 		header("content-type:image/png\r\n");
 		imagepng($dstim);
 		imagedestroy($im);

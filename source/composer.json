@@ -23,11 +23,13 @@
     "ext-xml": "*",
     "ext-fileinfo": "*",
     "ext-ctype": "*",
+    "ext-ldap": "*",
+    "ext-sockets": "*",
+    "ext-simplexml": "*",
+    "ext-xmlrpc": "*",
 
     "textalk/websocket": "^1.2",
-    "php": ">=7.2",
-    "ext-ldap": "*",
-    "ext-sockets": "*"
+    "php": ">=7.2"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.1"

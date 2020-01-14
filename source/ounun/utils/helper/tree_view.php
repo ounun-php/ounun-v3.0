@@ -5,7 +5,7 @@
  */
 namespace ounun\utils\helper;
 
-class treeview
+class tree_view
 {
 	public $data = [];
 
@@ -16,10 +16,11 @@ class treeview
 		$this->data = $data;
 	}
 
-
 	function set($data)
 	{
-		if (!is_array($data)) return false;
+		if (!is_array($data)) {
+		    return false;
+        }
 		$this->data = $data;
 
 		return $this->data;
@@ -47,7 +48,9 @@ class treeview
 	function select($id = null, $selectedid = null, $eval = '', $deep = 1)
 	{
 		$childs = $this->get_child($id);
-		if (!$childs) return ;
+		if (!$childs) {
+		    return ;
+        }
 		if ($deep == 1) {
 			$eval = addslashes($eval);
 			$this->html = '';
@@ -82,12 +85,10 @@ class treeview
 		if(!is_array($this->data) || !isset($this->data[$id])) return false;
 		static $parents = [];
 		$parentid = $this->data[$id]['parentid'];
-        if (is_null($parentid))
-        {
+        if (is_null($parentid)) {
         	krsort($parents);
         }
-        else
-        {
+        else {
         	$parents[] = $this->data[$parentid];
         	$this->get_parent($parentid);
         }
@@ -99,10 +100,13 @@ class treeview
 		if(!is_array($this->data) || (!is_null($id) && !isset($this->data[$id]))) return false;
 		if (is_numeric($id)) $id = intval($id);
 		$childs = [];
-		foreach($this->data as $k=>$r)
-		{
-			if (is_numeric($r['parentid'])) $r['parentid'] = intval($r['parentid']);
-			if($r['parentid'] === $id) $childs[$k] = $r;
+		foreach($this->data as $k=>$r) {
+			if (is_numeric($r['parentid'])) {
+			    $r['parentid'] = intval($r['parentid']);
+            }
+			if($r['parentid'] === $id) {
+			    $childs[$k] = $r;
+            }
 		}
 		return $childs;
 	}

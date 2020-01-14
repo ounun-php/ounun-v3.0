@@ -48,10 +48,10 @@ abstract class simple
      */
     public function help(array $argv)
     {
-        console::echo("命令:", console::Color_Purple, '',0,0,'');
+        console::echo("命令:", console\c::Color_Purple, '',0,0,'');
         console::echo("({$this->description})");
-        console::echo('./ounun ' . $this->name . ' [参数...]', console::Color_Blue);
-        console::echo($this->help, console::Color_Purple);
+        console::echo('./ounun ' . $this->name . ' [参数...]', console\c::Color_Blue);
+        console::echo($this->help, console\c::Color_Purple);
     }
 
     /**

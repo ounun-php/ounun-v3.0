@@ -1,81 +1,109 @@
 <?php
-/**
- * [Ounun System] Copyright (c) 2019 Ounun.ORG
- * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
- */
+
+
 namespace ounun\console;
 
-/** 常量 */
+
 class c
 {
-    /** @var int 禁用 - 状态 */
-    const Status_Disabled = 0;
-    /** @var int 使用 - 状态 */
-    const Status_Enabled = 1;
-    /** @var int 否 - 状态 */
-    const Status_No = 0;
-    /** @var int 是 - 状态 */
-    const Status_Yes = 1;
+    /**
+     * none             = "\033[0m"  
+     * black            = "\033[0;30m"  
+     * dark_gray        = "\033[1;30m"  
+     * blue             = "\033[0;34m"  
+     * light_blue       = "\033[1;34m"  
+     * green            = "\033[0;32m"  
+     * light_green      = "\033[1;32m"  
+     * cyan             = "\033[0;36m"  
+     * light_cyan       = "\033[1;36m"  
+     * red              = "\033[0;31m"  
+     * light_red        = "\033[1;31m"  
+     * purple           = "\033[0;35m"  
+     * light_purple     = "\033[1;35m"  
+     * brown            = "\033[0;33m"  
+     * yellow           = "\033[1;33m"  
+     * light_gray       = "\033[0;37m"  
+     * white            = "\033[1;37m"  
+     * 输出特效格式控制：  
+     * \033[0m           关闭所有属性    
+     * \033[1m           设置高亮度    
+     * \033[4m           下划线    
+     * \033[5m           闪烁    
+     * \033[7m           反显    
+     * \033[8m           消隐    
+     * \033[30m   --   \033[37m   设置前景色    
+     * \033[40m   --   \033[47m   设置背景色  
+     * 字背景颜色范围: 40--49     字颜色: 30--39  
+     * 40: 黑            30: 黑  
+     * 41:红             31: 红  
+     * 42:绿             32: 绿  
+     * 43:黄             33: 黄  
+     * 44:蓝             34: 蓝  
+     * 45:紫             35: 紫  
+     * 46:深绿           36: 深绿  
+     * 47:白色           37: 白色  
+     * 光标位置等的格式控制：  
+     * \033[nA             光标上移n行    
+     * \03[nB              光标下移n行    
+     * \033[nC             光标右移n行    
+     * \033[nD             光标左移n行    
+     * \033[y;xH           设置光标位置    
+     * \033[2J             清屏   
+     * \033[K              清除从光标到行尾的内容    
+     * \033[s              保存光标位置    
+     * \033[u              恢复光标位置    
+     * \033[?25l           隐藏光标    
+     * \33[?25h            显示光标  
+     */
 
-    /** @var int 正常(灰) */
-    const Status_Normal = 0;
-    /** @var int 等待空置状态 */
-    const Status_Await = 3;
-    /** @var int 工作中... */
-    const Status_Runing = 5;
-    /** @var int 过载状态 */
-    const Status_Full = 9;
-    /** @var int 完成 - 状态 */
-    const Status_Done = 10;
-    /** @var int 成功(绿色) */
-    const Status_Succeed = 99;
-    /** @var int 失败 - 状态 */
-    const Status_Fail = 100;
-    /** @var int 突出(橙黄) */
-    const Status_Warning = 106;
+    /** @var string 默认执行的命令 */
+    const Default_Cmd = 'help';
 
-    /** @var int 已删除 */
-    const Del_Yes = 1;
-    /** @var int 没删险 */
-    const Del_No = 0;
+    const Color_None = "\033[0m";
 
-    /** @var int 验证成功 */
-    const Check_Yes = 1;
-    /** @var int 没有验证 */
-    const Check_No = 0;
+    const Color_Black = "\033[0;30m";
 
+    const Color_Dark_Gray = "\033[1;30m";
 
-    /** @var string Json - 输出Ajax格式 */
-    const Format_Json = 'json';
-    /** @var string XML - 输出Ajax格式 */
-    const Format_Xml = 'xml';
-    /** @var string JsonP - 输出Ajax格式 */
-    const Format_Jsonp = 'jsonp';
-    /** @var string JsonP - 输出Ajax格式 */
-    const Format_Eval = 'eval';
-    /** @var string JavaScript - 输出Ajax格式 */
-    const Format_JS = 'javascript';
-    /** @var string Html - 输出Ajax格式 */
-    const Format_Html = 'html';
+    const Color_Blue = "\033[0;34m";
 
+    const Color_Light_BBlue = "\033[1;34m";
 
-    /** @var string kw::$container  取值范围: wechat, android, ipad, iphone, ipod, unknown */
-    const Container_Wechat = 'wechat';
-    /** @var string */
-    const Container_Android = 'android';
-    /** @var string */
-    const Container_Ipad = 'ipad';
-    /** @var string */
-    const Container_Iphone = 'iphone';
-    /** @var string */
-    const Container_Ipod = 'ipod';
-    /** @var string */
-    const Container_Unknown = 'unknown';
+    const Color_Green = "\033[0;32m";      // success
 
-    /** @var string kw::$os 取值范围: windows (pc端), mobile(手机端), unknown */
-    const Os_Windows = 'windows';
-    /** @var string */
-    const Os_Mobile = 'mobile';
-    /** @var string */
-    const Os_Unknown = 'unknown';
+    const Color_Light_Green = "\033[1;32m";
+
+    const Color_Cyan = "\033[0;36m";
+
+    const Color_Light_Cyan = "\033[1;36m";
+
+    const Color_Red = "\033[0;31m";
+
+    const Color_Light_Red = "\033[1;31m"; // error
+
+    const Color_Purple = "\033[0;35m";
+
+    const Color_Light_Purple = "\033[1;35m";
+
+    const Color_Brown = "\033[0;33m";
+
+    const Color_Yellow = "\033[1;33m";    // info
+
+    const Color_Light_Gray = "\033[0;37m";
+
+    const Color_White = "\033[1;37m";
+
+    /** @var array 不同深度的颜色 */
+    const Depth_Colors = [
+        self::Color_Blue,
+        self::Color_Black,
+        self::Color_Green,
+        self::Color_Cyan,
+        self::Color_Red,
+        self::Color_Purple,
+        self::Color_Brown,
+    ];
+
+    /** @var int 深度的颜色数量 */
+    const Depth_Colors_Count = 7;
 }

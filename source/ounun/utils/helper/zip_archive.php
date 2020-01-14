@@ -5,7 +5,7 @@
  */
 namespace ounun\utils\helper;
 
-class ZipArchive {
+class zip_archive {
 	const OVERWRITE = 1;
 	const CREATE = 1;
 	const EXCL = 1;

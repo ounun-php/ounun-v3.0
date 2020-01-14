@@ -8,13 +8,21 @@ namespace ounun\utils;
 
 class shell
 {
+    /** @var bool  */
     protected $_debug = false;
 
+    /**
+     * shell constructor.
+     * @param $debug
+     */
     public function __construct($debug)
     {
         $this->_debug = $debug;
     }
 
+    /**
+     * @param $dir
+     */
     protected function _mkdir($dir)
     {
         if ($this->_debug) {
@@ -26,7 +34,12 @@ class shell
         }
     }
 
-    protected function _sh_file($msg, $cmd, $sudo = '')
+    /**
+     * @param string $msg
+     * @param string $cmd
+     * @param string $sudo
+     */
+    protected function _sh_file(string $msg, string $cmd, $sudo = '')
     {
         $cmd = "#!/bin/sh\n" . $cmd;
         if ($sudo) {
@@ -40,7 +53,12 @@ class shell
         // unlink($filename);
     }
 
-    protected function _sh($msg, $cmd)
+    /**
+     * @param string $msg
+     * @param string $cmd
+     * @return bool
+     */
+    protected function _sh(string $msg, string $cmd)
     {
         if ($this->_debug) {
             echo "\n\ndebug no run ......\n\n\n";

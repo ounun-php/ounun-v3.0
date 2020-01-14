@@ -400,13 +400,13 @@ class manage
             }
         }
         if (static::Logs_Fail == $status) {
-            $color = console::Color_Red;
+            $color = \ounun\console\c::Color_Red;
         } elseif (static::Logs_Warning == $status) {
-            $color = console::Color_Brown;
+            $color = \ounun\console\c::Color_Brown;
         } elseif (static::Logs_Succeed == $status) {
-            $color = console::Color_Green;
+            $color = \ounun\console\c::Color_Green;
         } else {
-            $color = console::Color_Yellow;
+            $color = \ounun\console\c::Color_Yellow;
         }
         console::echo($msg, $color, $file, $line, $time, "\n");
     }
@@ -541,7 +541,7 @@ class manage
             $this->_task_curr = $task;
             $task->execute_multi($argc_input);
         }else{
-            console::echo("error --> class:{$task_class} not subclass:task\\task_base", console::Color_Red, __FILE__, __LINE__, time());
+            console::echo("error --> class:{$task_class} not subclass:task\\task_base", \ounun\console\c::Color_Red, __FILE__, __LINE__, time());
         }
     }
 
@@ -569,7 +569,7 @@ class manage
         $this->init();
         $tasks = $this->tasks();
         console::echo("Start   host:" . gethostname() . "  task_parallel_max:" . \ounun::$global['task_parallel_max'] . "    \$tasks_count:" . str_pad(count($tasks), 5) .
-            ' ----------------- ', consol::Color_Purple, __FILE__, __LINE__);
+            ' ----------------- ', \ounun\console\c::Color_Purple, __FILE__, __LINE__);
         /** @var simple $task */
         foreach ($tasks as $task) {
             // var_dump(['$task'=>$task]);
@@ -633,10 +633,10 @@ class manage
                         if (is_subclass_of($task, "cmd\\task\\task_base")) {
                             $this->_tasks[$v['task_id']] = $task;
                         } else {
-                            console::echo("error --> class:{$cls} not subclass:task\\task_base", console::Color_Red, __FILE__, __LINE__, time());
+                            console::echo("error --> class:{$cls} not subclass:task\\task_base", \ounun\console\c::Color_Red, __FILE__, __LINE__, time());
                         }
                     } else {
-                        console::echo("error --> class_exists:{$cls}", console::Color_Red, __FILE__, __LINE__, time());
+                        console::echo("error --> class_exists:{$cls}", \ounun\console\c::Color_Red, __FILE__, __LINE__, time());
                     }
                 }
             }

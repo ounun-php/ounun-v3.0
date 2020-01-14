@@ -5,10 +5,10 @@
  */
 namespace ounun\utils\helper;
 
-define('IPDATA_MINI', CMSTOP_PATH.'/'.'resources'.'/'.'ipdata'.'/'.'mini.Dat');
-define('IPDATA_FULL', CMSTOP_PATH.'/'.'resources'.'/'.'ipdata'.'/'.'QQWry.Dat');
+define('IPDATA_MINI', __DIR__.'/'.'resources'.'/'.'ipdata'.'/'.'mini.Dat');
+define('IPDATA_FULL', __DIR__.'/'.'resources'.'/'.'ipdata'.'/'.'QQWry.Dat');
 
-class iplocation
+class ip_location
 {
 	private $fp,
 	        $func,
@@ -40,7 +40,7 @@ class iplocation
 			if($iparray[0] == 10 || $iparray[0] == 127 || ($iparray[0] == 192 && $iparray[1] == 168) || ($iparray[0] == 172 && ($iparray[1] >= 16 && $iparray[1] <= 31)))
 			{
 				$return = 'LAN';
-			} 
+			}
 			elseif($iparray[0] > 255 || $iparray[1] > 255 || $iparray[2] > 255 || $iparray[3] > 255)
 			{
 				$return = 'Invalid IP Address';
@@ -115,7 +115,7 @@ class iplocation
 				continue;
 			}
 			$DataSeek = fread($this->fp, 3);
-			if(strlen($DataSeek) < 3) 
+			if(strlen($DataSeek) < 3)
 			{
 				fclose($this->fp);
 				return 'System Error';
@@ -220,10 +220,9 @@ class iplocation
 	{
 		@fclose($this->fp);
 	}
-	
+
 	function __destruct()
 	{
 		$this->close();
 	}
 }
-?>

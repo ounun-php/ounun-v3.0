@@ -39,6 +39,8 @@ class dc
     protected $_key    = '';
     /** @var int 缓存有效时长 */
     protected $_expire = 0;
+    /** @var bool  是否活加前缀 */
+    protected $_add_prefix = false;
 
     /** @var bool false:没读    true:已读 */
     protected $_is_read   = false;
@@ -149,11 +151,12 @@ class dc
      * @param mixed $val
      * @param int   $expire
      */
-     public function set_value($val,int $expire = 0)
+     public function set_value($val,int $expire = 0,bool $add_prefix = false)
      {
          $this->_is_read = true;
          $this->_value   = $val;
          $this->_expire  = $expire;
+         $this->_add_prefix = $add_prefix;
      }
 
     /**
@@ -162,9 +165,9 @@ class dc
      * @param mixed  $val
      * @return bool
      */
-    public function fast_set(string $key, $val)
+    public function fast_set(string $key, $val,int $expire = 0, bool $add_prefix = false)
     {
-        return $this->_cache_driver->set($key,$val);
+        return $this->_cache_driver->set($key,$val,$expire,$add_prefix);
     }
 
     /**
@@ -174,9 +177,9 @@ class dc
      * @param string $sub_key
      * @return mixed
      */
-    public function fast_get(string $key, string $sub_key = null)
+    public function fast_get(string $key, string $sub_key = null, $default = 0, bool $add_prefix = false)
     {
-        $value = $this->_cache_driver->get($key);
+        $value = $this->_cache_driver->get($key,$default,$add_prefix);
         if ($sub_key) {
             return $value[$sub_key];
         }
@@ -187,9 +190,9 @@ class dc
      * 简单方式，删除$key对应值$val
      * @param string $key
      */
-    public function fast_del(string $key)
+    public function fast_del(string $key,bool $add_prefix = false)
     {
-        $this->_cache_driver->delete($key);
+        $this->_cache_driver->delete($key,$add_prefix);
     }
 
     /**

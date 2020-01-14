@@ -952,10 +952,8 @@ function start_task($argv)
 {
     // load_config 0 Dir
     ounun::load_config(Dir_App);
-    // task
-    $task = is_file(Dir_App . 'task.php') ? include Dir_App . 'task.php' : [];
     // console
-    $c = new ounun\console($task);
+    $c = new ounun\console();
     $c->run($argv);
 }
 

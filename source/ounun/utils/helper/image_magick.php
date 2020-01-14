@@ -5,7 +5,7 @@
  */
 namespace ounun\utils\helper;
 
-class imagemagick
+class image_magick
 {
 	public $debug = false;
 	public $filepath;
