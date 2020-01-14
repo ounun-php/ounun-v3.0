@@ -63,14 +63,18 @@ class restful  extends \v
 
     /**
      * @param string $methods
-     * @param string $domain
+     * @param string $max_age
+     * @param string $origin_domain
+     * @param string $headers
+     * @param string $credentials
      */
-    static public  function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*')
+    static public function headers_allow_origin_set(string $methods = 'GET, POST, PATCH, PUT, DELETE, OPTIONS',string $max_age = '1728000',string $origin_domain = '*', string $headers = '*', string $credentials = 'true')
     {
-        header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Origin: '.$domain);
-        header('Access-Control-Allow-Methods: '.$methods);
-        header('Access-Control-Allow-Headers: authentication,origin,x-requested-with,content-type,accept,token,appid,unitid');
+        $credentials   && header('Access-Control-Allow-Credentials: '.$credentials);
+        $headers       && header('Access-Control-Allow-Headers: '.$headers);
+        $origin_domain && header('Access-Control-Allow-Origin: '.$origin_domain);
+        $methods       && header('Access-Control-Allow-Methods: '.$methods);
+        $max_age       && header('Access-Control-Max-Age: '.$max_age);
     }
 
     /**
