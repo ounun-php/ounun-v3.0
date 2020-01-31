@@ -30,11 +30,11 @@ class i18n
     const Sitename_Short  = '创梦思';
 
     /** 网站标题 */
-    const Title           = 'CMS.cc开源移动内容管理系统';
+    // const Title           = 'CMS.cc开源移动内容管理系统';
     /** @var string 网站关健词 */
-    const Keywords        = 'CMS.cc开源移动内容管理系统';
+    // const Keywords        = 'CMS.cc开源移动内容管理系统';
     /** @var string 网站简称 */
-    const Description     = 'CMS.cc开源移动内容管理系统';
+    // const Description     = 'CMS.cc开源移动内容管理系统';
     /** @var string 口号 */
-    const Slogan          = '创梦思开源CMS.CC,移动内容管理系统';
+    // const Slogan          = '创梦思开源CMS.CC,移动内容管理系统';
 }

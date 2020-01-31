@@ -49,12 +49,30 @@ class ounun
 
     /** @var string 根目录 */
     static public $dir_root  = '';
+    /** @var string 根目录(App) */
+    static public $dir_app = '';
     /** @var string Data目录 */
     static public $dir_data  = '';
     /** @var string Ounun目录 */
     static public $dir_ounun = __DIR__ . '/';
-    /** @var string 根目录(App) */
-    static public $dir_app = '';
+
+    /** @var string 当前APP */
+    static public $app_name = '';
+    /** @var string 当前APP Path */
+    static public $app_path = '';
+
+    /** @var string 域名Domain */
+    static public $app_domain = '';
+    /** @var string 项目代号 */
+    static public $app_code = '';
+    /** @var string 项目站点名称 */
+    static public $app_sitename = '';
+    /** @var int 静态index */
+    static public $app_static_idx = 1;
+    /** @var string 静态版本号 */
+    static public $app_static_version = '';
+    /** @var string 当前app之前通信内问key */
+    static public $app_key_communication_private = '';
 
     /** @var string 当前面页(文件名)  Page Base */
     static public $page_base_file = '';
@@ -87,15 +105,6 @@ class ounun
     /** @var string 为插件时网址前缀URL */
     static public $url_addon_pre = '';
 
-    /** @var string 当前APP */
-    static public $app_name = '';
-    /** @var string 当前APP Path */
-    static public $app_path = '';
-    /** @var string 域名Domain */
-    static public $app_domain = '';
-    /** @var string 当前app之前通信内问key */
-    static public $app_key_communication = '';
-
     /** @var string 应用模板类型 pc www  */
     static public $tpl_type = 'www';
     /** @var string 应用模板类型[默认] */
@@ -109,6 +118,11 @@ class ounun
     /** @var array 模板替换数据组 */
     static public $tpl_replace_str = [];
 
+    /** @var array 站点SEO */
+    static public $seo_site = ['title'=>'','keywords'=>'','description'=>'','slogan'=>''];
+    /** @var array 页面SEO */
+    static public $seo_page = ['title'=>'','keywords'=>'','description'=>'','h1'=>'','etag'=>''];
+
     /** @var \ounun\apps\i18n 语言包 */
     static public $i18n;
     /** @var string 当前语言 */
@@ -120,6 +134,15 @@ class ounun
         "en_us" => "English", // "zh"=>"繁體中文",
         "zh_cn" => "简体中文", // "ja"=>"日本語",
     ];
+
+    /**
+     * 本地环境变量设定
+     * @param array $config
+     */
+    static public function environment_set(array $config = [])
+    {
+        // print_r($ini);
+    }
 
     /**
      * 设定语言
@@ -162,13 +185,78 @@ class ounun
     }
 
     /**
-     * 本地环境变量设定
-     * @param array $config
+     * 设定站点的SEO
+     * @param string $title
+     * @param string $keywords
+     * @param string $description
+     * @param string $slogan
      */
-    static public function environment_set(array $config = [])
+    static public function seo_site_set(string $title = '',string $keywords = '',string $description = '',string $slogan = '')
     {
-        // print_r($ini);
+        $title && static::$seo_site['title'] = $title;
+        $keywords && static::$seo_site['keywords'] = $keywords;
+        $description && static::$seo_site['description'] = $description;
+        $slogan && static::$seo_site['slogan'] = $slogan;
     }
+
+    /**
+     * 设定页面的SEO
+     * @param string $title
+     * @param string $keywords
+     * @param string $description
+     * @param string $h1
+     * @param string $etag
+     */
+    static public function seo_page_set(string $title = '',string $keywords = '',string $description = '',string $h1 = '',string $etag = '')
+    {
+        $title && static::$seo_page['title'] = $title;
+        $keywords && static::$seo_page['keywords'] = $keywords;
+        $description && static::$seo_page['description'] = $description;
+        $h1 && static::$seo_page['h1'] = $h1;
+        $etag && static::$seo_page['etag'] = $etag;
+
+        if (static::$seo_page['title']) {
+            static::template_replace_str_set('{$seo_title}', static::$seo_page['title']);
+        }
+        if (static::$seo_page['keywords']) {
+            static::template_replace_str_set('{$seo_keywords}', static::$seo_page['keywords']);
+        }
+        if (static::$seo_page['description']) {
+            static::template_replace_str_set('{$seo_description}', static::$seo_page['description']);
+        }
+        if (static::$seo_page['h1']) {
+            static::template_replace_str_set('{$seo_h1}', static::$seo_page['h1']);
+        }
+        if (static::$seo_page['etag']) {
+            static::template_replace_str_set('{$etag}', static::$seo_page['etag']);
+        }
+    }
+
+    /**
+     * @param string $seo_title
+     * @param string $seo_keywords
+     * @param string $seo_description
+     * @param string $seo_h1
+     * @param string $etag
+     */
+//    static public function template_page_tkd_set(string $seo_title = '', string $seo_keywords = '', string $seo_description = '', string $seo_h1 = '', string $etag = '')
+//    {
+//        if ($seo_title) {
+//            static::template_replace_str_set('{$seo_title}', $seo_title);
+//        }
+//        if ($seo_keywords) {
+//            static::template_replace_str_set('{$seo_keywords}', $seo_keywords);
+//        }
+//        if ($seo_description) {
+//            static::template_replace_str_set('{$seo_description}', $seo_description);
+//        }
+//        if ($seo_h1) {
+//            static::template_replace_str_set('{$seo_h1}', $seo_h1);
+//        }
+//        if ($etag) {
+//            static::template_replace_str_set('{$etag}', $etag);
+//        }
+//    }
 
     /**
      * 设定公共配制数据
@@ -200,8 +288,6 @@ class ounun
         }
     }
 
-
-
     /**
      * 设定地址
      * @param string $url_www
@@ -212,9 +298,8 @@ class ounun
      * @param string $url_static
      * @param string $url_upload
      * @param string $url_static_g
-     * @param string $app_domain
      */
-    static public function urls_domain_set(string $url_www, string $url_wap, string $url_mip, string $url_api, string $url_res, string $url_static, string $url_upload, string $url_static_g, string $app_domain)
+    static public function urls_set(string $url_www, string $url_wap, string $url_mip, string $url_api, string $url_res, string $url_static, string $url_upload, string $url_static_g)
     {
         /** Www URL */
         static::$url_www = $url_www;
@@ -233,20 +318,42 @@ class ounun
         static::$url_upload = $url_upload;
         /** StaticG URL */
         static::$url_static_g = $url_static_g;
+    }
+
+    /**
+     * @param string $app_domain
+     * @param string $app_code
+     * @param string $app_sitename
+     * @param int $app_static_idx
+     * @param string $app_static_version
+     * @param string $app_key_communication_private
+     */
+    static public function urls_domain_set(string $app_domain,string $app_code,string $app_sitename,int $app_static_idx,string $app_static_version,string $app_key_communication_private)
+    {
         /** 项目主域名 */
         static::$app_domain = $app_domain;
+        /** 项目代号 */
+        static::$app_code = $app_code;
+        /** 项目站点名称 */
+        static::$app_sitename = $app_sitename;
+        /** 静态index */
+        static::$app_static_idx = $app_static_idx;
+        /** 静态版本号 */
+        static::$app_static_version = $app_static_version;
+        /** 静态版本号 */
+        static::$app_key_communication_private = $app_key_communication_private;
     }
 
     /**
      * 设定目录
-     * @param string $dir_ounun
-     * @param string $dir_root
-     * @param string $dir_data
      * @param string $app_name
      * @param string $app_path
+     * @param string $dir_root
      * @param string $dir_app
+     * @param string $dir_data
+     * @param string $dir_ounun
      */
-    static public function app_name_path_set(string $dir_ounun, string $dir_root, string $dir_data, string $app_name, string $app_path, string $dir_app = '')
+    static public function app_name_path_set(string $app_name, string $app_path, string $dir_root, string $dir_app, string $dir_data, string $dir_ounun)
     {
         // 当前APP
         if ($app_name) {
@@ -256,23 +363,24 @@ class ounun
         if ($app_path) {
             static::$app_path = $app_path;
         }
-        // Ounun目录
-        if ($dir_ounun) {
-            static::$dir_ounun = $dir_ounun;
-        }
+
         // 根目录
         if ($dir_root) {
             static::$dir_root = $dir_root;
-        }
-        // 根目录
-        if ($dir_data) {
-            static::$dir_data = $dir_data;
         }
         // APP目录
         if ($dir_app) {
             static::$dir_app = $dir_app;
         } elseif (!static::$dir_app) {
             static::$dir_app = Dir_App . static::$app_name . '/';
+        }
+        // 数据目录
+        if ($dir_data) {
+            static::$dir_data = $dir_data;
+        }
+        // Ounun目录
+        if ($dir_ounun) {
+            static::$dir_ounun = $dir_ounun;
         }
     }
 
@@ -333,31 +441,7 @@ class ounun
         }
     }
 
-    /**
-     * @param string $seo_title
-     * @param string $seo_keywords
-     * @param string $seo_description
-     * @param string $seo_h1
-     * @param string $etag
-     */
-    static public function template_page_tkd_set(string $seo_title = '', string $seo_keywords = '', string $seo_description = '', string $seo_h1 = '', string $etag = '')
-    {
-        if ($seo_title) {
-            static::template_replace_str_set('{$seo_title}', $seo_title);
-        }
-        if ($seo_keywords) {
-            static::template_replace_str_set('{$seo_keywords}', $seo_keywords);
-        }
-        if ($seo_description) {
-            static::template_replace_str_set('{$seo_description}', $seo_description);
-        }
-        if ($seo_h1) {
-            static::template_replace_str_set('{$seo_h1}', $seo_h1);
-        }
-        if ($etag) {
-            static::template_replace_str_set('{$etag}', $etag);
-        }
-    }
+
 
     /**
      * 设定模板替换
@@ -407,7 +491,7 @@ class ounun
             '{$app}' => static::$app_name,
             '{$domain}' => static::$app_domain,
 
-            '{$sitename}' => static::i18n_get()::Title,
+            '{$sitename}' => static::$seo_site['title'],
 
             '{$res}' => static::$url_res,
             '{$static}' => static::$url_static,

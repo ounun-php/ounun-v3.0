@@ -820,7 +820,7 @@ abstract class v
      */
     public function tkd_set(string $seo_title = '', string $seo_keywords = '', string $seo_description = '', string $seo_h1 = '', string $etag = '')
     {
-        \ounun::template_page_tkd_set($seo_title,$seo_keywords,$seo_description,$seo_h1,$etag);
+        \ounun::seo_page_set($seo_title,$seo_keywords,$seo_description,$seo_h1,$etag);
     }
 
     /**
