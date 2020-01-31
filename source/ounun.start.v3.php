@@ -163,9 +163,9 @@ class ounun
 
     /**
      * 本地环境变量设定
-     * @param array $ini
+     * @param array $config
      */
-    static public function environment_set(array $ini = [])
+    static public function environment_set(array $config = [])
     {
         // print_r($ini);
     }

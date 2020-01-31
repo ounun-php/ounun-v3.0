@@ -3,7 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\utils\helper;
+namespace ounun\extension\form\helper;
 
 class tree_view
 {
@@ -28,7 +28,7 @@ class tree_view
 
 	function get($id = null, $treeid = 'tree', $eval = '', $deep = 1)
 	{
-		$childs = $this->get_child($id);
+		$childs = $this->child_get($id);
 		if (!$childs) {
             return '';
         }
@@ -37,7 +37,7 @@ class tree_view
 		$html = $treeid ? "<ul id=\"$treeid\">\n" : "\n".$space."<ul>\n";
 		foreach ($childs as $k=>$r)
 		{
-			$child = $this->haschild($k) ? $this->get($k, '', $eval, $deep+1) : '';
+			$child = $this->child_has($k) ? $this->get($k, '', $eval, $deep+1) : '';
 			extract($r);
 			eval("\$html .= \"$space\t$eval\n\";");
 		}
@@ -47,7 +47,7 @@ class tree_view
 
 	function select($id = null, $selectedid = null, $eval = '', $deep = 1)
 	{
-		$childs = $this->get_child($id);
+		$childs = $this->child_get($id);
 		if (!$childs) {
 		    return ;
         }
@@ -60,7 +60,7 @@ class tree_view
 			extract($r);
 			$selected = $selectedid == $k ? 'selected' : '';
 			eval("\$this->html .= \"$eval\n\";");
-			if ($this->haschild($k)) $this->select($k, $selectedid, $eval, $deep+1);
+			if ($this->child_has($k)) $this->select($k, $selectedid, $eval, $deep+1);
 		}
 		return $this->html;
 	}
@@ -68,7 +68,7 @@ class tree_view
 	function pos($id, $eval = '')
 	{
 		if(!is_array($this->data) || !isset($this->data[$id])) return false;
-		$parents = $this->get_parent($id);
+		$parents = $this->parent_get($id);
 		$parents[] = $this->data[$id];
 		$eval = addslashes($eval);
 		$html = '';
@@ -80,25 +80,28 @@ class tree_view
 		return $html;
 	}
 
-	function get_parent($id)
+    public function parent_get($id)
 	{
 		if(!is_array($this->data) || !isset($this->data[$id])) return false;
 		static $parents = [];
 		$parentid = $this->data[$id]['parentid'];
         if (is_null($parentid)) {
         	krsort($parents);
-        }
-        else {
+        } else {
         	$parents[] = $this->data[$parentid];
-        	$this->get_parent($parentid);
+        	$this->parent_get($parentid);
         }
         return $parents;
 	}
 
-	function get_child($id)
+    public function child_get($id)
 	{
-		if(!is_array($this->data) || (!is_null($id) && !isset($this->data[$id]))) return false;
-		if (is_numeric($id)) $id = intval($id);
+		if(!is_array($this->data) || (!is_null($id) && !isset($this->data[$id]))) {
+		    return false;
+        }
+		if (is_numeric($id)) {
+		    $id = intval($id);
+        }
 		$childs = [];
 		foreach($this->data as $k=>$r) {
 			if (is_numeric($r['parentid'])) {
@@ -111,14 +114,21 @@ class tree_view
 		return $childs;
 	}
 
-	function haschild($id)
+	public function child_has($id)
 	{
-		if(!is_array($this->data) || !isset($this->data[$id])) return false;
-		if (is_numeric($id)) $id = intval($id);
-		foreach($this->data as $k=>$r)
-		{
-			if (is_numeric($r['parentid'])) $r['parentid'] = intval($r['parentid']);
-			if($r['parentid'] === $id) return true;
+		if(!is_array($this->data) || !isset($this->data[$id])) {
+		    return false;
+        }
+		if (is_numeric($id)) {
+		    $id = intval($id);
+        }
+		foreach($this->data as $k=>$r) {
+			if (is_numeric($r['parentid'])) {
+			    $r['parentid'] = intval($r['parentid']);
+            }
+			if($r['parentid'] === $id) {
+			    return true;
+            }
 		}
 		return false;
 	}

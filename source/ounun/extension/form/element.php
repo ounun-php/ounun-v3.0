@@ -200,8 +200,7 @@ class element extends form_element
 		$settings['value'] = $value;
 		$settings['attribute'] = $attribute;
 		$settings['options'][0] = '请选择';
-		foreach (table('model') as $modelid=>$v)
-		{
+		foreach (table('model') as $modelid=>$v) {
 			if($v['name'] == '辩论') continue;
 			$settings['options'][$modelid] = $v['name'];
 		}

@@ -3,11 +3,15 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\utils\helper;
+namespace ounun\extension\form\helper;
 
 class tree
 {
-	protected $db, $table, $field_id, $field_parentid, $field_name;
+	protected $db;
+    protected $table;
+    protected $field_id;
+    protected $field_parentid;
+    protected $field_name;
 
 	function __construct($table, $id = 'id', $parentid = 'parentid', $name = 'name')
 	{
@@ -20,7 +24,9 @@ class tree
 
 	function set($data)
 	{
-		if (isset($data[$this->field_parentid]) && intval($data[$this->field_parentid]) < 1) $data[$this->field_parentid] = null;
+		if (isset($data[$this->field_parentid]) && intval($data[$this->field_parentid]) < 1) {
+		    $data[$this->field_parentid] = null;
+        }
 		unset($data['parentids'], $data['childids']);
 		if (isset($data[$this->field_id]) && $data[$this->field_id])
 		{

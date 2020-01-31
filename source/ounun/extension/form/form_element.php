@@ -10,21 +10,6 @@ class form_element
 
     protected static $elements;
 
-
-    /** @var $this */
-    protected static $_instance;
-
-    /**
-     * @return $this
-     */
-    static public function i()
-    {
-        if(empty(static::$_instance)){
-            static::$_instance = new static();
-        }
-        return static::$_instance;
-    }
-
 	static function text($settings = [])
 	{
         $settings['type'] = 'text';
@@ -101,11 +86,17 @@ class form_element
 
 	static function file($settings = [])
 	{
-		if(!is_array($settings) || !isset($settings['name'])) return FALSE;
+		if(!is_array($settings) || !isset($settings['name'])) {
+		    return FALSE;
+        }
 		extract($settings);
-		if (!isset($id)) $id = $name;
+		if (!isset($id)) {
+		    $id = $name;
+        }
 		$html = '';
-		if(isset($max_file_size)) $html .= "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"$max_file_size\" />";
+		if(isset($max_file_size)) {
+		    $html .= "<input type=\"hidden\" name=\"MAX_FILE_SIZE\" value=\"$max_file_size\" />";
+        }
 		$attr = self::_attribute($settings);
 		$size = isset($size) ? " size=\"$size\" " : '';
 		$html .= "<input type=\"file\" name=\"$name\" id=\"$id\" $size $attr />";
