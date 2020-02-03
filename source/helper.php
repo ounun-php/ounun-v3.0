@@ -164,7 +164,7 @@ function url_to_mod(string $uri): array
 function url_check(string $url_original = "", bool $ext_req = true, string $domain = '')
 {
     // URL去重
-    $url = explode('?', $_SERVER['REQUEST_URI'], 2);
+    $url       = explode('?', $_SERVER['REQUEST_URI'], 2);
     $url_reset = '';
     if (false == $ext_req && $url[1]) {
         $url_reset = $url_original;
@@ -174,17 +174,15 @@ function url_check(string $url_original = "", bool $ext_req = true, string $doma
             $url_reset = "{$url_reset}?{$url[1]}";
         }
     }
-    // echo("\$url_reset:{$url_reset} \$url_original:{$url_original}\n");
-    // exit("\$domain:{$domain}\n");
+    // exit(__FILE__.':'.__LINE__." \$url_reset:{$url_reset} \$url_original:{$url_original} \$domain:{$domain} \$ext_req:".($ext_req?'1':'0')."\n");
     // 域名
     if ($domain && $domain != $_SERVER['HTTP_HOST']) {
-        // $domain  = $_SERVER['HTTP_HOST'];
         $url_reset = $url_reset ? $url_reset : $_SERVER['REQUEST_URI'];
         $url_reset = "//{$domain}{$url_reset}";
-        // exit("\$url_reset:{$url_reset} \$domain:{$domain}\n");
+        // exit(__FILE__.':'.__LINE__." \$url_reset:{$url_reset} \$url_original:{$url_original} \$domain:{$domain}\n");
         go_url($url_reset, false, 301);
     } else if ($url_reset) {
-        // exit("\$url_reset:{$url_reset}\n");
+        // exit(__FILE__.':'.__LINE__." \$url_reset:{$url_reset} \$url_original:{$url_original}\n");
         go_url($url_reset, false, 301);
     }
     // exit("\$domain:{$domain}\n");
@@ -785,9 +783,8 @@ abstract class v
     public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun::url_page(\ounun::$url_addon_pre.$page_file);
+        $page_url = \ounun::url_page(\ounun::$url_addon_pre.$page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
-
         // cache_html
         if('' == Environment ){
             $debug = \ounun::$global['debug'];
