@@ -233,19 +233,17 @@ class ounun
         }
 
         // 设定站点页面SEO
-        $key = 'seo';
+        $key = 'seo_site';
         if($config_ini && isset($config_ini[$key])){
-            $seo = $config_ini[$key];
-            if($seo && is_array($seo) ){
-                if($seo['site'] && is_array($seo['site'])){
-                    $config = $seo['site'];
-                    static::seo_site_set($config['sitename'],$config['keywords'],$config['description'],$config['slogan']);
-                }
-                if($seo['page'] && is_array($seo['page'])){
-                    $config = $seo['page'];
-                    static::seo_page_set($config['title'],$config['keywords'],$config['description'],$config['h1'],$config['etag']);
-                }
-            }
+            $config = $config_ini[$key];
+            static::seo_site_set($config['sitename'],$config['keywords'],$config['description'],$config['slogan']);
+        }
+
+        // 设定站点页面SEO
+        $key = 'seo_page';
+        if($config_ini && isset($config_ini[$key])){
+            $config = $config_ini[$key];
+            static::seo_page_set($config['title'],$config['keywords'],$config['description'],$config['h1'],$config['etag']);
         }
     }
 
@@ -268,21 +266,39 @@ class ounun
                 static::$langs[$lang] = $lang_name;
             }
         }
+    }
 
-        $i18ns = ['app\\' . static::$app_name . '\\i18n', 'utils\\i18n', 'ounun\\apps\\i18n'];
-        if ($lang && $lang != static::$lang_default) {
-            array_unshift($i18ns, 'app\\' . static::$app_name . '\\i18n\\' . $lang);
-        }
-        foreach ($i18ns as $i18n) {
-            $file = static::load_class_file_exists($i18n);
-            // echo ' \$i18n -->1:'.$i18n." \$file:".$file."\n";
-            if ($file) {
-                // echo ' \$i18n -->2:'.$i18n."\n";
-                static::$i18n = $i18n;
-                require $file;
-                break;
+
+    /**
+     * 语言包
+     * @return \ounun\apps\i18n
+     */
+    static public function i18n_get()
+    {
+        if(empty(static::$i18n)){
+            if(static::$app_name){
+                $i18ns = ['app\\' . static::$app_name . '\\i18n', 'utils\\i18n', 'ounun\\apps\\i18n'];
+                if (static::$lang && static::$lang != static::$lang_default) {
+                    array_unshift($i18ns, 'app\\' . static::$app_name . '\\i18n\\' . static::$lang);
+                }
+            }else{
+                $i18ns = [ 'utils\\i18n', 'ounun\\apps\\i18n'];
+                if (static::$lang && static::$lang != static::$lang_default) {
+                    array_unshift($i18ns, 'app\\i18n\\' . static::$lang);
+                }
+            }
+            foreach ($i18ns as $i18n) {
+                $file = static::load_class_file_exists($i18n);
+                // echo ' \$i18n -->1:'.$i18n." \$file:".$file."\n";
+                if ($file) {
+                    // echo ' \$i18n -->2:'.$i18n."\n";
+                    static::$i18n = $i18n;
+                    require $file;
+                    break;
+                }
             }
         }
+        return static::$i18n;
     }
 
 
@@ -441,7 +457,7 @@ class ounun
      */
     static public function template_paths_set(array $tpl_dirs = [],
                                               string $tpl_style = '', string $tpl_style_default = '',
-                                              string $tpl_type = '', string $tpl_type_default = '')
+                                              string $tpl_type = '' , string $tpl_type_default = '')
     {
         // 模板根目录
         if($tpl_dirs && is_array($tpl_dirs)){
@@ -537,16 +553,16 @@ class ounun
             // '{$canonical_mip}' => static::$page_mip, // static::$url_mip . $url_base,
             // '{$canonical_wap}' => static::$page_wap, // static::$url_wap . $url_base,
 
+            '{$site_name}' => static::$seo_site['name'],
+            '{$site_keywords}' => static::$seo_site['keywords'],
+            '{$site_description}' => static::$seo_site['description'],
+            '{$site_slogan}' => static::$seo_site['slogan'],
+
             '{$seo_title}' => static::$seo_page['title'],
             '{$seo_keywords}' => static::$seo_page['keywords'],
             '{$seo_description}' => static::$seo_page['description'],
             '{$seo_h1}' =>  static::$seo_page['h1'],
             '{$etag}' => static::$seo_page['etag'],
-
-            '{$site_name}' => static::$seo_site['name'],
-            '{$site_keywords}' => static::$seo_site['keywords'],
-            '{$site_description}' => static::$seo_site['description'],
-            '{$site_slogan}' => static::$seo_site['slogan'],
 
             '{$app}' => static::$app_name,
             '{$domain}' => static::$app_domain,
@@ -562,14 +578,7 @@ class ounun
         ], static::$tpl_replace_str);
     }
 
-    /**
-     * 语言包
-     * @return \ounun\apps\i18n
-     */
-    static public function i18n_get()
-    {
-        return static::$i18n;
-    }
+
 
     /**
      * 默认 数据库
@@ -612,7 +621,7 @@ class ounun
                 $page_url  = $page_lang. static::$app_path . $url;
             }
         }
-        if(empty(static::$page_url)){
+        if(empty(static::$page_url)) {
             static::url_page_set($page_base_file,$page_url,$page_lang);
         }
         return $page_url;
@@ -796,6 +805,12 @@ class ounun
             }
         }
 
+//        print_r([
+//            '$class'=>$class,
+//            // 'static::$maps_paths'=>static::$maps_paths
+//        ]);
+        // echo " \n<br />\$class'=> {$class} ";
+        // exit();
         // 查找 PSR-4 prefix
         $filename = strtr($class, '\\', '/') . '.php';
         $firsts   = [explode('\\', $class)[0], ''];
@@ -803,7 +818,7 @@ class ounun
             if (isset(static::$maps_paths[$first])) {
                 foreach (static::$maps_paths[$first] as $v) {
                     if ('' == $v['namespace']) {
-//                        print_r(static::$maps_paths);
+                        // print_r(static::$maps_paths);
                         $file = $v['path'] . $filename;
 //                                                echo " load_class2  -> \$class1 :{$class}  \$first:{$first}   \$len:{$v['len']}\n".
 //                                                    "                \t\t\$path:{$v['path']}\n".
@@ -825,6 +840,7 @@ class ounun
                 }
             }
         }
+        // echo ' ---> bad';
         return '';
     }
 
@@ -917,22 +933,49 @@ class ounun
     static public function routes_get(array $mod = [])
     {
         $app_name            = (static::$app_name == static::App_Name_Web || in_array(static::$app_name,static::App_Names)) ? static::$app_name : static::App_Name_Web;
+        // 这里修正URL兼容源生与重写
+        if($app_name == static::App_Name_Control){
+            foreach (\addons\apps::$addons_apps as $apps){
+                $addon_tag   = $apps::Addon_Tag;
+                if($addon_tag){
+                    /** @var \addons\apps $addon_apps_old */
+                    $addon_info     = static::$routes_cache[$addon_tag];
+                    if($addon_info){
+                        /** @var \addons\apps $addon_apps_old */
+                        $addon_apps_old = $addon_info['apps'];
+                        $addon_tag_old  = $addon_apps_old::Addon_Tag;
+                        if($addon_tag_old == $addon_tag){
+                            if($addon_info['auto'] == false){
+                                \addons\apps::mount_single($apps,$addon_tag,'', true);
+                            }
+                        }
+                    }else{
+                        \addons\apps::mount_single($apps,$addon_tag,'', true);
+                    }
+                }
+            }
+        }
+        // print_r(\ounun::$routes_cache);
         $class_filename      = '';
 
-        if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['addon_tag']){
-            $addon_tag              = $route['addon_tag'];
-            $class_filename         = "{$addon_tag}/{$app_name}/{$route['subclass']}.php";
-            $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['subclass']}";
+        if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['apps']){
+            /** @var \addons\apps $apps */
+            $apps                   = $route['apps'];
+            $addon_tag              = $apps::Addon_Tag;
+            $class_filename         = "{$addon_tag}/{$app_name}/{$route['class_name']}.php";
+            $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['class_name']}";
             static::$url_addon_pre  = $route['url']?'/'.$route['url']:'';
             array_shift($mod);
-        }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['addon_tag']){
-            $addon_tag              = $route['addon_tag'];
-            if($route['subclass']){
-                $class_filename         = "{$addon_tag}/{$app_name}/{$route['subclass']}.php";
-                $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['subclass']}";
+        }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['apps']){
+            /** @var \addons\apps $apps */
+            $apps                   = $route['apps'];
+            $addon_tag              = $apps::Addon_Tag;
+            if($route['class_name']){
+                $class_filename     = "{$addon_tag}/{$app_name}/{$route['class_name']}.php";
+                $classname          = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['class_name']}";
             }else{
-                $class_filename         = "{$addon_tag}/{$app_name}.php";
-                $classname              = "\\addons\\{$addon_tag}\\{$app_name}";
+                $class_filename     = "{$addon_tag}/{$app_name}.php";
+                $classname          = "\\addons\\{$addon_tag}\\{$app_name}";
             }
             static::$url_addon_pre  = $route['url'] && $route['url'] != static::def_module ? '/'.$route['url'] : '';
         }

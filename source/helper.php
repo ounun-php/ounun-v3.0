@@ -79,18 +79,14 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         }
         if ($skip && is_array($skip)) {
             foreach ($skip as $key => $value) {
-                if ($value) {
-                    if (is_array($value) && in_array($data_query[$key], $value, true)) {
-                        unset($data_query[$key]);
-                    } elseif ($value == $data_query[$key]) {
-                        unset($data_query[$key]);
-                    }
-                } else {
+                if (is_array($value) && in_array($data_query[$key], $value, true)) {
+                    unset($data_query[$key]);
+                } else { // if ($value == $data_query[$key]) {
                     unset($data_query[$key]);
                 }
             }
         }
-        $rs = [];
+        $rs     = [];
         $rs_str = '';
         foreach ($data_query as $key => $value) {
             if ('{page}' === $value) {
@@ -378,17 +374,9 @@ function error_code($data): int
 function succeed($data, string $message = '', $extend = [])
 {
     if ($extend) {
-        return array_merge($extend, [
-            'msg'    => $message,
-            'status' => 0,
-            'data'   => $data
-        ]);
+        return array_merge($extend, ['msg'    => $message, 'status' => 0, 'data'   => $data]);
     }
-    return [
-        'msg'    => $message,
-        'status' => 0,
-        'data'   => $data
-    ];
+    return ['msg'    => $message, 'status' => 0, 'data'   => $data];
 }
 
 /**
@@ -747,9 +735,7 @@ abstract class v
         }
     }
 
-    /**
-     * 停止 调试
-     */
+    /** 停止 调试 */
     public function debug_stop()
     {
         if (static::$debug) {
@@ -766,10 +752,18 @@ abstract class v
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];
         }
-        $method = $url_mods[0];
         \ounun::$view = $this;
+        $method       = $url_mods[0];
+        // 控制器初始化
+        $this->_initialize($method);
         $this->$method($url_mods);
     }
+
+    /**
+     * 控制器ounun_view 初始化
+     * @param string $method
+     */
+    protected function _initialize(string $method){ }
 
     /**
      * 初始化Page
@@ -854,7 +848,10 @@ abstract class v
     {
         url_check('/ads.txt');
         header('Content-Type: text/plain');
-        if (file_exists(\ounun::$dir_app . 'ads.txt')) {
+        if(\ounun::$global['ads']){
+            exit(\ounun::$global['ads']);
+        }elseif (file_exists(\ounun::$dir_app . 'ads.txt')) {
+
             readfile(\ounun::$dir_app . 'ads.txt');
         } else {
             exit("google.com, pub-7081168645550959, DIRECT, f08c47fec0942fa0");
@@ -877,7 +874,7 @@ abstract class v
     public function __call($method, $arguments)
     {
         header('HTTP/1.1 404 Not Found');
-        if(Environment){
+        if(Environment) {
             $this->debug_init('404');
         }
         error404("<strong>method</strong> -->   {$method} <br />\n 

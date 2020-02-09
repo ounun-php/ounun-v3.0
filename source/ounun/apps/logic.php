@@ -47,11 +47,14 @@ abstract class logic
             $this->_db = $db;
         }
         static::$_instance = $this;
-        //控制器初始化
-//        if (method_exists($this, '_initialize')) {
-//            $this->_initialize();
-//        }
+        // 控制器初始化
+        $this->_initialize();
     }
+
+    /**
+     * 控制器初始化
+     */
+    protected function _initialize(){ }
 
     /**
      * @param $name
