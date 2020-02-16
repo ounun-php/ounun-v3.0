@@ -127,6 +127,7 @@ class db
                     $bind[$field] = $value['default'];
                 }
             }
+            // echo "\$field:{$field} \$value['type']:{$value['type']} \$bind[\$field]:{$bind[$field]} \$value:".json_encode_unescaped($value)."\n";
         }
         return $bind;
     }

@@ -202,8 +202,8 @@ class restful  extends \v
      * @return false|string
      */
     public function encode_json($response_data) {
-        $jsonResponse = json_encode($response_data);
-        return $jsonResponse;
+        $json_response = json_encode($response_data);
+        return $json_response;
     }
 
     /**

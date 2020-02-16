@@ -8,17 +8,18 @@ namespace ounun\page;
 class util
 {
     /**
-     * @param array $paras_gets
-     * @param array $paras_page
-     * @param string $url_original
+     * @param string $url_original URL
+     * @param array $data_query 数据
+     * @param array $replace_ext 要替换的数据
+     * @param array $skip 忽略的数据 如:page
      * @return string
      */
-    static public function url(array $paras_gets = [], array $paras_page = [], string $url_original = '',string $url_key = 'p')
+    static public function url(array $data_query = [], array $replace_ext = [], array $skip = [],string $url_key = 'p',string $url_original = '')
     {
-        $paras_gets   = $paras_gets ? $paras_gets : $_GET;
-        $paras_page   = $paras_page ? $paras_page : ['page' => '{page}'];
+        $data_query   = $data_query   ? $data_query   : $_GET;
+        $replace_ext  = $replace_ext  ? $replace_ext  : ['page' => '{page}'];
         $url_original = $url_original ? $url_original : url_original();
-        $url          = url_build_query($url_original, $paras_gets, $paras_page);
+        $url          = url_build_query($url_original, $data_query, $replace_ext, $skip);
         // print_r(['$url_original'=>$url_original,'$url'=>$url,'$paras_gets'=>$paras_gets,'$paras_page'=>$paras_page]);
         // exit();
         self::page_set($_SERVER['REQUEST_URI'],$url_key);

@@ -79,10 +79,19 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         }
         if ($skip && is_array($skip)) {
             foreach ($skip as $key => $value) {
-                if (is_array($value) && in_array($data_query[$key], $value, true)) {
-                    unset($data_query[$key]);
+                // echo "\$key:{$key} \$data_query[\$key]:{$data_query[$key]}\n<br />";
+                if (is_array($value)) {
+                    if(in_array($data_query[$key], $value, true)){
+                        unset($data_query[$key]);
+                    }
                 } else { // if ($value == $data_query[$key]) {
-                    unset($data_query[$key]);
+                    if(is_integer($key) && is_string($value)){
+                        unset($data_query[$value]);
+                    }else{
+                        unset($data_query[$key]);
+                    }
+
+                    // unset($data_query[$key]);
                 }
             }
         }

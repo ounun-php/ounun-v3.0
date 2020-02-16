@@ -35,6 +35,8 @@ class ounun
 
     /** @var array 公共配制数据 */
     static public $global = [];
+    /** @var array 公共配制数据(插件) */
+    static public $global_addons = [];
     /** @var \v */
     static public $view;
     /** @var array DB配制数据 */
@@ -143,11 +145,18 @@ class ounun
         // 添加App路径(根目录)
         $key = 'app_root_paths';
         if($config_ini && isset($config_ini[$key])){
-            $vs = $config_ini[$key];
+            $vs          = $config_ini[$key];
+            $is_dir_root = false;
             if($vs && is_array($vs)){
                 foreach ($vs as $v){
+                    if($v['path'] == Dir_Root){
+                        $is_dir_root = true;
+                    }
                     static::add_paths_app_root($v['path'], $v['is_auto_helper'], $v['is_auto_task']);
                 }
+            }
+            if(!$is_dir_root){
+                static::add_paths_app_root(Dir_Root, true, true);
             }
         }
 
@@ -156,7 +165,7 @@ class ounun
         if($config_ini && isset($config_ini[$key])){
             $addons = $config_ini[$key];
             if($addons && is_array($addons)){
-                \addons\apps::mount_multi($addons);
+                \ounun\apps\addons::mount_multi($addons);
             }
         }
 
@@ -536,28 +545,23 @@ class ounun
     static public function template_replace_str_get()
     {
         return array_merge([
-            '{$page_url}'  => static::$page_url, // static::$view->page_url,
-            '{$page_file}' => static::$page_base_file,//static::$view->page_file,
-
+            '{$page_url}'  => static::$page_url,      // $lang/$app_path/$base_url,
+            '{$page_file}' => static::$page_base_file,// 基础url,
+            // 根目录/面面路径
             '{$page_www}'  => static::$page_www,
             '{$page_wap}'  => static::$page_wap,
             '{$page_mip}'  => static::$page_mip,
-
-            '{$url_www}'   => static::$url_www, //  站点首页
+            // 根目录
+            '{$url_www}'   => static::$url_www,
             '{$url_wap}'   => static::$url_wap,
             '{$url_mip}'   => static::$url_mip,
             '{$url_api}'   => static::$url_api,
-
-            // '{$url_page}' => static::url_page(),
-            // '{$canonical_www}' => static::$page_www, // static::$url_www . $url_base,
-            // '{$canonical_mip}' => static::$page_mip, // static::$url_mip . $url_base,
-            // '{$canonical_wap}' => static::$page_wap, // static::$url_wap . $url_base,
-
+            // seo_site
             '{$site_name}' => static::$seo_site['name'],
             '{$site_keywords}' => static::$seo_site['keywords'],
             '{$site_description}' => static::$seo_site['description'],
             '{$site_slogan}' => static::$seo_site['slogan'],
-
+            // seo_page
             '{$seo_title}' => static::$seo_page['title'],
             '{$seo_keywords}' => static::$seo_page['keywords'],
             '{$seo_description}' => static::$seo_page['description'],
@@ -568,13 +572,9 @@ class ounun
             '{$domain}' => static::$app_domain,
 
             '{$res}'      => static::$url_res,
-            '{$upload}'   => static::$url_upload,
-            '{$static}'   => static::$url_static,
-            '{$static_g}' => static::$url_static_g,
-
-            '/public/upload/'   => static::$url_upload,
-            '/public/static/'   => static::$url_static,
-            '/public/static_g/' => static::$url_static_g,
+            '{$upload}'   => static::$url_upload,       '/public/upload/'   => static::$url_upload,
+            '{$static}'   => static::$url_static,       '/public/static/'   => static::$url_static,
+            '{$static_g}' => static::$url_static_g,     '/public/static_g/' => static::$url_static_g,
         ], static::$tpl_replace_str);
     }
 
@@ -893,13 +893,13 @@ class ounun
 
     /** 路由数据 */
     static public $routes = [
-        //         'www.866bet.com/api'  => ['app'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
-        //                 '138.vc/api'  => ['app'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
-        //        'www2.866bet.com/api'  => ['app'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
+        //         'www.866bet.com/api'  => ['app_name'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
+        //                 '138.vc/api'  => ['app_name'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
+        //        'www2.866bet.com/api'  => ['app_name'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
     ];
 
     /** 路由数据(默认) */
-    static public $routes_default = ['app' => 'www', 'url' => '/'];
+    static public $routes_default = ['app_name' => 'www', 'url' => '/'];
 
     /** 路由数据 */
     static public $routes_cache = [];
@@ -935,22 +935,22 @@ class ounun
         $app_name            = (static::$app_name == static::App_Name_Web || in_array(static::$app_name,static::App_Names)) ? static::$app_name : static::App_Name_Web;
         // 这里修正URL兼容源生与重写
         if($app_name == static::App_Name_Control){
-            foreach (\addons\apps::$addons_apps as $apps){
+            foreach (\ounun\apps\addons::$addons_apps as $apps){
                 $addon_tag   = $apps::Addon_Tag;
                 if($addon_tag){
-                    /** @var \addons\apps $addon_apps_old */
+                    /** @var \ounun\apps\addons $addon_apps_old */
                     $addon_info     = static::$routes_cache[$addon_tag];
                     if($addon_info){
-                        /** @var \addons\apps $addon_apps_old */
+                        /** @var \ounun\apps\addons $addon_apps_old */
                         $addon_apps_old = $addon_info['apps'];
                         $addon_tag_old  = $addon_apps_old::Addon_Tag;
                         if($addon_tag_old == $addon_tag){
                             if($addon_info['auto'] == false){
-                                \addons\apps::mount_single($apps,$addon_tag,'', true);
+                                \ounun\apps\addons::mount_single($apps,$addon_tag,'', true);
                             }
                         }
                     }else{
-                        \addons\apps::mount_single($apps,$addon_tag,'', true);
+                        \ounun\apps\addons::mount_single($apps,$addon_tag,'', true);
                     }
                 }
             }
@@ -959,20 +959,20 @@ class ounun
         $class_filename      = '';
 
         if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['apps']){
-            /** @var \addons\apps $apps */
+            /** @var \ounun\apps\addons $apps */
             $apps                   = $route['apps'];
             $addon_tag              = $apps::Addon_Tag;
-            $class_filename         = "{$addon_tag}/{$app_name}/{$route['class_name']}.php";
-            $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['class_name']}";
+            $class_filename         = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
+            $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
             static::$url_addon_pre  = $route['url']?'/'.$route['url']:'';
             array_shift($mod);
         }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['apps']){
-            /** @var \addons\apps $apps */
+            /** @var \ounun\apps\addons $apps */
             $apps                   = $route['apps'];
             $addon_tag              = $apps::Addon_Tag;
-            if($route['class_name']){
-                $class_filename     = "{$addon_tag}/{$app_name}/{$route['class_name']}.php";
-                $classname          = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['class_name']}";
+            if($route['view_class']){
+                $class_filename     = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
+                $classname          = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
             }else{
                 $class_filename     = "{$addon_tag}/{$app_name}.php";
                 $classname          = "\\addons\\{$addon_tag}\\{$app_name}";
@@ -1030,7 +1030,7 @@ function start(array $mod, string $host)
     }
 
     // apps_domain_set
-    ounun::app_name_path_set((string)$cfg_0['app'],  (string)$cfg_0['path'],Dir_Root,'', Dir_Data,Dir_Ounun);
+    ounun::app_name_path_set((string)$cfg_0['app_name'],  (string)$cfg_0['path'],Dir_Root,'', Dir_Data,Dir_Ounun);
     // add_paths_app_instance
     ounun::add_paths_app_instance(Dir_App,'app',
         Dir_App . ounun::$app_name . '/', true,

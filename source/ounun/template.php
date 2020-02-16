@@ -15,7 +15,7 @@ class template
     /** @var string Api接口Rest */
     const Type_Api_Rest = 'api';
     /** @var string Pc网页www */
-    const Type_Www      = 'www';
+    const Type_Web      = 'web';
     /** @var string H5网页wap */
     const Type_Wap      = 'wap';
     /** @var string Mip网页 */
@@ -25,7 +25,7 @@ class template
     /** @var array 模板类型 */
     const Types = [
         self::Type_Api_Rest ,
-        self::Type_Www  ,
+        self::Type_Web  ,
         self::Type_Wap ,
         self::Type_Mip ,
         self::Type_Control ,
