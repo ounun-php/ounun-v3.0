@@ -37,6 +37,8 @@ class ounun
     static public $global = [];
     /** @var array 公共配制数据(插件) */
     static public $global_addons = [];
+    /** @var array 公共配制数据(应用) */
+    static public $global_app = [];
     /** @var \v */
     static public $view;
     /** @var array DB配制数据 */
@@ -142,9 +144,14 @@ class ounun
      */
     static public function environment_set(array $config_ini = [])
     {
+        // 为空时直接返回
+        if(empty($config_ini)){
+            return;
+        }
+
         // 添加App路径(根目录)
         $key = 'app_root_paths';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $vs          = $config_ini[$key];
             $is_dir_root = false;
             if($vs && is_array($vs)){
@@ -162,7 +169,7 @@ class ounun
 
         // 挂载模块
         $key = 'addons';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $addons = $config_ini[$key];
             if($addons && is_array($addons)){
                 \ounun\apps\addons::mount_multi($addons);
@@ -171,7 +178,7 @@ class ounun
 
         // 域名&项目代号&当前app之前通信内问key
         $key = 'domain';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $vs = $config_ini[$key];
             if($vs && is_array($vs)){
                 static::domain_set($vs['domain'],$vs['code'],$vs['version'],$vs['key']);
@@ -180,7 +187,7 @@ class ounun
 
         // 统计 / 备案号 / Baidu / xzh / 配制cache_file
         $key = 'global';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
                 static::global_set($config);
@@ -189,7 +196,7 @@ class ounun
 
         // html变量替换
         $key = 'template_array';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
                 static::template_array_set($config);
@@ -198,7 +205,7 @@ class ounun
 
         // 配制database
         $key = 'database';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
                 static::database_set($config['config'],$config['default']);
@@ -207,7 +214,7 @@ class ounun
 
         // 设定语言 & 设定支持的语言
         $key = 'lang';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
                 static::lang_set('',$config['default'],$config['support']);
@@ -216,7 +223,7 @@ class ounun
 
         // 设定路由数据
         $key = 'routes';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
                 static::routes_set($config['routes'],$config['routes_default'],$config['routes_cache']);
@@ -225,7 +232,7 @@ class ounun
 
         // 设定模板目录
         $key = 'template_paths';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $tpl_dirs = $config_ini[$key];
             if($tpl_dirs && is_array($tpl_dirs)){
                 static::template_paths_set($tpl_dirs);
@@ -234,7 +241,7 @@ class ounun
 
         // 设定路由数据
         $key = 'urls';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $urls = $config_ini[$key];
             if($urls && is_array($urls)){
                 static::urls_set($urls['url_www'],$urls['url_wap'],$urls['url_mip'],$urls['url_api'],$urls['url_res'],$urls['url_upload'],$urls['url_static'],$urls['url_static_g']);
@@ -243,17 +250,43 @@ class ounun
 
         // 设定站点页面SEO
         $key = 'seo_site';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             static::seo_site_set($config['sitename'],$config['keywords'],$config['description'],$config['slogan']);
         }
 
         // 设定站点页面SEO
         $key = 'seo_page';
-        if($config_ini && isset($config_ini[$key])){
+        if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             static::seo_page_set($config['title'],$config['keywords'],$config['description'],$config['h1'],$config['etag']);
         }
+
+        // 公共配制数据(应用)
+        $key = '__app__';
+        if(isset($config_ini[$key])){
+            $configs = $config_ini[$key];
+            if($configs && is_array($configs)){
+                foreach ($configs as $app_name=>$config){
+                    if($config && is_array($config)){
+                        static::global_app_set($app_name,$config);
+                    }
+                }
+            }
+        } // end if
+
+        // 公共配制数据(插件)
+        $key = '__app__';
+        if(isset($config_ini[$key])){
+            $configs = $config_ini[$key];
+            if($configs && is_array($configs)){
+                foreach ($configs as $addon_tag=>$config){
+                    if($config && is_array($config)){
+                        static::global_addons_set($addon_tag,$config);
+                    }
+                }
+            }
+        } // end if
     }
 
     /**
@@ -352,6 +385,42 @@ class ounun
         if ($config) {
             foreach ($config as $key => $value) {
                 static::$global[$key] = $value;
+            }
+        }
+    }
+
+    /**
+     * 设定公共配制数据(插件)
+     * @param array $config
+     */
+    static public function global_addons_set(string $addon_tag, array $config = [])
+    {
+        if ($addon_tag && $config) {
+            if(!isset(static::$global_addons[$addon_tag])){
+                static::$global_addons[$addon_tag] = [];
+            }elseif (is_array(static::$global_addons[$addon_tag])){
+                static::$global_addons[$addon_tag] = [];
+            }
+            foreach ($config as $key => $value) {
+                static::$global_addons[$addon_tag][$key] = $value;
+            }
+        }
+    }
+
+    /**
+     * 设定公共配制数据(应用)
+     * @param array $config
+     */
+    static public function global_app_set(string $app_name, array $config = [])
+    {
+        if ($app_name && $config) {
+            if(!isset(static::$global_app[$app_name])){
+                static::$global_app[$app_name] = [];
+            }elseif (is_array(static::$global_app[$app_name])){
+                static::$global_app[$app_name] = [];
+            }
+            foreach ($config as $key => $value) {
+                static::$global_app[$app_name][$key] = $value;
             }
         }
     }

@@ -148,12 +148,13 @@ class addons
      * @return array
      */
     public static function env_template(string $key, string $name, array $fields, bool $app = true, bool $global=false,bool $system=false,
-                                        bool $multi=false, bool $multi_array = false, string $multi_key = '', $multi_value = null)
+                                        bool $multi=false,bool $main = true,bool $multi_array = false, string $multi_key = '', $multi_value = null)
     {
         return [
             'name'   => $name,
             'global' => $global,
             'system' => $system,
+            'main'   => $main,
             'app'    => $app,
             'key'    => $key,
             'fields' => $fields,

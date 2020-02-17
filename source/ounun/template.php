@@ -25,10 +25,10 @@ class template
     /** @var array 模板类型 */
     const Types = [
         self::Type_Api_Rest ,
-        self::Type_Web  ,
-        self::Type_Wap ,
-        self::Type_Mip ,
-        self::Type_Control ,
+        self::Type_Web      ,
+        self::Type_Wap      ,
+        self::Type_Mip      ,
+        self::Type_Control  ,
     ];
 
     /** @var string 对应App目录 - 模板目录 */
