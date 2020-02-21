@@ -1,4 +1,8 @@
 <?php
+
+use ounun\apps\addons;
+use ounun\apps\i18n;
+
 /**
  * 路由
  * @param $routes      array  目录路由表
@@ -39,7 +43,7 @@ class ounun
     static public $global_addons = [];
     /** @var array 公共配制数据(应用) */
     static public $global_app = [];
-    /** @var \v */
+    /** @var v */
     static public $view;
     /** @var array DB配制数据 */
     static public $database = [];
@@ -126,7 +130,7 @@ class ounun
     /** @var array 页面SEO */
     static public $seo_page = ['title'=>'','keywords'=>'','description'=>'','h1'=>'','etag'=>''];
 
-    /** @var \ounun\apps\i18n 语言包 */
+    /** @var i18n 语言包 */
     static public $i18n;
     /** @var string 当前语言 */
     static public $lang = 'zh_cn';
@@ -137,6 +141,22 @@ class ounun
         "en_us" => "English", // "zh"=>"繁體中文",
         "zh_cn" => "简体中文", // "ja"=>"日本語",
     ];
+
+    /**
+     * 本地环境变量设定 (应用)
+     * @param string $app_name
+     */
+    static public function environment_app_set(string $app_name)
+    {
+        // 为空时直接返回
+        if(empty($app_name)){
+            return;
+        }
+        $config_ini = static::$global_app[$app_name];
+
+        print_r(['$app_name'=>$app_name,'$config_ini'=>$config_ini]);
+        static::environment_set($config_ini);
+    }
 
     /**
      * 本地环境变量设定
@@ -152,18 +172,29 @@ class ounun
         // 添加App路径(根目录)
         $key = 'app_root_paths';
         if(isset($config_ini[$key])){
-            $vs          = $config_ini[$key];
-            $is_dir_root = false;
+            $vs            = $config_ini[$key];
+            $is_dir_root   = false;
+            $is_dir_vendor = false;
+
+
             if($vs && is_array($vs)){
                 foreach ($vs as $v){
-                    if($v['path'] == Dir_Root){
-                        $is_dir_root = true;
+                    if(is_array($v) && $v['path']){
+                        if($v['path'] == Dir_Root){
+                            $is_dir_root = true;
+                        }
+                        if($v['path'] == Dir_Vendor . 'cms.cc/'){
+                            $is_dir_vendor = true;
+                        }
+                        static::add_paths_app_root($v['path'], $v['is_auto_helper'], $v['is_auto_task']);
                     }
-                    static::add_paths_app_root($v['path'], $v['is_auto_helper'], $v['is_auto_task']);
                 }
             }
-            if(!$is_dir_root){
+            if(!$is_dir_root && file_exists(Dir_Root)){
                 static::add_paths_app_root(Dir_Root, true, true);
+            }
+            if(!$is_dir_vendor && file_exists(Dir_Vendor . 'cms.cc/')){
+                static::add_paths_app_root(Dir_Vendor . 'cms.cc/', true, true);
             }
         }
 
@@ -172,7 +203,7 @@ class ounun
         if(isset($config_ini[$key])){
             $addons = $config_ini[$key];
             if($addons && is_array($addons)){
-                \ounun\apps\addons::mount_multi($addons);
+                addons::mount_multi($addons);
             }
         }
 
@@ -204,11 +235,11 @@ class ounun
         }
 
         // 配制database
-        $key = 'database';
+        $key = 'database_config';
         if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
-                static::database_set($config['config'],$config['default']);
+                static::database_set($config,$config_ini['database_default']);
             }
         }
 
@@ -226,7 +257,12 @@ class ounun
         if(isset($config_ini[$key])){
             $config = $config_ini[$key];
             if($config && is_array($config)){
-                static::routes_set($config['routes'],$config['routes_default'],$config['routes_cache']);
+                $routes         = $config['routes'];
+                $routes_default = $routes['default'];
+                unset($routes['default']);
+                if($routes && $routes_default){
+                    static::routes_set($routes,$routes_default,[]);
+                }
             }
         }
 
@@ -259,7 +295,7 @@ class ounun
         $key = 'seo_page';
         if(isset($config_ini[$key])){
             $config = $config_ini[$key];
-            static::seo_page_set($config['title'],$config['keywords'],$config['description'],$config['h1'],$config['etag']);
+            static::seo_page_set((string)$config['title'],(string)$config['keywords'],(string)$config['description'],(string)$config['h1'],(string)$config['etag']);
         }
 
         // 公共配制数据(应用)
@@ -269,20 +305,20 @@ class ounun
             if($configs && is_array($configs)){
                 foreach ($configs as $app_name=>$config){
                     if($config && is_array($config)){
-                        static::global_app_set($app_name,$config);
+                        static::global_exted_set($config,'',$app_name);
                     }
                 }
             }
         } // end if
 
         // 公共配制数据(插件)
-        $key = '__app__';
+        $key = '__addons__';
         if(isset($config_ini[$key])){
             $configs = $config_ini[$key];
             if($configs && is_array($configs)){
                 foreach ($configs as $addon_tag=>$config){
                     if($config && is_array($config)){
-                        static::global_addons_set($addon_tag,$config);
+                        static::global_exted_set($config,$addon_tag,'');
                     }
                 }
             }
@@ -313,7 +349,7 @@ class ounun
 
     /**
      * 语言包
-     * @return \ounun\apps\i18n
+     * @return i18n
      */
     static public function i18n_get()
     {
@@ -390,39 +426,33 @@ class ounun
     }
 
     /**
-     * 设定公共配制数据(插件)
+     * 设定公共配制数据(插件) 或 (应用)
+     * @param string $addon_tag
      * @param array $config
      */
-    static public function global_addons_set(string $addon_tag, array $config = [])
+    static public function global_exted_set(array $config = [], string $addon_tag = '', string $app_name = '')
     {
-        if ($addon_tag && $config) {
-            if(!isset(static::$global_addons[$addon_tag])){
-                static::$global_addons[$addon_tag] = [];
-            }elseif (is_array(static::$global_addons[$addon_tag])){
-                static::$global_addons[$addon_tag] = [];
+        if($config){
+            if ($addon_tag) {
+                if(!isset(static::$global_addons[$addon_tag])){
+                    static::$global_addons[$addon_tag] = [];
+                }elseif (is_array(static::$global_addons[$addon_tag])){
+                    static::$global_addons[$addon_tag] = [];
+                }
+                foreach ($config as $key => $value) {
+                    static::$global_addons[$addon_tag][$key] = $value;
+                }
+            }elseif ($app_name) {
+                if(!isset(static::$global_app[$app_name])){
+                    static::$global_app[$app_name] = [];
+                }elseif (is_array(static::$global_app[$app_name])){
+                    static::$global_app[$app_name] = [];
+                }
+                foreach ($config as $key => $value) {
+                    static::$global_app[$app_name][$key] = $value;
+                }
             }
-            foreach ($config as $key => $value) {
-                static::$global_addons[$addon_tag][$key] = $value;
-            }
-        }
-    }
-
-    /**
-     * 设定公共配制数据(应用)
-     * @param array $config
-     */
-    static public function global_app_set(string $app_name, array $config = [])
-    {
-        if ($app_name && $config) {
-            if(!isset(static::$global_app[$app_name])){
-                static::$global_app[$app_name] = [];
-            }elseif (is_array(static::$global_app[$app_name])){
-                static::$global_app[$app_name] = [];
-            }
-            foreach ($config as $key => $value) {
-                static::$global_app[$app_name][$key] = $value;
-            }
-        }
+        } // end $config
     }
 
     /**
@@ -508,6 +538,10 @@ class ounun
     {
         // 当前APP
         $app_name && static::$app_name = $app_name;
+        // 设定配制
+        if(static::$app_name){
+            static::environment_app_set(static::$app_name);
+        }
         // 当前APP Path
         $app_path && static::$app_path = $app_path;
 
@@ -783,9 +817,9 @@ class ounun
     static public function add_paths_app_root(string $path, bool $is_auto_helper = false, bool $is_auto_task = false)
     {
         /** src-0 \         自动加载 */
-        \ounun::add_paths($path . 'src/', '', false);
+        ounun::add_paths($path . 'src/', '', false);
         /** src-0 \addons   自动加载  */
-        \ounun::add_paths($path . 'addons/', 'addons', true);
+        ounun::add_paths($path . 'addons/', 'addons', true);
 
         /** 加载helper */
         if ($is_auto_helper) {
@@ -1001,74 +1035,86 @@ class ounun
      */
     static public function routes_get(array $mod = [])
     {
-        $app_name            = (static::$app_name == static::App_Name_Web || in_array(static::$app_name,static::App_Names)) ? static::$app_name : static::App_Name_Web;
+        $app_name    = (static::$app_name == static::App_Name_Web || in_array(static::$app_name,static::App_Names)) ? static::$app_name : static::App_Name_Web;
         // 这里修正URL兼容源生与重写
         if($app_name == static::App_Name_Control){
-            foreach (\ounun\apps\addons::$addons_apps as $apps){
+            foreach (addons::$addons_apps as $apps){
                 $addon_tag   = $apps::Addon_Tag;
                 if($addon_tag){
-                    /** @var \ounun\apps\addons $addon_apps_old */
+                    /** @var addons $addon_apps_old */
                     $addon_info     = static::$routes_cache[$addon_tag];
                     if($addon_info){
-                        /** @var \ounun\apps\addons $addon_apps_old */
+                        /** @var addons $addon_apps_old */
                         $addon_apps_old = $addon_info['apps'];
                         $addon_tag_old  = $addon_apps_old::Addon_Tag;
                         if($addon_tag_old == $addon_tag){
                             if($addon_info['auto'] == false){
-                                \ounun\apps\addons::mount_single($apps,$addon_tag,'', true);
+                                addons::mount_single($apps,$addon_tag,'', true);
                             }
                         }
                     }else{
-                        \ounun\apps\addons::mount_single($apps,$addon_tag,'', true);
+                        addons::mount_single($apps,$addon_tag,'', true);
                     }
                 }
             }
         }
         // print_r(\ounun::$routes_cache);
-        $class_filename      = '';
-
+        $class_filename = '';
+        $class_name     = '';
+        $addon_tag      = '';
         if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $route['apps']){
-            /** @var \ounun\apps\addons $apps */
+            /** @var addons $apps */
             $apps                   = $route['apps'];
             $addon_tag              = $apps::Addon_Tag;
             $class_filename         = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
-            $classname              = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
+            $class_name             = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
             static::$url_addon_pre  = $route['url']?'/'.$route['url']:'';
             array_shift($mod);
         }elseif(($route = static::$routes_cache[((is_array($mod) && $mod[0]) ? $mod[0] : static::def_module)]) && $route['apps']){
-            /** @var \ounun\apps\addons $apps */
+            /** @var addons $apps */
             $apps                   = $route['apps'];
             $addon_tag              = $apps::Addon_Tag;
             if($route['view_class']){
                 $class_filename     = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
-                $classname          = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
+                $class_name         = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
             }else{
                 $class_filename     = "{$addon_tag}/{$app_name}.php";
-                $classname          = "\\addons\\{$addon_tag}\\{$app_name}";
+                $class_name         = "\\addons\\{$addon_tag}\\{$app_name}";
             }
             static::$url_addon_pre  = $route['url'] && $route['url'] != static::def_module ? '/'.$route['url'] : '';
         }
 
         // paths
         if($class_filename){
-            $paths           = static::$maps_paths['addons'];
-            if ($paths && is_array($paths)) {
-                foreach ($paths as $v) {
-                    $filename = $v['path'] . $class_filename;
-                    // echo "\$filename:{$filename0}\n";
-                    if (is_file($filename)) {
-                        //  echo " --> \$filename000:{$filename}\n";
-                        if ($mod[1]) {
-                            array_shift($mod);
-                        } else {
-                            $mod = [static::def_method];
-                        }
-                        return [$filename,$classname,$mod];
-                    }
+            if($app_name == static::App_Name_Api){
+                if ($mod[1]) {
+                    array_shift($mod);
+                } else {
+                    $mod = [static::def_method];
                 }
+                $filename   = Dir_Ounun.'ounun/restful.php';
+                $class_name = "\\ounun\\restful";
+                return [$filename,$class_name,$addon_tag,$mod];
+            }else{
+                $paths           = static::$maps_paths['addons'];
+                if ($paths && is_array($paths)) {
+                    foreach ($paths as $v) {
+                        $filename = $v['path'] . $class_filename;
+                        // echo "\$filename:{$filename0}\n";
+                        if (is_file($filename)) {
+                            //  echo " --> \$filename000:{$filename}\n";
+                            if ($mod[1]) {
+                                array_shift($mod);
+                            } else {
+                                $mod = [static::def_method];
+                            }
+                            return [$filename,$class_name,$addon_tag,$mod];
+                        }
+                    }
+                } // if ($paths
             }
         }
-        return ['','',$mod];
+        return ['','','',$mod];
     }
 }
 
@@ -1098,6 +1144,7 @@ function start(array $mod, string $host)
         $cfg_0 = ounun::$routes_default;
     }
 
+    print_r(['$cfg_0'=>$cfg_0,'{$host}/{$mod[0]}'=>"{$host}/{$mod[0]}",'ounun::$routes_default'=>ounun::$routes_default,'ounun::$routes'=>ounun::$routes]);
     // apps_domain_set
     ounun::app_name_path_set((string)$cfg_0['app_name'],  (string)$cfg_0['path'],Dir_Root,'', Dir_Data,Dir_Ounun);
     // add_paths_app_instance
@@ -1110,7 +1157,8 @@ function start(array $mod, string $host)
     // 开始 重定义头
     header('X-Powered-By: cms.cc v3.2.1; ounun.org v3.1.2;');
     // 设定 模块与方法(缓存)
-    list($filename,$classname,$mod) = ounun::routes_get($mod);
+    /** @var v $classname */
+    list($filename,$classname,$addon_tag,$mod) = ounun::routes_get($mod);
     // echo "\$filename:".__LINE__." -->\$filename:{$filename} \$classname:{$classname} \$mod:".json_encode_unescaped($mod)."\n";
     // 设定 模块与方法
     if(empty($filename)){
@@ -1149,6 +1197,7 @@ function start(array $mod, string $host)
                     $filename = ounun::load_controller("controller/{$mod[0]}/index.php");
                     if ($filename) {
                         $module    = "{$mod[0]}\\index";
+                        /** @var v $classname */
                         $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
                         $mod       = [ounun::def_method];
                     }
@@ -1159,6 +1208,7 @@ function start(array $mod, string $host)
             // 默认模块 与 默认方法
             $module    = ounun::def_module;
             $addon_tag = ounun::def_module;
+            /** @var v $classname */
             $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
             $filename  = ounun::load_controller("controller/index.php");
             if($filename){
@@ -1168,7 +1218,8 @@ function start(array $mod, string $host)
         // echo "\$filename:".__LINE__." -->:{$filename}\n";
         if(empty($filename)){
             $module    = ounun::def_module;
-        //  $addon_tag = config::def_module;
+            $addon_tag = ounun::def_module;
+            /** @var v $classname */
             $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
             $filename  = ounun::load_controller("controller/index.php");
         }
@@ -1178,7 +1229,7 @@ function start(array $mod, string $host)
     if ($filename) {
         require $filename;
         if (class_exists($classname, false)) {
-            new $classname($mod);
+            new $classname($mod,$addon_tag);
             exit();
         } else {
             $error = "Can't find controller:'{$classname}' filename:" . $filename;
@@ -1214,7 +1265,7 @@ function start_task($argv)
 /** 注册自动加载 */
 spl_autoload_register('\\ounun::load_class');
 /** 自动加载 src-4 \ounun  */
-\ounun::add_paths(Dir_Ounun, 'ounun', false);
+ounun::add_paths(Dir_Ounun, 'ounun', false);
 /** 加载common.php */
 require __DIR__ . '/helper.php';
 

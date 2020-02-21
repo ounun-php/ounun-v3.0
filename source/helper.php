@@ -404,24 +404,36 @@ function succeed_data($data)
  * @param string $type AJAX返回数据格式
  * @param string $jsonp_callback
  * @param int $json_options 传递给json_encode的option参数
+ * @param string $charset
+ * @param string $table_attributes
  */
-function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
+function out($data, string $type = '', string $jsonp_callback = '', int $json_options = 0 , string $charset = '',string $table_attributes = '')
 {
     if (empty($type)) {
         $type = \ounun\c::Format_Json;
     }
+    if(empty($json_options)){
+        $json_options = JSON_UNESCAPED_UNICODE;
+    }
+    if(empty($charset)){
+        $charset = 'utf-8';
+    }
     switch ($type) {
         // 返回JSON数据格式到客户端 包含状态信息
         case \ounun\c::Format_Json :
-            header('Content-Type:application/json; charset=utf-8');
+            header('Content-Type:application/json; charset='.$charset);
             exit(json_encode($data, $json_options));
         // 返回xml格式数据
         case \ounun\c::Format_Xml :
-            header('Content-Type:text/xml; charset=utf-8');
+            header('Content-Type:text/xml; charset='.$charset);
             exit(\ounun\utils\db::xml_encode($data));
+        // 返回 SimpleXMLElement 对象
+        case \ounun\c::Format_Xml_Simple :
+            header('Content-Type:text/xml; charset='.$charset);
+            exit(\ounun\utils\db::xml_encode_simple($data));
         // 返回JSON数据格式到客户端 包含状态信息
         case \ounun\c::Format_Jsonp:
-            header('Content-Type:application/javascript; charset=utf-8');
+            header('Content-Type:application/javascript; charset='.$charset);
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
@@ -429,12 +441,15 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
         // 返回可执行的js脚本
         case  \ounun\c::Format_JS :
         case  \ounun\c::Format_Eval :
-            header('Content-Type:application/javascript; charset=utf-8');
+            header('Content-Type:application/javascript; charset='.$charset);
             exit($data);
-        // 返回可执行的js脚本
-        // case \ounun\mvc\c::Format_Html :
+        case \ounun\c::Format_Html_Table :
+            header('Content-Type:text/html; charset='.$charset);
+            exit(\ounun\utils\db::html_table_encode($data,$table_attributes));
+        // 返回Html
+        case \ounun\c::Format_Html :
         default :
-            header('Content-Type:text/html; charset=utf-8');
+            header('Content-Type:text/html; charset='.$charset);
             exit($data);
     }
 }
@@ -755,8 +770,9 @@ abstract class v
     /**
      * ounun_view constructor.
      * @param $url_mods
+     * @param string $addon_tag  设定的$addon_tag
      */
-    public function __construct($url_mods)
+    public function __construct($url_mods, string $addon_tag = '')
     {
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];
@@ -764,15 +780,22 @@ abstract class v
         \ounun::$view = $this;
         $method       = $url_mods[0];
         // 控制器初始化
-        $this->_initialize($method);
+        $rs = $this->_initialize($method);
+        if(error_is($rs)){
+            out($rs);
+        }
         $this->$method($url_mods);
     }
 
     /**
      * 控制器ounun_view 初始化
      * @param string $method
+     * @return mixed
      */
-    protected function _initialize(string $method){ }
+    protected function _initialize(string $method)
+    {
+        return true;
+    }
 
     /**
      * 初始化Page

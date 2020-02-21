@@ -420,7 +420,7 @@ class db
      * @param string $encoding 数据编码
      * @return string
      */
-    public static  function xml_encode($data, $root = 'ounun', $item = 'item', $attr = '', $id = 'id', $encoding = 'utf-8')
+    public static function xml_encode($data, $root = 'ounun', $item = 'item', $attr = '', $id = 'id', $encoding = 'utf-8')
     {
         if (is_array($attr)) {
             $_attr = [];
@@ -437,5 +437,41 @@ class db
         $xml .= "</{$root}>";
 
         return $xml;
+    }
+
+    /**
+     * 创建 SimpleXMLElement 对象
+     * @param $data
+     * @return mixed
+     */
+    public static function xml_encode_simple($data)
+    {
+        // 创建 SimpleXMLElement 对象
+        $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
+        foreach($data as $key=> $value) {
+            $xml->addChild($key, $value);
+        }
+        return $xml->asXML();
+    }
+
+    /**
+     * 创建 Html 对象
+     * @param $data
+     * @param string $table_attributes
+     * @return string
+     */
+    public static function html_table_encode($data,string $table_attributes = '') {
+        if(empty($table_attributes)){
+            $table_attributes = ' style="border: darkcyan solid 1px;"';
+        }
+        if(is_array($data)){
+            $html = '<table'.$table_attributes.'>';
+            foreach($data as $key => $value) {
+                $html .= "<tr><td>". $key. "</td><td>". $value. "</td></tr>";
+            }
+            $html .= "</table>";
+            return $html;
+        }
+        return '';
     }
 }

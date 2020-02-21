@@ -10,8 +10,6 @@ use ounun\console\c;
 
 class console
 {
-
-
     /** @var string 命令名称 */
     public $name;
 
