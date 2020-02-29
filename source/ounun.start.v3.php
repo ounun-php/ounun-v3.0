@@ -51,9 +51,11 @@ class ounun
     static public $database_default = '';
 
     /** @var array 自动加载路径paths */
-    static public $maps_paths = [];
+    static public $maps_paths  = [];
     /** @var array 自动加载路径maps */
-    static public $maps_class = [];
+    static public $maps_class  = [];
+    /** @var array 已安装的功能模块(插件) */
+    public static $maps_installed_addons = [];
 
     /** @var string 根目录 */
     static public $dir_root  = '';
@@ -154,8 +156,10 @@ class ounun
         }
         $config_ini = static::$global_app[$app_name];
 
-        print_r(['$app_name'=>$app_name,'$config_ini'=>$config_ini]);
-        static::environment_set($config_ini);
+        // print_r(['$app_name'=>$app_name,'$config_ini'=>$config_ini]);
+        if($config_ini){
+            static::environment_set($config_ini);
+        }
     }
 
     /**
@@ -305,7 +309,7 @@ class ounun
             if($configs && is_array($configs)){
                 foreach ($configs as $app_name=>$config){
                     if($config && is_array($config)){
-                        static::global_exted_set($config,'',$app_name);
+                        static::global_addons_set($config,'',$app_name);
                     }
                 }
             }
@@ -318,7 +322,7 @@ class ounun
             if($configs && is_array($configs)){
                 foreach ($configs as $addon_tag=>$config){
                     if($config && is_array($config)){
-                        static::global_exted_set($config,$addon_tag,'');
+                        static::global_addons_set($config,$addon_tag,'');
                     }
                 }
             }
@@ -345,7 +349,6 @@ class ounun
             }
         }
     }
-
 
     /**
      * 语言包
@@ -378,7 +381,6 @@ class ounun
         }
         return static::$i18n;
     }
-
 
     /**
      * 设定站点的SEO
@@ -430,7 +432,7 @@ class ounun
      * @param string $addon_tag
      * @param array $config
      */
-    static public function global_exted_set(array $config = [], string $addon_tag = '', string $app_name = '')
+    static public function global_addons_set(array $config = [], string $addon_tag = '', string $app_name = '')
     {
         if($config){
             if ($addon_tag) {
@@ -453,6 +455,38 @@ class ounun
                 }
             }
         } // end $config
+    }
+
+    /**
+     * 公共配制数据
+     * @param string $config_key
+     * @param $default
+     * @return mixed|string
+     */
+    public static function global_get(string $config_key,$default)
+    {
+        if(\ounun::$global && \ounun::$global[$config_key]){
+            return  \ounun::$global[$config_key];
+        }
+        return $default;
+    }
+
+    /**
+     * 公共配制数据(插件)
+     * @param string $config_key
+     * @param $default
+     * @param string $addon_tag
+     * @return mixed
+     */
+    public static function global_addons_get(string $config_key,$default,string $addon_tag)
+    {
+        if(\ounun::$global_addons){
+            $tag = \ounun::$global_addons[$addon_tag];
+            if($tag && $tag[$config_key]){
+                return $tag[$config_key];
+            }
+        }
+        return $default;
     }
 
     /**
@@ -616,8 +650,6 @@ class ounun
         }
     }
 
-
-
     /**
      * 设定模板替换
      * @param array $data
@@ -778,9 +810,9 @@ class ounun
      */
     static public function url_root_curr_get()
     {
-        if (static::$tpl_style == '_mip') {
+        if (static::$tpl_style == \ounun\template::Tpl_Type_Mip) {
             return static::$url_mip;
-        } elseif (static::$tpl_style == '_wap') {
+        } elseif (static::$tpl_style == \ounun\template::Tpl_Type_Wap) {
             return static::$url_wap;
         }
         return static::$url_www;
@@ -876,6 +908,18 @@ class ounun
             require $filename;
         } else {
             static::$maps_class[$class] = $filename;
+        }
+    }
+
+    /**
+     * 添加$addon
+     * @param string $addon_apps
+     */
+    //static public function apps_push(string $addon_apps)
+    static public function add_addons(string $addon_apps)
+    {
+        if($addon_apps && !in_array($addon_apps,static::$maps_installed_addons)){
+            array_push(static::$maps_installed_addons,$addon_apps);
         }
     }
 
@@ -1038,7 +1082,7 @@ class ounun
         $app_name    = (static::$app_name == static::App_Name_Web || in_array(static::$app_name,static::App_Names)) ? static::$app_name : static::App_Name_Web;
         // 这里修正URL兼容源生与重写
         if($app_name == static::App_Name_Control){
-            foreach (addons::$addons_apps as $apps){
+            foreach (static::$maps_installed_addons as $apps){
                 $addon_tag   = $apps::Addon_Tag;
                 if($addon_tag){
                     /** @var addons $addon_apps_old */
@@ -1135,6 +1179,7 @@ function start(array $mod, string $host)
     ounun::load_config(Dir_App, false);
 
     // Routes
+    // print_r(['{$host}/{$mod[0]}'=>"{$host}/{$mod[0]}",]);
     if ($mod && $mod[0] && ounun::$routes["{$host}/{$mod[0]}"]) {
         $mod_0 = array_shift($mod);
         $cfg_0 = ounun::$routes["{$host}/{$mod_0}"];
@@ -1144,7 +1189,7 @@ function start(array $mod, string $host)
         $cfg_0 = ounun::$routes_default;
     }
 
-    print_r(['$cfg_0'=>$cfg_0,'{$host}/{$mod[0]}'=>"{$host}/{$mod[0]}",'ounun::$routes_default'=>ounun::$routes_default,'ounun::$routes'=>ounun::$routes]);
+    // print_r(['$cfg_0'=>$cfg_0,'ounun::$routes_default'=>ounun::$routes_default,'ounun::$routes'=>ounun::$routes]);
     // apps_domain_set
     ounun::app_name_path_set((string)$cfg_0['app_name'],  (string)$cfg_0['path'],Dir_Root,'', Dir_Data,Dir_Ounun);
     // add_paths_app_instance

@@ -18,12 +18,9 @@ class addons
 
     /** @var string 系统 */
     const Is_System = false;
-
-    /** @var array 功能模块(插件) */
-    public static $addons_apps     = [];
-
+    
     /** @var array 插件子模块(主要是子类继承用) */
-    public static $addons_subclass = [];
+    public static $addons_view_class = [];
 
     /** @var self 实例 */
     protected static $_instance;
@@ -69,21 +66,20 @@ class addons
         \ounun::$routes_cache[$addon_url] = [
             'apps'        => $addon_apps,
             'url'         => $addon_url,
-            //'addon_tag' => $addon_apps::Addon_Tag,
             'view_class'  => $view_class,
             'auto'        => $is_auto_reg_subclass,
         ];
         //
-        static::apps_push($addon_apps);
+        \ounun::add_addons($addon_apps);
         //
         if($is_auto_reg_subclass && empty($view_class)) {
-            /** @var array $addons_subclass addon_subclass */
-            $addons_subclass = $addon_apps::$addons_subclass;
-            if($addons_subclass && is_array($addons_subclass)){
+            /** @var array $addons_view_class addon_subclass */
+            $addons_view_class = $addon_apps::$addons_view_class;
+            if($addons_view_class && is_array($addons_view_class)){
                 // $addon_url
                 $addon_url = $addon_url ? $addon_url.'/' : '';
                 /** @var \ounun\apps\addons $addon */
-                foreach ($addons_subclass as $addon){
+                foreach ($addons_view_class as $addon){
                     if (is_array($addon) && $addon['view_class']) {
                         if ($addon && is_array($addon) && $addon['top']) {
                             $url = $addon['url']??$addon['view_class'];
@@ -93,7 +89,6 @@ class addons
                         \ounun::$routes_cache[$url] = [
                             'apps'         => $addon_apps,
                             'url'          => $url,
-                            // 'addon_tag' => $addon_apps::Addon_Tag,
                             'view_class'   => $addon['view_class'],
                             'auto'         => false,
                         ];
@@ -186,50 +181,5 @@ class addons
             'default'   => $default,
             'enum_value'=> $enum_value
         ];
-    }
-
-
-
-    /**
-     * 公共配制数据
-     * @param string $config_key
-     * @param $default
-     * @return mixed|string
-     */
-    public static function env_global(string $config_key,$default)
-    {
-        if(\ounun::$global && \ounun::$global[$config_key]){
-            return  \ounun::$global[$config_key];
-        }
-        return $default;
-    }
-
-    /**
-     * 公共配制数据(插件)
-     * @param string $config_key
-     * @param $default
-     * @param string $addon_tag
-     * @return mixed
-     */
-    protected static function env_global_addons(string $config_key,$default,string $addon_tag)
-    {
-        if(\ounun::$global_addons){
-            $tag = \ounun::$global_addons[$addon_tag];
-            if($tag && $tag[$config_key]){
-                return $tag[$config_key];
-            }
-        }
-        return $default;
-    }
-
-    /**
-     * 添加$addon
-     * @param string $addon_apps
-     */
-    static public function apps_push(string $addon_apps)
-    {
-        if($addon_apps && !in_array($addon_apps,self::$addons_apps)){
-            array_push(self::$addons_apps,$addon_apps);
-        }
     }
 }

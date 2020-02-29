@@ -95,8 +95,6 @@ class console
         return 0;
     }
 
-
-
     /**
      * @param string $msg
      * @param string $color
