@@ -829,9 +829,7 @@ abstract class v
         }
 
         // db
-        if (empty(static::$db_v)) {
-            static::$db_v = \ounun\db\pdo::i(\ounun::database_default_get());
-        }
+        static::db_v_get();
     }
 
     /**

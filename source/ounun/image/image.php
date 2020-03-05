@@ -13,7 +13,7 @@ class image
     private $resize_height = 0;
 
     private $image = null;
-    private $imageinfo = [];
+    private $image_info = [];
     private $crop_width = 0;
     private $crop_height = 0;
     private $crop_position = 1;
@@ -144,7 +144,7 @@ class image
         if (!$this->image) {
             return false;
         }
-        $this->imageinfo = getimagesize($this->src);
+        $this->image_info = getimagesize($this->src);
         $actions = array_unique($this->actions);
         $src_image = $this->image;
         foreach ($actions as $action) {
@@ -167,8 +167,8 @@ class image
             $new_image = $this->modify($src_image, $this->crop_width,
                 $this->crop_height, $this->crop_width, $this->crop_height, 0, 0, $dst_x, $dst_y);
         }
-        $this->imageinfo[0] = $this->crop_width;
-        $this->imageinfo[1] = $this->crop_height;
+        $this->image_info[0] = $this->crop_width;
+        $this->image_info[1] = $this->crop_height;
 
         return $new_image;
     }
@@ -177,9 +177,9 @@ class image
     protected function doResize($src_image)
     {
         $newimage = $this->modify($src_image, $this->resize_width, $this->resize_height,
-            $this->imageinfo[0], $this->imageinfo[1]);
-        $this->imageinfo[0] = $this->resize_width;
-        $this->imageinfo[1] = $this->resize_height;
+            $this->image_info[0], $this->image_info[1]);
+        $this->image_info[0] = $this->resize_width;
+        $this->image_info[1] = $this->resize_height;
 
         return $newimage;
     }
@@ -247,8 +247,8 @@ class image
 
     private function getCropDestPoint()
     {
-        $s_width = $this->imageinfo[0];
-        $s_height = $this->imageinfo[1];
+        $s_width = $this->image_info[0];
+        $s_height = $this->image_info[1];
         $dst_x = $dst_y = 0;
         if ($this->crop_width == '0' || $this->crop_width > $s_width) {
             $this->crop_width = $s_width;

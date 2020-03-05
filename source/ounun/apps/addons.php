@@ -5,6 +5,8 @@
  */
 namespace ounun\apps;
 
+use ounun\db\pdo;
+
 class addons
 {
     /** @var string 插件名称 */
@@ -21,6 +23,9 @@ class addons
     
     /** @var array 插件子模块(主要是子类继承用) */
     public static $addons_view_class = [];
+
+    /** @var array 依赖插件 */
+    public static $addons_require = [];
 
     /** @var self 实例 */
     protected static $_instance;
@@ -111,12 +116,22 @@ class addons
     }
 
     /**
-     * 插件依赖
+     * 关连 插件
      * @return array
      */
-    static public function require_addons()
+    static public function addons_related(string $addon_apps = '')
     {
+        if(empty($addon_apps)){
+            $addon_apps = static::class;
+        }
         $addons = [];
+        /** @var addons $addon */
+        foreach (\ounun::$maps_installed_addons as $addon){
+            if(in_array($addon_apps,$addon::$addons_require)){
+                // print_r(['$addon_apps'=>$addon_apps,'$addon'=>$addon,'$addon::$addons_require'=>$addon::$addons_require]);
+                $addons[] = $addon;
+            }
+        }
         return $addons;
     }
 
@@ -127,59 +142,5 @@ class addons
     static public function env_config()
     {
         return [];
-    }
-
-    /**
-     * @param string $key
-     * @param string $name
-     * @param array $fields
-     * @param bool $app      是否支持app各自设定
-     * @param bool $global
-     * @param bool $system
-     * @param bool $multi
-     * @param bool $multi_array
-     * @param string $multi_key
-     * @param mixed  $multi_value
-     * @return array
-     */
-    public static function env_template(string $key, string $name, array $fields, bool $app = true, bool $global=false,bool $system=false,
-                                        bool $multi=false,bool $multi_array = false, string $multi_key = '', $multi_value = null)
-    {
-        return [
-            'name'   => $name,
-            'global' => $global,
-            'system' => $system,
-            'app'    => $app,
-            'key'    => $key,
-            'fields' => $fields,
-
-            'multi'         => $multi,
-            'multi_array'   => $multi_array,
-            'multi_key'     => $multi_key,
-            'multi_value'   => $multi_value,
-        ];
-    }
-
-    /**
-     * @param string $field
-     * @param string $name
-     * @param string $type
-     * @param $default
-     * @param int $len_min
-     * @param int $len_max
-     * @param array $enum_value
-     * @return array
-     */
-    public static function env_template_field(string $field, string $name, string $type, $default, int $len_min = 0, int $len_max = 32,array $enum_value=[])
-    {
-        return [
-            'field'     => $field,
-            'name'      => $name,
-            'type'      => $type,
-            'len_min'   => $len_min,
-            'len_max'   => $len_max,
-            'default'   => $default,
-            'enum_value'=> $enum_value
-        ];
     }
 }

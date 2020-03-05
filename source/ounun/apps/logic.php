@@ -54,7 +54,7 @@ abstract class logic
     /**
      * 控制器初始化
      */
-    protected function _initialize(){ }
+    abstract protected function _initialize();
 
     /**
      * @param $name

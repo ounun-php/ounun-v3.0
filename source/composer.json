@@ -30,7 +30,8 @@
 
     "textalk/websocket": "^1.2",
     "php": ">=7.2",
-    "ext-apcu": "*"
+    "ext-apcu": "*",
+    "ext-imagick": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "^8.1"

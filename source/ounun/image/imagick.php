@@ -111,6 +111,7 @@ class imagick
                     $canvas = new Imagick();
                     foreach ($images as $frame) {
                         $img = new Imagick();
+                        // $img->resize_to();
                         $img->readImageBlob($frame);
                         $img->thumbnailImage($width, $height, true);
                         $canvas->addImage($img);
