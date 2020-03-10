@@ -456,21 +456,27 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
 
 /**
  * 获得 json字符串数据
- * @param $data
+ * @param mixed|string $data
  * @return string
  */
 function json_encode_unescaped($data): string
 {
+    if(is_string($data)){
+        return $data;
+    }
     return json_encode($data, JSON_UNESCAPED_UNICODE);
 }
 
 /**
  * 对 json格式的字符串进行解码
- * @param string $json_string
+ * @param string|mixed $json_string
  * @return mixed
  */
-function json_decode_array(?string $json_string)
+function json_decode_array($json_string)
 {
+    if(is_array($json_string)){
+        return $json_string;
+    }
     return json_decode($json_string, true);
 }
 
@@ -605,7 +611,7 @@ function error404(string $msg = ''): void
                     <h1>404 Not Found</h1>
                 </div>
                 <hr>
-                <div align="center"><a href="' . \ounun::$url_www . '">返回网站首页</a></div>
+                <div align="center"><a href="' . \ounun::$root_www . '">返回网站首页</a></div>
                 '.($msg?'<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">'.$msg.'</div>':'').'
             </body>
             </html>
@@ -893,7 +899,7 @@ abstract class v
      */
     public function favicon($mod)
     {
-        go_url(\ounun::$url_static . 'favicon.ico', false, 301);
+        go_url(\ounun::$root_static . 'favicon.ico', false, 301);
     }
 
     /**

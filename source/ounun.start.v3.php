@@ -95,22 +95,22 @@ class ounun
     static public $page_mip = '';
 
     /** @var string Www URL */
-    static public $url_www = '';
+    static public $root_www = '';
     /** @var string Mobile URL */
-    static public $url_wap = '';
+    static public $root_wap = '';
     /** @var string Mip URL */
-    static public $url_mip = '';
+    static public $root_mip = '';
 
     /** @var string Api URL */
-    static public $url_api = '';
+    static public $root_api = '';
     /** @var string Res URL */
-    static public $url_res = '';
+    static public $root_res = '';
     /** @var string Static URL */
-    static public $url_static = '';
+    static public $root_static = '';
     /** @var string Upload URL */
-    static public $url_upload = '';
+    static public $root_upload = '';
     /** @var string StaticG URL */
-    static public $url_static_g = '';
+    static public $root_static_g = '';
     /** @var string 为插件时网址前缀URL */
     static public $url_addon_pre = '';
 
@@ -284,7 +284,7 @@ class ounun
         if(isset($config_ini[$key])){
             $urls = $config_ini[$key];
             if($urls && is_array($urls)){
-                static::urls_set($urls['url_www'],$urls['url_wap'],$urls['url_mip'],$urls['url_api'],$urls['url_res'],$urls['url_upload'],$urls['url_static'],$urls['url_static_g']);
+                static::urls_set($urls['root_www'],$urls['root_wap'],$urls['root_mip'],$urls['root_api'],$urls['root_res'],$urls['root_upload'],$urls['root_static'],$urls['root_static_g']);
             }
         }
 
@@ -508,34 +508,34 @@ class ounun
 
     /**
      * 设定地址
-     * @param string $url_www
-     * @param string $url_wap
-     * @param string $url_mip
-     * @param string $url_api
-     * @param string $url_res
-     * @param string $url_static
-     * @param string $url_upload
-     * @param string $url_static_g
+     * @param string $root_www
+     * @param string $root_wap
+     * @param string $root_mip
+     * @param string $root_api
+     * @param string $root_res
+     * @param string $root_static
+     * @param string $root_upload
+     * @param string $root_static_g
      */
-    static public function urls_set(string $url_www, string $url_wap, string $url_mip, string $url_api, string $url_res, string $url_upload,  string $url_static, string $url_static_g)
+    static public function urls_set(string $root_www, string $root_wap, string $root_mip, string $root_api, string $root_res, string $root_upload,  string $root_static, string $root_static_g)
     {
         /** Www URL */
-        static::$url_www = $url_www;
+        static::$root_www = $root_www;
         /** Wap URL Mobile */
-        static::$url_wap = $url_wap;
+        static::$root_wap = $root_wap;
         /** Mip URL */
-        static::$url_mip = $url_mip;
+        static::$root_mip = $root_mip;
 
         /** Api URL */
-        static::$url_api = $url_api;
+        static::$root_api = $root_api;
         /** Res URL */
-        static::$url_res = $url_res;
+        static::$root_res = $root_res;
         /** Upload URL */
-        static::$url_upload = $url_upload;
+        static::$root_upload = $root_upload;
         /** Static URL */
-        static::$url_static = $url_static;
+        static::$root_static = $root_static;
         /** StaticG URL */
-        static::$url_static_g = $url_static_g;
+        static::$root_static_g = $root_static_g;
     }
 
     /**
@@ -687,10 +687,10 @@ class ounun
             '{$page_wap}'  => static::$page_wap,
             '{$page_mip}'  => static::$page_mip,
             // 根目录
-            '{$url_www}'   => static::$url_www,
-            '{$url_wap}'   => static::$url_wap,
-            '{$url_mip}'   => static::$url_mip,
-            '{$url_api}'   => static::$url_api,
+            '{$root_www}'   => static::$root_www,
+            '{$root_wap}'   => static::$root_wap,
+            '{$root_mip}'   => static::$root_mip,
+            '{$root_api}'   => static::$root_api,
             // seo_site
             '{$site_name}' => static::$seo_site['name'],
             '{$site_keywords}' => static::$seo_site['keywords'],
@@ -706,10 +706,10 @@ class ounun
             '{$app}' => static::$app_name,
             '{$domain}' => static::$app_domain,
 
-            '{$res}'      => static::$url_res,
-            '{$upload}'   => static::$url_upload,       '/public/upload/'   => static::$url_upload,
-            '{$static}'   => static::$url_static,       '/public/static/'   => static::$url_static,
-            '{$static_g}' => static::$url_static_g,     '/public/static_g/' => static::$url_static_g,
+            '{$res}'      => static::$root_res,
+            '{$upload}'   => static::$root_upload,       '/public/upload/'   => static::$root_upload,
+            '{$static}'   => static::$root_static,       '/public/static/'   => static::$root_static,
+            '{$static_g}' => static::$root_static_g,     '/public/static_g/' => static::$root_static_g,
         ], static::$tpl_replace_str);
     }
 
@@ -775,17 +775,17 @@ class ounun
         static::$page_url = $page_url;
 
         /** @var string Www Page */
-        $a = explode('/',static::$url_www,5);
+        $a = explode('/',static::$root_www,5);
         $p = $a[3]?"/{$a[3]}":'';
         static::$page_www = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
 
         /** @var string Mobile Page */
-        $a = explode('/',static::$url_wap,5);
+        $a = explode('/',static::$root_wap,5);
         $p = $a[3]?"/{$a[3]}":'';
         static::$page_wap = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
 
         /** @var string Mip Page */
-        $a = explode('/',static::$url_mip,5);
+        $a = explode('/',static::$root_mip,5);
         $p = $a[3]?"/{$a[3]}":'';
         static::$page_mip = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
     }
@@ -796,7 +796,7 @@ class ounun
      * @param string $static_root
      * @return string
      */
-    static public function url_static($url, string $static_root = '/static/'): string
+    static public function root_static($url, string $static_root = '/static/'): string
     {
         if ($url && is_array($url)) {
             $url = count($url) > 1 ? '??' . implode(',', $url) : $url[0];
@@ -808,14 +808,14 @@ class ounun
      * 当前带http的网站根
      * @return string
      */
-    static public function url_root_curr_get()
+    static public function root_url_curr_get()
     {
         if (static::$tpl_style == \ounun\template::Tpl_Type_Mip) {
-            return static::$url_mip;
+            return static::$root_mip;
         } elseif (static::$tpl_style == \ounun\template::Tpl_Type_Wap) {
-            return static::$url_wap;
+            return static::$root_wap;
         }
-        return static::$url_www;
+        return static::$root_www;
     }
 
     /**
