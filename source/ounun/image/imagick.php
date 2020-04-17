@@ -12,15 +12,12 @@ class imagick
     private $image = null;
     private $type = null;
 
-    // 构造函数
-    public function __construct()
-    {
-    }
-
     // 析构函数
     public function __destruct()
     {
-        if ($this->image !== null) $this->image->destroy();
+        if ($this->image !== null) {
+            $this->image->destroy();
+        }
     }
 
     /**

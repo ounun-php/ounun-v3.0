@@ -161,5 +161,4 @@ class redis extends \ounun\dc\driver
     {
         return $this->_handler->flushDB();
     }
-
 }

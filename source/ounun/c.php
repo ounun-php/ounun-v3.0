@@ -8,31 +8,55 @@ namespace ounun;
 /** 常量 */
 class c
 {
-    /** @var int 禁用 - 状态 */
-    const Status_Disabled = 0;
-    /** @var int 使用 - 状态 */
-    const Status_Enabled = 1;
     /** @var int 否 - 状态 */
     const Status_No = 0;
     /** @var int 是 - 状态 */
     const Status_Yes = 1;
+    /** @var int 禁用 - 状态 */
+    const Status_Disabled = 1000;
+    /** @var int 开启 - 状态 */
+    const Status_Enabled  = 1010;
+    /** @var int 关 - 状态 */
+    const Status_Off = 2000;
+    /** @var int 开 - 状态 */
+    const Status_On  = 2010;
 
     /** @var int 正常(灰) */
-    const Status_Normal = 0;
+    const Status_Normal = 3000;
     /** @var int 等待空置状态 */
-    const Status_Await = 3;
+    const Status_Await  = 3030;
     /** @var int 工作中... */
-    const Status_Runing = 5;
+    const Status_Runing = 3050;
     /** @var int 过载状态 */
-    const Status_Full = 9;
+    const Status_Full  = 3090;
     /** @var int 完成 - 状态 */
-    const Status_Done = 10;
+    const Status_Done  = 3100;
     /** @var int 成功(绿色) */
-    const Status_Succeed = 99;
+    const Status_Succeed = 3299;
+
     /** @var int 失败 - 状态 */
-    const Status_Fail = 100;
+    const Status_Fail    = 4100;
     /** @var int 突出(橙黄) */
-    const Status_Warning = 106;
+    const Status_Warning = 4106;
+    /** @var array 状态 */
+    const Status = [
+        self::Status_No  => '否',
+        self::Status_Yes => '是',
+        self::Status_Disabled => '禁用',
+        self::Status_Enabled => '开启',
+        self::Status_Off => '关',
+        self::Status_On => '开',
+
+        self::Status_Normal => '正常(灰)',
+        self::Status_Await => '空置',
+        self::Status_Runing => '工作中...',
+        self::Status_Full => '过载状态',
+        self::Status_Done => '完成',
+        self::Status_Succeed => '成功(绿色)',
+
+        self::Status_Fail => '失败',
+        self::Status_Warning => '突出(橙黄)',
+    ];
 
     /** @var int 已删除 */
     const Del_Yes = 1;

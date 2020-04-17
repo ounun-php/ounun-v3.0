@@ -16,16 +16,16 @@ class dc
     static protected $_instance = [];
 
     /**
-     * @param string $tag
+     * @param string $cache_data_key
      * @param array $config
      * @return $this
      */
-    static public function i(string $tag = 'tag', array $config = [])
+    static public function i(string $cache_data_key = 'data', array $config = [])
     {
-        if (empty(static::$_instance[$tag])) {
-            static::$_instance[$tag] = new static($config);
+        if (empty(static::$_instance[$cache_data_key])) {
+            static::$_instance[$cache_data_key] = new static($config);
         }
-        return static::$_instance[$tag];
+        return static::$_instance[$cache_data_key];
     }
 
     /** @var driver 缓存驱动 */

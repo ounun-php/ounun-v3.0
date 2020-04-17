@@ -30,7 +30,7 @@ abstract class driver
     public function GET()
     {
         $rs = succeed([__METHOD__,$this->_restful->input_get(),$this->_restful->gets_get(),$this->_restful->post_get()]);
-        out(succeed($rs));
+        out($rs);
     }
 
     /** POST 创建资源信息 */

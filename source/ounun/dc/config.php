@@ -43,13 +43,13 @@ class config
      * config constructor.
      * @param \ounun\db\pdo $db
      * @param array $config
-     * @param string $tag
+     * @param string $cache_data_key
      */
-    public function __construct(string $tag, array $config, \ounun\db\pdo $db)
+    public function __construct(string $cache_data_key, array $config, \ounun\db\pdo $db)
     {
         $config['format_string']  = false;
         $this->_db = $db;
-        $this->_dc = dc::i($tag,$config);
+        $this->_dc = dc::i($cache_data_key,$config);
     }
 
     /**
@@ -82,9 +82,9 @@ class config
         if (!$this->_value[$tag_key]) {
             $this->_dc->set_key($tag_key);
             $c = $this->_dc->get();
-            //$this->_cd[$tag_key]->mtime = time();
-            //debug_header('$last_modify',$last_modify,true);
-            //debug_header('$this_mtime',$this->_cd[$tag_key]->mtime,true);
+            // $this->_cd[$tag_key]->mtime = time();
+            // debug_header('$last_modify',$last_modify,true);
+            // debug_header('$this_mtime',$this->_cd[$tag_key]->mtime,true);
             if ($c == null) {
                 //debug_header('$this_mtime2',222,true);
                 $this->_value[$tag_key] = $this->$mysql_method($args);

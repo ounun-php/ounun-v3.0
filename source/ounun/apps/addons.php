@@ -5,6 +5,8 @@
  */
 namespace ounun\apps;
 
+use addons\activity\control;
+use apps\control\admin;
 use ounun\db\pdo;
 
 class addons
@@ -20,26 +22,12 @@ class addons
 
     /** @var string 系统 */
     const Is_System = false;
-    
+
     /** @var array 插件子模块(主要是子类继承用) */
-    public static $addons_view_class = [];
+    protected static $_addons_view_class = [];
 
     /** @var array 依赖插件 */
     public static $addons_require = [];
-
-    /** @var self 实例 */
-    protected static $_instance;
-
-    /**
-     * @return self 返回数据库连接对像
-     */
-    public static function i(): self
-    {
-        if (empty(static::$_instance)) {
-            static::$_instance = new static();
-        }
-        return static::$_instance;
-    }
 
     /**
      * 加载模块
@@ -79,7 +67,7 @@ class addons
         //
         if($is_auto_reg_subclass && empty($view_class)) {
             /** @var array $addons_view_class addon_subclass */
-            $addons_view_class = $addon_apps::$addons_view_class;
+            $addons_view_class = $addon_apps::addons_view_class();
             if($addons_view_class && is_array($addons_view_class)){
                 // $addon_url
                 $addon_url = $addon_url ? $addon_url.'/' : '';
@@ -106,16 +94,6 @@ class addons
     }
 
     /**
-     * 菜单数据
-     * @return array
-     */
-    static public function apps_menu_control()
-    {
-        $menu = [];
-        return [static::Menu_Tag,$menu];
-    }
-
-    /**
      * 关连 插件
      * @return array
      */
@@ -133,6 +111,56 @@ class addons
             }
         }
         return $addons;
+    }
+
+    /** @var array 插件子模块 */
+    public static function addons_view_class()
+    {
+        return static::$_addons_view_class;
+    }
+
+    /**
+     * 插件子模块 字段
+     * @return array
+     */
+    static protected function addons_view_class_field(string $view_class,string $view_name,bool $top = false, bool $enable = true)
+    {
+        return ['view_class'=> $view_class , 'view_name' => $view_name, 'top'=> $top, 'enable' => $enable];
+    }
+
+    /**
+     * 菜单数据
+     * @return array
+     */
+    static public function apps_menu_control()
+    {
+        $sub   = [];
+        $subv  = ("\\addons\\".static::Addon_Tag."\\control")::apps_menu_control();
+        if($subv){
+            $sub[] = $subv;
+        }
+        foreach (static::addons_view_class() as $view){
+            if($view['view_class'] && $view['view_name'] && $view['enable']){
+                /** @var admin $view_class */
+                $view_class = "\\addons\\".static::Addon_Tag."\\control\\{$view['view_class']}";
+                if(class_exists($view_class)){
+                    $menu       = $view_class::apps_menu_control();
+                    if($menu){
+                        $sub[]  = $menu;
+                    }
+                } // end class_exists
+            }
+        }
+        if($sub){
+            $menu  = [
+                'name'    => static::Addon_Name,
+                'default' => static::Addon_Tag.'/index.html',
+                'sub'     => $sub,
+            ];
+        }else{
+            $menu  = [];
+        }
+        return [static::Menu_Tag,$menu];
     }
 
     /**

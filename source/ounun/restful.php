@@ -35,9 +35,15 @@ class restful  extends \v
      */
     public function __construct($url_mods, string $addon_tag = '')
     {
-        if($addon_tag){
-            $this->_class = "addons\\".$addon_tag."\\api";
+        if(empty($addon_tag)){
+            error404("<strong>REQUEST_METHOD</strong> -->   {$_SERVER['REQUEST_METHOD']} <br />\n
+                           <strong>HTTP_ACCEPT</strong> -->   {$_SERVER['HTTP_ACCEPT']} <br />\n
+                           <strong>get</strong> ------> " . json_encode($_GET,JSON_UNESCAPED_UNICODE) . " <br />\n
+                           <strong>post</strong> ------> " . json_encode($_POST,JSON_UNESCAPED_UNICODE) . " <br />\n
+                           <strong>input</strong> ------> " . file_get_contents('php://input') . " <br />\n
+                           <strong>Mods</strong> ------> " . json_encode($url_mods,JSON_UNESCAPED_UNICODE) . " <br />");
         }
+        $this->_class        = "addons\\".$addon_tag."\\api";
         $this->_method       = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
         $this->_request_gets = $_GET;
@@ -48,9 +54,9 @@ class restful  extends \v
         }
         if($this->_class){
             if (!$url_mods) {
-                $url_mods = [\ounun::def_method];
+                $url_mods     =  [\ounun::def_method];
             }
-            $class = "{$this->_class}\\{$url_mods[0]}";
+            $class            = "{$this->_class}\\{$url_mods[0]}";
             if(class_exists($class)){
                 \ounun::$view = $this;
                 static::$tpl  = true;  // 不去初始化template
@@ -59,9 +65,12 @@ class restful  extends \v
                 if(error_is($rs)){
                     out($rs);
                 }
-                $this->init_page(\ounun::$url_addon_pre.'/'.($url_mods[0] && $url_mods[0] != \ounun::def_method ? $url_mods[0].'.php':''), false, true);
+//              print_r(['$url_mods'=>$url_mods,'$addon_tag'=>$addon_tag,'\ounun::$url_addon_pre'=>\ounun::$url_addon_pre,'$class'=>$class]);
+//              exit();
+                $this->init_page('/'.($url_mods[0] && $url_mods[0] != \ounun::def_method ? $url_mods[0].'.php':''), false, true);
                 new $class($url_mods,$this);
             }else{
+//              print_r(['$url_mods'=>$url_mods,'$addon_tag'=>$addon_tag,'$class'=>$class]);
                 parent::__construct($url_mods,$addon_tag);
             }
         }

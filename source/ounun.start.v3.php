@@ -190,7 +190,7 @@ class ounun
                         if($v['path'] == Dir_Vendor . 'cms.cc/'){
                             $is_dir_vendor = true;
                         }
-                        static::add_paths_app_root($v['path'], $v['is_auto_helper'], $v['is_auto_task']);
+                        static::add_paths_app_root($v['path'], $v['is_auto_helper'], $v['is_auto_command']);
                     }
                 }
             }
@@ -691,25 +691,25 @@ class ounun
             '{$root_wap}'   => static::$root_wap,
             '{$root_mip}'   => static::$root_mip,
             '{$root_api}'   => static::$root_api,
+
+            '{$root_res}'       => static::$root_res,
+            '{$root_upload}'    => static::$root_upload,       '/public/upload/'   => static::$root_upload,
+            '{$root_static}'    => static::$root_static,       '/public/static/'   => static::$root_static,
+            '{$root_static_g}'  => static::$root_static_g,     '/public/static_g/' => static::$root_static_g,
             // seo_site
-            '{$site_name}' => static::$seo_site['name'],
-            '{$site_keywords}' => static::$seo_site['keywords'],
+            '{$site_name}'        => static::$seo_site['name'],
+            '{$site_keywords}'    => static::$seo_site['keywords'],
             '{$site_description}' => static::$seo_site['description'],
-            '{$site_slogan}' => static::$seo_site['slogan'],
+            '{$site_slogan}'      => static::$seo_site['slogan'],
             // seo_page
-            '{$seo_title}' => static::$seo_page['title'],
-            '{$seo_keywords}' => static::$seo_page['keywords'],
+            '{$seo_title}'       => static::$seo_page['title'],
+            '{$seo_keywords}'    => static::$seo_page['keywords'],
             '{$seo_description}' => static::$seo_page['description'],
-            '{$seo_h1}' =>  static::$seo_page['h1'],
-            '{$etag}' => static::$seo_page['etag'],
+            '{$seo_h1}'          => static::$seo_page['h1'],
+            '{$seo_etag}'        => static::$seo_page['etag'],
 
-            '{$app}' => static::$app_name,
-            '{$domain}' => static::$app_domain,
-
-            '{$res}'      => static::$root_res,
-            '{$upload}'   => static::$root_upload,       '/public/upload/'   => static::$root_upload,
-            '{$static}'   => static::$root_static,       '/public/static/'   => static::$root_static,
-            '{$static_g}' => static::$root_static_g,     '/public/static_g/' => static::$root_static_g,
+            '{$app_name}'   => static::$app_name,
+            '{$app_domain}' => static::$app_domain,
         ], static::$tpl_replace_str);
     }
 
@@ -844,10 +844,13 @@ class ounun
      * 添加App路径(根目录)
      * @param string $path
      * @param bool $is_auto_helper
-     * @param bool $is_auto_task
+     * @param bool $is_auto_command
      */
-    static public function add_paths_app_root(string $path, bool $is_auto_helper = false, bool $is_auto_task = false)
+    static public function add_paths_app_root(string $path, ?bool $is_auto_helper = false, ?bool $is_auto_command = false)
     {
+        if(empty($path)){
+            return;
+        }
         /** src-0 \         自动加载 */
         ounun::add_paths($path . 'src/', '', false);
         /** src-0 \addons   自动加载  */
@@ -858,14 +861,14 @@ class ounun
             is_file($path . 'app/helper.php') && require $path . 'app/helper.php';
         }
 
-        /** 加载task */
-        if ($is_auto_task) {
-            $task = is_file($path . 'app/task.php') ? include $path . 'app/task.php' : [];
-            if ($task) {
-                if (static::$global['task'] && is_array(static::$global['task'])) {
-                    static::$global['task'] = array_merge(static::$global['task'], $task);
+        /** 加载command */
+        if ($is_auto_command) {
+            $command = is_file($path . 'app/command.php') ? include $path . 'app/command.php' : [];
+            if ($command) {
+                if (static::$global['command'] && is_array(static::$global['command'])) {
+                    static::$global['command'] = array_merge(static::$global['command'], $command);
                 } else {
-                    static::$global['task'] = $task;
+                    static::$global['command'] = $command;
                 }
             }
         }
@@ -1128,35 +1131,34 @@ class ounun
             static::$url_addon_pre  = $route['url'] && $route['url'] != static::def_module ? '/'.$route['url'] : '';
         }
 
+        // api
+        if($app_name == static::App_Name_Api){
+            if($mod[0]){
+                array_shift($mod);
+            }
+            $filename   = Dir_Ounun.'ounun/restful.php';
+            $class_name = "\\ounun\\restful";
+            return [$filename,$class_name,$addon_tag,$mod];
+        }
+
         // paths
         if($class_filename){
-            if($app_name == static::App_Name_Api){
-                if ($mod[1]) {
-                    array_shift($mod);
-                } else {
-                    $mod = [static::def_method];
-                }
-                $filename   = Dir_Ounun.'ounun/restful.php';
-                $class_name = "\\ounun\\restful";
-                return [$filename,$class_name,$addon_tag,$mod];
-            }else{
-                $paths           = static::$maps_paths['addons'];
-                if ($paths && is_array($paths)) {
-                    foreach ($paths as $v) {
-                        $filename = $v['path'] . $class_filename;
-                        // echo "\$filename:{$filename0}\n";
-                        if (is_file($filename)) {
-                            //  echo " --> \$filename000:{$filename}\n";
-                            if ($mod[1]) {
-                                array_shift($mod);
-                            } else {
-                                $mod = [static::def_method];
-                            }
-                            return [$filename,$class_name,$addon_tag,$mod];
+            $paths           = static::$maps_paths['addons'];
+            if ($paths && is_array($paths)) {
+                foreach ($paths as $v) {
+                    $filename = $v['path'] . $class_filename;
+                    // echo "\$filename:{$filename0}\n";
+                    if (is_file($filename)) {
+                        //  echo " --> \$filename000:{$filename}\n";
+                        if ($mod[1]) {
+                            array_shift($mod);
+                        } else {
+                            $mod = [static::def_method];
                         }
+                        return [$filename,$class_name,$addon_tag,$mod];
                     }
-                } // if ($paths
-            }
+                }
+            } // if ($paths
         }
         return ['','','',$mod];
     }
@@ -1204,7 +1206,7 @@ function start(array $mod, string $host)
     // 设定 模块与方法(缓存)
     /** @var v $classname */
     list($filename,$classname,$addon_tag,$mod) = ounun::routes_get($mod);
-    // echo "\$filename:".__LINE__." -->\$filename:{$filename} \$classname:{$classname} \$mod:".json_encode_unescaped($mod)."\n";
+    // echo "\$filename:".__LINE__." -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:".json_encode_unescaped($mod)."\n";
     // 设定 模块与方法
     if(empty($filename)){
         if (is_array($mod) && $mod[0]) {
@@ -1270,6 +1272,7 @@ function start(array $mod, string $host)
         }
         // echo "\$filename:".__LINE__." -->:{$filename}\n";
     }
+
     // 包括模块文件
     if ($filename) {
         require $filename;
@@ -1298,12 +1301,12 @@ function start_web()
  * Cmd
  * @param $argv
  */
-function start_task($argv)
+function start_command($argv)
 {
     // load_config 0 Dir
     ounun::load_config(Dir_App);
     // console
-    $c = new \apps\crontab\console();
+    $c = new \apps\crontab\console(ounun::$global['command']??[]);
     $c->run($argv);
 }
 
