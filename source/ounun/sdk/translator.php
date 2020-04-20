@@ -8,7 +8,7 @@ use ounun\utils\caiji;
 
 class translator
 {
-    public static $all_langs=[
+    public static $langs=[
         'zh'=>'中文',
         'en'=>'英语',
         'fra'=>'法语',
@@ -261,14 +261,14 @@ class translator
         return $return;
     }
 
-    public static function api_langs_get($api){
-        $allowLangs=self::$allow_langs[$api];
+    public static function api_langs_get($api_type){
+        $allowLangs=self::$allow_langs[$api_type];
         if(!empty($allowLangs)&&is_array($allowLangs)){
             foreach($allowLangs as $k=>$v){
-                if(empty(self::$all_langs[$k])){
+                if(empty(self::$langs[$k])){
                     unset($allowLangs[$k]);
                 }else{
-                    $allowLangs[$k]=self::$all_langs[$k];
+                    $allowLangs[$k]=self::$langs[$k];
                 }
             }
         }
