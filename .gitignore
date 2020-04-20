@@ -5,6 +5,11 @@ app.*/data/session/*
 app.*/environment.txt
 app.*/app/config2.php
 
+source/vendor/ounun
+source/vendor/cms.cc
+source/vendor/ounun_example
+source/vendor/*
+
 example/data/cache/*
 example/data/html/*
 example/data/logs/*
