@@ -157,7 +157,7 @@ class reverse
             }
         }
         if(empty($this->_server_url_root)){
-            return error('404-empty-server_url_root',404,404);
+            return error('404-empty-server_url_root:'.$this->server_url(),404,404);
         }
         $server_url = $this->server_url();
         $this->content = http::file_get_contents_loop($server_url,'',1);
