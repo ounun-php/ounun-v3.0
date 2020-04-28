@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\apps;
 
 
@@ -29,7 +30,7 @@ abstract class logic
     /** @var \ounun\db\pdo */
     public $db;
 
-    /** @var string  */
+    /** @var string */
     public $table = '';
     /** @var array 数据表结构 */
     public $table_options = [

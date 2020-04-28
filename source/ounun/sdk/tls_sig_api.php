@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\sdk;
 
 if (!extension_loaded('openssl')) {
@@ -68,7 +69,7 @@ class tls_sig_api
      */
     private function base64Encode($string)
     {
-        static $replace = Array('+' => '*', '/' => '-', '=' => '_');
+        static $replace = array('+' => '*', '/' => '-', '=' => '_');
         $base64 = base64_encode($string);
         if ($base64 === false) {
             throw new Exception('base64_encode error');
@@ -85,7 +86,7 @@ class tls_sig_api
      */
     private function base64Decode($base64)
     {
-        static $replace = Array('+' => '*', '/' => '-', '=' => '_');
+        static $replace = array('+' => '*', '/' => '-', '=' => '_');
         $string = str_replace(array_values($replace), array_keys($replace), $base64);
         $result = base64_decode($string);
         if ($result == false) {
@@ -102,7 +103,7 @@ class tls_sig_api
      */
     private function genSignContent(array $json)
     {
-        static $members = Array(
+        static $members = array(
             'TLS.appid_at_3rd',
             'TLS.account_type',
             'TLS.identifier',
@@ -160,18 +161,18 @@ class tls_sig_api
      */
     public function genSig($identifier, $expire = 180 * 24 * 3600)
     {
-        $json = Array(
+        $json            = array(
             'TLS.account_type' => '0',
-            'TLS.identifier' => (string)$identifier,
+            'TLS.identifier'   => (string)$identifier,
             'TLS.appid_at_3rd' => '0',
-            'TLS.sdk_appid' => (string)$this->appid,
+            'TLS.sdk_appid'    => (string)$this->appid,
             'TLS.expire_after' => (string)$expire,
-            'TLS.version' => '201512300000',
-            'TLS.time' => (string)time()
+            'TLS.version'      => '201512300000',
+            'TLS.time'         => (string)time()
         );
-        $err = '';
-        $content = $this->genSignContent($json, $err);
-        $signature = $this->sign($content, $err);
+        $err             = '';
+        $content         = $this->genSignContent($json, $err);
+        $signature       = $this->sign($content, $err);
         $json['TLS.sig'] = base64_encode($signature);
         if ($json['TLS.sig'] === false) {
             throw new Exception('base64_encode error');
@@ -200,8 +201,8 @@ class tls_sig_api
     public function verifySig(string $sig, string $identifier, int &$init_time, int &$expire_time, string &$error_msg)
     {
         try {
-            $error_msg = '';
-            $decoded_sig = $this->base64Decode($sig);
+            $error_msg        = '';
+            $decoded_sig      = $this->base64Decode($sig);
             $uncompressed_sig = gzuncompress($decoded_sig);
             if ($uncompressed_sig === false) {
                 throw new Exception('gzuncompress error');
@@ -217,7 +218,7 @@ class tls_sig_api
             if ($json['TLS.sdk_appid'] != $this->appid) {
                 throw new Exception("appid error sigappid:{$json['TLS.appid']} thisappid:{$this->appid}");
             }
-            $content = $this->genSignContent($json);
+            $content   = $this->genSignContent($json);
             $signature = base64_decode($json['TLS.sig']);
             if ($signature == false) {
                 throw new Exception('sig json_decode error');
@@ -226,7 +227,7 @@ class tls_sig_api
             if (!$succ) {
                 throw new Exception('verify failed');
             }
-            $init_time = $json['TLS.time'];
+            $init_time   = $json['TLS.time'];
             $expire_time = $json['TLS.expire_after'];
             return true;
         } catch (Exception $ex) {

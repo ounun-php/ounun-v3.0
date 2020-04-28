@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\console;
 
 use ounun\console;
@@ -49,7 +50,7 @@ abstract class task_driver
      */
     public function help(array $argv)
     {
-        console::echo("命令:", console::Color_Purple, '',0,0,'');
+        console::echo("命令:", console::Color_Purple, '', 0, 0, '');
         console::echo("({$this->description})");
         console::echo('./ounun ' . $this->name . ' [参数...]', console::Color_Blue);
         console::echo($this->help, console::Color_Purple);

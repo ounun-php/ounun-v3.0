@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\apps\logic;
 
 
@@ -21,7 +22,7 @@ class oauth extends user
     public function key_set($key_private, $domain)
     {
         $this->_key_private = $key_private;
-        $this->_domain = $domain;
+        $this->_domain      = $domain;
     }
 
     /**
@@ -33,8 +34,8 @@ class oauth extends user
         if ($_COOKIE['_']) {
             list($yg, , $openid_en, $time_en, $type, $hex) = explode('.', $_COOKIE['_']);
             if ($yg == 'yg' && $openid_en && $time_en && $hex) {
-                $openid = \short_url_decode($openid_en);
-                $time = \short_url_decode($time_en);
+                $openid   = \short_url_decode($openid_en);
+                $time     = \short_url_decode($time_en);
                 $now_time = time();
                 if ($time > $now_time) {
                     return -1; // 登录时间 比现在还晚
@@ -42,7 +43,7 @@ class oauth extends user
                 if ($type && $time + $type * 3600 < $now_time) {
                     return -2; // 登录超时
                 }
-                $str = $openid . $time . $type . $this->_key_private;
+                $str     = $openid . $time . $type . $this->_key_private;
                 $hex_old = substr(md5($str), 12, 6) . substr(sha1($str), 16, 10);
                 if ($hex == $hex_old) {
                     return $openid;
@@ -64,13 +65,13 @@ class oauth extends user
     {
         $cstr = '';
         if ($openid) {
-            $time = time();
-            $str = $openid . $time . $type . $this->_key_private;
+            $time      = time();
+            $str       = $openid . $time . $type . $this->_key_private;
             $openid_en = \short_url_encode($openid);
-            $time_en = \short_url_encode($time);
-            $ot = $this->_oauth_types($oauth_type);
-            $ot = implode('-', $ot);
-            $cstr = "{$pre}.{$ot}.{$openid_en}.{$time_en}.{$type}." . substr(md5($str), 12, 6) . substr(sha1($str), 16, 10);
+            $time_en   = \short_url_encode($time);
+            $ot        = $this->_oauth_types($oauth_type);
+            $ot        = implode('-', $ot);
+            $cstr      = "{$pre}.{$ot}.{$openid_en}.{$time_en}.{$type}." . substr(md5($str), 12, 6) . substr(sha1($str), 16, 10);
             setcookie('_', $cstr, $time * 2, '/', $this->_domain);
         }
         return $cstr;
@@ -85,13 +86,13 @@ class oauth extends user
     }
 
     /**
-     * @param  int $oauth_type
-     * @param  string $_
+     * @param int $oauth_type
+     * @param string $_
      * @return array
      */
     private function _oauth_types($oauth_type = 0, $_ = '')
     {
-        $_ = $_ ? $_ : $_COOKIE['_'];
+        $_  = $_ ? $_ : $_COOKIE['_'];
         $rs = [];
         if ($_) {
             $ts = explode('.', $_COOKIE['_'])[1];
@@ -99,7 +100,7 @@ class oauth extends user
                 $ts = explode('-', $ts);
                 if ($ts) {
                     foreach ($ts as $v) {
-                        $v = (int)$v;
+                        $v      = (int)$v;
                         $rs[$v] = $v;
                     }
                 }

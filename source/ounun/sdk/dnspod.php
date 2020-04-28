@@ -7,6 +7,7 @@
  * Released under the Apache License, Version 2.0
  *
  */
+
 namespace ounun\sdk;
 
 class dnspod
@@ -18,23 +19,23 @@ class dnspod
     private $_format = 'json';
 
     public $grade_list = [
-        'D_Free' => '免费套餐',
-        'D_Plus' => '豪华 VIP套餐',
-        'D_Extra' => '企业I VIP套餐',
-        'D_Expert' => '企业II VIP套餐',
-        'D_Ultra' => '企业III VIP套餐',
-        'DP_Free' => '新免费套餐',
-        'DP_Plus' => '个人专业版',
-        'DP_Extra' => '企业创业版',
+        'D_Free'    => '免费套餐',
+        'D_Plus'    => '豪华 VIP套餐',
+        'D_Extra'   => '企业I VIP套餐',
+        'D_Expert'  => '企业II VIP套餐',
+        'D_Ultra'   => '企业III VIP套餐',
+        'DP_Free'   => '新免费套餐',
+        'DP_Plus'   => '个人专业版',
+        'DP_Extra'  => '企业创业版',
         'DP_Expert' => '企业标准版',
-        'DP_Ultra' => '企业旗舰版',
+        'DP_Ultra'  => '企业旗舰版',
     ];
 
     public $status_list = [
         'enable' => '启用',
-        'pause' => '暂停',
-        'spam' => '封禁',
-        'lock' => '锁定',
+        'pause'  => '暂停',
+        'spam'   => '封禁',
+        'lock'   => '锁定',
     ];
 
     /**
@@ -47,11 +48,11 @@ class dnspod
      */
     public function __construct($token, $token_id, $format = 'json', $lang = 'cn', $error_on_empty = 'no')
     {
-        $this->_token = $token;
-        $this->_id = $token_id;
-        $this->_lang = $lang;
+        $this->_token          = $token;
+        $this->_id             = $token_id;
+        $this->_lang           = $lang;
         $this->_error_on_empty = $error_on_empty;
-        $this->_format = $format;
+        $this->_format         = $format;
     }
 
     /**
@@ -61,7 +62,7 @@ class dnspod
     public function record($domain_id)
     {
         $response = $this->_api('Record.List', array('domain_id' => $domain_id));
-        $records = [];
+        $records  = [];
         foreach ($response['records'] as $id => $rv) {
             if ($rv['value'] != 'f1g1ns1.dnspod.net.' && $rv['value'] != 'f1g1ns2.dnspod.net.') {
                 $records[$id] = $rv;
@@ -81,13 +82,13 @@ class dnspod
     public function record_create($domain_id, $value, $sub_domain = '@', $type = 'CNAME', $ttl = 600, $mx = 10, $line = '默认')
     {
         $data = [
-            'domain_id' => $domain_id,
-            'sub_domain' => $sub_domain ? $sub_domain : '@',
+            'domain_id'   => $domain_id,
+            'sub_domain'  => $sub_domain ? $sub_domain : '@',
             'record_type' => $type,
             'record_line' => $line,
-            'value' => $value,
-            'mx' => $mx,
-            'ttl' => $ttl,
+            'value'       => $value,
+            'mx'          => $mx,
+            'ttl'         => $ttl,
         ];
         return $this->_api('Record.Create', $data);
     }
@@ -130,20 +131,20 @@ class dnspod
         }
 
         $data_ext = [
-            'login_token' => "{$this->_id},{$this->_token}",
-            'format' => $this->_format,
-            'lang' => $this->_lang,
+            'login_token'    => "{$this->_id},{$this->_token}",
+            'format'         => $this->_format,
+            'lang'           => $this->_lang,
             'error_on_empty' => $this->_error_on_empty,
         ];
-        $api = 'https://dnsapi.cn/' . $api;
-        $data = array_merge($data, $data_ext);
+        $api      = 'https://dnsapi.cn/' . $api;
+        $data     = array_merge($data, $data_ext);
 
         $result = $this->_post($api, $data);
         if (!$result) {
             return $this->_message(false, '内部错误：调用失败');
         }
 
-        $result = explode("\r\n\r\n", $result);
+        $result  = explode("\r\n\r\n", $result);
         $results = json_decode($result[1], true);
         if (!is_array($results)) {
             return $this->_message(false, '内部错误：返回异常');

@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 
@@ -15,20 +16,20 @@ class template
     /** @var string Api接口Rest */
     const Type_Api_Rest = '';
     /** @var string Pc网页www */
-    const Type_Pc       = 'pc';
+    const Type_Pc = 'pc';
     /** @var string H5网页wap */
-    const Type_Wap      = 'wap';
+    const Type_Wap = 'wap';
     /** @var string Mip网页 */
-    const Type_Mip      = 'mip';
+    const Type_Mip = 'mip';
     /** @var string control后台 */
-    const Type_Control  = 'control';
+    const Type_Control = 'control';
     /** @var array 模板类型 */
     const Types = [
-        self::Type_Api_Rest ,
-        self::Type_Pc  ,
-        self::Type_Wap ,
-        self::Type_Mip ,
-        self::Type_Control ,
+        self::Type_Api_Rest,
+        self::Type_Pc,
+        self::Type_Wap,
+        self::Type_Mip,
+        self::Type_Control,
     ];
 
     /** @var bool 是否开启ob_start */
@@ -57,28 +58,28 @@ class template
      * 创建对像 template constructor.
      * @param string $tpl_style 风格
      * @param string $tpl_style_default 风格(默认)
-     * @param string $tpl_type  类型
+     * @param string $tpl_type 类型
      * @param string $tpl_type_default 模板文件所以目录(默认)
      * @param bool $is_trim
      */
-    public function __construct(string $tpl_style = '',string $tpl_style_default = '',string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
+    public function __construct(string $tpl_style = '', string $tpl_style_default = '', string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
     {
-        if($tpl_style){
+        if ($tpl_style) {
             $this->_style = $tpl_style;
         }
-        if($tpl_style_default){
+        if ($tpl_style_default) {
             $this->_style_default = $tpl_style_default;
         }
 
-        if($tpl_type){
+        if ($tpl_type) {
             $this->_type = $tpl_type;
         }
-        if($tpl_type_default){
+        if ($tpl_type_default) {
             $this->_type_default = $tpl_type_default;
         }
 
         $this->_dir_current = '';
-        $this->_is_trim = $is_trim;
+        $this->_is_trim     = $is_trim;
 
         $this->replace();
     }
@@ -97,57 +98,57 @@ class template
         // echo "<hr /><br />\n";
 
         // $types
-        if($this->_type_default && $this->_type != $this->_type_default) {
+        if ($this->_type_default && $this->_type != $this->_type_default) {
             $types = [$this->_type, $this->_type_default];
-        }else {
+        } else {
             $types = [$this->_type];
         }
 
-        if($addon_tag){
+        if ($addon_tag) {
             $this->_addon_tag = $addon_tag;
-            $addon_tag2 =  $addon_tag.'/';
-        }else{
+            $addon_tag2       = $addon_tag . '/';
+        } else {
             $addon_tag2 = '';
         }
         foreach (\ounun::$tpl_dirs as $tpl_dir) {
             // print_r($tpl_dir);
-            if('root' == $tpl_dir['type']){
+            if ('root' == $tpl_dir['type']) {
                 // $styles
-                if($this->_style_default && $this->_style != $this->_style_default) {
+                if ($this->_style_default && $this->_style != $this->_style_default) {
                     $styles = [$this->_style, $this->_style_default];
-                }else {
+                } else {
                     $styles = [$this->_style];
                 }
-                foreach ($styles as $style){
+                foreach ($styles as $style) {
                     foreach ($types as $type) {
                         $filename2 = "{$tpl_dir['path']}{$style}/{$type}/{$addon_tag2}{$filename}";
                         // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                         if (is_file($filename2)) {
-                            if($remember_dir_current){
+                            if ($remember_dir_current) {
                                 $this->_dir_current = dirname($filename2) . '/';
                             }
                             return $filename2;
                         }
                     } // end $types
                 } // end $styles
-            }elseif ('app' == $tpl_dir['type']){
+            } elseif ('app' == $tpl_dir['type']) {
                 foreach ($types as $type) {
-                    $filename2 = "{$tpl_dir['path']}".\ounun::$app_name."/template/{$type}/{$addon_tag2}{$filename}";
+                    $filename2 = "{$tpl_dir['path']}" . \ounun::$app_name . "/template/{$type}/{$addon_tag2}{$filename}";
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
-                        if($remember_dir_current){
+                        if ($remember_dir_current) {
                             $this->_dir_current = dirname($filename2) . '/';
                         }
                         return $filename2;
                     }
                 }
-            // }elseif ('app' == $tpl_dir['type']){
-            }else{
+                // }elseif ('app' == $tpl_dir['type']){
+            } else {
                 foreach ($types as $type) {
                     $filename2 = "{$tpl_dir['path']}{$addon_tag2}template/{$type}/{$filename}";
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
-                        if($remember_dir_current){
+                        if ($remember_dir_current) {
                             $this->_dir_current = dirname($filename2) . '/';
                         }
                         return $filename2;
@@ -155,7 +156,7 @@ class template
                 }
             }
         }
-        if($show_debug){
+        if ($show_debug) {
             $this->error($filename, $addon_tag);
         }
         return '';
@@ -179,15 +180,15 @@ class template
         }
 
         // $this->_addon_tag == ''
-        if(empty($addon_tag) && $this->_addon_tag){
+        if (empty($addon_tag) && $this->_addon_tag) {
             $addon_tag = $this->_addon_tag;
-            $filename2 = $this->tpl_fixed($filename,  '',false,false);
-            if($filename2){
-                return  $filename2;
+            $filename2 = $this->tpl_fixed($filename, '', false, false);
+            if ($filename2) {
+                return $filename2;
             }
         }
 
-        return $this->tpl_fixed($filename,  $addon_tag,true,false);
+        return $this->tpl_fixed($filename, $addon_tag, true, false);
     }
 
 
@@ -205,7 +206,7 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>".json_encode_unescaped(\ounun::$tpl_dirs)." <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(\ounun::$tpl_dirs) . " <br />
               </div>";
         trigger_error("Can't find Template:{$filename}", E_USER_ERROR);
     }
@@ -230,12 +231,12 @@ class template
     public function callback(bool $output = true)
     {
         // 执行
-        if($output){
+        if ($output) {
             $buffer = ob_get_contents();
             ob_clean();
             ob_implicit_flush(1);
 
-            exit(static::trim($buffer,$this->_is_trim));
+            exit(static::trim($buffer, $this->_is_trim));
         }
     }
 
@@ -244,7 +245,7 @@ class template
      * @param bool $is_trim
      * @return string
      */
-    static public function trim(string $buffer,bool $is_trim)
+    static public function trim(string $buffer, bool $is_trim)
     {
         // 写文件
         if ($is_trim) {
@@ -260,9 +261,9 @@ class template
                 return "<style{$matches[1]}>{$matches_2}</style>";
             }, $buffer);
 
-            $pattern = ['/\s{2,}/', '/>\s?</', '/\"\s?' . '>/'];
+            $pattern     = ['/\s{2,}/', '/>\s?</', '/\"\s?' . '>/'];
             $replacement = [' ', '><', '">'];
-            $buffer = preg_replace($pattern, $replacement, $buffer);
+            $buffer      = preg_replace($pattern, $replacement, $buffer);
         }
 
         // 替换
@@ -274,7 +275,7 @@ class template
      */
     static public function ob_start()
     {
-        if(empty(static::$_ob_start)){
+        if (empty(static::$_ob_start)) {
             ob_start();
             static::$_ob_start = true;
         }

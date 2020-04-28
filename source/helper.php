@@ -23,7 +23,7 @@ defined('Dir_Cache') || define('Dir_Cache', Dir_Data . 'cache/');
 defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
 defined('Environment') || define('Environment', environment());
-if(Environment){
+if (Environment) {
     /** 开始时间戳 **/
     define('Ounun_Start_Time', microtime(true));
     /** 开始内存量 **/
@@ -89,7 +89,7 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
                 }
             }
         }
-        $rs = [];
+        $rs     = [];
         $rs_str = '';
         foreach ($data_query as $key => $value) {
             if ('{page}' === $value) {
@@ -113,7 +113,7 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         if ($url && $len > 0) {
             if (strpos($url, '?') === false) {
                 return $url . '?' . implode('&', $rs);
-            }elseif ('?' === $url[$len-1]){
+            } elseif ('?' === $url[$len - 1]) {
                 return $url . implode('&', $rs);
             }
             return $url . '&' . implode('&', $rs);
@@ -163,7 +163,7 @@ function url_to_mod(string $uri): array
 function url_check(string $url_original = "", bool $ext_req = true, string $domain = '')
 {
     // URL去重
-    $url = explode('?', $_SERVER['REQUEST_URI'], 2);
+    $url       = explode('?', $_SERVER['REQUEST_URI'], 2);
     $url_reset = '';
     if (false == $ext_req && $url[1]) {
         $url_reset = $url_original;
@@ -197,16 +197,16 @@ function url_check(string $url_original = "", bool $ext_req = true, string $doma
  */
 function go_note(string $url1, string $url2, string $note, bool $top = false): void
 {
-    $top = "\t" . ($top ? 'window.top.' : '');
+    $top  = "\t" . ($top ? 'window.top.' : '');
     $note = $note ? $note : '点击“确定”继续操作  点击“取消” 中止操作';
     echo '<script type="text/javascript">' . "\n";
     if ($url2) {
         $url1 = $top . "location.href='{$url1}';\n";
         $url2 = $top . "location.href='{$url2}';\n";
-        echo 'if(window.confirm(' . json_encode($note,JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '}else{' . "\n" . $url2 . '}' . "\n";
+        echo 'if(window.confirm(' . json_encode($note, JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '}else{' . "\n" . $url2 . '}' . "\n";
     } else {
         $url1 = $top . "location.href='{$url1}';\n";
-        echo 'if(window.confirm(' . json_encode($note,JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '};' . "\n";
+        echo 'if(window.confirm(' . json_encode($note, JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '};' . "\n";
     }
     echo '</script>' . "\n";
     exit();
@@ -267,7 +267,7 @@ function go_msg(string $msg, string $url = ''): void
  */
 function msg(string $msg, bool $outer = true, $meta = true): string
 {
-    $rs = "\n" . 'alert(' . json_encode($msg,JSON_UNESCAPED_UNICODE) . ');' . "\n";
+    $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     if ($outer) {
         if ($meta) {
             $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
@@ -286,7 +286,7 @@ function msg(string $msg, bool $outer = true, $meta = true): string
  */
 function msg_close(string $msg, bool $close = false): void
 {
-    $rs = "\n" . 'alert(' . json_encode($msg,JSON_UNESCAPED_UNICODE) . ');' . "\n";
+    $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
     $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
     echo $rs;
@@ -486,7 +486,7 @@ function extend_decode_json(string $extend_string)
 {
     $extend = [];
     if ($extend_string) {
-        $extend = json_decode($extend_string,true);
+        $extend = json_decode($extend_string, true);
     }
     return $extend;
 }
@@ -523,9 +523,9 @@ function short_url_encode(int $id = 0): string
     }
     $show = '';
     while ($id > 0) {
-        $s = $id % 62;
+        $s    = $id % 62;
         $show = ($s > 35 ? chr($s + 61) : ($s > 9 ? chr($s + 55) : $s)) . $show;
-        $id = floor($id / 62);
+        $id   = floor($id / 62);
     }
     return $show;
 }
@@ -539,9 +539,9 @@ function short_url_decode(string $string = ''): int
 {
     $p = 0;
     while ($string !== '') {
-        $s = substr($string, 0, 1);
-        $n = is_numeric($s) ? $s : ord($s);
-        $p = $p * 62 + (($n >= 97) ? ($n - 61) : ($n >= 65 ? $n - 55 : $n));
+        $s      = substr($string, 0, 1);
+        $n      = is_numeric($s) ? $s : ord($s);
+        $p      = $p * 62 + (($n >= 97) ? ($n - 61) : ($n >= 65 ? $n - 55 : $n));
         $string = substr($string, 1);
     }
     return $p;
@@ -595,7 +595,7 @@ function error404(string $msg = ''): void
                 </div>
                 <hr>
                 <div align="center"><a href="' . \ounun::$url_www . '">返回网站首页</a></div>
-                '.($msg?'<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">'.$msg.'</div>':'').'
+                ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
             </body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
@@ -672,13 +672,13 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     /** @var string $env_file 读取环境配制 */
-    $env_file = Dir_Root.'.environment.php';
-    if(is_file($env_file)){
+    $env_file = Dir_Root . '.environment.php';
+    if (is_file($env_file)) {
         $ini = require $env_file;
-        if(empty($ini)){
+        if (empty($ini)) {
             $GLOBALS['_environment_'] = '';
-        }else{
-            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
+        } else {
+            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment']) ? $ini['global']['environment'] : '';
             \ounun::environment_set($ini);
         }
     } else {
@@ -722,11 +722,11 @@ abstract class v
     public function cache_html($key)
     {
         if ('' == Environment && \ounun::$global['cache_html']) {
-            $cfg = \ounun::$global['cache_html'];
-            $cfg['mod'] = 'html_' . \ounun::$app_name .'_'. \ounun::$tpl_style. '_'.\ounun::$tpl_type;
-            $key2  = \ounun::$app_name . '_' . \ounun::$tpl_style .'_'.\ounun::$tpl_type. '_' . $key;
-            $debug = \ounun::$global['debug'];
-            $debug = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
+            $cfg                = \ounun::$global['cache_html'];
+            $cfg['mod']         = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type;
+            $key2               = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
+            $debug              = \ounun::$global['debug'];
+            $debug              = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
             static::$cache_html = new \ounun\cache\buffer\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
             static::$cache_html->run(true);
         }
@@ -754,10 +754,10 @@ abstract class v
      * @param bool $show_debug
      * @return string
      */
-    static public function tpl_fixed(string $filename,string $addon_tag = '',bool $show_debug = true): string
+    static public function tpl_fixed(string $filename, string $addon_tag = '', bool $show_debug = true): string
     {
-        $tpl = static::$tpl->tpl_fixed($filename,$addon_tag,$show_debug);
-        if($tpl){
+        $tpl = static::$tpl->tpl_fixed($filename, $addon_tag, $show_debug);
+        if ($tpl) {
             return $tpl;
         }
         return '';
@@ -770,7 +770,7 @@ abstract class v
      */
     static public function tpl_curr(string $filename, string $addon_tag = ''): string
     {
-        return static::$tpl->tpl_curr($filename,$addon_tag);
+        return static::$tpl->tpl_curr($filename, $addon_tag);
     }
 
     /** @var \ounun\debug 调试 相关 */
@@ -785,9 +785,10 @@ abstract class v
      * @param bool $is_run_time
      * @param bool $is_bof
      */
-    public static function debug_init($filename='404',$is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false){
+    public static function debug_init($filename = '404', $is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false)
+    {
         if (empty(static::$debug)) {
-            static::$debug = new \ounun\debug(\ounun::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,$is_run_time,$is_bof);
+            static::$debug = new \ounun\debug(\ounun::$dir_data . 'logs/' . $filename . '_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url, $is_run_time, $is_bof);
         }
     }
 
@@ -822,7 +823,7 @@ abstract class v
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];
         }
-        $method = $url_mods[0];
+        $method       = $url_mods[0];
         \ounun::$view = $this;
         $this->$method($url_mods);
     }
@@ -839,14 +840,14 @@ abstract class v
     public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun::url_page(\ounun::$url_addon_pre.$page_file);
+        \ounun::url_page(\ounun::$url_addon_pre . $page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html
-        if('' == Environment ){
-            $debug = \ounun::$global['debug'];
+        if ('' == Environment) {
+            $debug                   = \ounun::$global['debug'];
             static::$cache_html_trim = $debug && isset($debug['html_trim']) ? $debug['html_trim'] : $cache_html_trim;
-        }else{
+        } else {
             static::$cache_html_trim = false;
         }
         if ($is_cache_html) {
@@ -856,7 +857,7 @@ abstract class v
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new \ounun\template(\ounun::$tpl_style,\ounun::$tpl_style_default, \ounun::$tpl_type,\ounun::$tpl_type_default, static::$cache_html_trim);
+            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_style_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
         }
 
         // db
@@ -871,9 +872,9 @@ abstract class v
      */
     public function index($mod)
     {
-        error404("<strong>method</strong>  --> ".__METHOD__." <br />\n  
-                        <strong>mod</strong> ------> " . json_encode($mod,JSON_UNESCAPED_UNICODE) . " <br />\n  
-                        <strong>class</strong> ------> ".get_class($this));
+        error404("<strong>method</strong>  --> " . __METHOD__ . " <br />\n  
+                        <strong>mod</strong> ------> " . json_encode($mod, JSON_UNESCAPED_UNICODE) . " <br />\n  
+                        <strong>class</strong> ------> " . get_class($this));
     }
 
     /**
@@ -922,11 +923,11 @@ abstract class v
     public function __call($method, $arguments)
     {
         header('HTTP/1.1 404 Not Found');
-        if(Environment){
+        if (Environment) {
             $this->debug_init('404');
         }
         error404("<strong>method</strong> -->   {$method} <br />\n 
-                        <strong>args</strong> ------> " . json_encode($arguments,JSON_UNESCAPED_UNICODE) . " <br />\n 
-                        <strong>class</strong> -----> ".get_class($this));
+                        <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) . " <br />\n 
+                        <strong>class</strong> -----> " . get_class($this));
     }
 }

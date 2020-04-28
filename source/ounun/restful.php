@@ -3,9 +3,10 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
-class restful  extends \v
+class restful extends \v
 {
     protected $_class;
 
@@ -24,29 +25,29 @@ class restful  extends \v
     public function __construct($mod)
     {
         $rs = $this->_construct_before($mod);
-        if(error_is($rs)){
+        if (error_is($rs)) {
             out($rs);
         }
         //
-        $this->_method = strtoupper($_SERVER['REQUEST_METHOD']);
+        $this->_method       = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
         $this->_request_gets = $_GET;
         $this->_request_post = $_POST;
-        $data = file_get_contents('php://input');
-        if($data){
+        $data                = file_get_contents('php://input');
+        if ($data) {
             $this->_request_inputs = json_decode_array($data);
         }
-        if($this->_class){
+        if ($this->_class) {
             if (!$mod) {
                 $mod = [\ounun::def_method];
             }
             $class = "{$this->_class}\\{$mod[0]}";
-            if(class_exists($class)){
+            if (class_exists($class)) {
                 \ounun::$view = $this;
                 static::$tpl  = true;  // 不去初始化template
-                $this->init_page(\ounun::$url_addon_pre.'/'.($mod[0] && $mod[0] != \ounun::def_method ? $mod[0].'.php':''), false, true);
-                new $class($mod,$this);
-            }else{
+                $this->init_page(\ounun::$url_addon_pre . '/' . ($mod[0] && $mod[0] != \ounun::def_method ? $mod[0] . '.php' : ''), false, true);
+                new $class($mod, $this);
+            } else {
                 parent::__construct($mod);
             }
         }
@@ -65,11 +66,11 @@ class restful  extends \v
      * @param string $methods
      * @param string $domain
      */
-    static public  function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*')
+    static public function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*')
     {
         header('Access-Control-Allow-Credentials: true');
-        header('Access-Control-Allow-Origin: '.$domain);
-        header('Access-Control-Allow-Methods: '.$methods);
+        header('Access-Control-Allow-Origin: ' . $domain);
+        header('Access-Control-Allow-Methods: ' . $methods);
         header('Access-Control-Allow-Headers: authentication,origin,x-requested-with,content-type,accept,token,appid,unitid');
     }
 
@@ -123,34 +124,38 @@ class restful  extends \v
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported'
         ];
-        $status_message = $Http_Status_Message[$status_code]??$Http_Status_Message[200];
+        $status_message      = $Http_Status_Message[$status_code] ?? $Http_Status_Message[200];
 
-        header($http_version. ' ' . $status_code  . ' ' . $status_message);
-        header('Content-Type: '. $content_type. '; charset=utf-8');
+        header($http_version . ' ' . $status_code . ' ' . $status_message);
+        header('Content-Type: ' . $content_type . '; charset=utf-8');
     }
 
-    public function gets_get($key = ''){
-        if($key){
+    public function gets_get($key = '')
+    {
+        if ($key) {
             return $this->_request_gets[$key];
         }
         return $this->_request_gets;
     }
 
-    public function post_get($key = ''){
-        if($key){
+    public function post_get($key = '')
+    {
+        if ($key) {
             return $this->_request_post[$key];
         }
         return $this->_request_post;
     }
 
-    public function input_get($key = ''){
-        if($key){
+    public function input_get($key = '')
+    {
+        if ($key) {
             return $this->_request_inputs[$key];
         }
         return $this->_request_inputs;
     }
 
-    public function method_get(){
+    public function method_get()
+    {
         return $this->_method;
     }
 
@@ -159,16 +164,17 @@ class restful  extends \v
      * @param int $status_code
      * @param string $request_content_type
      */
-    public function out($raw_data, int $status_code = 200, string $request_content_type='') {
+    public function out($raw_data, int $status_code = 200, string $request_content_type = '')
+    {
 
-        $request_content_type = $request_content_type??$this->_http_accept;
+        $request_content_type = $request_content_type ?? $this->_http_accept;
         static::headers_set($request_content_type, $status_code, $this->_http_version);
 
-        if(strpos($request_content_type,'application/json') !== false){
+        if (strpos($request_content_type, 'application/json') !== false) {
             $response = $this->encode_json($raw_data);
-        } else if(strpos($request_content_type,'text/html') !== false){
+        } else if (strpos($request_content_type, 'text/html') !== false) {
             $response = $this->encode_html($raw_data);
-        } else if(strpos($request_content_type,'application/xml') !== false){
+        } else if (strpos($request_content_type, 'application/xml') !== false) {
             $response = $this->encode_xml($raw_data);
         } else {
             $response = $this->encode_json($raw_data);
@@ -181,11 +187,12 @@ class restful  extends \v
      * @param $response_data
      * @return string
      */
-    public function encode_html($response_data) {
-        if(is_array($response_data)){
+    public function encode_html($response_data)
+    {
+        if (is_array($response_data)) {
             $html_response = '<table style="border: darkcyan solid 1px;">';
-            foreach($response_data as $key=> $value) {
-                $html_response .= "<tr><td>". $key. "</td><td>". $value. "</td></tr>";
+            foreach ($response_data as $key => $value) {
+                $html_response .= "<tr><td>" . $key . "</td><td>" . $value . "</td></tr>";
             }
             $html_response .= "</table>";
             return $html_response;
@@ -197,7 +204,8 @@ class restful  extends \v
      * @param $response_data
      * @return false|string
      */
-    public function encode_json($response_data) {
+    public function encode_json($response_data)
+    {
         $jsonResponse = json_encode($response_data);
         return $jsonResponse;
     }
@@ -206,10 +214,11 @@ class restful  extends \v
      * @param $response_data
      * @return mixed
      */
-    public function encode_xml($response_data) {
+    public function encode_xml($response_data)
+    {
         // 创建 SimpleXMLElement 对象
         $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
-        foreach($response_data as $key=> $value) {
+        foreach ($response_data as $key => $value) {
             $xml->addChild($key, $value);
         }
         return $xml->asXML();

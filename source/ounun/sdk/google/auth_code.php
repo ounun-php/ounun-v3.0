@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\sdk\google;
 /**
  * PHP Class for handling Google Authenticator 2-factor authentication
@@ -132,18 +133,18 @@ class auth_code
     {
         if (empty($secret)) return '';
 
-        $base32chars = $this->_base32_lookup_table_get();
+        $base32chars        = $this->_base32_lookup_table_get();
         $base32charsFlipped = array_flip($base32chars);
 
         $paddingCharCount = substr_count($secret, $base32chars[32]);
-        $allowedValues = array(6, 4, 3, 1, 0);
+        $allowedValues    = array(6, 4, 3, 1, 0);
         if (!in_array($paddingCharCount, $allowedValues)) return false;
         for ($i = 0; $i < 4; $i++) {
             if ($paddingCharCount == $allowedValues[$i] &&
                 substr($secret, -($allowedValues[$i])) != str_repeat($base32chars[32], $allowedValues[$i])) return false;
         }
-        $secret = str_replace('=', '', $secret);
-        $secret = str_split($secret);
+        $secret       = str_replace('=', '', $secret);
+        $secret       = str_split($secret);
         $binaryString = "";
         for ($i = 0; $i < count($secret); $i = $i + 8) {
             $x = "";
@@ -172,14 +173,14 @@ class auth_code
 
         $base32chars = $this->_base32_lookup_table_get();
 
-        $secret = str_split($secret);
+        $secret       = str_split($secret);
         $binaryString = "";
         for ($i = 0; $i < count($secret); $i++) {
             $binaryString .= str_pad(base_convert(ord($secret[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
         }
         $fiveBitBinaryArray = str_split($binaryString, 5);
-        $base32 = "";
-        $i = 0;
+        $base32             = "";
+        $i                  = 0;
         while ($i < count($fiveBitBinaryArray)) {
             $base32 .= $base32chars[base_convert(str_pad($fiveBitBinaryArray[$i], 5, '0'), 2, 10)];
             $i++;

@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\cache\driver;
 
 
@@ -41,13 +42,13 @@ class memcached extends \ounun\cache\driver
      */
     public function __construct($mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $auth = false)
     {
-        $this->_mod = $mod;
+        $this->_mod        = $mod;
         $this->_mem_config = [];
-        $this->_mem = null;
+        $this->_mem        = null;
 
-        $this->_expire = $expire;
-        $this->_auth = $auth;
-        $this->_large_scale = $large_scale;
+        $this->_expire        = $expire;
+        $this->_auth          = $auth;
+        $this->_large_scale   = $large_scale;
         $this->_format_string = $format_string;
     }
 
@@ -58,7 +59,7 @@ class memcached extends \ounun\cache\driver
      */
     public function add_server($host, $port, $weight)
     {
-        $port = (int)$port;
+        $port   = (int)$port;
         $weight = (int)$weight;
         // config
         $this->_mem_config[] = array('host' => $host, 'port' => $port, 'weight' => $weight);
@@ -92,10 +93,10 @@ class memcached extends \ounun\cache\driver
             $key = md5($key);
         }
         if ($this->_format_string) {
-            $this->_data = '';
+            $this->_data    = '';
             $this->_is_read = false;
         } else {
-            $this->_data = null;
+            $this->_data    = null;
             $this->_is_read = false;
         }
         $this->_key = "{$this->_mod}.{$key}";
@@ -108,7 +109,7 @@ class memcached extends \ounun\cache\driver
     public function val($val)
     {
         $this->_is_read = true;
-        $this->_data = $val;
+        $this->_data    = $val;
     }
 
     /**
@@ -123,7 +124,7 @@ class memcached extends \ounun\cache\driver
         }
         // read
         $this->_is_read = true;
-        $this->_data = $this->_mem->get($this->_key);
+        $this->_data    = $this->_mem->get($this->_key);
         return $this->_data;
     }
 
@@ -183,10 +184,10 @@ class memcached extends \ounun\cache\driver
     public function delete()
     {
         if ($this->_format_string) {
-            $this->_data = '';
+            $this->_data    = '';
             $this->_is_read = true;
         } else {
-            $this->_data = null;
+            $this->_data    = null;
             $this->_is_read = true;
         }
         return $this->_mem->delete($this->_key);

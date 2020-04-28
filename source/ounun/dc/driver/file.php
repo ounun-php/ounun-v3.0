@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\dc\driver;
 
 /**
@@ -54,8 +55,8 @@ class file extends \ounun\dc\driver
     /**
      * 取得变量的存储文件名
      * @access protected
-     * @param  string $name 缓存变量名
-     * @param  bool   $auto 是否自动创建目录
+     * @param string $name 缓存变量名
+     * @param bool $auto 是否自动创建目录
      * @return string
      */
     protected function cache_key_get($name, $auto = false)
@@ -92,7 +93,7 @@ class file extends \ounun\dc\driver
      * 读取缓存
      * @access public
      * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
+     * @param mixed $default 默认值
      * @return mixed
      */
     public function get($name, $default = false)
@@ -104,7 +105,7 @@ class file extends \ounun\dc\driver
         $content      = file_get_contents($filename);
         $this->expire = null;
         if (false !== $content) {
-            $expire = (int) substr($content, 8, 12);
+            $expire = (int)substr($content, 8, 12);
             if (0 != $expire && time() > filemtime($filename) + $expire) {
                 return $default;
             }
@@ -124,9 +125,9 @@ class file extends \ounun\dc\driver
     /**
      * 写入缓存
      * @access public
-     * @param string            $name 缓存变量名
-     * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire  有效时间（秒）
+     * @param string $name 缓存变量名
+     * @param mixed $value 存储数据
+     * @param integer|\DateTime $expire 有效时间（秒）
      * @return boolean
      */
     public function set($name, $value, $expire = null)
@@ -160,8 +161,8 @@ class file extends \ounun\dc\driver
     /**
      * 自增缓存（针对数值缓存）
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name 缓存变量名
+     * @param int $step 步长
      * @return false|int
      */
     public function inc($name, $step = 1)
@@ -180,8 +181,8 @@ class file extends \ounun\dc\driver
     /**
      * 自减缓存（针对数值缓存）
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name 缓存变量名
+     * @param int $step 步长
      * @return false|int
      */
     public function dec($name, $step = 1)
@@ -226,7 +227,7 @@ class file extends \ounun\dc\driver
             $this->rm('tag_' . md5($tag));
             return true;
         }
-        $files = (array) glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . '/' : '') . '*');
+        $files = (array)glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . '/' : '') . '*');
         foreach ($files as $path) {
             if (is_dir($path)) {
                 $matches = glob($path . '/*.php');
@@ -250,21 +251,21 @@ class file extends \ounun\dc\driver
     private function deldir($path)
     {
         //如果是目录则继续
-        if(is_dir($path)){
+        if (is_dir($path)) {
             //扫描一个文件夹内的所有文件夹和文件并返回数组
             $p = scandir($path);
-            foreach($p as $val){
+            foreach ($p as $val) {
                 //排除目录中的.和..
-                if($val !="." && $val !=".."){
+                if ($val != "." && $val != "..") {
                     //如果是目录则递归子目录，继续操作
-                    if(is_dir($path.$val)){
+                    if (is_dir($path . $val)) {
                         //子目录中操作删除文件夹和文件
-                        $this->deldir($path.$val.'/');
+                        $this->deldir($path . $val . '/');
                         //目录清空后删除空文件夹
-                        @rmdir($path.$val.'/');
-                    }else{
+                        @rmdir($path . $val . '/');
+                    } else {
                         //如果是文件直接删除
-                        unlink($path.'/'.$val);
+                        unlink($path . '/' . $val);
                     }
                 }
             }

@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 /**
@@ -89,11 +90,11 @@ class agent
     public static function device_info_get()
     {
         return [
-            'deviceType' => self::deviceType(),
+            'deviceType'  => self::deviceType(),
             'browserType' => self::browser_type(),
-            'isRetina' => self::isRetina(),
-            'osType' => self::osType(),
-            'isIos6' => self::is_ios6(),
+            'isRetina'    => self::isRetina(),
+            'osType'      => self::osType(),
+            'isIos6'      => self::is_ios6(),
         ];
     }
 
@@ -127,7 +128,7 @@ class agent
     // 系统类型
     public static function osType($agent = '')
     {
-        $agent = self::getAgent($agent);
+        $agent       = self::getAgent($agent);
         $browserType = self::browser_type($agent);
 
         switch ($browserType) {
@@ -159,7 +160,7 @@ class agent
     // retina屏
     public static function isRetina($agent = '')
     {
-        $agent = self::getAgent($agent);
+        $agent  = self::getAgent($agent);
         $osType = self::osType($agent);
 
         if (($osType == self::Os_Type_Ios) && (self::is_ios6($agent) != 1)) {

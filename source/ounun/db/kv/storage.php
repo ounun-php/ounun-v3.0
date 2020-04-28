@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\db\kv;
 
 abstract class storage
@@ -22,13 +23,14 @@ abstract class storage
     }
 
 
-    protected $id, $handler;
+    protected $id;
+    protected $handler;
 
     public static function &get_instance($storage = 'dba', $handler = 'flatfile')
     {
-        $class = 'dbkv_storage_'.$storage;
+        $class = 'dbkv_storage_' . $storage;
         if (!class_exists($class)) {
-            require(dirname(__FILE__).'/'.'storage'.'/'.$storage.'.php');
+            require(dirname(__FILE__) . '/' . 'storage' . '/' . $storage . '.php');
         }
         return new $class($handler);
     }

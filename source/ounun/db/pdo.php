@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\db;
 
 class pdo
@@ -143,9 +144,9 @@ class pdo
      */
     public function __construct(array $config = [])
     {
-        $host = explode(':', $config['host']);
-        $this->_post = (int)$host[1];
-        $this->_host = $host[0];
+        $host            = explode(':', $config['host']);
+        $this->_post     = (int)$host[1];
+        $this->_host     = $host[0];
         $this->_database = $config['database'];
         $this->_username = $config['username'];
         $this->_password = $config['password'];
@@ -226,7 +227,7 @@ class pdo
             $this->_last_sql = $sql;
         }
         $this->_bind_keys = $this->_keys_parse($this->_last_sql);
-        $this->_stmt = $this->_pdo->prepare($this->_last_sql);
+        $this->_stmt      = $this->_pdo->prepare($this->_last_sql);
         $this->_query_times++;
         return $this;
     }
@@ -239,7 +240,7 @@ class pdo
     public function active(): self
     {
         if (null == $this->_pdo) {
-            $dsn = "{$this->_driver}:host={$this->_host};port={$this->_post};dbname={$this->_database};charset={$this->_charset}";
+            $dsn     = "{$this->_driver}:host={$this->_host};port={$this->_post};dbname={$this->_database};charset={$this->_charset}";
             $options = [];
             if (self::Driver_Mysql == $this->_driver) {
                 $options = [
@@ -260,12 +261,12 @@ class pdo
     {
         $duplicate = '';
         if (($this->_duplicate || $this->_duplicate_ext) && $this->_is_replace == false) {
-            $update = $this->_fields_update($this->_duplicate, $this->_duplicate);
+            $update    = $this->_fields_update($this->_duplicate, $this->_duplicate);
             $duplicate = 'ON DUPLICATE KEY UPDATE ' . $this->_duplicate_ext . ' ' . implode(' , ', $update);
         }
 
         $fields = $this->_values_parse($this->_is_multiple ? array_shift($data) : $data);
-        $cols = array_keys($fields);
+        $cols   = array_keys($fields);
 
         $this->_prepare(($this->_is_replace ? 'REPLACE' : 'INSERT') . ' ' . $this->_option . ' INTO ' . $this->_table . ' (`' . implode('`, `', $cols) . '`) VALUES (:' . implode(', :', $cols) . ') ' . $duplicate . ';');
         if ($this->_is_multiple) {
@@ -305,13 +306,13 @@ class pdo
             if ($where_bind && is_array($where_bind)) {
                 if (array_keys($where_bind) === range(0, count($where_bind) - 1)) {
                     // echo __FILE__.':'.__LINE__."\n";
-                    $i = 0;
+                    $i                 = 0;
                     $where_bind_fields = $this->_values_parse($where_bind[$i]);
                     $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
                     foreach ($update_data as &$v) {
                         $i++;
                         $where_bind_fields = $this->_values_parse($where_bind[$i]);
-                        $fields = $this->_values_parse($v);
+                        $fields            = $this->_values_parse($v);
                         $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
                     }
                 } else {
@@ -320,7 +321,7 @@ class pdo
                     $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
                     foreach ($update_data as &$v) {
                         $where_bind_fields = $this->_values_parse($where_bind);
-                        $fields = $this->_values_parse($v);
+                        $fields            = $this->_values_parse($v);
                         $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
                     }
                 }
@@ -394,7 +395,7 @@ class pdo
                 ->_execute($this->_bind_param);
         }
         if ($this->_assoc) {
-            $rs = [];
+            $rs  = [];
             $rs0 = $this->_stmt->fetchAll(\PDO::FETCH_ASSOC);
             if ($rs0 && is_array($rs0)) {
                 foreach ($rs0 as $v) {
@@ -415,7 +416,7 @@ class pdo
      */
     public function column_value(string $field, $default_value, bool $force_prepare = false)
     {
-        $rs = $this->column_one($force_prepare);
+        $rs    = $this->column_one($force_prepare);
         $field = str_replace('`', '', trim($field));
         if ($rs && $rs[$field]) {
             return $rs[$field];
@@ -431,13 +432,13 @@ class pdo
      */
     public function delete(int $limit = 1): int
     {
-        if($limit === 0 ){
+        if ($limit === 0) {
             $this->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ';')
-                 ->_execute($this->_bind_param);
-        }else{
+                ->_execute($this->_bind_param);
+        } else {
             $this->limit($limit)
-                 ->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ' ' . $this->_limit . ';')
-                 ->_execute($this->_bind_param);
+                ->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ' ' . $this->_limit . ';')
+                ->_execute($this->_bind_param);
         }
         return $this->_stmt->rowCount(); //取得前一次 MySQL 操作所影响的记录行数
     }
@@ -494,7 +495,7 @@ class pdo
      */
     public function duplicate(array $duplicate, string $duplicate_ext = ''): self
     {
-        $this->_duplicate = $duplicate;
+        $this->_duplicate     = $duplicate;
         $this->_duplicate_ext = $duplicate_ext;
         return $this;
     }
@@ -554,7 +555,7 @@ class pdo
      */
     public function full_join(string $inner_join, string $on, bool $is_outer = false): self
     {
-        $outer = $is_outer ? 'OUTER' : '';
+        $outer       = $is_outer ? 'OUTER' : '';
         $this->_join = 'FULL ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
@@ -567,7 +568,7 @@ class pdo
      */
     public function left_join(string $inner_join, string $on, bool $is_outer = false): self
     {
-        $outer = $is_outer ? 'OUTER' : '';
+        $outer       = $is_outer ? 'OUTER' : '';
         $this->_join = 'LEFT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
@@ -580,7 +581,7 @@ class pdo
      */
     public function right_join(string $inner_join, string $on, bool $is_outer = false): self
     {
-        $outer = $is_outer ? 'OUTER' : '';
+        $outer       = $is_outer ? 'OUTER' : '';
         $this->_join = 'RIGHT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
@@ -600,7 +601,7 @@ class pdo
                 $this->_where = 'WHERE ' . $where;
             }
             if ($param && is_array($param)) {
-                $param = $this->_values_parse($param);
+                $param             = $this->_values_parse($param);
                 $this->_bind_param = array_merge($this->_bind_param, $param);
             }
         }
@@ -825,9 +826,9 @@ class pdo
      */
     public function trans_check($res)
     {
-        if($res){
+        if ($res) {
             return $this->trans_commit();
-        }else{
+        } else {
             return $this->trans_rollback();
         }
     }
@@ -883,7 +884,7 @@ class pdo
     /**
      * 为 SQL 查询里的字符串添加引号(特殊情况时才用)
      * @param mixed $data
-     * @param int   $type
+     * @param int $type
      * @return string
      */
     public function quote($data, int $type = \PDO::PARAM_INT)
@@ -991,7 +992,7 @@ class pdo
         $result = [];
         foreach ($splits as $v) {
             if ($v[0] == ':') {
-                $key = substr($v, 1);
+                $key          = substr($v, 1);
                 $result[$key] = $key;
             }
         }
@@ -1011,9 +1012,9 @@ class pdo
                     list($type_length, $field) = explode(':', $col);
                     list($type, $length) = explode('-', $type_length);
                     $fields[$field] = [
-                        'field' => ':' . $field,
-                        'value' => $val,
-                        'type' => $this->_types2param($type),
+                        'field'  => ':' . $field,
+                        'value'  => $val,
+                        'type'   => $this->_types2param($type),
                         'length' => $length
                     ];
                 } elseif (':' == $col[1]) {
@@ -1021,20 +1022,20 @@ class pdo
                     $fields[$field] = [
                         'field' => ':' . $field,
                         'value' => $val,
-                        'type' => $this->_types2param($type),
+                        'type'  => $this->_types2param($type),
                     ];
                 } elseif (':' == $col[0]) {
                     list($type, $field) = explode(':', $col);
                     $fields[$field] = [
                         'field' => ':' . $field,
                         'value' => $val,
-                        'type' => $this->_types2param($type),
+                        'type'  => $this->_types2param($type),
                     ];
                 } else {
                     $fields[$col] = [
                         'field' => ':' . $col,
                         'value' => $val,
-                        'type' => $this->_types2param(''),
+                        'type'  => $this->_types2param(''),
                     ];
                 }
             }
@@ -1089,13 +1090,13 @@ class pdo
             $this->_stmt->execute();
         } catch (\Exception $e) {
             print_r([
-                '$this->_last_sql' => $this->_last_sql,
+                '$this->_last_sql'   => $this->_last_sql,
                 '$this->_bind_param' => $this->_bind_param,
-                '$fields' => $fields,
+                '$fields'            => $fields,
             ]);
             $this->_stmt->debugDumpParams();
             // echo $this->_stmt->queryString."\n";
-            trigger_error("Sql Error:" . $e->getMessage() . "\nTrace:".$e->getTraceAsString()."\n", E_USER_ERROR);
+            trigger_error("Sql Error:" . $e->getMessage() . "\nTrace:" . $e->getTraceAsString() . "\n", E_USER_ERROR);
         }
     }
 
@@ -1106,22 +1107,22 @@ class pdo
     {
         $this->_stmt = null;
 
-        $this->_option = '';
-        $this->_fields = [];
-        $this->_order = [];
-        $this->_group = [];
-        $this->_limit = '';
-        $this->_where = '';
-        $this->_assoc = '';
-        $this->_bind_keys = [];
-        $this->_bind_param = [];
-        $this->_duplicate = [];
+        $this->_option        = '';
+        $this->_fields        = [];
+        $this->_order         = [];
+        $this->_group         = [];
+        $this->_limit         = '';
+        $this->_where         = '';
+        $this->_assoc         = '';
+        $this->_bind_keys     = [];
+        $this->_bind_param    = [];
+        $this->_duplicate     = [];
         $this->_duplicate_ext = '';
-        $this->_join = '';
+        $this->_join          = '';
 
         $this->_is_multiple = false;
-        $this->_is_replace = false;
-        $this->_is_debug = false;
+        $this->_is_replace  = false;
+        $this->_is_debug    = false;
     }
 
     /**

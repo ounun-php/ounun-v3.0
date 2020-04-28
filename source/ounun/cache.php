@@ -94,37 +94,37 @@ class cache
      */
     public function config($config, $mod = null)
     {
-        $mod = $mod ? $mod : $config['mod'];
+        $mod       = $mod ? $mod : $config['mod'];
         $type_list = [self::Type_File, self::Type_Memcache, self::Type_Memcached, self::Type_Redis];
-        $type = in_array($config['type'], $type_list) ? $config['type'] : self::Type_File;
+        $type      = in_array($config['type'], $type_list) ? $config['type'] : self::Type_File;
         if (self::Type_Redis == $type) {
-            $sfg = $config['sfg'];
-            $expire = $config['expire'];
-            $auth = $config['auth'];
+            $sfg           = $config['sfg'];
+            $expire        = $config['expire'];
+            $auth          = $config['auth'];
             $format_string = $config['format_string'];
-            $large_scale = $config['large_scale'];
+            $large_scale   = $config['large_scale'];
             $this->config_redis($sfg, $mod, $expire, $large_scale, $format_string, $auth);
         } elseif (self::Type_Memcache == $type) {
-            $sfg = $config['sfg'];
-            $zip_threshold = $config['zip_threshold'];
+            $sfg            = $config['sfg'];
+            $zip_threshold  = $config['zip_threshold'];
             $zip_min_saving = $config['zip_min_saving'];
-            $expire = $config['expire'];
-            $flag = $config['flag'];
-            $format_string = $config['format_string'];
-            $large_scale = $config['large_scale'];
+            $expire         = $config['expire'];
+            $flag           = $config['flag'];
+            $format_string  = $config['format_string'];
+            $large_scale    = $config['large_scale'];
             $this->config_memcache($sfg, $mod, $expire, $format_string, $large_scale, $zip_threshold, $zip_min_saving, $flag);
         } elseif (self::Type_Memcached == $type) {
-            $sfg = $config['sfg'];
-            $expire = $config['expire'];
-            $auth = $config['auth'];
+            $sfg           = $config['sfg'];
+            $expire        = $config['expire'];
+            $auth          = $config['auth'];
             $format_string = $config['format_string'];
-            $large_scale = $config['large_scale'];
+            $large_scale   = $config['large_scale'];
             $this->config_memcached($sfg, $mod, $expire, $format_string, $large_scale, $auth);
         } else //if(self::Type_File == $type)
         {
-            $root = $config['root'];
+            $root          = $config['root'];
             $format_string = $config['format_string'];
-            $large_scale = $config['large_scale'];
+            $large_scale   = $config['large_scale'];
             $this->config_file($mod, $root, $format_string, $large_scale);
         }
     }
@@ -138,7 +138,7 @@ class cache
     public function config_file($mod = 'def', $root = '', $format_string = false, $large_scale = false)
     {
         if (0 == $this->_type) {
-            $this->_type = self::Type_File;
+            $this->_type  = self::Type_File;
             $this->_drive = new cache\driver\file($mod, $root, $format_string, $large_scale);
         } else {
             trigger_error("ERROR! Repeat Seting:Cache->config_file().", E_USER_ERROR);
@@ -153,7 +153,7 @@ class cache
     public function config_memcache(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $zip_threshold = 5000, $zip_min_saving = 0.3, $flag = MEMCACHE_COMPRESSED)
     {
         if (0 == $this->_type) {
-            $this->_type = self::Type_Memcache;
+            $this->_type  = self::Type_Memcache;
             $this->_drive = new cache\driver\memcache($mod, $expire, $format_string, $large_scale, $zip_threshold, $zip_min_saving, $flag);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
@@ -193,7 +193,7 @@ class cache
     public function config_memcached(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $auth = false)
     {
         if (0 == $this->_type) {
-            $this->_type = self::Type_Memcached;
+            $this->_type  = self::Type_Memcached;
             $this->_drive = new cache\driver\memcached($mod, $expire, $format_string, $large_scale, $auth);
             if (is_array($servers)) {
                 foreach ($servers as $v) {

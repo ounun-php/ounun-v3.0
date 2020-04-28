@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\console;
 
 
@@ -41,16 +42,16 @@ abstract class task_multiple extends task_driver
             $input_new[] = array_shift($argc_input);
         }
         if ($input_len >= 2) {
-            $input_new[] =  array_shift($argc_input);
+            $input_new[] = array_shift($argc_input);
         }
         $this->_time_argc_sleep = ($input_len >= 3) ? ((int)array_shift($argc_input)) : 5;
         $this->_time_argc_live  = ($input_len >= 4) ? ((int)array_shift($argc_input)) : 59;
-        $this->_time_curr = time();
-        $this->_time_past = 0;
-        $this->_time_run_count = 0;
-        if($input_len >= 5){
-            while ($argc_input){
-                $input_new[] =  array_shift($argc_input);
+        $this->_time_curr       = time();
+        $this->_time_past       = 0;
+        $this->_time_run_count  = 0;
+        if ($input_len >= 5) {
+            while ($argc_input) {
+                $input_new[] = array_shift($argc_input);
             }
         }
 
@@ -58,19 +59,19 @@ abstract class task_multiple extends task_driver
         $do = 0;
         do {
             console::echo("Execute multiple  \$sleep:" . str_pad($this->_time_argc_sleep, 5) .
-                                                 " \$count:" . str_pad($this->_time_run_count, 5) .
-                                                 " \$past:" . str_pad($this->_time_past, 5) .
-                                                 " \$live:" . str_pad($this->_time_argc_live, 5) .' ---------- ', console::Color_Light_Red, __FILE__, __LINE__);
+                " \$count:" . str_pad($this->_time_run_count, 5) .
+                " \$past:" . str_pad($this->_time_past, 5) .
+                " \$live:" . str_pad($this->_time_argc_live, 5) . ' ---------- ', console::Color_Light_Red, __FILE__, __LINE__);
             $do = $this->execute_do($input_new);
-            if($do){
-               return $do;
+            if ($do) {
+                return $do;
             }
             $this->_time_run_count++;
             if (0 == $do) {
                 sleep($this->_time_argc_sleep);
             }
             $this->_time_past = time() - $this->_time_curr;
-        }while ($this->_time_past < $this->_time_argc_live && 0 == $do);
+        } while ($this->_time_past < $this->_time_argc_live && 0 == $do);
         return 0;
     }
 
@@ -80,7 +81,7 @@ abstract class task_multiple extends task_driver
      */
     public function execute_do(array $argc_input)
     {
-        echo __METHOD__ . " \$input:".json_encode_unescaped($argc_input)."\n";
+        echo __METHOD__ . " \$input:" . json_encode_unescaped($argc_input) . "\n";
         return 0;
     }
 }

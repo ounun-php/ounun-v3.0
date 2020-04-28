@@ -3,130 +3,121 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\dc\driver;
 
 
 /**
- * Sqlite缓存驱动
+ * 文件类型缓存类
  */
 class sqlite extends \ounun\dc\driver
 {
     protected $options = [
-        'db'         => ':memory:',
-        'table'      => 'sharedmemory',
-        'prefix'     => '',
-        'expire'     => 0,
-        'persistent' => false,
+        'prefix' => '',
+        'path'   => '',
+        'expire' => 0, // 等于 10*365*24*3600（10年）
     ];
 
     /**
      * 构造函数
-     * @param array $options 缓存参数
-     * @throws \BadFunctionCallException
      * @access public
+     *
+     * @param array $options
      */
     public function __construct($options = [])
     {
-        if (!extension_loaded('sqlite')) {
-            throw new \BadFunctionCallException('not support: sqlite');
-        }
         if (!empty($options)) {
             $this->options = array_merge($this->options, $options);
         }
-        $func          = $this->options['persistent'] ? 'sqlite_popen' : 'sqlite_open';
-        $this->handler = $func($this->options['db']);
+        if (substr($this->options['path'], -1) != '/') {
+            $this->options['path'] .= '/';
+        }
+
     }
 
     /**
-     * 获取实际的缓存标识
-     * @access public
-     * @param string $name 缓存名
+     * 取得变量的存储文件名
+     * @access protected
+     * @param string $name 缓存变量名
      * @return string
      */
     protected function cache_key_get($name)
     {
-        return $this->options['prefix'] . sqlite_escape_string($name);
+        return $this->options['path'] . $this->options['prefix'] . md5($name) . '.php';
     }
 
     /**
-     * 判断缓存
+     * 判断缓存是否存在
      * @access public
      * @param string $name 缓存变量名
-     * @return bool
+     * @return mixed
      */
     public function has($name)
     {
-        $name   = $this->cache_key_get($name);
-        $sql    = 'SELECT value FROM ' . $this->options['table'] . ' WHERE var=\'' . $name . '\' AND (expire=0 OR expire >' . $_SERVER['REQUEST_TIME'] . ') LIMIT 1';
-        $result = sqlite_query($this->handler, $sql);
-        return sqlite_num_rows($result);
+        return $this->get($name) ? true : false;
     }
 
     /**
      * 读取缓存
      * @access public
      * @param string $name 缓存变量名
-     * @param mixed  $default 默认值
+     * @param mixed $default 默认值
      * @return mixed
      */
     public function get($name, $default = false)
     {
-        $name   = $this->cache_key_get($name);
-        $sql    = 'SELECT `value` FROM ' . $this->options['table'] . ' WHERE `var`=\'' . $name . '\' AND (`expire`=0 OR `expire` >' . $_SERVER['REQUEST_TIME'] . ') LIMIT 1';
-        $result = sqlite_query($this->handler, $sql);
-        if (sqlite_num_rows($result)) {
-            $content = sqlite_fetch_single($result);
-            if (function_exists('gzcompress')) {
-                //启用数据压缩
-                $content = gzuncompress($content);
+        $filename = $this->cache_key_get($name);
+        if (is_file($filename)) {
+            // 判断是否过期
+            $mtime = filemtime($filename);
+            if ($mtime < time()) {
+                // 清除已经过期的文件
+                unlink($filename);
+                return $default;
             }
-            return unserialize($content);
+            return include $filename;
+        } else {
+            return $default;
         }
-        return $default;
     }
 
     /**
      * 写入缓存
-     * @access public
-     * @param string            $name 缓存变量名
-     * @param mixed             $value  存储数据
-     * @param integer|\DateTime $expire  有效时间（秒）
-     * @return boolean
+     * @access   public
+     * @param string $name 缓存变量名
+     * @param mixed $value 存储数据
+     * @param integer|\DateTime $expire 有效时间（秒）
+     * @return bool
      */
     public function set($name, $value, $expire = null)
     {
-        $name  = $this->cache_key_get($name);
-        $value = sqlite_escape_string(serialize($value));
         if (is_null($expire)) {
             $expire = $this->options['expire'];
         }
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp();
         } else {
-            $expire = (0 == $expire) ? 0 : (time() + $expire); //缓存有效期为0表示永久缓存
+            $expire = 0 === $expire ? 10 * 365 * 24 * 3600 : $expire;
+            $expire = time() + $expire;
         }
-        if (function_exists('gzcompress')) {
-            //数据压缩
-            $value = gzcompress($value, 3);
+        $filename = $this->cache_key_get($name);
+        if ($this->tag && !is_file($filename)) {
+            $first = true;
         }
-        if ($this->tag) {
-            $tag       = $this->tag;
-            $this->tag = null;
-        } else {
-            $tag       = '';
+        $ret = file_put_contents($filename, ("<?php return " . var_export($value, true) . ";"));
+        // 通过设置修改时间实现有效期
+        if ($ret) {
+            isset($first) && $this->tag_item_set($filename);
+            touch($filename, $expire);
         }
-        $sql = 'REPLACE INTO ' . $this->options['table'] . ' (`var`, `value`, `expire`, `tag`) VALUES (\'' . $name . '\', \'' . $value . '\', \'' . $expire . '\', \'' . $tag . '\')';
-        if (sqlite_query($this->handler, $sql)) {
-            return true;
-        }
-        return false;
+        return $ret;
     }
 
     /**
      * 自增缓存（针对数值缓存）
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name 缓存变量名
+     * @param int $step 步长
      * @return false|int
      */
     public function inc($name, $step = 1)
@@ -142,8 +133,8 @@ class sqlite extends \ounun\dc\driver
     /**
      * 自减缓存（针对数值缓存）
      * @access public
-     * @param string    $name 缓存变量名
-     * @param int       $step 步长
+     * @param string $name 缓存变量名
+     * @param int $step 步长
      * @return false|int
      */
     public function dec($name, $step = 1)
@@ -164,28 +155,26 @@ class sqlite extends \ounun\dc\driver
      */
     public function rm($name)
     {
-        $name = $this->cache_key_get($name);
-        $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE `var`=\'' . $name . '\'';
-        sqlite_query($this->handler, $sql);
-        return true;
+        return unlink($this->cache_key_get($name));
     }
 
     /**
      * 清除缓存
-     * @access public
+     * @access   public
      * @param string $tag 标签名
-     * @return boolean
+     * @return bool
      */
     public function clear($tag = null)
     {
         if ($tag) {
-            $name = sqlite_escape_string($tag);
-            $sql  = 'DELETE FROM ' . $this->options['table'] . ' WHERE `tag`=\'' . $name . '\'';
-            sqlite_query($this->handler, $sql);
+            // 指定标签清除
+            $keys = $this->tag_item_get($tag);
+            foreach ($keys as $key) {
+                unlink($key);
+            }
+            $this->rm('tag_' . md5($tag));
             return true;
         }
-        $sql = 'DELETE FROM ' . $this->options['table'];
-        sqlite_query($this->handler, $sql);
-        return true;
+        array_map("unlink", glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . '/' : '') . '*.php'));
     }
 }

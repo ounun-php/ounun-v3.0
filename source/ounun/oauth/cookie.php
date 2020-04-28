@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\oauth;
 
 
@@ -39,17 +40,17 @@ class cookie
             return;
         }
         // 设定
-        $oauth_config = \ounun::$global['oauth']?\ounun::$global['oauth']:[];
+        $oauth_config = \ounun::$global['oauth'] ? \ounun::$global['oauth'] : [];
 
         static::$key_private = $key_private ? $key_private : $oauth_config['login_key'];
-        static::$domain = $domain ? $domain : $oauth_config['login_domain'];
+        static::$domain      = $domain ? $domain : $oauth_config['login_domain'];
 
-        static::$pre_key = $pre_key ? $pre_key : ($oauth_config['pre_key']?$oauth_config['pre_key']:'a');
-        static::$cookie_key = $cookie_key ? $cookie_key : ($oauth_config['cookie_key']?$oauth_config['cookie_key']:'_');
-        static::$overtime_max = $overtime_max ? $overtime_max : ($oauth_config['overtime_max']?$oauth_config['overtime_max']:static::Overtime_Max);
+        static::$pre_key      = $pre_key ? $pre_key : ($oauth_config['pre_key'] ? $oauth_config['pre_key'] : 'a');
+        static::$cookie_key   = $cookie_key ? $cookie_key : ($oauth_config['cookie_key'] ? $oauth_config['cookie_key'] : '_');
+        static::$overtime_max = $overtime_max ? $overtime_max : ($oauth_config['overtime_max'] ? $oauth_config['overtime_max'] : static::Overtime_Max);
 
         // 设定就有误 报错
-        if (empty(static::$key_private) || empty(static::$domain) ) {
+        if (empty(static::$key_private) || empty(static::$domain)) {
             trigger_error("Can't find \ounun::\$global['oauth']", E_USER_ERROR);
         }
     }
@@ -76,12 +77,12 @@ class cookie
                 $timeouts = static::Timeout;
             }
             $oauth_type_en = ($oauth_type && is_array($oauth_type)) ? implode('-', $oauth_type) : '';
-            $str = $uid . $oauth_type_en . $cid . $time . $timeouts . static::$key_private;
-            $uid_en = short_url_encode($uid);
-            $cid_en = short_url_encode($cid);
-            $time_en = short_url_encode($time);
-            $username_en = urlencode($username);
-            $cookie_value = static::$pre_key . ".{$oauth_type_en}.{$uid_en}.{$cid_en}.{$time_en}.{$timeouts}." . substr(md5($str), 12, 6) . substr(sha1($str), 16, 10) . ".{$username_en}";
+            $str           = $uid . $oauth_type_en . $cid . $time . $timeouts . static::$key_private;
+            $uid_en        = short_url_encode($uid);
+            $cid_en        = short_url_encode($cid);
+            $time_en       = short_url_encode($time);
+            $username_en   = urlencode($username);
+            $cookie_value  = static::$pre_key . ".{$oauth_type_en}.{$uid_en}.{$cid_en}.{$time_en}.{$timeouts}." . substr(md5($str), 12, 6) . substr(sha1($str), 16, 10) . ".{$username_en}";
             setcookie(static::$cookie_key, $cookie_value, $time + 365 * 86400, '/', static::$domain);
         }
         return true;
@@ -101,9 +102,9 @@ class cookie
             if ($pre_key == static::$pre_key && $uid_en && $time_en && $hex) {
                 $oauth_type = $oauth_type_en ? explode('-', $oauth_type_en) : [];
 
-                $uid = short_url_decode($uid_en);
-                $cid = short_url_decode($cid_en);
-                $time = short_url_decode($time_en);
+                $uid      = short_url_decode($uid_en);
+                $cid      = short_url_decode($cid_en);
+                $time     = short_url_decode($time_en);
                 $username = urldecode($username_en);
                 if (empty($uid)) {
                     return error('需要登录uid不能为0'); // 需要登录uid不能为0
@@ -115,7 +116,7 @@ class cookie
                 if ($timeouts && $time + $timeouts < $now_time) {
                     return error('登录超时'); // 登录超时
                 }
-                $str = $uid . $oauth_type_en . $cid . $time . $timeouts . static::$key_private;
+                $str     = $uid . $oauth_type_en . $cid . $time . $timeouts . static::$key_private;
                 $hex_old = substr(md5($str), 12, 6) . substr(sha1($str), 16, 10);
                 if ($hex == $hex_old) {
                     return [$uid, $cid, $oauth_type, $timeouts, $username];
@@ -176,14 +177,14 @@ class cookie
             // init
             if ($oauth_type && is_array($oauth_type)) {
                 foreach ($oauth_type as $v) {
-                    $v = (int)$v;
+                    $v       = (int)$v;
                     $rs2[$v] = $v;
                 }
             }
             // 替换
             if ($oauth_type_add_or_new && is_array($oauth_type_add_or_new)) {
                 foreach ($oauth_type_add_or_new as $v) {
-                    $v = (int)$v;
+                    $v       = (int)$v;
                     $rs2[$v] = $v;
                 }
             }
@@ -197,7 +198,7 @@ class cookie
             // 替换
             if ($oauth_type_add_or_new && is_array($oauth_type_add_or_new)) {
                 foreach ($oauth_type_add_or_new as $v) {
-                    $v = (int)$v;
+                    $v       = (int)$v;
                     $rs2[$v] = $v;
                 }
             }

@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\cache\driver;
 
 class file extends \ounun\cache\driver
@@ -33,9 +34,9 @@ class file extends \ounun\cache\driver
      */
     public function __construct($mod = 'def', $root = '', $format_string = false, $large_scale = false)
     {
-        $this->_mod = $mod;
-        $this->_root = $root;
-        $this->_large_scale = $large_scale;
+        $this->_mod           = $mod;
+        $this->_root          = $root;
+        $this->_large_scale   = $large_scale;
         $this->_format_string = $format_string;
     }
 
@@ -51,12 +52,12 @@ class file extends \ounun\cache\driver
         }
         if ($this->_format_string) {
             $this->_filename = "{$this->_root}{$this->_mod}/{$key}.z";
-            $this->_data = '';
-            $this->_is_read = false;
+            $this->_data     = '';
+            $this->_is_read  = false;
         } else {
             $this->_filename = "{$this->_root}{$this->_mod}/{$key}.php";
-            $this->_data = null;
-            $this->_is_read = false;
+            $this->_data     = null;
+            $this->_is_read  = false;
         }
     }
 
@@ -67,7 +68,7 @@ class file extends \ounun\cache\driver
     public function val($val)
     {
         $this->_is_read = true;
-        $this->_data = $val;
+        $this->_data    = $val;
     }
 
     /**
@@ -160,10 +161,10 @@ class file extends \ounun\cache\driver
     public function delete()
     {
         if ($this->_format_string) {
-            $this->_data = '';
+            $this->_data    = '';
             $this->_is_read = false;
         } else {
-            $this->_data = null;
+            $this->_data    = null;
             $this->_is_read = false;
         }
         if (file_exists($this->_filename)) {

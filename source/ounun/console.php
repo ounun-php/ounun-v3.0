@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 use ounun\console\task_driver;
@@ -81,7 +82,7 @@ class console
     public function __construct(array $cmds, string $name = 'Ounun CMD', string $version = '0.1')
     {
         // echo "\\ounun\\cmd\\def\\help::class:".\ounun\cmd\def\help::class;
-        $this->name = $name;
+        $this->name    = $name;
         $this->version = $version;
 
         $cmds = array_merge(static::$default_cmds, $cmds);
@@ -126,7 +127,7 @@ class console
                     $command->help($argv);
                 } else {
                     $run_time = 0 - microtime(true);
-                    $run_cmd = str_pad($argv[1], 16);
+                    $run_cmd  = str_pad($argv[1], 16);
                     static::echo("-- runing... {$run_cmd} " . date("Y-m-d H:i:s") . "             --------------------", static::Color_Cyan);
                     $command->execute($argv);
                     $run_time += microtime(true);
@@ -200,21 +201,21 @@ class console
      * @param int $time
      * @param string $end
      */
-    static public function echo(string $msg, string $color = '',string $file = '', int $line = 0,int $time = 0, string $end = "\n")
+    static public function echo(string $msg, string $color = '', string $file = '', int $line = 0, int $time = 0, string $end = "\n")
     {
-        if($file){
+        if ($file) {
             $file = basename($file);
             $file = "{$file}:{$line} ";
-        }else{
+        } else {
             $file = '';
         }
-        if($time){
-            $file = static::Color_Cyan . '['.date("Y-m-d H:i:s").']' .static::Color_None.$file;
+        if ($time) {
+            $file = static::Color_Cyan . '[' . date("Y-m-d H:i:s") . ']' . static::Color_None . $file;
         }
         if (empty($color)) {
-            echo $file.$msg . $end;
+            echo $file . $msg . $end;
         } else {
-            echo $file.$color . $msg . static::Color_None . $end;
+            echo $file . $color . $msg . static::Color_None . $end;
         }
     }
 
@@ -225,25 +226,25 @@ class console
      * @param string $file
      * @param int $line
      */
-    static public function print_r($array, $tab = '', int $depth0 = 0,string $file = '', int $line = 0)
+    static public function print_r($array, $tab = '', int $depth0 = 0, string $file = '', int $line = 0)
     {
         $depth = $depth0 % static::Depth_Colors_Count;
         $color = static::Depth_Colors[$depth];
         // echo "\$depth:{$depth} - ";
         if (is_array($array)) {
             if (empty($array)) {
-                static::echo("[]", $color,$file,$line);
+                static::echo("[]", $color, $file, $line);
             } else {
-                static::echo("[", $color,$file,$line);
+                static::echo("[", $color, $file, $line);
                 foreach ($array as $k => $v) {
-                    static::echo("\t" . $tab . (is_numeric($k) ? $k : '"' . $k . '"'), $color, $file,$line,0,'');
-                    static::echo(' => ', static::Color_Light_Gray, '',0,0, '');
-                    static::print_r($v, "\t" . $tab, $depth + 1,$file,$line);
+                    static::echo("\t" . $tab . (is_numeric($k) ? $k : '"' . $k . '"'), $color, $file, $line, 0, '');
+                    static::echo(' => ', static::Color_Light_Gray, '', 0, 0, '');
+                    static::print_r($v, "\t" . $tab, $depth + 1, $file, $line);
                 }
-                static::echo($tab . "]", $color,$file,$line);
+                static::echo($tab . "]", $color, $file, $line);
             }
         } else {
-            static::echo(is_numeric($array) ? $array : '"' . $array . '"', $color,$file,$line);
+            static::echo(is_numeric($array) ? $array : '"' . $array . '"', $color, $file, $line);
         }
     }
 }

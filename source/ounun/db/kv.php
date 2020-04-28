@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\db;
 
 
@@ -12,8 +13,8 @@ class kv
 
     function __construct($storage = 'dba', $handler = 'flatfile')
     {
-        require_once(dirname(__FILE__).'/'.'storage.php');
-        $this->handle = & dbkv_storage::get_instance($storage, $handler);
+        require_once(dirname(__FILE__) . '/' . 'storage.php');
+        $this->handle = &dbkv_storage::get_instance($storage, $handler);
     }
 
     function open($path, $mode = 'n')
