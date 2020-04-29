@@ -3,91 +3,75 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
-class restful  extends \v
+class restful extends \v
 {
-    /** @var string  */
     protected $_class;
 
-    /** @var string  */
     protected $_method;
 
-    /** @var array  */
     protected $_request_gets;
 
-    /** @var array  */
     protected $_request_post;
 
-    /** @var array  */
     protected $_request_inputs;
 
-    /** @var string  */
     protected $_http_accept;
 
-    /** @var string  */
     protected $_http_version = 'HTTP/1.1';
 
-    /**
-     * restful constructor.
-     * @param $url_mods
-     * @param string $addon_tag  设定的$addon_tag
-     */
-    public function __construct($url_mods, string $addon_tag = '')
+    public function __construct($mod)
     {
-        if(empty($addon_tag)){
-            error404("<strong>REQUEST_METHOD</strong> -->   {$_SERVER['REQUEST_METHOD']} <br />\n
-                           <strong>HTTP_ACCEPT</strong> -->   {$_SERVER['HTTP_ACCEPT']} <br />\n
-                           <strong>get</strong> ------> " . json_encode($_GET,JSON_UNESCAPED_UNICODE) . " <br />\n
-                           <strong>post</strong> ------> " . json_encode($_POST,JSON_UNESCAPED_UNICODE) . " <br />\n
-                           <strong>input</strong> ------> " . file_get_contents('php://input') . " <br />\n
-                           <strong>Mods</strong> ------> " . json_encode($url_mods,JSON_UNESCAPED_UNICODE) . " <br />");
+        $rs = $this->_construct_before($mod);
+        if (error_is($rs)) {
+            out($rs);
         }
-        $this->_class        = "addons\\".$addon_tag."\\api";
+        //
         $this->_method       = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
         $this->_request_gets = $_GET;
         $this->_request_post = $_POST;
-        $data = file_get_contents('php://input');
-        if($data){
+        $data                = file_get_contents('php://input');
+        if ($data) {
             $this->_request_inputs = json_decode_array($data);
         }
-        if($this->_class){
-            if (!$url_mods) {
-                $url_mods     =  [\ounun::def_method];
+        if ($this->_class) {
+            if (!$mod) {
+                $mod = [\ounun::def_method];
             }
-            $class            = "{$this->_class}\\{$url_mods[0]}";
-            if(class_exists($class)){
+            $class = "{$this->_class}\\{$mod[0]}";
+            if (class_exists($class)) {
                 \ounun::$view = $this;
                 static::$tpl  = true;  // 不去初始化template
-                // 控制器初始化
-                $rs = $this->_initialize($url_mods[0]);
-                if(error_is($rs)){
-                    out($rs);
-                }
-//              print_r(['$url_mods'=>$url_mods,'$addon_tag'=>$addon_tag,'\ounun::$url_addon_pre'=>\ounun::$url_addon_pre,'$class'=>$class]);
-//              exit();
-                $this->init_page('/'.($url_mods[0] && $url_mods[0] != \ounun::def_method ? $url_mods[0].'.php':''), false, true);
-                new $class($url_mods,$this);
-            }else{
-//              print_r(['$url_mods'=>$url_mods,'$addon_tag'=>$addon_tag,'$class'=>$class]);
-                parent::__construct($url_mods,$addon_tag);
+                $this->init_page(\ounun::$url_addon_pre . '/' . ($mod[0] && $mod[0] != \ounun::def_method ? $mod[0] . '.php' : ''), false, true);
+                new $class($mod, $this);
+            } else {
+                parent::__construct($mod);
             }
         }
     }
 
     /**
-     * @param string $age
-     * @param string $domain
-     * @param string $methods
-     * @param string $headers
+     * @param $mod
+     * @return bool|array
      */
-    static public function headers_allow_origin_set(string $domain = '*',string $age = '1728000',string $methods = 'GET,POST,PATCH,PUT,DELETE,OPTIONS', string $headers = 'Authori-zation,Authorization, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With')
+    public function _construct_before($mod)
     {
-        header('Access-Control-Allow-Origin: '.$domain);
-        header('Access-Control-Allow-Headers: '.$headers);
-        header('Access-Control-Allow-Methods: '.$methods);
-        header('Access-Control-Max-Age: '.$age);
+        return true;
+    }
+
+    /**
+     * @param string $methods
+     * @param string $domain
+     */
+    static public function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*')
+    {
+        header('Access-Control-Allow-Credentials: true');
+        header('Access-Control-Allow-Origin: ' . $domain);
+        header('Access-Control-Allow-Methods: ' . $methods);
+        header('Access-Control-Allow-Headers: authentication,origin,x-requested-with,content-type,accept,token,appid,unitid');
     }
 
     /**
@@ -140,48 +124,38 @@ class restful  extends \v
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported'
         ];
-        $status_message = $Http_Status_Message[$status_code]??$Http_Status_Message[200];
+        $status_message      = $Http_Status_Message[$status_code] ?? $Http_Status_Message[200];
 
-        header($http_version. ' ' . $status_code  . ' ' . $status_message);
+        header($http_version . ' ' . $status_code . ' ' . $status_message);
+        header('Content-Type: ' . $content_type . '; charset=utf-8');
     }
 
-    /**
-     * @param string $key
-     * @return array|mixed
-     */
-    public function gets_get($key = ''){
-        if($key){
+    public function gets_get($key = '')
+    {
+        if ($key) {
             return $this->_request_gets[$key];
         }
         return $this->_request_gets;
     }
 
-    /**
-     * @param string $key
-     * @return array|mixed
-     */
-    public function post_get($key = ''){
-        if($key){
+    public function post_get($key = '')
+    {
+        if ($key) {
             return $this->_request_post[$key];
         }
         return $this->_request_post;
     }
 
-    /**
-     * @param string $key
-     * @return array|mixed
-     */
-    public function input_get($key = ''){
-        if($key){
+    public function input_get($key = '')
+    {
+        if ($key) {
             return $this->_request_inputs[$key];
         }
         return $this->_request_inputs;
     }
 
-    /**
-     * @return string
-     */
-    public function method_get(){
+    public function method_get()
+    {
         return $this->_method;
     }
 
@@ -190,20 +164,63 @@ class restful  extends \v
      * @param int $status_code
      * @param string $request_content_type
      */
-    public function out($raw_data, int $status_code = 200, string $request_content_type='') {
+    public function out($raw_data, int $status_code = 200, string $request_content_type = '')
+    {
 
-        $request_content_type = $request_content_type??$this->_http_accept;
+        $request_content_type = $request_content_type ?? $this->_http_accept;
         static::headers_set($request_content_type, $status_code, $this->_http_version);
 
-        if(strpos($request_content_type,'application/json') !== false){
-            $type = \ounun\c::Format_Json;
-        } else if(strpos($request_content_type,'text/html') !== false){
-            $type = \ounun\c::Format_Html_Table;
-        } else if(strpos($request_content_type,'application/xml') !== false){
-            $type = \ounun\c::Format_Xml_Simple;
+        if (strpos($request_content_type, 'application/json') !== false) {
+            $response = $this->encode_json($raw_data);
+        } else if (strpos($request_content_type, 'text/html') !== false) {
+            $response = $this->encode_html($raw_data);
+        } else if (strpos($request_content_type, 'application/xml') !== false) {
+            $response = $this->encode_xml($raw_data);
         } else {
-            $type = \ounun\c::Format_Json;
+            $response = $this->encode_json($raw_data);
         }
-        out($raw_data,$type);
+        exit($response);
+    }
+
+
+    /**
+     * @param $response_data
+     * @return string
+     */
+    public function encode_html($response_data)
+    {
+        if (is_array($response_data)) {
+            $html_response = '<table style="border: darkcyan solid 1px;">';
+            foreach ($response_data as $key => $value) {
+                $html_response .= "<tr><td>" . $key . "</td><td>" . $value . "</td></tr>";
+            }
+            $html_response .= "</table>";
+            return $html_response;
+        }
+        return $response_data;
+    }
+
+    /**
+     * @param $response_data
+     * @return false|string
+     */
+    public function encode_json($response_data)
+    {
+        $jsonResponse = json_encode($response_data);
+        return $jsonResponse;
+    }
+
+    /**
+     * @param $response_data
+     * @return mixed
+     */
+    public function encode_xml($response_data)
+    {
+        // 创建 SimpleXMLElement 对象
+        $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
+        foreach ($response_data as $key => $value) {
+            $xml->addChild($key, $value);
+        }
+        return $xml->asXML();
     }
 }

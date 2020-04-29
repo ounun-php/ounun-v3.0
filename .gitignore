@@ -6,10 +6,8 @@ app.*/environment.txt
 app.*/app/config2.php
 
 source/vendor/*
+example/*
 
 !.gitkeep
 .settings
 .idea
-
-example/extend/_test/coll
-example/extend/_test/site

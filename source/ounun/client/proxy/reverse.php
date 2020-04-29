@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\client\proxy;
 
 
@@ -14,51 +15,51 @@ class reverse
     const Chunk_Size = 102400;
 
     /** @var bool 是否ssl */
-    public $is_ssl     = false;
+    public $is_ssl = false;
     /** @var bool false: 高速，不转发 true:正常代理 */
-    public $is_header  = false;
+    public $is_header = false;
     /** @var bool false: 数据缓存后，内容直接输出  true:数据缓存后，再跳转 */
     // public $is_jump = false;
 
     /** @var string 缓存数据 */
-    public $content    = '';
+    public $content = '';
 
     /** @var string 服务器版本 */
-    protected $_server_version  = 'Ounun.org Download Server';
+    protected $_server_version = 'Ounun.org Download Server';
     /** @var string 服务器源网址root */
     protected $_server_url_root = '';
     /** @var string 服务器源path */
-    protected $_server_path     = '';
+    protected $_server_path = '';
     /** @var string 服务器源file */
-    protected $_server_file     = '';
+    protected $_server_file = '';
 
     /** @var int 端口 */
     protected $_port = 80;
     /** @var string 主机名 */
     protected $_host = '';
     /** @var string 服务器ip */
-    protected $_ip   = '127.0.0.1';
+    protected $_ip = '127.0.0.1';
 
     /** @var int 在服务器端 缓存时间 0:默认已缓存就不更新了 */
-    protected $_cache_life          = 0;
+    protected $_cache_life = 0;
     /** @var int 在客户端   缓存时间 */
-    protected $_cache_time          = 72000;
+    protected $_cache_time = 72000;
     /** @var string 遇到cc的参数就更新缓存; */
-    protected $_cache_clean_param   = 'clean';
+    protected $_cache_clean_param = 'clean';
     /** @var string 根目录 */
-    protected $_cache_path_root     = '';
+    protected $_cache_path_root = '';
     /** @var string 本地目录名称 */
-    protected $_cache_filename      = '';
+    protected $_cache_filename = '';
 
-    /** @var int  */
+    /** @var int */
     protected $_http_code = 200;
-    /** @var int  */
+    /** @var int */
     protected $_last_modified = 0;
-    /** @var string  */
+    /** @var string */
     protected $_http_if_modified_304 = '';
 
     /** @var array 替换数据[0],[1] */
-    protected $_data_replace   = [];
+    protected $_data_replace = [];
 
     /**
      * reverse constructor.
@@ -66,54 +67,54 @@ class reverse
      */
     public function __construct(array $config = [])
     {
-        if($config['server_version']){
-            $this->_server_version  = $config['server_version'];
+        if ($config['server_version']) {
+            $this->_server_version = $config['server_version'];
         }
-        if($config['server_url_root']){
+        if ($config['server_url_root']) {
             $this->_server_url_root = $config['server_url_root'];
         }
-        if($config['server_path']){
-            $this->_server_path     = $config['server_path'];
+        if ($config['server_path']) {
+            $this->_server_path = $config['server_path'];
         }
-        if($config['server_file']){
-            $this->_server_file    = $config['server_file'];
+        if ($config['server_file']) {
+            $this->_server_file = $config['server_file'];
         }
 
-        if($config['host']){
-            $this->_host   =  $config['host'];
+        if ($config['host']) {
+            $this->_host = $config['host'];
         }
-        if($config['port']){
-            $this->_port   =  $config['port'];
+        if ($config['port']) {
+            $this->_port = $config['port'];
         }
-        if($config['ip']){
-            $this->_ip     =  $config['ip'];
+        if ($config['ip']) {
+            $this->_ip = $config['ip'];
         }
 
         // cache
-        if($config['cache_time']){
-            $this->_cache_time          =  $config['cache_time'];
+        if ($config['cache_time']) {
+            $this->_cache_time = $config['cache_time'];
         }
-        if($config['cache_life']){
-            $this->_cache_life          =  $config['cache_life'];
+        if ($config['cache_life']) {
+            $this->_cache_life = $config['cache_life'];
         }
-        if($config['cache_clean_param']){
-            $this->_cache_clean_param   =  $config['cache_clean_param'];
+        if ($config['cache_clean_param']) {
+            $this->_cache_clean_param = $config['cache_clean_param'];
         }
-        if($config['cache_path_root']){
-            $this->_cache_path_root     =  $config['cache_path_root'];
+        if ($config['cache_path_root']) {
+            $this->_cache_path_root = $config['cache_path_root'];
         }
-        if($config['cache_filename']){
-            $this->_cache_filename      =  $config['cache_filename'];
+        if ($config['cache_filename']) {
+            $this->_cache_filename = $config['cache_filename'];
         }
 
         $this->_http_if_modified_304 = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '';
 //      $this->_http_code            = 200;
 
-        if($config['is_ssl']){
-            $this->is_ssl     =  $config['is_ssl'];
+        if ($config['is_ssl']) {
+            $this->is_ssl = $config['is_ssl'];
         }
-        if($config['is_header']){
-            $this->is_header  =  $config['is_header'];
+        if ($config['is_header']) {
+            $this->is_header = $config['is_header'];
         }
     }
 
@@ -124,15 +125,15 @@ class reverse
     public function cache_check()
     {
         if (empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-            if( 'GET' == $_SERVER['REQUEST_METHOD'] ){
+            if ('GET' == $_SERVER['REQUEST_METHOD']) {
                 return $this->cache_get();
-            }elseif('POST' == $_SERVER['REQUEST_METHOD']) {
+            } elseif ('POST' == $_SERVER['REQUEST_METHOD']) {
                 // return $this->cache_post();
                 return $this->cache_get();
-            }else{
-                return error('404-REQUEST_METHOD',404,404);
+            } else {
+                return error('404-REQUEST_METHOD', 404, 404);
             }
-        }else{
+        } else {
             return succeed(304);
         }
     }
@@ -144,28 +145,28 @@ class reverse
     public function cache_get()
     {
         $local_filename = $this->local_filename();
-        if(file_exists($local_filename)){
-            $mtime                  = filemtime($local_filename);
-            $this->_last_modified   = gmdate("D, d M Y H:i:s", $mtime) . " GMT";
+        if (file_exists($local_filename)) {
+            $mtime                = filemtime($local_filename);
+            $this->_last_modified = gmdate("D, d M Y H:i:s", $mtime) . " GMT";
             // $filesize = filesize($local_filename);
             if ($this->_cache_clean_param && isset($req[$this->_cache_clean_param])) {//含有cc参数
                 unlink($local_filename);
-            }elseif($this->_cache_life <= 0 ){
+            } elseif ($this->_cache_life <= 0) {
                 return succeed(304);
-            }elseif($this->_cache_life && $mtime + $this->_cache_life < time() ){
+            } elseif ($this->_cache_life && $mtime + $this->_cache_life < time()) {
                 return succeed(304);
             }
         }
-        if(empty($this->_server_url_root)){
-            return error('404-empty-server_url_root',404,404);
+        if (empty($this->_server_url_root)) {
+            return error('404-empty-server_url_root:' . $this->server_url(), 404, 404);
         }
-        $server_url = $this->server_url();
-        $this->content = http::file_get_contents_loop($server_url,'',1);
-        if($this->content){
-            $this->write($local_filename,$this->content);
+        $server_url    = $this->server_url();
+        $this->content = http::file_get_contents_loop($server_url, '', 1);
+        if ($this->content) {
+            $this->write($local_filename, $this->content);
             return succeed(200);
         }
-        return error('404-error-file_get_contents',404,404);
+        return error('404-error-file_get_contents', 404, 404);
     }
 
     /**
@@ -175,18 +176,18 @@ class reverse
      */
     protected function write(string $local_filename, string $content)
     {
-        $local_dir      = dirname($local_filename);
-        if(!file_exists($local_dir)){
+        $local_dir = dirname($local_filename);
+        if (!file_exists($local_dir)) {
             mkdir($local_dir, 0777, true);
         }
         if ($this->_data_replace) {
             $content = str_replace($this->_data_replace[0], $this->_data_replace[1], $content);
         }
         $rs = file_put_contents($local_filename, $content);
-        if($rs){
+        if ($rs) {
             chmod($local_filename, 0777);
-            $mtime                  = filemtime($local_filename);
-            $this->_last_modified   = gmdate("D, d M Y H:i:s", $mtime) . " GMT";
+            $mtime                = filemtime($local_filename);
+            $this->_last_modified = gmdate("D, d M Y H:i:s", $mtime) . " GMT";
         }
         return $rs;
     }
@@ -198,9 +199,9 @@ class reverse
      * @param bool $is_sendfile
      * @param int $time_expired
      */
-    public function output(string $local_filename, bool $is_sendfile = false,int $time_expired = 0)
+    public function output(string $local_filename, bool $is_sendfile = false, int $time_expired = 0)
     {
-        $time_expired            = $time_expired == 0 ? time() : $time_expired;
+        $time_expired = $time_expired == 0 ? time() : $time_expired;
         if ($this->_http_if_modified_304) {
             $time_current_string = gmdate("D, d M Y H:i:s", $time_expired);
             header("HTTP/1.1 304 Not Modified");
@@ -208,10 +209,10 @@ class reverse
             header("Last-Modified: {$this->_last_modified}");
             header("Server: {$this->_server_version}");
         } else {
-            if($is_sendfile || empty($this->content)){
-                static::output_sendfile($local_filename,$this->_cache_time,$this->_last_modified,$this->_server_version,$this->is_header,$time_expired);
-            }else{
-                static::output_content($this->content,$local_filename,$this->_cache_time,$this->_last_modified,$this->_server_version,$this->is_header,$time_expired);
+            if ($is_sendfile || empty($this->content)) {
+                static::output_sendfile($local_filename, $this->_cache_time, $this->_last_modified, $this->_server_version, $this->is_header, $time_expired);
+            } else {
+                static::output_content($this->content, $local_filename, $this->_cache_time, $this->_last_modified, $this->_server_version, $this->is_header, $time_expired);
             }
         }
     }
@@ -225,7 +226,7 @@ class reverse
      * @param bool $is_header
      * @param int $time_expired
      */
-    static public function output_content(string $content,string $local_filename,int $time_cache, string $last_modified, string $server_version,bool $is_header, int $time_expired = 0)
+    static public function output_content(string $content, string $local_filename, int $time_cache, string $last_modified, string $server_version, bool $is_header, int $time_expired = 0)
     {
         $time_current_string = gmdate("D, d M Y H:i:s", $time_expired);
         $time_expired_string = gmdate("D, d M Y H:i:s", ($time_expired + $time_cache));
@@ -252,11 +253,11 @@ class reverse
      * @param bool $is_header
      * @param int $time_expired
      */
-    static public function output_sendfile(string $local_filename, int $time_cache, string $last_modified, string $server_version,bool $is_header, int $time_expired = 0)
+    static public function output_sendfile(string $local_filename, int $time_cache, string $last_modified, string $server_version, bool $is_header, int $time_expired = 0)
     {
         // exit(__METHOD__);
 
-        $time_current_string = gmdate("D, d M Y H:i:s",  $time_expired);
+        $time_current_string = gmdate("D, d M Y H:i:s", $time_expired);
         $time_expired_string = gmdate("D, d M Y H:i:s", ($time_expired + $time_cache));
 
         header("HTTP/1.1 200 OK");
@@ -282,7 +283,7 @@ class reverse
      */
     public function server_url()
     {
-        return  $this->_server_url_root.'/'.($this->_server_path?$this->_server_path.'/':'').$this->_server_file;
+        return $this->_server_url_root . '/' . ($this->_server_path ? $this->_server_path . '/' : '') . $this->_server_file;
     }
 
     /**
@@ -291,7 +292,7 @@ class reverse
      */
     public function local_filename()
     {
-        return $this->_cache_path_root.$this->_cache_filename;
+        return $this->_cache_path_root . $this->_cache_filename;
     }
 
 
@@ -306,9 +307,9 @@ class reverse
                 $name           = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
                 $headers[$name] = $value;
             } elseif ($name == "CONTENT_TYPE") {
-                $headers["Content-Type"]     = $value;
+                $headers["Content-Type"] = $value;
             } elseif ($name == "CONTENT_LENGTH") {
-                $headers["Content-Length"]   = $value;
+                $headers["Content-Length"] = $value;
 //            } elseif (stristr($name, "X-Requested-With")) {
 //                $headers["X-Requested-With"] = $value;
             }
@@ -340,18 +341,18 @@ class reverse
      * @param bool $is_ssl
      * @return string
      */
-    public static function host(string $host,int $port = 80, bool $is_ssl = false)
+    public static function host(string $host, int $port = 80, bool $is_ssl = false)
     {
-        if($is_ssl){
+        if ($is_ssl) {
             if (empty($port) || $port == 443) {
                 return 'https://' . $host;
-            } else{
+            } else {
                 return 'https://' . $host . ':' . $port;
             }
-        }else{
+        } else {
             if (empty($port) || $port == 80) {
                 return 'http://' . $host;
-            } else{
+            } else {
                 return 'http://' . $host . ':' . $port;
             }
         }

@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\cache\buffer;
 
 use ounun\debug;
@@ -50,12 +51,12 @@ class html
     {
         $this->stop = false;
         // 初始化参数
-        $this->_expire = $expire;
+        $this->_expire   = $expire;
         $this->_now_time = time();
 
         $this->_cache_time = 0;
 
-        $this->_is_trim   = $trim;
+        $this->_is_trim  = $trim;
         $this->_is_debug = $debug;
         // 是否支持gzip
         if (stripos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') === false) {
@@ -97,16 +98,16 @@ class html
     public function run_cache_check()
     {
         $this->_cache_time = $this->_cache->cache_time();
-        \ounun\debug::header('time',  $this->_cache_time,$this->_is_debug,__FUNCTION__,__LINE__);
-        \ounun\debug::header('expire',$this->_expire,    $this->_is_debug,__FUNCTION__,__LINE__);
+        \ounun\debug::header('time', $this->_cache_time, $this->_is_debug, __FUNCTION__, __LINE__);
+        \ounun\debug::header('expire', $this->_expire, $this->_is_debug, __FUNCTION__, __LINE__);
         if ($this->_cache_time + $this->_expire > $this->_now_time) {
-            \ounun\debug::header('xypc',$this->_cache->filename(),$this->_is_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('xypc', $this->_cache->filename(), $this->_is_debug, __FUNCTION__, __LINE__);
             return true;
         }
         $cache_time_t = $this->_cache->cache_time_tmp();
-        \ounun\debug::header('time_t',$cache_time_t,$this->_is_debug,__FUNCTION__,__LINE__);
+        \ounun\debug::header('time_t', $cache_time_t, $this->_is_debug, __FUNCTION__, __LINE__);
         if ($cache_time_t + self::Cache_Time_Interval > $this->_now_time) {
-            \ounun\debug::header('xypc_t',$this->_cache->filename().'.t time:'.$cache_time_t,$this->_is_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('xypc_t', $this->_cache->filename() . '.t time:' . $cache_time_t, $this->_is_debug, __FUNCTION__, __LINE__);
             return true;
         }
         $this->_cache_time = 0;
@@ -115,11 +116,11 @@ class html
 
     /**
      * [2/3] 执行缓存程序
-     * @param  bool $outpt ( 是否输出 )
+     * @param bool $outpt ( 是否输出 )
      */
     public function run_execute(bool $output)
     {
-        \ounun\debug::header('xypm',$this->_cache->filename(),$this->_is_debug,__FUNCTION__,__LINE__);
+        \ounun\debug::header('xypm', $this->_cache->filename(), $this->_is_debug, __FUNCTION__, __LINE__);
         $this->stop = false;
         $this->_cache->cache_time_tmp_set();
         // 生成
@@ -135,7 +136,7 @@ class html
     {
         if ($this->_cache_time) {
             // 处理 etag
-            $etag = $this->_cache_time;
+            $etag      = $this->_cache_time;
             $etag_http = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '';
 
             // 处理 cache expire
@@ -165,16 +166,16 @@ class html
             return;
         }
         // 执行
-        $buffer = ob_get_contents();
+        $buffer   = ob_get_contents();
         $filesize = strlen($buffer);
         ob_clean();
         ob_implicit_flush(1);
         // 写文件
-        \ounun\debug::header('xypm_size',$filesize,$this->_is_debug,__FUNCTION__,__LINE__);
+        \ounun\debug::header('xypm_size', $filesize, $this->_is_debug, __FUNCTION__, __LINE__);
         if ($filesize > self::Cache_Mini_Size) {
-            \ounun\debug::header('xypm_ok',$this->_cache->filename(),$this->_is_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('xypm_ok', $this->_cache->filename(), $this->_is_debug, __FUNCTION__, __LINE__);
 
-            $buffer = template::trim($buffer,$this->_is_trim);
+            $buffer = template::trim($buffer, $this->_is_trim);
             $buffer = gzencode($buffer, 9);
             $this->_cache->cache_html($buffer);
             $this->_cache_time = $this->_cache->cache_time();
@@ -183,7 +184,7 @@ class html
             }
         } else {
             $this->_cache->delete();
-            \ounun\debug::header('xypm_noc','nocache',$this->_is_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('xypm_noc', 'nocache', $this->_is_debug, __FUNCTION__, __LINE__);
             if ($output) {
                 header('Content-Length: ' . $filesize);
                 exit($buffer);

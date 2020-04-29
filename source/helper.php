@@ -23,8 +23,7 @@ defined('Dir_Cache') || define('Dir_Cache', Dir_Data . 'cache/');
 defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
 defined('Environment') || define('Environment', environment());
-/** 开始调试 开始时间戳、内存量 */
-if(Environment){
+if (Environment) {
     /** 开始时间戳 **/
     define('Ounun_Start_Time', microtime(true));
     /** 开始内存量 **/
@@ -79,19 +78,14 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         }
         if ($skip && is_array($skip)) {
             foreach ($skip as $key => $value) {
-                // echo "\$key:{$key} \$data_query[\$key]:{$data_query[$key]}\n<br />";
-                if (is_array($value)) {
-                    if(in_array($data_query[$key], $value, true)){
+                if ($value) {
+                    if (is_array($value) && in_array($data_query[$key], $value, true)) {
+                        unset($data_query[$key]);
+                    } elseif ($value == $data_query[$key]) {
                         unset($data_query[$key]);
                     }
-                } else { // if ($value == $data_query[$key]) {
-                    if(is_integer($key) && is_string($value)){
-                        unset($data_query[$value]);
-                    }else{
-                        unset($data_query[$key]);
-                    }
-
-                    // unset($data_query[$key]);
+                } else {
+                    unset($data_query[$key]);
                 }
             }
         }
@@ -119,7 +113,7 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         if ($url && $len > 0) {
             if (strpos($url, '?') === false) {
                 return $url . '?' . implode('&', $rs);
-            }elseif ('?' === $url[$len-1]){
+            } elseif ('?' === $url[$len - 1]) {
                 return $url . implode('&', $rs);
             }
             return $url . '&' . implode('&', $rs);
@@ -179,15 +173,17 @@ function url_check(string $url_original = "", bool $ext_req = true, string $doma
             $url_reset = "{$url_reset}?{$url[1]}";
         }
     }
-    // exit(__FILE__.':'.__LINE__." \$url_reset:{$url_reset} \$url_original:{$url_original} \$domain:{$domain} \$ext_req:".($ext_req?'1':'0')."\n");
+    // echo("\$url_reset:{$url_reset} \$url_original:{$url_original}\n");
+    // exit("\$domain:{$domain}\n");
     // 域名
     if ($domain && $domain != $_SERVER['HTTP_HOST']) {
+        // $domain  = $_SERVER['HTTP_HOST'];
         $url_reset = $url_reset ? $url_reset : $_SERVER['REQUEST_URI'];
         $url_reset = "//{$domain}{$url_reset}";
-        // exit(__FILE__.':'.__LINE__." \$url_reset:{$url_reset} \$url_original:{$url_original} \$domain:{$domain}\n");
+        // exit("\$url_reset:{$url_reset} \$domain:{$domain}\n");
         go_url($url_reset, false, 301);
     } else if ($url_reset) {
-        // exit(__FILE__.':'.__LINE__." \$url_reset:{$url_reset} \$url_original:{$url_original}\n");
+        // exit("\$url_reset:{$url_reset}\n");
         go_url($url_reset, false, 301);
     }
     // exit("\$domain:{$domain}\n");
@@ -201,23 +197,23 @@ function url_check(string $url_original = "", bool $ext_req = true, string $doma
  */
 function go_note(string $url1, string $url2, string $note, bool $top = false): void
 {
-    $top = "\t" . ($top ? 'window.top.' : '');
+    $top  = "\t" . ($top ? 'window.top.' : '');
     $note = $note ? $note : '点击“确定”继续操作  点击“取消” 中止操作';
     echo '<script type="text/javascript">' . "\n";
     if ($url2) {
         $url1 = $top . "location.href='{$url1}';\n";
         $url2 = $top . "location.href='{$url2}';\n";
-        echo 'if(window.confirm(' . json_encode($note,JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '}else{' . "\n" . $url2 . '}' . "\n";
+        echo 'if(window.confirm(' . json_encode($note, JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '}else{' . "\n" . $url2 . '}' . "\n";
     } else {
         $url1 = $top . "location.href='{$url1}';\n";
-        echo 'if(window.confirm(' . json_encode($note,JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '};' . "\n";
+        echo 'if(window.confirm(' . json_encode($note, JSON_UNESCAPED_UNICODE) . ')){' . "\n" . $url1 . '};' . "\n";
     }
     echo '</script>' . "\n";
     exit();
 }
 
 /**
- * @param string $url
+ * @param $url
  * @param bool $top
  * @param int $head_code
  * @param int $delay 延时跳转(单位秒)
@@ -271,7 +267,7 @@ function go_msg(string $msg, string $url = ''): void
  */
 function msg(string $msg, bool $outer = true, $meta = true): string
 {
-    $rs = "\n" . 'alert(' . json_encode($msg,JSON_UNESCAPED_UNICODE) . ');' . "\n";
+    $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     if ($outer) {
         if ($meta) {
             $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
@@ -290,7 +286,7 @@ function msg(string $msg, bool $outer = true, $meta = true): string
  */
 function msg_close(string $msg, bool $close = false): void
 {
-    $rs = "\n" . 'alert(' . json_encode($msg,JSON_UNESCAPED_UNICODE) . ');' . "\n";
+    $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
     $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
     echo $rs;
@@ -383,9 +379,17 @@ function error_code($data): int
 function succeed($data, string $message = '', $extend = [])
 {
     if ($extend) {
-        return array_merge($extend, ['msg'    => $message, 'status' => 0, 'data'   => $data]);
+        return array_merge($extend, [
+            'msg'    => $message,
+            'status' => 0,
+            'data'   => $data
+        ]);
     }
-    return ['msg'    => $message, 'status' => 0, 'data'   => $data];
+    return [
+        'msg'    => $message,
+        'status' => 0,
+        'data'   => $data
+    ];
 }
 
 /**
@@ -404,79 +408,58 @@ function succeed_data($data)
  * @param string $type AJAX返回数据格式
  * @param string $jsonp_callback
  * @param int $json_options 传递给json_encode的option参数
- * @param string $charset
- * @param string $table_attributes
  */
-function out($data, string $type = '', string $jsonp_callback = '', int $json_options = 0 , string $charset = '',string $table_attributes = '')
+function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
-        $type = \ounun\c::Format_Json;
-    }
-    if(empty($json_options)){
-        $json_options = JSON_UNESCAPED_UNICODE;
-    }
-    if(empty($charset)){
-        $charset = 'utf-8';
+        $type = \ounun\console\c::Format_Json;
     }
     switch ($type) {
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\c::Format_Json :
-            header('Content-Type:application/json; charset='.$charset);
+        case \ounun\console\c::Format_Json :
+            header('Content-Type:application/json; charset=utf-8');
             exit(json_encode($data, $json_options));
         // 返回xml格式数据
-        case \ounun\c::Format_Xml :
-            header('Content-Type:text/xml; charset='.$charset);
+        case \ounun\console\c::Format_Xml :
+            header('Content-Type:text/xml; charset=utf-8');
             exit(\ounun\utils\db::xml_encode($data));
-        // 返回 SimpleXMLElement 对象
-        case \ounun\c::Format_Xml_Simple :
-            header('Content-Type:text/xml; charset='.$charset);
-            exit(\ounun\utils\db::xml_encode_simple($data));
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\c::Format_Jsonp:
-            header('Content-Type:application/javascript; charset='.$charset);
+        case \ounun\console\c::Format_Jsonp:
+            header('Content-Type:application/javascript; charset=utf-8');
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
-            exit('try{'.$jsonp_callback . '(' . json_encode($data, $json_options) . ');}catch(err){}');
+            exit($jsonp_callback . '(' . json_encode($data, $json_options) . ');');
         // 返回可执行的js脚本
-        case  \ounun\c::Format_JS :
-        case  \ounun\c::Format_Eval :
-            header('Content-Type:application/javascript; charset='.$charset);
+        case  \ounun\console\c::Format_JS :
+        case  \ounun\console\c::Format_Eval :
+            header('Content-Type:application/javascript; charset=utf-8');
             exit($data);
-        case \ounun\c::Format_Html_Table :
-            header('Content-Type:text/html; charset='.$charset);
-            exit(\ounun\utils\db::html_table_encode($data,$table_attributes));
-        // 返回Html
-        case \ounun\c::Format_Html :
+        // 返回可执行的js脚本
+        // case \ounun\mvc\c::Format_Html :
         default :
-            header('Content-Type:text/html; charset='.$charset);
+            header('Content-Type:text/html; charset=utf-8');
             exit($data);
     }
 }
 
 /**
  * 获得 json字符串数据
- * @param mixed|string $data
+ * @param $data
  * @return string
  */
 function json_encode_unescaped($data): string
 {
-    if(is_string($data)){
-        return $data;
-    }
     return json_encode($data, JSON_UNESCAPED_UNICODE);
 }
 
 /**
  * 对 json格式的字符串进行解码
- * @param string|mixed $json_string
+ * @param string $json_string
  * @return mixed
  */
-function json_decode_array($json_string)
+function json_decode_array(?string $json_string)
 {
-    if(is_array($json_string)){
-        return $json_string;
-    }
     return json_decode($json_string, true);
 }
 
@@ -499,11 +482,11 @@ function extend_decode_php(string $extend_string)
  * @param string $extend_string
  * @return array|mixed
  */
-function extend_decode_json(string $extend_string = '')
+function extend_decode_json(string $extend_string)
 {
     $extend = [];
     if ($extend_string) {
-        $extend = json_decode($extend_string,true);
+        $extend = json_decode($extend_string, true);
     }
     return $extend;
 }
@@ -513,7 +496,7 @@ function extend_decode_json(string $extend_string = '')
  * @param string $string to encode
  * @return string
  */
-function base64_url_encode(string $string = ''): string
+function base64_url_encode(string $string = null): string
 {
     return strtr(base64_encode($string), '+/=', '-_~');
 }
@@ -523,7 +506,7 @@ function base64_url_encode(string $string = ''): string
  * @param string $string to decode
  * @return string
  */
-function base64_url_decode(string $string = ''): string
+function base64_url_decode(string $string = null): string
 {
     return base64_decode(strtr($string, '-_~', '+/='));
 }
@@ -540,9 +523,9 @@ function short_url_encode(int $id = 0): string
     }
     $show = '';
     while ($id > 0) {
-        $s = $id % 62;
+        $s    = $id % 62;
         $show = ($s > 35 ? chr($s + 61) : ($s > 9 ? chr($s + 55) : $s)) . $show;
-        $id = floor($id / 62);
+        $id   = floor($id / 62);
     }
     return $show;
 }
@@ -556,9 +539,9 @@ function short_url_decode(string $string = ''): int
 {
     $p = 0;
     while ($string !== '') {
-        $s = substr($string, 0, 1);
-        $n = is_numeric($s) ? $s : ord($s);
-        $p = $p * 62 + (($n >= 97) ? ($n - 61) : ($n >= 65 ? $n - 55 : $n));
+        $s      = substr($string, 0, 1);
+        $n      = is_numeric($s) ? $s : ord($s);
+        $p      = $p * 62 + (($n >= 97) ? ($n - 61) : ($n >= 65 ? $n - 55 : $n));
         $string = substr($string, 1);
     }
     return $p;
@@ -568,16 +551,16 @@ function short_url_decode(string $string = ''): int
  * HTTP缓存控制
  * @param int $expires 缓存时间 0:为不缓存 单位:s
  * @param string $etag ETag
- * @param int $last_modified 最后更新时间
+ * @param int $LastModified 最后更新时间
  */
-function expires(int $expires = 0, string $etag = '', int $last_modified = 0)
+function expires(int $expires = 0, string $etag = '', int $LastModified = 0)
 {
     if ($expires > 0) {
         $time = time();
         header("Expires: " . gmdate("D, d M Y H:i:s", $time + $expires) . " GMT");
         header("Cache-Control: max-age=" . $expires);
-        if ($last_modified) {
-            header("Last-Modified: " . gmdate("D, d M Y H:i:s", $last_modified) . " GMT");
+        if ($LastModified) {
+            header("Last-Modified: " . gmdate("D, d M Y H:i:s", $LastModified) . " GMT");
         }
         if ($etag) {
             if ($etag == $_SERVER["HTTP_IF_NONE_MATCH"]) {
@@ -611,8 +594,8 @@ function error404(string $msg = ''): void
                     <h1>404 Not Found</h1>
                 </div>
                 <hr>
-                <div align="center"><a href="' . \ounun::$root_www . '">返回网站首页</a></div>
-                '.($msg?'<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">'.$msg.'</div>':'').'
+                <div align="center"><a href="' . \ounun::$url_www . '">返回网站首页</a></div>
+                ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
             </body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
@@ -625,6 +608,61 @@ function error404(string $msg = ''): void
 }
 
 /**
+ * Convert special characters to HTML safe entities.
+ * 特殊字符转换成 HTML安全格式。
+ * @param string $string to encode
+ * @return string
+ */
+function safe(string $string): string
+{
+    return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
+}
+
+/**
+ * Filter a valid UTF-8 string so that it contains only words, numbers,
+ * dashes, underscores, periods, and spaces - all of which are safe
+ * characters to use in file names, URI, XML, JSON, and (X)HTML.
+ * @param string $string to clean
+ * @param bool $spaces TRUE to allow spaces
+ * @return string
+ */
+function sanitize(string $string, bool $spaces = true): string
+{
+    $search = [
+        '/[^\w\-\. ]+/u',   // Remove non safe characters
+        '/\s\s+/',          // Remove extra whitespace
+        '/\.\.+/',
+        '/--+/',
+        '/__+/'             // Remove duplicate symbols
+    ];
+    $string = preg_replace($search, [' ', ' ', '.', '-', '_'], $string);
+    if (!$spaces) {
+        $string = preg_replace('/--+/', '-', str_replace(' ', '-', $string));
+    }
+    return trim($string, '-._ ');
+}
+
+/**
+ * Create a SEO friendly URL string from a valid UTF-8 string.
+ * @param string $string to filter
+ * @return string
+ */
+function sanitize_url(string $string): string
+{
+    return urlencode(mb_strtolower(sanitize($string, false)));
+}
+
+/**
+ * Filter a valid UTF-8 string to be file name safe.
+ * @param string $string to filter
+ * @return string
+ */
+function sanitize_filename(string $string): string
+{
+    return sanitize($string, false);
+}
+
+/**
  * 当前开发环境
  * @return string '','2','-dev'
  */
@@ -634,17 +672,17 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     /** @var string $env_file 读取环境配制 */
-    $env_file = Dir_Root.'.environment.php';
-    if(is_file($env_file)){
+    $env_file = Dir_Root . '.environment.php';
+    if (is_file($env_file)) {
         $ini = require $env_file;
-        if(empty($ini)){
+        if (empty($ini)) {
             $GLOBALS['_environment_'] = '';
-        }else{
-            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment'])?$ini['global']['environment']:'';
+        } else {
+            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment']) ? $ini['global']['environment'] : '';
             \ounun::environment_set($ini);
         }
     } else {
-        exit("{$env_file}:not exist");
+        $GLOBALS['_environment_'] = '2';
     }
     return $GLOBALS['_environment_'];
 }
@@ -663,7 +701,7 @@ abstract class v
     public static function db_v_get()
     {
         if (empty(static::$db_v)) {
-            static::$db_v = \ounun\db\pdo::i(\ounun::database_default_get());
+            static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
         }
         return static::$db_v;
     }
@@ -684,11 +722,11 @@ abstract class v
     public function cache_html($key)
     {
         if ('' == Environment && \ounun::$global['cache_html']) {
-            $cfg = \ounun::$global['cache_html'];
-            $cfg['mod'] = 'html_' . \ounun::$app_name .'_'. \ounun::$tpl_style. '_'.\ounun::$tpl_type;
-            $key2  = \ounun::$app_name . '_' . \ounun::$tpl_style .'_'.\ounun::$tpl_type. '_' . $key;
-            $debug = \ounun::$global['debug'];
-            $debug = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
+            $cfg                = \ounun::$global['cache_html'];
+            $cfg['mod']         = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type;
+            $key2               = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
+            $debug              = \ounun::$global['debug'];
+            $debug              = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
             static::$cache_html = new \ounun\cache\buffer\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
             static::$cache_html->run(true);
         }
@@ -716,10 +754,10 @@ abstract class v
      * @param bool $show_debug
      * @return string
      */
-    static public function tpl_fixed(string $filename,string $addon_tag = '',bool $show_debug = true): string
+    static public function tpl_fixed(string $filename, string $addon_tag = '', bool $show_debug = true): string
     {
-        $tpl = static::$tpl->tpl_fixed($filename,$addon_tag,$show_debug);
-        if($tpl){
+        $tpl = static::$tpl->tpl_fixed($filename, $addon_tag, $show_debug);
+        if ($tpl) {
             return $tpl;
         }
         return '';
@@ -732,7 +770,7 @@ abstract class v
      */
     static public function tpl_curr(string $filename, string $addon_tag = ''): string
     {
-        return static::$tpl->tpl_curr($filename,$addon_tag);
+        return static::$tpl->tpl_curr($filename, $addon_tag);
     }
 
     /** @var \ounun\debug 调试 相关 */
@@ -747,9 +785,10 @@ abstract class v
      * @param bool $is_run_time
      * @param bool $is_bof
      */
-    public static function debug_init($filename='404',$is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false){
+    public static function debug_init($filename = '404', $is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false)
+    {
         if (empty(static::$debug)) {
-            static::$debug = new \ounun\debug(\ounun::$dir_data . 'logs/'.$filename.'_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,$is_run_time,$is_bof);
+            static::$debug = new \ounun\debug(\ounun::$dir_data . 'logs/' . $filename . '_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url, $is_run_time, $is_bof);
         }
     }
 
@@ -765,7 +804,9 @@ abstract class v
         }
     }
 
-    /** 停止 调试 */
+    /**
+     * 停止 调试
+     */
     public function debug_stop()
     {
         if (static::$debug) {
@@ -776,31 +817,15 @@ abstract class v
     /**
      * ounun_view constructor.
      * @param $url_mods
-     * @param string $addon_tag  设定的$addon_tag
      */
-    public function __construct($url_mods, string $addon_tag = '')
+    public function __construct($url_mods)
     {
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];
         }
-        \ounun::$view = $this;
         $method       = $url_mods[0];
-        // 控制器初始化
-        $rs = $this->_initialize($method);
-        if(error_is($rs)){
-            out($rs);
-        }
+        \ounun::$view = $this;
         $this->$method($url_mods);
-    }
-
-    /**
-     * 控制器ounun_view 初始化
-     * @param string $method
-     * @return mixed
-     */
-    protected function _initialize(string $method)
-    {
-        return true;
     }
 
     /**
@@ -815,13 +840,14 @@ abstract class v
     public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        $page_url = \ounun::url_page(\ounun::$url_addon_pre.$page_file);
+        \ounun::url_page(\ounun::$url_addon_pre . $page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
+
         // cache_html
-        if('' == Environment ){
-            $debug = \ounun::$global['debug'];
+        if ('' == Environment) {
+            $debug                   = \ounun::$global['debug'];
             static::$cache_html_trim = $debug && isset($debug['html_trim']) ? $debug['html_trim'] : $cache_html_trim;
-        }else{
+        } else {
             static::$cache_html_trim = false;
         }
         if ($is_cache_html) {
@@ -831,23 +857,13 @@ abstract class v
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new \ounun\template(\ounun::$tpl_style,\ounun::$tpl_style_default, \ounun::$tpl_type,\ounun::$tpl_type_default, static::$cache_html_trim);
+            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_style_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
         }
 
         // db
-        static::db_v_get();
-    }
-
-    /**
-     * @param string $seo_title
-     * @param string $seo_keywords
-     * @param string $seo_description
-     * @param string $seo_h1
-     * @param string $etag
-     */
-    public function tkd_set(string $seo_title = '', string $seo_keywords = '', string $seo_description = '', string $seo_h1 = '', string $etag = '')
-    {
-        \ounun::seo_page_set($seo_title,$seo_keywords,$seo_description,$seo_h1,$etag);
+        if (empty(static::$db_v)) {
+            static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
+        }
     }
 
     /**
@@ -856,9 +872,9 @@ abstract class v
      */
     public function index($mod)
     {
-        error404("<strong>method</strong>  --> ".__METHOD__." <br />\n  
-                        <strong>mod</strong> ------> " . json_encode($mod,JSON_UNESCAPED_UNICODE) . " <br />\n  
-                        <strong>class</strong> ------> ".get_class($this));
+        error404("<strong>method</strong>  --> " . __METHOD__ . " <br />\n  
+                        <strong>mod</strong> ------> " . json_encode($mod, JSON_UNESCAPED_UNICODE) . " <br />\n  
+                        <strong>class</strong> ------> " . get_class($this));
     }
 
     /**
@@ -884,10 +900,7 @@ abstract class v
     {
         url_check('/ads.txt');
         header('Content-Type: text/plain');
-        if(\ounun::$global['ads']){
-            exit(\ounun::$global['ads']);
-        }elseif (file_exists(\ounun::$dir_app . 'ads.txt')) {
-
+        if (file_exists(\ounun::$dir_app . 'ads.txt')) {
             readfile(\ounun::$dir_app . 'ads.txt');
         } else {
             exit("google.com, pub-7081168645550959, DIRECT, f08c47fec0942fa0");
@@ -899,7 +912,7 @@ abstract class v
      */
     public function favicon($mod)
     {
-        go_url(\ounun::$root_static . 'favicon.ico', false, 301);
+        go_url(\ounun::$url_static . 'favicon.ico', false, 301);
     }
 
     /**
@@ -910,11 +923,11 @@ abstract class v
     public function __call($method, $arguments)
     {
         header('HTTP/1.1 404 Not Found');
-        if(Environment) {
+        if (Environment) {
             $this->debug_init('404');
         }
         error404("<strong>method</strong> -->   {$method} <br />\n 
-                        <strong>args</strong> ------> " . json_encode($arguments,JSON_UNESCAPED_UNICODE) . " <br />\n 
-                        <strong>class</strong> -----> ".get_class($this));
+                        <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) . " <br />\n 
+                        <strong>class</strong> -----> " . get_class($this));
     }
 }

@@ -50,9 +50,9 @@ class mysqli
         if ($cfg['charset']) {
             $this->_charset = $cfg['charset'];
         }
-        $host = explode(':', $cfg['host']);
-        $this->_post = (int)$host[1];
-        $this->_host = $host[0];
+        $host            = explode(':', $cfg['host']);
+        $this->_post     = (int)$host[1];
+        $this->_host     = $host[0];
         $this->_database = $cfg['database'];
         $this->_username = $cfg['username'];
         $this->_password = $cfg['password'];
@@ -106,7 +106,7 @@ class mysqli
      */
     protected function bind_value(string $sql, $bind): string
     {
-        $rs = preg_split('/(\:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $rs  = preg_split('/(\:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $rs2 = [];
         foreach ($rs as $v) {
             if ($v[0] == ':') {
@@ -186,13 +186,13 @@ class mysqli
         if (array_keys($bind) !== range(0, count($bind) - 1)) {
             // Associative array
             $cols = array_keys($bind);
-            $sql = "INSERT {$params} INTO {$table} " . '(`' . implode('`, `', $cols) . '`) ' . 'VALUES (:' . implode(', :', $cols) . ') ' . $this->format($ext, $bind2) . ';';
+            $sql  = "INSERT {$params} INTO {$table} " . '(`' . implode('`, `', $cols) . '`) ' . 'VALUES (:' . implode(', :', $cols) . ') ' . $this->format($ext, $bind2) . ';';
 
             $this->conn($sql, $bind, false);
         } else {
             // Indexed array
             $tmpArray = [];
-            $cols = array_keys($bind[0]);
+            $cols     = array_keys($bind[0]);
             foreach ($bind as $v) {
                 $tmpArray[] = $this->format(' :' . implode(', :', $cols) . ' ', $v);
             }
@@ -200,7 +200,7 @@ class mysqli
             $this->conn($sql, null, false);
         }
 
-        $this->_insert_id = $this->_conn->insert_id;     // 取得上一步 INSERT 操作产生的 ID
+        $this->_insert_id      = $this->_conn->insert_id;     // 取得上一步 INSERT 操作产生的 ID
         $this->_query_affected = $this->_conn->affected_rows; // 取得前一次 MySQL 操作所影响的记录行数
         return $this->_insert_id;
     }
@@ -229,10 +229,10 @@ class mysqli
         $primary = $primary + $bind;
 
         $cols = array_keys($primary);
-        $sql = "INSERT  INTO {$table} " . '(`' . implode('`, `', $cols) . '`) ' . 'VALUES (:' . implode(', :', $cols) . ')  ON DUPLICATE KEY UPDATE ' . implode(' , ', $update) . ';';
+        $sql  = "INSERT  INTO {$table} " . '(`' . implode('`, `', $cols) . '`) ' . 'VALUES (:' . implode(', :', $cols) . ')  ON DUPLICATE KEY UPDATE ' . implode(' , ', $update) . ';';
         $this->conn($sql, $primary);
 
-        $this->_insert_id = $this->_conn->insert_id; //取得上一步 INSERT 操作产生的 ID
+        $this->_insert_id      = $this->_conn->insert_id; //取得上一步 INSERT 操作产生的 ID
         $this->_query_affected = $this->_conn->affected_rows; //取得前一次 MySQL 操作所影响的记录行数
         return $this->_insert_id;
     }
@@ -250,7 +250,7 @@ class mysqli
     {
         $this->conn("INSERT {$param} INTO {$table} {$sql} ", $bind);
 
-        $this->_insert_id = $this->_conn->insert_id;     // 取得上一步 INSERT 操作产生的 ID
+        $this->_insert_id      = $this->_conn->insert_id;     // 取得上一步 INSERT 操作产生的 ID
         $this->_query_affected = $this->_conn->affected_rows; // 取得前一次 MySQL 操作所影响的记录行数
         return $this->_insert_id;
     }
@@ -269,12 +269,12 @@ class mysqli
         if (array_keys($bind) !== range(0, count($bind) - 1)) {
             // Associative array
             $cols = array_keys($bind);
-            $sql = "REPLACE {$param} INTO {$table} " . '(`' . implode('`, `', $cols) . '`) ' . 'VALUES (:' . implode(', :', $cols) . ') ;';
+            $sql  = "REPLACE {$param} INTO {$table} " . '(`' . implode('`, `', $cols) . '`) ' . 'VALUES (:' . implode(', :', $cols) . ') ;';
             $this->conn($sql, $bind);
         } else {
             // Indexed array
             $tmpArray = [];
-            $cols = array_keys($bind[0]);
+            $cols     = array_keys($bind[0]);
             foreach ($bind as $v) {
                 $tmpArray[] = $this->format(' :' . implode(', :', $cols) . ' ', $v);
             }
@@ -475,7 +475,7 @@ class mysqli
             }
         } else {
             while ($rss = $this->_rs->fetch_assoc()) {
-                $tmp = array_values($rss);
+                $tmp         = array_values($rss);
                 $rs[$tmp[0]] = $rss;
             }
         }
@@ -566,8 +566,8 @@ class mysqli
     /**
      * Writes the log and returns the exception
      *
-     * @param  string $message
-     * @param  string $sql
+     * @param string $message
+     * @param string $sql
      * @return string
      */
     private function exception_log($message = "", $sql = "")

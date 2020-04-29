@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 class debug
@@ -40,21 +41,21 @@ class debug
     /**
      * 构造函数
      * debug constructor.
-     * @param string $filename     输出文件名
-     * @param bool $is_out_buffer  是否输出 buffer
-     * @param bool $is_out_get      是否输出 get
-     * @param bool $is_out_post    是否输出 post
-     * @param bool $is_out_url     是否输出 url
-     * @param bool $is_run_time    运行时间毫秒
-     * @param bool $is_bof         倒序(后面的日志写到前面)
+     * @param string $filename 输出文件名
+     * @param bool $is_out_buffer 是否输出 buffer
+     * @param bool $is_out_get 是否输出 get
+     * @param bool $is_out_post 是否输出 post
+     * @param bool $is_out_url 是否输出 url
+     * @param bool $is_run_time 运行时间毫秒
+     * @param bool $is_bof 倒序(后面的日志写到前面)
      */
     public function __construct($filename = 'debug.txt',
                                 $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true, $is_run_time = true, $is_bof = true)
     {
-        if($filename) {
+        if ($filename) {
             $dirname = dirname($filename);
-            if(!file_exists($dirname)) {
-                mkdir($dirname,0777,true);
+            if (!file_exists($dirname)) {
+                mkdir($dirname, 0777, true);
             }
         }
         // ob_start();
@@ -63,12 +64,12 @@ class debug
 
         $this->_filename = $filename;
 
-        $this->_is_bof = $is_bof;
+        $this->_is_bof        = $is_bof;
         $this->_is_out_buffer = $is_out_buffer;
-        $this->_is_out_get = $is_out_get;
-        $this->_is_out_post = $is_out_post;
-        $this->_is_out_url = $is_out_url;
-        $this->_is_run_time = $is_run_time;
+        $this->_is_out_get    = $is_out_get;
+        $this->_is_out_post   = $is_out_post;
+        $this->_is_out_url    = $is_out_url;
+        $this->_is_run_time   = $is_run_time;
         if ($this->_is_run_time) {
             $this->_time = -microtime(true);
         }
@@ -105,7 +106,7 @@ class debug
     /** 停止调试 */
     public function stop()
     {
-        $this->_logs = [];
+        $this->_logs     = [];
         $this->_filename = '';
     }
 
@@ -129,7 +130,7 @@ class debug
             return;
         }
         $filename = $this->_filename;
-        $str = '';
+        $str      = '';
         if ($this->_is_out_url) {
             $str .= 'URL :' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:') . '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . "\n";
         }
@@ -151,14 +152,14 @@ class debug
         }
         if ($this->_is_run_time) {
             $this->_time += microtime(true);
-            $run_time = 'RunTime:' . sprintf('%f', $this->_time);
+            $run_time    = 'RunTime:' . sprintf('%f', $this->_time);
         } else {
             $run_time = '';
         }
         if ($this->_is_out_buffer && $this->_logs_buffer) {
             $str .= '--- DATE:' . date("Y-m-d H:i:s") . ' RunTime:' . $run_time . '---' . "\n" . $this->_logs_buffer . "\n";
         }
-        $this->_logs = [];
+        $this->_logs        = [];
         $this->_logs_buffer = '';
         if ($this->_is_bof) {
             if (file_exists($filename)) {
@@ -211,19 +212,19 @@ class debug
     static protected $_instance;
 
     /**
-     * @param string $filename     输出文件名
-     * @param bool $is_out_buffer  是否输出 buffer
-     * @param bool $is_out_get      是否输出 get
-     * @param bool $is_out_post    是否输出 post
-     * @param bool $is_out_url     是否输出 url
-     * @param bool $is_run_time    运行时间毫秒
-     * @param bool $is_bof         倒序(后面的日志写到前面)
+     * @param string $filename 输出文件名
+     * @param bool $is_out_buffer 是否输出 buffer
+     * @param bool $is_out_get 是否输出 get
+     * @param bool $is_out_post 是否输出 post
+     * @param bool $is_out_url 是否输出 url
+     * @param bool $is_run_time 运行时间毫秒
+     * @param bool $is_bof 倒序(后面的日志写到前面)
      * @return $this 调试日志单例
      */
     public static function i($filename = 'debug.txt', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true, $is_run_time = true, $is_bof = true): self
     {
         if (empty(static::$_instance)) {
-            static::$_instance = new static($filename, $is_out_buffer , $is_out_get , $is_out_post , $is_out_url , $is_run_time , $is_bof);
+            static::$_instance = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url, $is_run_time, $is_bof);
         }
         return static::$_instance;
     }

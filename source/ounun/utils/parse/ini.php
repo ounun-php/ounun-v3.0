@@ -3,15 +3,12 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\utils\parse;
+
+namespace ounun\config\driver;
 
 
 class ini
 {
-    /**
-     * @param $config
-     * @return array|false
-     */
     public function parse($config)
     {
         if (is_file($config)) {

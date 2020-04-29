@@ -3,13 +3,14 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\apps;
 
 
 abstract class logic
 {
-    /** @var array 错误提示信息  */
-    const Error_Msg  = [];
+    /** @var array 错误提示信息 */
+    const Error_Msg = [];
 
     /** @var self 实例 */
     protected static $_instance;
@@ -29,13 +30,25 @@ abstract class logic
         return static::$_instance;
     }
 
+    /** @var \ounun\db\pdo */
+    public $db;
+
+    /** @var string */
+    public $table = '';
+    /** @var array 数据表结构 */
+    public $table_options = [
+        'fields'          => [],
+        'primary'         => '',
+        'readonly'        => [],
+        'create_autofill' => [],
+        'update_autofill' => [],
+        'filters_input'   => [],
+        'filters_output'  => [],
+        'validators'      => [],
+        'options'         => []
+    ];
     /** @var array 数据 */
     protected $_data = [];
-
-    /** @var \ounun\db\pdo */
-    protected $_db;
-    /** @var string  */
-    protected $_table        = '';
 
     /**
      * cms constructor.
@@ -100,11 +113,11 @@ abstract class logic
      */
     protected function error($error_code = 1, $data = null, $extend = [])
     {
-        if(static::Error_Msg && isset(static::Error_Msg[$error_code])){
-            $msg = static::Error_Msg[$error_code]."(code:{$error_code})";
-        }else{
+        if (static::Error_Msg && isset(static::Error_Msg[$error_code])) {
+            $msg = static::Error_Msg[$error_code] . "(code:{$error_code})";
+        } else {
             $msg = "错误代码暂没定义(code:{$error_code})";
         }
-        return error($msg,$error_code,$data,$extend);
+        return error($msg, $error_code, $data, $extend);
     }
 }

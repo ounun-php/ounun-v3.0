@@ -3,10 +3,11 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\cache\buffer;
 
 
-class cache  extends \ounun\cache
+class cache extends \ounun\cache
 {
     private $_cache_time = -1;
     private $_cache_time_t = -1;
@@ -25,20 +26,20 @@ class cache  extends \ounun\cache
     {
         parent::__construct();
         $type_list = array(self::Type_File, self::Type_Memcache, self::Type_Redis);
-        $type = in_array($config['type'], $type_list) ? $config['type'] : self::Type_File;
+        $type      = in_array($config['type'], $type_list) ? $config['type'] : self::Type_File;
         if (self::Type_Redis == $type) {
-            $config['type'] = $type;
+            $config['type']          = $type;
             $config['format_string'] = false;
-            $config['large_scale'] = true;
+            $config['large_scale']   = true;
         } elseif (self::Type_Memcache == $type) {
-            $config['type'] = $type;
+            $config['type']          = $type;
             $config['format_string'] = false;
-            $config['large_scale'] = true;
+            $config['large_scale']   = true;
         } else//if(self::Type_File == $type)
         {
-            $config['type'] = $type;
+            $config['type']          = $type;
             $config['format_string'] = true;
-            $config['large_scale'] = true;
+            $config['large_scale']   = true;
         }
         $this->_debug = $debug;
         $this->config($config);
@@ -57,10 +58,10 @@ class cache  extends \ounun\cache
         $this->_cache_time = 0;
         if (self::Type_File == $this->_type) {
             $filename = $this->filename();
-            \ounun\debug::header('filename',$filename,$this->_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('filename', $filename, $this->_debug, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_time = filemtime($filename);
-                \ounun\debug::header('cache_time',$this->_cache_time,$this->_debug,__FUNCTION__,__LINE__);
+                \ounun\debug::header('cache_time', $this->_cache_time, $this->_debug, __FUNCTION__, __LINE__);
             }
         } else {
             $this->_cache_time = (int)$this->get('filemtime');
@@ -81,11 +82,11 @@ class cache  extends \ounun\cache
         $this->_cache_time_t = 0;
         if (self::Type_File == $this->_type) {
             $filename = $this->filename() . '.t';
-            \ounun\debug::header('file',$filename,$this->_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('file', $filename, $this->_debug, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_time_t = filemtime($filename);
                 $this->_cache_size_t = filesize($filename);
-                \ounun\debug::header('time',$this->_cache_time_t,$this->_debug,__FUNCTION__,__LINE__);
+                \ounun\debug::header('time', $this->_cache_time_t, $this->_debug, __FUNCTION__, __LINE__);
             }
         } else {
             $this->_cache_time_t = (int)$this->get('filemtime_t');
@@ -110,7 +111,7 @@ class cache  extends \ounun\cache
         $this->_cache_time_t = time();
         if (self::Type_File == $this->_type) {
             $filename = $this->filename() . '.t';
-            \ounun\debug::header('file',$filename,$this->_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('file', $filename, $this->_debug, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 touch($filename);
             } else {
@@ -137,10 +138,10 @@ class cache  extends \ounun\cache
         }
         if (self::Type_File == $this->_type) {
             $filename = $this->filename();
-            \ounun\debug::header('file',$filename,$this->_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('file', $filename, $this->_debug, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_size = filesize($filename);
-                \ounun\debug::header('size',$this->_cache_size,$this->_debug,__FUNCTION__,__LINE__);
+                \ounun\debug::header('size', $this->_cache_size, $this->_debug, __FUNCTION__, __LINE__);
             }
             $this->_cache_size = 0;
         } else {
@@ -159,7 +160,7 @@ class cache  extends \ounun\cache
             $this->val($html);
             $this->write();
             $filename = $this->filename() . '.t';
-            \ounun\debug::header('delfile',$filename,$this->_debug,__FUNCTION__,__LINE__);
+            \ounun\debug::header('delfile', $filename, $this->_debug, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 unlink($filename);
             }
@@ -192,7 +193,7 @@ class cache  extends \ounun\cache
             } else {
                 $content = $this->get('html');
             }
-            $content = gzdecode($content);
+            $content  = gzdecode($content);
             $filesize = strlen($content);
             header('Content-Length: ' . $filesize);
             exit($content);
@@ -205,9 +206,9 @@ class cache  extends \ounun\cache
      */
     public function delete()
     {
-        $this->_cache_time = -1;
+        $this->_cache_time   = -1;
         $this->_cache_time_t = -1;
-        $this->_cache_size = -1;
+        $this->_cache_size   = -1;
         $this->_cache_size_t = -1;
 
         $filename = $this->filename() . '.t';

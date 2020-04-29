@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 /**
@@ -10,29 +11,29 @@ namespace ounun;
  * Class agent
  * @package ounun
  */
-class client
+class agent
 {
     // 设备类型
-    const Device_Mobile = 1;
-    const Device_Desktop = 2;
-    const Device_Unknown = 0;
+    const DEVICE_Mobile = 1;
+    const DEVICE_Desktop = 2;
+    const DEVICE_Unknown = -1;
 
     // 浏览器类型
-    const Browser_Type_iPhone = 1;
-    const Browser_Type_iPad = 2;
-    const Browser_Type_iPod = 3;
-    const Browser_Type_Android = 4;
-    const Browser_Type_Xzh_App = 5;
-    const Browser_Type_Unknown = 0;
+    const Browser_Type_IPHONE = 1;
+    const Browser_Type_IPAD = 2;
+    const Browser_Type_IPOD = 3;
+    const Browser_Type_ANDROID = 4;
+    const Browser_Type_XzApp = 5;
+    const Browser_Type_Unknown = -1;
 
     // 系统类型
     const Os_Type_Ios = 1;
     const Os_Type_ANDROID = 2;
-    const Os_Type_Unknown = 0;
+    const Os_Type_Unknown = -1;
 
-    // 是否Retina屏
-    const Retina_Type_Yes = 1;
-    const Retina_Type_Not = 0;
+    // 是否RETINA屏
+    const RETINA_TYPE_YES = 1;
+    const RETINA_TYPE_NOT = 0;
 
     // 是否IOS6系统
     const Ios6_Yes = 1;
@@ -71,11 +72,11 @@ class client
 
     const Display_Type_Welcome = 9;
 
-    const Display_Type_Last_Visit = 1;
+    const Display_Type_Lastvisit = 1;
 
     const Display_Type_Account = 2;
 
-    const Display_Type_Wx_App = 3;
+    const Display_Type_Wxapp = 3;
 
     const Display_Type_Webapp = 4;
 
@@ -85,81 +86,58 @@ class client
 
     const Display_Type_Module = 7;
 
-
-    /**
-     * @param string $agent
-     * @return mixed|string
-     */
-    public static function agent_get($agent = '')
-    {
-        $agent = empty($agent) ? $_SERVER['HTTP_USER_AGENT'] : $agent;
-        return $agent;
-    }
-
-
-    /**
-     * 得到agent完整类型信息
-     * @return array
-     */
+    // 得到agent完整类型信息
     public static function device_info_get()
     {
         return [
-            'device_type'  => self::device_type(),
-            'browser_type' => self::browser_type(),
-            'is_retina'    => self::is_retina(),
-            'os_type'      => self::os_type(),
-            'is_ios6'      => self::is_ios6(),
+            'deviceType'  => self::deviceType(),
+            'browserType' => self::browser_type(),
+            'isRetina'    => self::isRetina(),
+            'osType'      => self::osType(),
+            'isIos6'      => self::is_ios6(),
         ];
     }
 
-    /**
-     * 浏览器类型
-     * @param string $agent
-     * @return int
-     */
+    // 浏览器类型
     public static function browser_type($agent = '')
     {
-        $agent = self::agent_get($agent);
+        $agent = self::getAgent($agent);
         if (stripos($agent, 'baiduboxapp') !== false) {
-            return self::Browser_Type_Xzh_App;
+            return self::Browser_Type_XzApp;
         }
 
         if (stripos($agent, 'iphone') !== false) {
-            return self::Browser_Type_iPhone;
+            return self::Browser_Type_IPHONE;
         }
 
         if (stripos($agent, 'ipad') !== false) {
-            return self::Browser_Type_iPad;
+            return self::Browser_Type_IPAD;
         }
 
         if (stripos($agent, 'ipod') !== false) {
-            return self::Browser_Type_iPod;
+            return self::Browser_Type_IPOD;
         }
 
         if (stripos($agent, 'android') !== false) {
-            return self::Browser_Type_Android;
+            return self::Browser_Type_ANDROID;
         }
 
         return self::Browser_Type_Unknown;
     }
 
-    /**
-     * 系统类型
-     * @param string $agent
-     * @return int
-     */
-    public static function os_type($agent = '')
+    // 系统类型
+    public static function osType($agent = '')
     {
-        $agent = self::agent_get($agent);
+        $agent       = self::getAgent($agent);
         $browserType = self::browser_type($agent);
 
         switch ($browserType) {
-            case self::Browser_Type_iPhone:
-            case self::Browser_Type_iPad:
-            case self::Browser_Type_iPod:
+            case self::Browser_Type_IPHONE:
+            case self::Browser_Type_IPAD:
+            case self::Browser_Type_IPOD:
                 $osType = self::Os_Type_Ios;
                 break;
-            case self::Browser_Type_Android:
+            case self::Browser_Type_ANDROID:
                 $osType = self::Os_Type_ANDROID;
                 break;
             default:
@@ -169,44 +147,33 @@ class client
         return $osType;
     }
 
-    /**
-     * 设备类型
-     * @return int
-     */
-    public static function device_type()
+    // 设备类型
+    public static function deviceType()
     {
-        if (self::is_mobile()) {
-            return self::Device_Mobile;
+        if (self::isMobile()) {
+            return self::DEVICE_Mobile;
         } else {
-            return self::Device_Desktop;
+            return self::DEVICE_Desktop;
         }
     }
 
-    /**
-     * retina屏
-     * @param string $agent
-     * @return int
-     */
-    public static function is_retina($agent = '')
+    // retina屏
+    public static function isRetina($agent = '')
     {
-        $agent = self::agent_get($agent);
-        $osType = self::os_type($agent);
+        $agent  = self::getAgent($agent);
+        $osType = self::osType($agent);
 
         if (($osType == self::Os_Type_Ios) && (self::is_ios6($agent) != 1)) {
-            return self::Retina_Type_Yes;
+            return self::RETINA_TYPE_YES;
         } else {
-            return self::Retina_Type_Not;
+            return self::RETINA_TYPE_NOT;
         }
     }
 
-    /**
-     * ios6系统的手机(iphone4, iphone4s)
-     * @param string $agent
-     * @return int
-     */
+    // ios6系统的手机(iphone4, iphone4s)
     public static function is_ios6($agent = '')
     {
-        $agent = self::agent_get($agent);
+        $agent = self::getAgent($agent);
 
         if (stripos($agent, 'iPhone OS 6')) {
             return self::Ios6_Yes;
@@ -215,14 +182,10 @@ class client
         }
     }
 
-    /**
-     * 检查是否在微信中打开
-     * @param string $agent
-     * @return int
-     */
-    public static function is_wechat_message($agent = '')
+    // 检查是否在微信中打开
+    public static function is_micro_message($agent = '')
     {
-        $agent = self::agent_get($agent);
+        $agent = self::getAgent($agent);
 
         if (stripos($agent, 'MicroMessenger') !== false) {
             return self::Wechat_Msg_Yes;
@@ -231,11 +194,8 @@ class client
         }
     }
 
-    /**
-     * 已安装APP
-     * @return int
-     */
-    public static function is_app_installed()
+    // 已安装APP
+    public static function isAppInstalled()
     {
         if (isset($_GET['isappinstalled']) && ($_GET['isappinstalled'] == 1)) {
             return self::App_Installed_Yes;
@@ -248,7 +208,7 @@ class client
      * 是移动设备访问
      * @return bool
      */
-    public static function is_mobile()
+    public static function isMobile()
     {
         // 如果有HTTP_X_WAP_PROFILE则一定是移动设备
         if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
@@ -280,5 +240,15 @@ class client
             }
         }
         return false;
+    }
+
+    /**
+     * @param string $agent
+     * @return mixed|string
+     */
+    public static function getAgent($agent = '')
+    {
+        $agent = empty($agent) ? $_SERVER['HTTP_USER_AGENT'] : $agent;
+        return $agent;
     }
 }

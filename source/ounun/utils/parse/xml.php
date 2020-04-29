@@ -3,14 +3,11 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\utils\parse;
+
+namespace ounun\config\driver;
 
 class xml
 {
-    /**
-     * @param $config
-     * @return array
-     */
     public function parse($config)
     {
         if (is_file($config)) {
@@ -18,10 +15,10 @@ class xml
         } else {
             $content = simplexml_load_string($config);
         }
-        $result = (array) $content;
+        $result = (array)$content;
         foreach ($result as $key => $val) {
             if (is_object($val)) {
-                $result[$key] = (array) $val;
+                $result[$key] = (array)$val;
             }
         }
         return $result;

@@ -1,5 +1,5 @@
 {
-  "name": "ounun.org/ounun-v3.0",
+  "name": "ounun-php/core-v3.0",
   "description": "the new ounun framework",
   "type": "library",
   "keywords": [
@@ -12,29 +12,28 @@
   "require": {
     "ext-json": "*",
     "ext-curl": "*",
-    "ext-ftp": "*",
     "ext-bcmath": "*",
     "ext-zlib": "*",
     "ext-mysqli": "*",
     "ext-pdo": "*",
     "ext-openssl": "*",
     "ext-mbstring": "*",
+    "ext-memcache": "*",
+    "ext-memcached": "*",
+    "ext-redis": "*",
     "ext-gd": "*",
     "ext-xml": "*",
-    "ext-fileinfo": "*",
-    "ext-ctype": "*",
-    "ext-ldap": "*",
-    "ext-sockets": "*",
-    "ext-simplexml": "*",
-    "ext-xmlrpc": "*",
-
-    "textalk/websocket": "^1.2",
-    "php": ">=7.2",
     "ext-apcu": "*",
-    "ext-imagick": "*"
+    "ext-fileinfo": "*",
+    "ext-sqlite": "*",
+    "ext-xmlrpc": "*",
+    "ext-imagick": "*",
+    "ext-simplexml": "*",
+    "ext-wincache": "*",
+    "php": ">=7.2.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^8.1"
+    "phpunit/phpunit": "8.1.*"
   },
   "autoload": {
     "psr-4": {
