@@ -297,4 +297,10 @@ class file extends \ounun\dc\driver
         return is_file($path) && unlink($path);
     }
 
+
+
+    public function delete(string $key, bool $add_prefix = true)
+    {
+        // TODO: Implement delete() method.
+    }
 }

@@ -12,6 +12,10 @@ namespace ounun\dc\driver;
  */
 class sqlite extends \ounun\dc\driver
 {
+    /** @var string file类型 */
+    const Type          = 'file';
+
+    /** @var array  */
     protected $options = [
         'prefix' => '',
         'path'   => '',

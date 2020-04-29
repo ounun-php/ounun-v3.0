@@ -1,5 +1,7 @@
 <?php
-namespace ounun\http\session\storage;
+namespace ounun\client\session\storage;
+
+
 use ounun\db\pdo;
 use ounun\http\session\storage;
 

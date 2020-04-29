@@ -1,5 +1,7 @@
 <?php
-namespace ounun\http\session\storage;
+namespace ounun\client\session\storage;
+
+
 use ounun\http\session\storage;
 
 /**
@@ -7,7 +9,7 @@ use ounun\http\session\storage;
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-class memcache extends storage
+class memcached extends storage
 {
     /**
      * memcache constructor.

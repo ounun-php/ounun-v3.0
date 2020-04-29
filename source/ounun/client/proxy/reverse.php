@@ -7,7 +7,7 @@
 namespace ounun\client\proxy;
 
 
-use ounun\utils\curl\http;
+use ounun\client\http;
 
 class reverse
 {

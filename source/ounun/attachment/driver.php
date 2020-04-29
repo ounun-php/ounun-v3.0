@@ -134,7 +134,6 @@ abstract class driver
             $file = $this->_target;
         }
 
-
         $info              = [];
         $pathinfo          = pathinfo($file);
         $info['file_path'] = $this->format($pathinfo['dirname'], false) . '/';

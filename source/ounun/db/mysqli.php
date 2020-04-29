@@ -43,19 +43,19 @@ class mysqli
     /**
      * 创建MYSQL类
      * mysqli constructor.
-     * @param array $cfg
+     * @param array $config
      */
-    public function __construct(array $cfg)
+    public function __construct(array $config)
     {
-        if ($cfg['charset']) {
-            $this->_charset = $cfg['charset'];
+        if ($config['charset']) {
+            $this->_charset = $config['charset'];
         }
-        $host            = explode(':', $cfg['host']);
+        $host            = explode(':', $config['host']);
         $this->_post     = (int)$host[1];
         $this->_host     = $host[0];
-        $this->_database = $cfg['database'];
-        $this->_username = $cfg['username'];
-        $this->_password = $cfg['password'];
+        $this->_database = $config['database'];
+        $this->_username = $config['username'];
+        $this->_password = $config['password'];
     }
 
     /**

@@ -3,7 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\http;
+namespace ounun\client;
 
 class uri
 {
@@ -258,7 +258,7 @@ class uri
 		$this->_fragment = $anchor;
 	}
 
-    public function is_ssl()
+    public function ssl_is()
 	{
 		return $this->get_scheme() == 'https' ? true : false;
 	}

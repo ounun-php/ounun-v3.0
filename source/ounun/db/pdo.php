@@ -64,7 +64,7 @@ class pdo
     /** @var string 数据库主机名称 */
     protected $_host = '';
     /** @var string 数据库主机端口 */
-    protected $_post = 3306;
+    protected $_port = 3306;
     /** @var string 数据库charset */
     protected $_charset = 'utf8'; //'utf8mb4','utf8','gbk',latin1;
     /** @var string pdo驱动默认为mysql */
@@ -149,7 +149,7 @@ class pdo
     public function __construct(array $config = [])
     {
         $host            = explode(':', $config['host']);
-        $this->_post     = (int)$host[1];
+        $this->_port     = (int)$host[1];
         $this->_host     = $host[0];
         $this->_database = $config['database'];
         $this->_username = $config['username'];
@@ -244,7 +244,7 @@ class pdo
     public function active(): self
     {
         if (null == $this->_pdo) {
-            $dsn     = "{$this->_driver}:host={$this->_host};port={$this->_post};dbname={$this->_database};charset={$this->_charset}";
+            $dsn     = "{$this->_driver}:host={$this->_host};port={$this->_port};dbname={$this->_database};charset={$this->_charset}";
             $options = [];
             if (self::Driver_Mysql == $this->_driver) {
                 $options = [

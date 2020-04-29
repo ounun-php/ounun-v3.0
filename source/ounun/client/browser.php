@@ -3,7 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\http;
+namespace ounun\client;
 
 /**
 * @version      $Id: browser.php 10707 2008-08-21 09:52:47Z eddieajau $

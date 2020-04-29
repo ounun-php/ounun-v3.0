@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ounun\utils\curl;
+namespace ounun\client;
 
 
 class http_proxy
