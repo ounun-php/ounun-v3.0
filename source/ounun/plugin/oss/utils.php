@@ -34,7 +34,7 @@ class utils
             while (($file = readdir($dh)) !== false) {
                 // echo $src_dir2.$file." \t --> \n";
                 if($file=="." || $file=="..") {
-
+                    continue;
                 }elseif(is_dir($src_dir2.$file)) {
                     if(!file_exists($this->_taget_dir.$dir)) {
                         echo "mkdir \t -> ".$this->_taget_dir.$dir."\n";
@@ -71,7 +71,7 @@ class utils
             while (($file = readdir($dh)) !== false) {
                 // echo $src_dir2.$file." \t --> \n";
                 if($file=="." || $file=="..") {
-                    //
+                    continue;
                 }elseif(is_dir($src_dir2.$file)) {
                     self::rename("{$dir}{$file}/",$dir_root);
                 } else {

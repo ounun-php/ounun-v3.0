@@ -3,13 +3,12 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
-namespace ounun\dc\driver;
+namespace ounun\cache\driver;
 
 /**
  * 文件类型缓存类
  */
-class file extends \ounun\dc\driver
+class file extends \ounun\cache\driver
 {
     /** @var string file类型 */
     const Type          = 'file';

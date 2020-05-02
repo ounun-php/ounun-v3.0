@@ -6,8 +6,6 @@
 
 namespace ounun;
 
-use ounun\console\task_driver;
-
 class console
 {
     /** @var string 默认执行的命令 */

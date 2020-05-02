@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ounun\dc;
+namespace ounun\cache\driver\redis;
 
 
 class tagset

@@ -3,7 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\dc\driver;
+namespace ounun\cache\driver;
 
 
 /**
@@ -12,7 +12,7 @@ namespace ounun\dc\driver;
  *
  * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
  */
-class redis extends \ounun\dc\driver
+class redis extends \ounun\cache\driver
 {
     /** @var string redis类型 */
     const Type          = 'redis';

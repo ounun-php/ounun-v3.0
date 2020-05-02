@@ -4,13 +4,13 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-namespace ounun\dc\driver;
+namespace ounun\cache\driver;
 
 
 /**
  * 文件类型缓存类
  */
-class sqlite extends \ounun\dc\driver
+class sqlite extends \ounun\cache\driver
 {
     /** @var string file类型 */
     const Type          = 'file';

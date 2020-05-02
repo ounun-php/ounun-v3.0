@@ -412,27 +412,27 @@ function succeed_data($data)
 function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
-        $type = \ounun\console\c::Format_Json;
+        $type = \ounun\c::Format_Json;
     }
     switch ($type) {
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\console\c::Format_Json :
+        case \ounun\c::Format_Json :
             header('Content-Type:application/json; charset=utf-8');
             exit(json_encode($data, $json_options));
         // 返回xml格式数据
-        case \ounun\console\c::Format_Xml :
+        case \ounun\c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
             exit(\ounun\utils\db::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\console\c::Format_Jsonp:
+        case \ounun\c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
             exit($jsonp_callback . '(' . json_encode($data, $json_options) . ');');
         // 返回可执行的js脚本
-        case  \ounun\console\c::Format_JS :
-        case  \ounun\console\c::Format_Eval :
+        case  \ounun\c::Format_JS :
+        case  \ounun\c::Format_Eval :
             header('Content-Type:application/javascript; charset=utf-8');
             exit($data);
         // 返回可执行的js脚本

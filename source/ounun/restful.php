@@ -166,7 +166,6 @@ class restful extends \v
      */
     public function out($raw_data, int $status_code = 200, string $request_content_type = '')
     {
-
         $request_content_type = $request_content_type ?? $this->_http_accept;
         static::headers_set($request_content_type, $status_code, $this->_http_version);
 
