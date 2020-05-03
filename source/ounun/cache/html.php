@@ -1,10 +1,8 @@
 <?php
 
 
-namespace ounun\cache\buffer;
+namespace ounun\cache;
 
-
-use ounun\cache\driver;
 use ounun\template;
 
 class html
@@ -17,7 +15,7 @@ class html
     /** 全部 - Cdn 类型  */
     const Cdn_Type_Full = 1;
     /** CDN只存etag/expiry/mtime(Redis,Memcached,Sqlite) - Cdn 类型   */
-    const Cdn_Type_Min  = 2;
+    const Cdn_Type_Min = 2;
 
     /** @var bool */
     public $stop = false;

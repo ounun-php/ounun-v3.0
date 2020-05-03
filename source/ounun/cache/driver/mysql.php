@@ -10,10 +10,10 @@ namespace ounun\cache\driver;
 /**
  * 文件类型缓存类
  */
-class sqlite extends \ounun\cache\driver
+class mysql extends \ounun\cache\driver
 {
     /** @var string file类型 */
-    const Type          = 'sqlite';
+    const Type          = 'mysql';
 
     /** @var array  */
     protected $options = [

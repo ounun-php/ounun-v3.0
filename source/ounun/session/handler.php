@@ -1,5 +1,5 @@
 <?php
-namespace ounun\client\session;
+namespace ounun\session;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
@@ -15,7 +15,7 @@ use ounun\db\pdo;
  *
  * @package ounun
  */
-class session_handler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
+class handler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** @var pdo */
     private $_db;
@@ -312,15 +312,15 @@ class session_handler implements \SessionHandlerInterface, \SessionUpdateTimesta
      * @param pdo $db
      * @param string $session_table
      * @param string $session_name
-     * @return session_handler
+     * @return handler
      */
-    public static function start(?pdo $db = null, string $session_table = 'v1_system_session', string $session_name = 'PHPSESSID'): session_handler
+    public static function start(?pdo $db = null, string $session_table = 'v1_system_session', string $session_name = 'PHPSESSID'): handler
     {
         if(empty($db)){
             $db  = \v::db_v_get();
         }
         session_write_close();
-        $handler = new session_handler($db, $session_table, $session_name);
+        $handler = new handler($db, $session_table, $session_name);
         session_set_save_handler($handler,true);
         //
         // Warning: session_write_close(): Failed to write session data using user defined save handler. (session.save_path: ) in Unknown on line

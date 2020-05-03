@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\seo;
 
 use ounun\utils\str;
@@ -29,7 +30,7 @@ class pinyin_gbk
     {
         $fp = fopen(Dir_Plugins_Pinyin . 'res/pinyin.dat', 'r');
         while (!feof($fp)) {
-            $line = trim(fgets($fp));
+            $line                             = trim(fgets($fp));
             $this->_data[$line[0] . $line[1]] = substr($line, 3, strlen($line) - 3);
         }
         fclose($fp);
@@ -112,7 +113,7 @@ class pinyin_gbk
             return $s0{0};
         }
         // $s=iconv("UTF-8","gb2312", $s0);
-        $s = mb_convert_encoding($s0, "GBK", "UTF-8");
+        $s   = mb_convert_encoding($s0, "GBK", "UTF-8");
         $asc = ord($s{0}) * 256 + ord($s{1}) - 65536;
         if ($asc >= -20319 and $asc <= -20284) return "A";
         if ($asc >= -20283 and $asc <= -19776) return "B";
@@ -141,8 +142,6 @@ class pinyin_gbk
     }
 
 
-
-
     /**
      * 汉字转拼单
      * @param $str
@@ -155,8 +154,8 @@ class pinyin_gbk
         $str = u2g($str);//转成GBK
         global $pinyins;
         $restr = '';
-        $str = trim($str);
-        $slen = strlen($str);
+        $str   = trim($str);
+        $slen  = strlen($str);
         if ($slen < 2) {
             return $str;
         }
@@ -164,7 +163,7 @@ class pinyin_gbk
             $fp = fopen('./Lib/Conf/pinyin.dat', 'r');
             if ($fp) {
                 while (!feof($fp)) {
-                    $line = trim(fgets($fp));
+                    $line                         = trim(fgets($fp));
                     $pinyins[$line[0] . $line[1]] = substr($line, 3, strlen($line) - 3);
                 }
             }
@@ -209,8 +208,8 @@ class pinyin_gbk
         $str = str::utf82gbk($str);//转成GBK
         global $pinyins;
         $restr = '';
-        $str = trim($str);
-        $slen = strlen($str);
+        $str   = trim($str);
+        $slen  = strlen($str);
         if ($slen < 2) {
             return $str;
         }
@@ -218,7 +217,7 @@ class pinyin_gbk
             $fp = fopen('./Lib/Conf/pinyin.dat', 'r');
             if ($fp) {
                 while (!feof($fp)) {
-                    $line = trim(fgets($fp));
+                    $line                         = trim(fgets($fp));
                     $pinyins[$line[0] . $line[1]] = substr($line, 3, strlen($line) - 3);
                 }
             }

@@ -810,9 +810,9 @@ class ounun
      */
     static public function root_url_curr_get()
     {
-        if (static::$tpl_style == \ounun\template::Tpl_Type_Mip) {
+        if (static::$tpl_style == \ounun\template::Type_Mip) {
             return static::$root_mip;
-        } elseif (static::$tpl_style == \ounun\template::Tpl_Type_Wap) {
+        } elseif (static::$tpl_style == \ounun\template::Type_Wap) {
             return static::$root_wap;
         }
         return static::$root_www;

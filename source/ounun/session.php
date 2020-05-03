@@ -1,12 +1,14 @@
 <?php
-namespace ounun\client\session;
+namespace ounun;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 class session
 {
-	protected $options, $started = false;
+	protected $options = [];
+
+	protected $started = false;
 
 	public function __construct($options = [])
 	{

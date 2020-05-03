@@ -4,7 +4,7 @@
 namespace ounun\client;
 
 
-class http_proxy
+class proxy
 {
     protected static $instance=null;
     public $header=null;

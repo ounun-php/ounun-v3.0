@@ -6,6 +6,8 @@
 
 namespace ounun\attachment;
 
+use ounun\utils\helper\folder;
+
 abstract class driver
 {
     static public $url_site = '/';
@@ -20,15 +22,13 @@ abstract class driver
     public $filesize_max = 1024;
 
     /** @var string 目录名称 */
-	protected $_dir;
+    protected $_dir;
 
-	/** @var int 错误代码 */
-	protected $_error_code = 0;
+    /** @var int 错误代码 */
+    protected $_error_code = 0;
 
-	/** @var string 文件名称 */
-	protected $_filename = '';
-
-
+    /** @var string 文件名称 */
+    protected $_filename = '';
 
     protected $_source;
 
@@ -37,8 +37,8 @@ abstract class driver
     protected $_time;
 
 
-	/** @var array 文件列表 */
-	protected $_files = [];
+    /** @var array 文件列表 */
+    protected $_files = [];
 
 
     /**
@@ -147,6 +147,7 @@ abstract class driver
         }
         return $info;
     }
+
     /**
      * @param string $file
      * @return bool

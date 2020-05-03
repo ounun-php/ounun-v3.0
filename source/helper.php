@@ -608,58 +608,16 @@ function error404(string $msg = ''): void
 }
 
 /**
- * Convert special characters to HTML safe entities.
- * 特殊字符转换成 HTML安全格式。
- * @param string $string to encode
- * @return string
+ * 获得libs Data数据
+ * @param string $filename
+ * @return mixed
  */
-function safe(string $string): string
+function data(string $filename)
 {
-    return htmlspecialchars($string, ENT_QUOTES, 'utf-8');
-}
-
-/**
- * Filter a valid UTF-8 string so that it contains only words, numbers,
- * dashes, underscores, periods, and spaces - all of which are safe
- * characters to use in file names, URI, XML, JSON, and (X)HTML.
- * @param string $string to clean
- * @param bool $spaces TRUE to allow spaces
- * @return string
- */
-function sanitize(string $string, bool $spaces = true): string
-{
-    $search = [
-        '/[^\w\-\. ]+/u',   // Remove non safe characters
-        '/\s\s+/',          // Remove extra whitespace
-        '/\.\.+/',
-        '/--+/',
-        '/__+/'             // Remove duplicate symbols
-    ];
-    $string = preg_replace($search, [' ', ' ', '.', '-', '_'], $string);
-    if (!$spaces) {
-        $string = preg_replace('/--+/', '-', str_replace(' ', '-', $string));
+    if (file_exists($filename)) {
+        return require $filename;
     }
-    return trim($string, '-._ ');
-}
-
-/**
- * Create a SEO friendly URL string from a valid UTF-8 string.
- * @param string $string to filter
- * @return string
- */
-function sanitize_url(string $string): string
-{
-    return urlencode(mb_strtolower(sanitize($string, false)));
-}
-
-/**
- * Filter a valid UTF-8 string to be file name safe.
- * @param string $string to filter
- * @return string
- */
-function sanitize_filename(string $string): string
-{
-    return sanitize($string, false);
+    return null;
 }
 
 /**

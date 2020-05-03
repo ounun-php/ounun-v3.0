@@ -78,7 +78,7 @@ class download extends driver
      * @param string $ext
      * @return string
      */
-    static public function url_oss_image(string $image_url, int $w, int $h, int $q = 90, string $ext='')
+    static public function url_oss_image(string $image_url, int $w, int $h, int $q = 90, string $ext = '')
     {
         return "{$image_url}?x-oss-process=image/auto-orient,1/resize,m_fill,w_{$w},h_{$h}/quality,Q_{$q}{$ext}";
     }
@@ -93,11 +93,11 @@ class download extends driver
      * @param string $ext
      * @return string
      */
-    static public function url_google_image(string $host , string $path , string $image_url, int $w = 0 , int $h = 0 , string $ext='c')
+    static public function url_google_image(string $host, string $path, string $image_url, int $w = 0, int $h = 0, string $ext = 'c')
     {
-        if($w || $h){
-            $w = $w <=0 ? '-' : $w;
-            $h = $h <=0 ? '-' : $h;
+        if ($w || $h) {
+            $w = $w <= 0 ? '-' : $w;
+            $h = $h <= 0 ? '-' : $h;
             return "https://{$host}/{$ext}{$w}x{$h}/{$path}/{$image_url}";
         }
         return "https://{$host}/{$path}/{$image_url}";

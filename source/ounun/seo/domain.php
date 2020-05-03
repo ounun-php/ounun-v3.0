@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\seo;
 
 
@@ -54,7 +55,7 @@ class domain
         'white', 'total', 'whistle', 'low', 'me', 'gaiety', 'ink', 'about', 'honest', 'chicken', 'lid', 'happen', 'money', 'ye', 'form', 'maybe', 'mention', 'ambitious', 'ni', 'scissors',
         'treasury', 'material', 'college', 'drown', 'scold', 'complete', 'zhuan', 'shade', 'expense', 'lun', 'half', 'lie', 'struggle', 'gen', 'represent', 'object', 'every', 'astonish',
         'swing', 'approval', 'disrespect', 'pa', 'sake', 'vessel', 'center', 'poison', 'kneel', 'now', 'worth', 'thin', 'cu', 'bunch', 'aside', 'peng', 'verse', 'except', 'entrance', 'scale',
-        'bucket', 'applause', 'citizen', 'kong', 'discomfort', 'say', 'mystery', 'treasure', 'cow', 'prevent', 'message', 'agent', 'basket', 'deal', 'best', 'vnang', 'critic', 'advantage', 'good', 'niece', 'shuang','excess',
+        'bucket', 'applause', 'citizen', 'kong', 'discomfort', 'say', 'mystery', 'treasure', 'cow', 'prevent', 'message', 'agent', 'basket', 'deal', 'best', 'vnang', 'critic', 'advantage', 'good', 'niece', 'shuang', 'excess',
         'splendid', 'stripe', 'button', 'neighbor', 'yesterday', 'ti', 'zhong', 'push', 'future', 'passage', 'nail', 'government', 'shang', 'toe', 'holy', 'whisper', 'xiong', 'queen', 'walk', 'military', 'shan', 'jealousy', 'street',
         'bundle', 'action', 'slippery', 'chuan', 'root', 'rivalry', 'sorry', 'camp', 'package', 'baggage', 'wai', 'road', 'cage', 'tear', 'trust', 'bay', 'never', 'dissatisfaction', 'fun', 'bribery', 'round', 'dissatisfy', 'fold', 'admit',
         'black', 'nai', 'multiplication', 'key', 'iu', 'barber', 'harden', 'hurrah', 'hun', 'inn', 'here', 'cultivate', 'hit', 'brush', 'kuo', 'gun', 'digestion', 'boil', 'pink', 'ditch', 'extraordinary', 'lead', 'border', 'confident', 'destroy',
@@ -116,7 +117,7 @@ class domain
         'strength', 'upon', 'steady', 'win', 'shoot', 'artificial', 'home', 'prevention', 'floor', 'k', 'qia', 'stair', 'hay', 'without', 'figure', 'sincere', 'hole', 'besides', 'pride', 'bind', 'however', 'glad', 'paw', 'shoe', 'audience', 'robbery', 'hut', 'sick', 'dan', 'drive', 'cave', 'leave', 'earn', 'sword', 'juice',
         'conscious', 'see', 'signature', 'such', 'sweeten', 'ru', 'goat', 'metal', 'cha', 'kitchen', 'redden', 'waiting', 'corn', 'normal', 'tower', 'board', 'slight', 'separate', 'proof', 'luo', 'ken', 'importance', 'seat', 'miserable', 'through', 'lock', 'surround', 'glory', 'wait', 'organize', 'secrecy', 'dream', 'motor',
         'experiment', 'teach', 'creep', 'foolish51.free', 'explosive', 'true', 'huo', 'particle', 'lung', 'deaf', 'slip', 'cheat', 'jiao', 'hou', 'cool', 'being', 'addition', 'parent', 'spit', 'difficulty', 'any', 'how', 'already', 'congratulation', 'sample', 'terrible', 'ton', 'numerous', 'dong', 'stop', 'commercial',
-        'everyday', 'earnest', 'host', 'rong', 'victory', 'direction', 'first', 'would', 'moon', 'chemical', 'mark', 'pou', 'altogether', 'one', 'scatter', 'angle', 'excessive', 'dependent', 'bathe', 'subject', 'ya', 'minister', 'box', 'discover', 'disappear', 'conscience', 'friendly','pair', 'full', 'near', 'fair',
+        'everyday', 'earnest', 'host', 'rong', 'victory', 'direction', 'first', 'would', 'moon', 'chemical', 'mark', 'pou', 'altogether', 'one', 'scatter', 'angle', 'excessive', 'dependent', 'bathe', 'subject', 'ya', 'minister', 'box', 'discover', 'disappear', 'conscience', 'friendly', 'pair', 'full', 'near', 'fair',
         'praise', 'feeble', 'bear', 'performance', 'qian', 'busy', 'yellow', 'pardon', 'mang', 'advertisement', 'salt', 'zang', 'men', 'stage', 'week', 'hook', 'merry', 'star', 'weng', 'blue', 'commerce', 'beyond', 'gay', 'violence', 'split', 'gather', 'pig', 'dance', 'detail', 'ocean', 'noun', 'duty', 'old-fashioned',
         'operator', 'highway', 'wander', 'yu', 'jia', 'huan', 'memory', 'fork', 'glass', 'hope', 'replace', 'mian', 'gang', 'tip', 'spoil', 'deng', 'indeed', 'exercise', 'weave', 'sea', 'stock', 'kou', 'deliver', 'letter', 'chuai', 'several', 'joke', 'diao', 'coat', 'ceremony', 'begin', 'ounce', 'despair', 'last', 'justice',
         'urgent', 'radio', 'union', 'han', 'shave', 'sympathy', 'bag', 'city', 'nei', 'ren', 'qualification', 'even', 'grind', 'often', 'piao', 'xu', 'hear', 'table', 'load', 'thick', 'sew', 'native', 'wrist', 'destruction', 'persuade', 'calculation', 'it', 'morning', 'saw', 'path', 'wife', 'inward', 'tire', 'ga', 'fellowship',
@@ -141,7 +142,7 @@ class domain
         'set', 'flatten', 'asleep', 'pull', 'fit', 'sock', 'cuo', 'guest', 'zi', 'sail', 'swear', 'zha', 'man', 'risk', 'pronounce', 'bow', 'elder', 'biao', 'delicate', 'bowl', 'nobody', 'own', 'de', 'cup', 'wild', 'silent', 'conqueror', 'still', 'decisive', 'tongue', 'zen', 'shai', 'virtue', 'motherhood', 'comparison', 'mo', 'eng',
         'west', 'sore', 'realize', 'reduction', 'voice', 'a', 'refuse', 'wool', 'apology', 'make', 'state', 'chest', 'borrow', 'shallow', 'nun', 'salesman', 'agriculture', 'shun', 'shelter', 'actress', 'army', 'absolute', 'basic', 'few', 'confession', 'hang', 'noble', 'ceng', 'reply', 'behind', 'disagree', 'custom', 'greet', 'choose',
         'horse', 'divide', 'pattern', 'laugh', 'wicked', 'chief', 'dependence', 'join', 'eager', 'chou', 'poet', 'oil', 'pain', 'cottage', 'exception', 'ba', 'hai', 'effective', 'patriotic', 'powder', 'witness', 'umbrella', 'huang', 'fish', 'scene', 'voyage', 'belt', 'smell', 'sheet', 'doubt', 're', 'w', 'permission', 'chu', 'gu',
-        'lake', 'cake', 'slave', 'of', 'especially', 'daylight', 'slavery', 'kua', 'gray', 'upset', 'fight', 'local', 'sport', 'interruption', 'zun', 'wealth', 'sai', 'uncle', 'touch', 'bo', 't', 'arrive', 'solution', 'screen', 'nurse', 'tremble', 'or', 'kai', 'further', 'check', 'calculate', 'severe', 'onto', 'obe' ,
+        'lake', 'cake', 'slave', 'of', 'especially', 'daylight', 'slavery', 'kua', 'gray', 'upset', 'fight', 'local', 'sport', 'interruption', 'zun', 'wealth', 'sai', 'uncle', 'touch', 'bo', 't', 'arrive', 'solution', 'screen', 'nurse', 'tremble', 'or', 'kai', 'further', 'check', 'calculate', 'severe', 'onto', 'obe',
     ];
 
     /** 二级域名 字符串 */
@@ -154,13 +155,13 @@ class domain
 
     /**
      * 取得根域名
-     * @param  string $host 域名
+     * @param string $host 域名
      * @return string 返回根域名
      */
     public static function domain($host)
     {
         $array_domain = explode('.', $host);
-        $array_num = count($array_domain);
+        $array_num    = count($array_domain);
         if ($array_num <= 2) {
             return $host;
         } else {

@@ -249,20 +249,4 @@ class time
         }
         return (new date(mktime($hours, $minutes, $seconds, $month, $day, $year)));
     }
-
-    public function __get($name)
-    {
-        if ($name == 'date') {
-            return $this->year.'-'.$this->month.'-'.$this->day;
-        } elseif (property_exists($this, $name)) {
-            return $this->$name;
-        } else {
-            return null;
-        }
-    }
-
-    public function __tostring()
-    {
-        return $this->format();
-    }
 }

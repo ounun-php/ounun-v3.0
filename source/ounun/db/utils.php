@@ -3,12 +3,10 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-namespace ounun\utils;
+namespace ounun\db;
 
 
-use ounun\db\pdo;
-
-class db
+class utils
 {
     /** @var string 整数类型 */
     const Type_Int = 'int';

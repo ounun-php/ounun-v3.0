@@ -16,12 +16,13 @@ class cookie
 
     /** @var string 通信私钥 */
     static protected $key_private = '';
+    /** @var string cookie前缀 */
+    static protected $key_pre = '';
+    /** @var string 登录cookie Key */
+    static protected $key_cookie = '';
+
     /** @var string cookie域名 */
     static protected $domain = '';
-    /** @var string cookie前缀 */
-    static protected $pre_key = '';
-    /** @var string 登录cookie Key */
-    static protected $cookie_key = '';
     /** @var int 登录校验 超时间 */
     static protected $overtime_max = 600;
 
@@ -45,8 +46,8 @@ class cookie
         static::$key_private = $key_private ? $key_private : $oauth_config['login_key'];
         static::$domain      = $domain ? $domain : $oauth_config['login_domain'];
 
-        static::$pre_key      = $pre_key ? $pre_key : ($oauth_config['pre_key'] ? $oauth_config['pre_key'] : 'a');
-        static::$cookie_key   = $cookie_key ? $cookie_key : ($oauth_config['cookie_key'] ? $oauth_config['cookie_key'] : '_');
+        static::$key_pre      = $pre_key ? $pre_key : ($oauth_config['pre_key'] ? $oauth_config['pre_key'] : 'a');
+        static::$key_cookie   = $cookie_key ? $cookie_key : ($oauth_config['cookie_key'] ? $oauth_config['cookie_key'] : '_');
         static::$overtime_max = $overtime_max ? $overtime_max : ($oauth_config['overtime_max'] ? $oauth_config['overtime_max'] : static::Overtime_Max);
 
         // 设定就有误 报错
@@ -82,8 +83,8 @@ class cookie
             $cid_en        = short_url_encode($cid);
             $time_en       = short_url_encode($time);
             $username_en   = urlencode($username);
-            $cookie_value  = static::$pre_key . ".{$oauth_type_en}.{$uid_en}.{$cid_en}.{$time_en}.{$timeouts}." . substr(md5($str), 12, 6) . substr(sha1($str), 16, 10) . ".{$username_en}";
-            setcookie(static::$cookie_key, $cookie_value, $time + 365 * 86400, '/', static::$domain);
+            $cookie_value  = static::$key_pre . ".{$oauth_type_en}.{$uid_en}.{$cid_en}.{$time_en}.{$timeouts}." . substr(md5($str), 12, 6) . substr(sha1($str), 16, 10) . ".{$username_en}";
+            setcookie(static::$key_cookie, $cookie_value, $time + 365 * 86400, '/', static::$domain);
         }
         return true;
     }
@@ -97,9 +98,9 @@ class cookie
         // 设定
         static::config_set();
         // 执行
-        if ($_COOKIE[static::$cookie_key]) {
-            list($pre_key, $oauth_type_en, $uid_en, $cid_en, $time_en, $timeouts, $hex, $username_en) = explode('.', $_COOKIE[static::$cookie_key], 8);
-            if ($pre_key == static::$pre_key && $uid_en && $time_en && $hex) {
+        if ($_COOKIE[static::$key_cookie]) {
+            list($pre_key, $oauth_type_en, $uid_en, $cid_en, $time_en, $timeouts, $hex, $username_en) = explode('.', $_COOKIE[static::$key_cookie], 8);
+            if ($pre_key == static::$key_pre && $uid_en && $time_en && $hex) {
                 $oauth_type = $oauth_type_en ? explode('-', $oauth_type_en) : [];
 
                 $uid      = short_url_decode($uid_en);
@@ -137,7 +138,7 @@ class cookie
         // 设定
         static::config_set();
         // 执行
-        setcookie(static::$cookie_key, '', -1, '/', static::$domain);
+        setcookie(static::$key_cookie, '', -1, '/', static::$domain);
         return true;
     }
 
