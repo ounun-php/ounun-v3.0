@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 class str
@@ -94,10 +95,10 @@ class str
      */
     static public function msubstr2(string $str, int $length, int $start = 0, string $charset = "utf-8", bool $suffix = true): string
     {
-        $re['utf-8'] = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
+        $re['utf-8']  = "/[\x01-\x7f]|[\xc2-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xff][\x80-\xbf]{3}/";
         $re['gb2312'] = "/[\x01-\x7f]|[\xb0-\xf7][\xa0-\xfe]/";
-        $re['gbk'] = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
-        $re['big5'] = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
+        $re['gbk']    = "/[\x01-\x7f]|[\x81-\xfe][\x40-\xfe]/";
+        $re['big5']   = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
         preg_match_all($re[$charset], $str, $match);
         $length_new = $length;
         $length_chi = 0;
@@ -188,7 +189,7 @@ class str
      */
     static public function uniqid(): string
     {
-        $uniqid_prefix = '';
+        $uniqid_prefix   = '';
         $uniqid_filename = '/tmp/php_session_uniqid.txt';
         if (!file_exists($uniqid_filename)) {
             $uniqid_prefix = \substr(\uniqid('', false), 3);
@@ -213,7 +214,7 @@ class str
      */
     static public function remove_xss(string $val): string
     {
-        $val = preg_replace('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/', '', $val);
+        $val    = preg_replace('/([\x00-\x08,\x0b-\x0c,\x0e-\x19])/', '', $val);
         $search = 'abcdefghijklmnopqrstuvwxyz';
         $search .= 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $search .= '1234567890!@#$%^&*()';
@@ -222,9 +223,9 @@ class str
             $val = preg_replace('/(&#[xX]0{0,8}' . dechex(ord($search[$i])) . ';?)/i', $search[$i], $val); // with a ;
             $val = preg_replace('/(&#0{0,8}' . ord($search[$i]) . ';?)/', $search[$i], $val); // with a ;
         }
-        $ra1 = array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'style', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
-        $ra2 = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
-        $ra = array_merge($ra1, $ra2);
+        $ra1   = array('javascript', 'vbscript', 'expression', 'applet', 'meta', 'xml', 'blink', 'link', 'style', 'script', 'embed', 'object', 'iframe', 'frame', 'frameset', 'ilayer', 'layer', 'bgsound', 'title', 'base');
+        $ra2   = array('onabort', 'onactivate', 'onafterprint', 'onafterupdate', 'onbeforeactivate', 'onbeforecopy', 'onbeforecut', 'onbeforedeactivate', 'onbeforeeditfocus', 'onbeforepaste', 'onbeforeprint', 'onbeforeunload', 'onbeforeupdate', 'onblur', 'onbounce', 'oncellchange', 'onchange', 'onclick', 'oncontextmenu', 'oncontrolselect', 'oncopy', 'oncut', 'ondataavailable', 'ondatasetchanged', 'ondatasetcomplete', 'ondblclick', 'ondeactivate', 'ondrag', 'ondragend', 'ondragenter', 'ondragleave', 'ondragover', 'ondragstart', 'ondrop', 'onerror', 'onerrorupdate', 'onfilterchange', 'onfinish', 'onfocus', 'onfocusin', 'onfocusout', 'onhelp', 'onkeydown', 'onkeypress', 'onkeyup', 'onlayoutcomplete', 'onload', 'onlosecapture', 'onmousedown', 'onmouseenter', 'onmouseleave', 'onmousemove', 'onmouseout', 'onmouseover', 'onmouseup', 'onmousewheel', 'onmove', 'onmoveend', 'onmovestart', 'onpaste', 'onpropertychange', 'onreadystatechange', 'onreset', 'onresize', 'onresizeend', 'onresizestart', 'onrowenter', 'onrowexit', 'onrowsdelete', 'onrowsinserted', 'onscroll', 'onselect', 'onselectionchange', 'onselectstart', 'onstart', 'onstop', 'onsubmit', 'onunload');
+        $ra    = array_merge($ra1, $ra2);
         $found = true; // keep replacing as long as the previous round replaced something
         while ($found == true) {
             $val_before = $val;
@@ -240,9 +241,9 @@ class str
                     }
                     $pattern .= $ra[$i][$j];
                 }
-                $pattern .= '/i';
+                $pattern     .= '/i';
                 $replacement = substr($ra[$i], 0, 2) . '<x>' . substr($ra[$i], 2);  // add in <> to nerf the tag
-                $val = preg_replace($pattern, $replacement, $val);      // filter out the hex tags
+                $val         = preg_replace($pattern, $replacement, $val);      // filter out the hex tags
                 if ($val_before == $val) {
                     // no replacements were made, so exit the loop
                     $found = false;
@@ -304,7 +305,7 @@ class str
         if (($firstchar_ord >= 65 && $firstchar_ord <= 91) || ($firstchar_ord >= 48 && $firstchar_ord <= 57)) {
             return $s0{0};
         }
-        $s = mb_convert_encoding($s0, "GBK", "UTF-8");
+        $s   = mb_convert_encoding($s0, "GBK", "UTF-8");
         $asc = ord($s{0}) * 256 + ord($s{1}) - 65536;
         if ($asc >= -20319 and $asc <= -20284) return "A";
         if ($asc >= -20283 and $asc <= -19776) return "B";
@@ -396,9 +397,9 @@ class str
         if (!is_int($length) || $length < 0) {
             return false;
         }
-        $char = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $char   = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $string = '';
-        $l = strlen($char) - 1;
+        $l      = strlen($char) - 1;
         for ($i = $length; $i > 0; $i--) {
             $string .= $char[mt_rand(0, $l)];
         }
@@ -463,7 +464,7 @@ class str
      */
     static public function hide_ipv4($ip)
     {
-        $ip = explode('.', $ip);
+        $ip    = explode('.', $ip);
         $ip[2] = '*';
         return implode('.', $ip);
     }
@@ -514,7 +515,7 @@ class str
      */
     static public function sanitize_url(string $string): string
     {
-        return urlencode(mb_strtolower(sanitize($string, false)));
+        return urlencode(mb_strtolower(static::sanitize($string, false)));
     }
 
     /**
@@ -525,6 +526,6 @@ class str
      */
     static public function sanitize_filename(string $string): string
     {
-        return sanitize($string, false);
+        return static::sanitize($string, false);
     }
 }

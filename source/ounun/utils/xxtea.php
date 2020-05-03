@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 class xxtea
@@ -89,23 +90,23 @@ if (!extension_loaded('xxtea')) {
                 $k [$i] = 0;
             }
         }
-        $n = count($v) - 1;
-        $z = $v [$n];
-        $y = $v [0];
+        $n     = count($v) - 1;
+        $z     = $v [$n];
+        $y     = $v [0];
         $delta = 0x9E3779B9;
-        $q = floor(6 + 52 / ($n + 1));
-        $sum = 0;
+        $q     = floor(6 + 52 / ($n + 1));
+        $sum   = 0;
         while (0 < $q--) {
             $sum = xxtea_int32($sum + $delta);
-            $e = $sum >> 2 & 3;
+            $e   = $sum >> 2 & 3;
             for ($p = 0; $p < $n; $p++) {
-                $y = $v [$p + 1];
+                $y  = $v [$p + 1];
                 $mx = xxtea_int32((($z >> 5 & 0x07ffffff) ^ $y << 2) + (($y >> 3 & 0x1fffffff) ^ $z << 4)) ^ xxtea_int32(($sum ^ $y) + ($k [$p & 3 ^ $e] ^ $z));
-                $z = $v [$p] = xxtea_int32($v [$p] + $mx);
+                $z  = $v [$p] = xxtea_int32($v [$p] + $mx);
             }
-            $y = $v [0];
+            $y  = $v [0];
             $mx = xxtea_int32((($z >> 5 & 0x07ffffff) ^ $y << 2) + (($y >> 3 & 0x1fffffff) ^ $z << 4)) ^ xxtea_int32(($sum ^ $y) + ($k [$p & 3 ^ $e] ^ $z));
-            $z = $v [$n] = xxtea_int32($v [$n] + $mx);
+            $z  = $v [$n] = xxtea_int32($v [$n] + $mx);
         }
         return xxtea_long2str($v, false);
     }
@@ -121,22 +122,22 @@ if (!extension_loaded('xxtea')) {
                 $k [$i] = 0;
             }
         }
-        $n = count($v) - 1;
-        $z = $v [$n];
-        $y = $v [0];
+        $n     = count($v) - 1;
+        $z     = $v [$n];
+        $y     = $v [0];
         $delta = 0x9E3779B9;
-        $q = floor(6 + 52 / ($n + 1));
-        $sum = xxtea_int32($q * $delta);
+        $q     = floor(6 + 52 / ($n + 1));
+        $sum   = xxtea_int32($q * $delta);
         while ($sum != 0) {
             $e = $sum >> 2 & 3;
             for ($p = $n; $p > 0; $p--) {
-                $z = $v [$p - 1];
+                $z  = $v [$p - 1];
                 $mx = xxtea_int32((($z >> 5 & 0x07ffffff) ^ $y << 2) + (($y >> 3 & 0x1fffffff) ^ $z << 4)) ^ xxtea_int32(($sum ^ $y) + ($k [$p & 3 ^ $e] ^ $z));
-                $y = $v [$p] = xxtea_int32($v [$p] - $mx);
+                $y  = $v [$p] = xxtea_int32($v [$p] - $mx);
             }
-            $z = $v [$n];
-            $mx = xxtea_int32((($z >> 5 & 0x07ffffff) ^ $y << 2) + (($y >> 3 & 0x1fffffff) ^ $z << 4)) ^ xxtea_int32(($sum ^ $y) + ($k [$p & 3 ^ $e] ^ $z));
-            $y = $v [0] = xxtea_int32($v [0] - $mx);
+            $z   = $v [$n];
+            $mx  = xxtea_int32((($z >> 5 & 0x07ffffff) ^ $y << 2) + (($y >> 3 & 0x1fffffff) ^ $z << 4)) ^ xxtea_int32(($sum ^ $y) + ($k [$p & 3 ^ $e] ^ $z));
+            $y   = $v [0] = xxtea_int32($v [0] - $mx);
             $sum = xxtea_int32($sum - $delta);
         }
         return xxtea_long2str($v, true);
@@ -152,7 +153,7 @@ if (!extension_loaded('xxtea')) {
     function xxtea_long2str($v, $w)
     {
         $len = count($v);
-        $n = ($len - 1) << 2;
+        $n   = ($len - 1) << 2;
         if ($w) {
             $m = $v [$len - 1];
             if (($m < $n - 3) || ($m > $n))

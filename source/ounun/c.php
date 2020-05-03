@@ -101,5 +101,5 @@ class c
     /** @var string bool - 字段类型 */
     const Data_Type_Bool = 'bool';
     /** @var string 下线(子集) - 字段类型 */
-    const Data_Type_Child   = 'child';
+    const Data_Type_Child = 'child';
 }

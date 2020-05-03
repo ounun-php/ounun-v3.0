@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 /**
@@ -42,14 +43,14 @@ class crontab
         } elseif ($cron_str) {
             // 格式检查
             $cron_str = trim($cron_str);
-            $reg = '#^([\*,\/,\-\d]+)( [,\/,\-\d\*]+){4}$#';
+            $reg      = '#^([\*,\/,\-\d]+)( [,\/,\-\d\*]+){4}$#';
             if (!preg_match($reg, $cron_str)) {
-                $this->_cron = [];
+                $this->_cron  = [];
                 $this->_error = "格式错误:{$cron_str}";
                 return;
             }
             // 分别解析 分、 时、 日、 月、 周
-            $n2m = [['min' => 0, 'max' => 59, 'name' => '分'],
+            $n2m   = [['min' => 0, 'max' => 59, 'name' => '分'],
                 ['min' => 0, 'max' => 59, 'name' => '小时'],
                 ['min' => 1, 'max' => 31, 'name' => '日'],
                 ['min' => 1, 'max' => 12, 'name' => '月'],
@@ -58,14 +59,14 @@ class crontab
             foreach ($parts as $k => $v) {
                 $tmp = $this->parse($parts[$k], $n2m[$k]['min'], $n2m[$k]['max']); // 分
                 if (error_is($tmp)) {
-                    $this->_cron = [];
+                    $this->_cron  = [];
                     $this->_error = "{$n2m[$k]['name']}:" . error_message($tmp);
                     return;
                 }
                 $this->_cron[$k] = succeed_data($tmp);
             }
         } else {
-            $this->_cron = [];
+            $this->_cron  = [];
             $this->_error = "cron_str与cron_data 不能为都为空";
         }
         return;
@@ -73,7 +74,7 @@ class crontab
 
     /**
      * 检查某时间($time)是否符合某个corntab时间计划($str_cron)
-     * @param  int $time 时间戳
+     * @param int $time 时间戳
      * @return array  出错返回string（错误信息）
      */
     public function check(int $time): array
@@ -83,8 +84,8 @@ class crontab
             return $cron;
         }
 
-        $curr = $this->format($time);
-        $cron = succeed_data($cron);
+        $curr    = $this->format($time);
+        $cron    = succeed_data($cron);
         $succeed = (!$cron[0] || in_array($curr[0], $cron[0]))
             && (!$cron[1] || in_array($curr[1], $cron[1]))
             && (!$cron[2] || in_array($curr[2], $cron[2]))
@@ -145,7 +146,7 @@ class crontab
         }
 
         // 处理"/" -- 间隔
-        $tmp = explode('/', $part);
+        $tmp  = explode('/', $part);
         $part = $tmp[0];
         $step = isset($tmp[1]) ? $tmp[1] : 1;
 

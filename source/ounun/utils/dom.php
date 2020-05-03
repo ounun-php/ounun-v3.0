@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 class dom
@@ -13,7 +14,7 @@ class dom
      * @param string $a_ext
      * @return string
      */
-    static  public function a(array $data, int $len = 0, string $a_ext = ''): string
+    static public function a(array $data, int $len = 0, string $a_ext = ''): string
     {
         $tag = $len ? str::msubstr($data['title'], 0, $len, true) : $data['title'];
         return "<a href=\"{$data['url']}\" title=\"{$data['title']}\" {$a_ext}>{$tag}</a>";
@@ -29,7 +30,7 @@ class dom
         $rs = [];
         foreach ($urls as $v) {
             if ($v['url'] && $v['title']) {
-                $ext = $v['ext'] ? $v['ext'] : '';
+                $ext  = $v['ext'] ? $v['ext'] : '';
                 $rs[] = static::a($v, $len, $ext);
             }
         }
@@ -42,7 +43,7 @@ class dom
      * @param int $len
      * @return string
      */
-    static  public function a_s(array $urls, string $glue = "", int $len = 0): string
+    static public function a_s(array $urls, string $glue = "", int $len = 0): string
     {
         $rs = static::a_m($urls, $len);
         return implode($glue, $rs);
@@ -58,10 +59,10 @@ class dom
     {
         $rs = [];
         foreach ($array as $id => $title) {
-            $url = static::$url_fun($id);
+            $url  = static::$url_fun($id);
             $rs[] = [
                 'title' => $title,
-                'url' => $url
+                'url'   => $url
             ];
         }
         if ($is_html) {
@@ -77,7 +78,7 @@ class dom
      * @param string $glue
      * @return string
      */
-    static  public function kv2a_s(array $array, string $url_fun, string $glue = ""): string
+    static public function kv2a_s(array $array, string $url_fun, string $glue = ""): string
     {
         $rs = static::kv2a_m($array, $url_fun, true);
         return implode($glue, $rs);

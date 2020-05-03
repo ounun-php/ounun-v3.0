@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 
@@ -22,13 +23,13 @@ class lbs
     {
         list($minlng, $maxlng, $minlat, $maxlat) = static::get_nearby_by_longitude_and_latitude_and_distince($longitude, $latitude, $distince);
 
-        $m = 10000000000;
-        $r_lng = rand(1,$m);
-        $r_lat = rand(1,$m);
-        $i_lng = $minlng + $r_lng/$m * ($maxlng - $minlng);
-        $i_lat = $minlat + $r_lat/$m * ($maxlat - $minlat);
+        $m     = 10000000000;
+        $r_lng = rand(1, $m);
+        $r_lat = rand(1, $m);
+        $i_lng = $minlng + $r_lng / $m * ($maxlng - $minlng);
+        $i_lat = $minlat + $r_lat / $m * ($maxlat - $minlat);
         // print_r([$minlng, $maxlng, $minlat, $maxlat,'lng'=>$i_lng,'lat'=>$i_lat]);
-        return [$i_lng,$i_lat]; // return static::find_nearby_store($minlng, $maxlng, $minlat, $maxlat);
+        return [$i_lng, $i_lat]; // return static::find_nearby_store($minlng, $maxlng, $minlat, $maxlat);
     }
 
     /**
@@ -58,7 +59,7 @@ class lbs
     /**
      * @Description  计算距离远近并按照距离排序
      * @param float $longitude 经度
-     * @param float $latitude  纬度
+     * @param float $latitude 纬度
      * @param array $nearbyStoreList 附近门店
      * @return array 按照距离由近到远排序之后List
      */
@@ -66,8 +67,8 @@ class lbs
     {
         $list = [];
         foreach ($nearbyStoreList as $v) {
-            $dis = static::distince($longitude, $latitude, $v['longitude'], $v['latitude']);
-            $dis = (string)$dis;
+            $dis        = static::distince($longitude, $latitude, $v['longitude'], $v['latitude']);
+            $dis        = (string)$dis;
             $list[$dis] = $v;
         }
         ksort($list);
@@ -93,12 +94,12 @@ class lbs
 
         $radLat1 = static::rad($latitude1);
         $radLat2 = static::rad($latitude2);
-        $a = $radLat1 - $radLat2;
-        $b = static::rad($longitude1) - static::rad($longitude2);
-        $s = 2 * asin(sqrt(pow(sin($a / 2), 2) +
-                 cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
-        $s = $s * $r;
-        $s = round($s * 1000);
+        $a       = $radLat1 - $radLat2;
+        $b       = static::rad($longitude1) - static::rad($longitude2);
+        $s       = 2 * asin(sqrt(pow(sin($a / 2), 2) +
+                cos($radLat1) * cos($radLat2) * pow(sin($b / 2), 2)));
+        $s       = $s * $r;
+        $s       = round($s * 1000);
         return $s;
     }
 

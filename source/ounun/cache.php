@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 use ounun\cache\driver;
@@ -18,7 +19,6 @@ class cache
     const Expire_Middle = 300;
     /** @var int 有效期 长,1小时（秒） */
     const Expire_Long = 3600;
-
 
 
     /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
@@ -49,16 +49,16 @@ class cache
     protected $_tag;
 
     /** @var array 数据 */
-    protected $_value  = [];
+    protected $_value = [];
     /** @var string key */
-    protected $_key    = '';
+    protected $_key = '';
     /** @var int 缓存有效时长 */
     protected $_expire = 0;
     /** @var bool  是否活加前缀 */
     protected $_add_prefix = false;
 
     /** @var bool false:没读    true:已读 */
-    protected $_is_read   = false;
+    protected $_is_read = false;
 
     /**
      * config constructor.
@@ -68,13 +68,13 @@ class cache
     {
         $this->_is_read = false;
         // Cache
-        if (redis::Type == $config['driver_type']){
+        if (redis::Type == $config['driver_type']) {
             $this->_cache_driver = new redis($config);
-        }elseif (memcached::Type == $config['driver_type']){
+        } elseif (memcached::Type == $config['driver_type']) {
             $this->_cache_driver = new memcached($config);
-        }elseif (wincache::Type == $config['driver_type']){
+        } elseif (wincache::Type == $config['driver_type']) {
             $this->_cache_driver = new wincache($config);
-        }else{
+        } else {
             $this->_cache_driver = new file($config);
         }
     }
@@ -166,14 +166,14 @@ class cache
     /**
      * 设定数据中$sub_key为$sub_val
      * @param string $sub_key
-     * @param mixed  $sub_val
+     * @param mixed $sub_val
      */
     public function sub_set(string $sub_key, $sub_val)
     {
         if (!$this->_is_read) {
             $this->get();
         }
-        if(empty($this->_value)){
+        if (empty($this->_value)) {
             $this->_value = [];
         }
         $this->_value[$sub_key] = $sub_val;
@@ -193,25 +193,25 @@ class cache
     /**
      * 设定数据Value
      * @param mixed $val
-     * @param int   $expire
+     * @param int $expire
      */
-     public function set_value($val,int $expire = 0,bool $add_prefix = false)
-     {
-         $this->_is_read = true;
-         $this->_value   = $val;
-         $this->_expire  = $expire;
-         $this->_add_prefix = $add_prefix;
-     }
+    public function set_value($val, int $expire = 0, bool $add_prefix = false)
+    {
+        $this->_is_read    = true;
+        $this->_value      = $val;
+        $this->_expire     = $expire;
+        $this->_add_prefix = $add_prefix;
+    }
 
     /**
      * 简单方式，设定$key对应值$val
      * @param string $key
-     * @param mixed  $val
+     * @param mixed $val
      * @return bool
      */
-    public function fast_set(string $key, $val,int $expire = 0, bool $add_prefix = false)
+    public function fast_set(string $key, $val, int $expire = 0, bool $add_prefix = false)
     {
-        return $this->_cache_driver->set($key,$val,$expire,$add_prefix);
+        return $this->_cache_driver->set($key, $val, $expire, $add_prefix);
     }
 
     /**
@@ -223,7 +223,7 @@ class cache
      */
     public function fast_get(string $key, string $sub_key = null, $default = 0, bool $add_prefix = false)
     {
-        $value = $this->_cache_driver->get($key,$default,$add_prefix);
+        $value = $this->_cache_driver->get($key, $default, $add_prefix);
         if ($sub_key) {
             return $value[$sub_key];
         }
@@ -234,9 +234,9 @@ class cache
      * 简单方式，删除$key对应值$val
      * @param string $key
      */
-    public function fast_del(string $key,bool $add_prefix = false)
+    public function fast_del(string $key, bool $add_prefix = false)
     {
-        $this->_cache_driver->delete($key,$add_prefix);
+        $this->_cache_driver->delete($key, $add_prefix);
     }
 
 
@@ -346,13 +346,6 @@ class cache
         }
         return $this->_value[$tag_key];
     }
-
-
-
-
-
-
-
 
 
     /**
@@ -547,7 +540,6 @@ class cache
     {
         return $this->_drive->write();
     }
-
 
 
     /**

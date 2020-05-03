@@ -129,7 +129,7 @@ class client
     // 系统类型
     public static function os_type($agent = '')
     {
-        $agent       = self::agent_get($agent);
+        $agent        = self::agent_get($agent);
         $browser_type = self::browser_type($agent);
 
         switch ($browser_type) {

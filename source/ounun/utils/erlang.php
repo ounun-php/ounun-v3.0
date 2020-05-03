@@ -3,9 +3,11 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
-use ounun\utils\curl\http;
+
+use ounun\client\http;
 
 class erlang
 {
@@ -22,7 +24,7 @@ class erlang
      */
     public static function string2binary($string)
     {
-        $i = 0;
+        $i      = 0;
         $number = [];
         while (isset($string{$i})) {
             $number[] = ord($string{$i});
@@ -74,9 +76,9 @@ class erlang
     protected function _erlang_call(string $node_type, string $mod, string $fun, string $arg_data)
     {
         $time = time();
-        $fun = substr($fun, 0, 3) == 'gm_' ? substr($fun, 3) : $fun;
-        $mod = substr($mod, -4, 4) == '_api' ? substr($mod, 0, -4) : $mod;
-        $md5 = md5("{$this->_hub_id}_{$node_type}_{$mod}_{$fun}_{$arg_data}_{$time}_{$this->_key}");
+        $fun  = substr($fun, 0, 3) == 'gm_' ? substr($fun, 3) : $fun;
+        $mod  = substr($mod, -4, 4) == '_api' ? substr($mod, 0, -4) : $mod;
+        $md5  = md5("{$this->_hub_id}_{$node_type}_{$mod}_{$fun}_{$arg_data}_{$time}_{$this->_key}");
         // echo "{$this->_hub_id}_{$node_type}_{$mod}_{$fun}_{$arg_data}_{$time}_{$this->_key}<br />\n";
         return $this->_port($mod, $fun, "{ {$this->_hub_id},{$node_type},\"{$md5}\",{$time},{$arg_data}}");
     }

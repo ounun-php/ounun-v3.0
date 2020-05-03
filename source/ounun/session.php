@@ -1,31 +1,33 @@
 <?php
-namespace ounun;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
+namespace ounun;
+
 class session
 {
-	protected $options = [];
+    protected $options = [];
 
-	protected $started = false;
+    protected $started = false;
 
-	public function __construct($options = [])
-	{
+    public function __construct($options = [])
+    {
         $this->options = $options;
-	}
+    }
 
     public function start()
-	{
-		if (!$this->started) {
-			ini_set('session.gc_maxlifetime', $this->options['maxlifetime']);
-			//session_cache_limiter($this->options['cache_limiter']);
-			session_cache_expire($this->options['cache_expire']);
-			session_set_cookie_params($this->options['cookie_lifetime'], $this->options['cookie_path'], $this->options['cookie_domain']);
+    {
+        if (!$this->started) {
+            ini_set('session.gc_maxlifetime', $this->options['maxlifetime']);
+            //session_cache_limiter($this->options['cache_limiter']);
+            session_cache_expire($this->options['cache_expire']);
+            session_set_cookie_params($this->options['cookie_lifetime'], $this->options['cookie_path'], $this->options['cookie_domain']);
 
-			$storage = storage::i($this->options['storage'], $this->options);
-			session_start();
-			$this->started = true;
-		}
-	}
+            $storage = storage::i($this->options['storage'], $this->options);
+            session_start();
+            $this->started = true;
+        }
+    }
 }

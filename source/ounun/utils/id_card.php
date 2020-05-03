@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 /**
@@ -13,13 +14,13 @@ class id_card
 {
     /**
      * 身份证
-     * @param  string $id
+     * @param string $id
      * @return bool
      */
     public static function check($id)
     {
-        $id = strtoupper($id);
-        $regx = '/(^\d{15}$)|(^\d{17}([0-9]|X)$)/';
+        $id        = strtoupper($id);
+        $regx      = '/(^\d{15}$)|(^\d{17}([0-9]|X)$)/';
         $arr_split = [];
         if (!preg_match($regx, $id)) {
             return false;
@@ -47,14 +48,14 @@ class id_card
                 //检验18位身份证的校验码是否正确。
                 //校验位按照ISO 7064:1983.MOD 11-2的规定生成，X可以认为是数字10。
                 $arr_int = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2];
-                $arr_ch = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
-                $sign = 0;
+                $arr_ch  = ['1', '0', 'X', '9', '8', '7', '6', '5', '4', '3', '2'];
+                $sign    = 0;
                 for ($i = 0; $i < 17; $i++) {
-                    $b = (int)$id{$i};
-                    $w = $arr_int[$i];
+                    $b    = (int)$id{$i};
+                    $w    = $arr_int[$i];
                     $sign += $b * $w;
                 }
-                $n = $sign % 11;
+                $n       = $sign % 11;
                 $val_num = $arr_ch[$n];
                 if ($val_num != substr($id, 17, 1)) {
                     return false;

@@ -145,7 +145,7 @@ class debug
             $str .= 'POST:' . var_export($_POST, true) . "\n";
         }
         if ($this->_is_out_post) {
-            $str .= 'INPUT:' . file_get_contents('php://input')  . "\n";
+            $str .= 'INPUT:' . file_get_contents('php://input') . "\n";
         }
         if ($this->_logs) {
             $str .= 'LOGS:' . var_export($this->_logs, true) . "\n";
