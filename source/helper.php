@@ -551,16 +551,20 @@ function short_url_decode(string $string = ''): int
  * HTTP缓存控制
  * @param int $expires 缓存时间 0:为不缓存 单位:s
  * @param string $etag ETag
- * @param int $LastModified 最后更新时间
+ * @param int $last_modified 最后更新时间
+ * @param string $content_type 文件类型
  */
-function expires(int $expires = 0, string $etag = '', int $LastModified = 0)
+function expires(int $expires = 0, string $etag = '', int $last_modified = 0, string $content_type = '')
 {
+    if ($content_type) {
+        header('Content-Type: ' . $content_type);
+    }
     if ($expires > 0) {
         $time = time();
         header("Expires: " . gmdate("D, d M Y H:i:s", $time + $expires) . " GMT");
         header("Cache-Control: max-age=" . $expires);
-        if ($LastModified) {
-            header("Last-Modified: " . gmdate("D, d M Y H:i:s", $LastModified) . " GMT");
+        if ($last_modified) {
+            header("Last-Modified: " . gmdate("D, d M Y H:i:s", $last_modified) . " GMT");
         }
         if ($etag) {
             if ($etag == $_SERVER["HTTP_IF_NONE_MATCH"]) {
@@ -594,7 +598,7 @@ function error404(string $msg = ''): void
                     <h1>404 Not Found</h1>
                 </div>
                 <hr>
-                <div align="center"><a href="' . \ounun::$url_www . '">返回网站首页</a></div>
+                <div align="center"><a href="' . \ounun::$root_www . '">返回网站首页</a></div>
                 ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
             </body>
             </html>
@@ -659,7 +663,7 @@ abstract class v
     public static function db_v_get()
     {
         if (empty(static::$db_v)) {
-            static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
+            static::$db_v = \ounun\db\pdo::i(\ounun::database_default_get());
         }
         return static::$db_v;
     }
@@ -670,7 +674,7 @@ abstract class v
     /** @var bool html_trim */
     public static $cache_html_trim = true;
 
-    /** @var ounun\cache\buffer\html cache_html */
+    /** @var ounun\cache\html cache_html */
     public static $cache_html;
 
     /**
@@ -685,7 +689,7 @@ abstract class v
             $key2               = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
             $debug              = \ounun::$global['debug'];
             $debug              = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
-            static::$cache_html = new \ounun\cache\buffer\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
+            static::$cache_html = new \ounun\cache\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
             static::$cache_html->run(true);
         }
     }
@@ -820,7 +824,7 @@ abstract class v
 
         // db
         if (empty(static::$db_v)) {
-            static::$db_v = \ounun\db\pdo::instance(\ounun::database_default_get());
+            static::$db_v = \ounun\db\pdo::i(\ounun::database_default_get());
         }
     }
 
@@ -831,8 +835,8 @@ abstract class v
     public function index($mod)
     {
         error404("<strong>method</strong>  --> " . __METHOD__ . " <br />\n  
-                        <strong>mod</strong> ------> " . json_encode($mod, JSON_UNESCAPED_UNICODE) . " <br />\n  
-                        <strong>class</strong> ------> " . get_class($this));
+                       <strong>mod</strong> ------> " . json_encode($mod, JSON_UNESCAPED_UNICODE) . " <br />\n  
+                       <strong>class</strong> ------> " . get_class($this));
     }
 
     /**
@@ -870,7 +874,25 @@ abstract class v
      */
     public function favicon($mod)
     {
-        go_url(\ounun::$url_static . 'favicon.ico', false, 301);
+        $filename = Dir_Root . 'public/static/favicon.ico';
+        $type     = 'image/x-icon';
+        $time     = 14400;
+        if (file_exists($filename)) {
+            $mtime = filemtime($filename);
+            expires($time, $mtime, $mtime, $type);
+            readfile($filename);
+        } else {
+            $filename = Dir_Root . 'public/favicon.ico';
+            if (file_exists($filename)) {
+                $mtime = filemtime($filename);
+                expires($time, $mtime, $mtime, $type);
+                readfile($filename);
+            }
+        }
+        if ($_GET['t']) {
+            error404();
+        }
+        go_url(\ounun::$root_static . 'favicon.ico?t=' . time(), false, 301);
     }
 
     /**

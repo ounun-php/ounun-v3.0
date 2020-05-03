@@ -101,11 +101,11 @@ class upload extends driver
 
         $fileext = pathinfo($file['name'], PATHINFO_EXTENSION);
         if ($file['rename'] === true) {
-            $this->set_filename(null, $fileext);
+            $this->filename_set(null, $fileext);
         } elseif ($file['rename'] === false) {
-            $this->set_filename($file['name']);
+            $this->filename_set($file['name']);
         } else {
-            $this->set_filename($file['rename']);
+            $this->filename_set($file['rename']);
         }
 
         $this->_target = $this->_dir . $this->_filename;
@@ -124,7 +124,7 @@ class upload extends driver
             'fileext'  => $fileext,
             'filesize' => $file['size']
         ];
-        if ($this->is_image($file['name'])) {
+        if ($this->image_is($file['name'])) {
             $info['isimage'] = 1;
         }
         $this->_files[] = $info;

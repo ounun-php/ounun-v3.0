@@ -183,9 +183,9 @@ class debug
      * @param string $function
      * @param int $line
      */
-    static public function header(string $k, $v, bool $debug = false, string $function = '', int $line = 0)
+    static public function header(string $k, $v, string $function = '', int $line = 0)
     {
-        // static $idx = 0;
+        $debug = (\ounun::$global['debug'] && \ounun::$global['debug']['header'])??false;
         if ($debug && !headers_sent()) {
             static::$_header_idx++;
             if ($line) {
@@ -204,7 +204,7 @@ class debug
             }
             $key = implode('-', $key);
             $idx = str_pad(static::$_header_idx, 4, '0', STR_PAD_LEFT);
-            header("{$idx}-{$key}: {$v}", false);
+            header("o{$idx}-{$key}: {$v}", false);
         }
     }
 

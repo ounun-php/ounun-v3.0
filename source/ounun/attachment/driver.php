@@ -6,7 +6,8 @@
 
 namespace ounun\attachment;
 
-use ounun\utils\helper\folder;
+
+use ounun\utils\file;
 
 abstract class driver
 {
@@ -47,7 +48,7 @@ abstract class driver
      */
     public function __construct(string $dir = '')
     {
-        $this->set_dir($dir);
+        $this->dir_set($dir);
         $this->_time = time();
     }
 
@@ -57,7 +58,7 @@ abstract class driver
      */
     public function set(string $dir, array $allow_exts = [])
     {
-        $this->set_dir($dir);
+        $this->dir_set($dir);
         if ($allow_exts) {
             if (is_array($allow_exts)) {
                 $this->allow_exts = $allow_exts;
@@ -81,7 +82,7 @@ abstract class driver
         return true;
     }
 
-    public function set_target($target = null, $file_ext = null)
+    public function target_set($target = null, $file_ext = null)
     {
         if (is_null($target)) {
             $filename = $dir = null;
@@ -91,25 +92,25 @@ abstract class driver
             $filename = $pathinfo['basename'];
             $file_ext = null;
         }
-        $this->set_dir($dir);
-        $this->set_filename($filename, $file_ext);
+        $this->dir_set($dir);
+        $this->filename_set($filename, $file_ext);
         $this->_target = $this->_dir . $this->_filename;
         return true;
     }
 
-    public function set_dir($dir = '', int $time = 0)
+    public function dir_set($dir = '', int $time = 0)
     {
         $time = $time ?? time();
         if (is_null($dir)) {
             $dir = static::$path_upload . date('Y/md/', $time);
         } else {
-            $dir = folder::path($dir);
+            $dir = file::path($dir);
         }
         $this->_dir = $dir;
         return mkdir($this->_dir, 0777, true);
     }
 
-    public function set_filename($filename = null, $fileext = null)
+    public function filename_set($filename = null, $fileext = null)
     {
         $this->_filename = is_null($filename) ? $this->_time . mt_rand(100, 999) . '.' . $fileext : $filename;
     }
@@ -119,7 +120,7 @@ abstract class driver
         if (!$this->source_set($source)) {
             return false;
         }
-        if (!$this->set_target($target, pathinfo($source, PATHINFO_EXTENSION))) {
+        if (!$this->target_set($target, pathinfo($source, PATHINFO_EXTENSION))) {
             return false;
         }
         if (!@copy($this->_source, $this->_target)) {
@@ -152,7 +153,7 @@ abstract class driver
      * @param string $file
      * @return bool
      */
-    public function is_image(string $file, string $extension = '')
+    public function image_is(string $file, string $extension = '')
     {
         return in_array(strtolower(pathinfo($file, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'bmp']);
     }
