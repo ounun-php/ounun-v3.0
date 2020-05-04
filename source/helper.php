@@ -846,10 +846,18 @@ abstract class v
     public function robots($mod)
     {
         url_check('/robots.txt');
-        header('Content-Type: text/plain');
-        if (file_exists(\ounun::$dir_app . 'robots.txt')) {
-            readfile(\ounun::$dir_app . 'robots.txt');
+        $filename = \ounun::$dir_app . 'robots.txt';
+        print_r(['$filename'=>$filename]);
+        $type     = 'text/plain';
+        $time     = 14400;
+        if (file_exists($filename)) {
+            $mtime = filemtime($filename);
+            $etag  = ob_etaghandler()
+            expires($time, $mtime, $mtime, $type);
+            readfile($filename);
         } else {
+            $mtime = time();
+            expires($time, $mtime, $mtime, $type);
             exit("User-agent: *\nDisallow:");
         }
     }
@@ -861,10 +869,16 @@ abstract class v
     public function ads($mod)
     {
         url_check('/ads.txt');
-        header('Content-Type: text/plain');
-        if (file_exists(\ounun::$dir_app . 'ads.txt')) {
-            readfile(\ounun::$dir_app . 'ads.txt');
+        $filename = \ounun::$dir_app . 'ads.txt';
+        $type     = 'text/plain';
+        $time     = 14400;
+        if (file_exists($filename)) {
+            $mtime = filemtime($filename);
+            expires($time, $mtime, $mtime, $type);
+            readfile($filename);
         } else {
+            $mtime = time();
+            expires($time, $mtime, $mtime, $type);
             exit("google.com, pub-7081168645550959, DIRECT, f08c47fec0942fa0");
         }
     }

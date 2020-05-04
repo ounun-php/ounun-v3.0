@@ -20,31 +20,13 @@ class cache
     /** @var int 有效期 长,1小时（秒） */
     const Expire_Long = 3600;
 
+    /** @var string storage_key 库名称 */
+    public $storage_key = '';
 
     /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
-    protected $_type = 0;
-
-    /** @var array */
-    static protected $_instance = [];
-
-    /**
-     * @param string $cache_data_key
-     * @param array $config
-     * @return $this
-     */
-    static public function i(string $cache_data_key = 'data', array $config = [])
-    {
-        if (empty(static::$_instance[$cache_data_key])) {
-            static::$_instance[$cache_data_key] = new static($config);
-        }
-        return static::$_instance[$cache_data_key];
-    }
-
-    /**  @var \ounun\cache\driver */
-    private $_drive = null;
-
+    protected $_driver_type = 0;
     /** @var driver 缓存驱动 */
-    protected $_cache_driver;
+    protected $_drive;
     /** @var string 模块名称 */
     protected $_tag;
 
@@ -56,17 +38,37 @@ class cache
     protected $_expire = 0;
     /** @var bool  是否活加前缀 */
     protected $_add_prefix = false;
-
     /** @var bool false:没读    true:已读 */
     protected $_is_read = false;
 
+
+    /** @var array */
+    static protected $_instance = [];
+
     /**
+     * @param string $storage_key
+     * @param array $config
+     * @return $this
+     */
+    static public function i(string $storage_key = 'data', array $config = [])
+    {
+        if (empty(static::$_instance[$storage_key])) {
+            $cache                           = new self($config);
+            $cache->storage_key              = $storage_key;
+            static::$_instance[$storage_key] = $cache;
+        }
+        return static::$_instance[$storage_key];
+    }
+
+    /**
+     * 构造函数
      * config constructor.
      * @param array $config
      */
     public function __construct(array $config = [])
     {
-        $this->_is_read = false;
+        $this->_is_read     = false;
+        $this->_driver_type = $config['driver_type'];
         // Cache
         if (redis::Type == $config['driver_type']) {
             $this->_cache_driver = new redis($config);
@@ -77,16 +79,6 @@ class cache
         } else {
             $this->_cache_driver = new file($config);
         }
-    }
-
-    /**
-     * 构造函数
-     * cache constructor.
-     * @param int $type
-     */
-    public function __construct2(int $type = 0)
-    {
-        $this->_type = 0;
     }
 
     /**
@@ -436,9 +428,9 @@ class cache
      */
     public function config_file($mod = 'def', $root = '', $format_string = false, $large_scale = false)
     {
-        if (0 == $this->_type) {
-            $this->_type  = self::Type_File;
-            $this->_drive = new cache\driver\file($mod, $root, $format_string, $large_scale);
+        if (0 == $this->_driver_type) {
+            $this->_driver_type = self::Type_File;
+            $this->_drive       = new cache\driver\file($mod, $root, $format_string, $large_scale);
         } else {
             trigger_error("ERROR! Repeat Seting:Cache->config_file().", E_USER_ERROR);
         }
@@ -451,9 +443,9 @@ class cache
      */
     public function config_memcache(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $zip_threshold = 5000, $zip_min_saving = 0.3, $flag = MEMCACHE_COMPRESSED)
     {
-        if (0 == $this->_type) {
-            $this->_type  = self::Type_Memcache;
-            $this->_drive = new cache\driver\memcache($mod, $expire, $format_string, $large_scale, $zip_threshold, $zip_min_saving, $flag);
+        if (0 == $this->_driver_type) {
+            $this->_driver_type = self::Type_Memcache;
+            $this->_drive       = new cache\driver\memcache($mod, $expire, $format_string, $large_scale, $zip_threshold, $zip_min_saving, $flag);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
                     $this->_drive->add_server($v['host'], $v['port'], $v['weight']);
@@ -471,9 +463,9 @@ class cache
      */
     public function config_redis(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $auth = false)
     {
-        if (0 == $this->_type) {
-            $this->_type  = self::Type_Redis;
-            $this->_drive = new cache\driver\redis($mod, $expire, $large_scale, $format_string, $auth);
+        if (0 == $this->_driver_type) {
+            $this->_driver_type = self::Type_Redis;
+            $this->_drive       = new cache\driver\redis($mod, $expire, $large_scale, $format_string, $auth);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
                     $this->_drive->connect($v['host'], $v['port']);
@@ -491,9 +483,9 @@ class cache
      */
     public function config_memcached(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $auth = false)
     {
-        if (0 == $this->_type) {
-            $this->_type  = self::Type_Memcached;
-            $this->_drive = new cache\driver\memcached($mod, $expire, $format_string, $large_scale, $auth);
+        if (0 == $this->_driver_type) {
+            $this->_driver_type = self::Type_Memcached;
+            $this->_drive       = new cache\driver\memcached($mod, $expire, $format_string, $large_scale, $auth);
             if (is_array($servers)) {
                 foreach ($servers as $v) {
                     $this->_drive->add_server($v['host'], $v['port'], $v['weight']);
