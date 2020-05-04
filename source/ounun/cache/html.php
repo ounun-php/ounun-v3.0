@@ -263,7 +263,7 @@ class html
     public function filename()
     {
         if (empty($this->_cache_filename)) {
-            $this->_cache_filename = $this->_cache_driver->cache_key_get($this->_cache_key);
+            $this->_cache_filename = $this->_cache_driver->key_get($this->_cache_key);
         }
         return $this->_cache_filename;
     }

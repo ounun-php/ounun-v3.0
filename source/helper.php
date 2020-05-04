@@ -613,6 +613,7 @@ function error404(string $msg = ''): void
 
 /**
  * 获得libs Data数据
+ *
  * @param string $filename
  * @return mixed
  */
@@ -625,7 +626,37 @@ function data(string $filename)
 }
 
 /**
+ * 重试指定次数的操作。
+ * Retry an operation a given number of times.
+ *
+ * @param int $times
+ * @param callable $callback
+ * @param int $sleep
+ * @return mixed
+ *
+ * @throws \Exception
+ */
+function retry($times, callable $callback, $sleep = 0)
+{
+    $times--;
+    beginning:
+    try {
+        return $callback();
+    } catch (Exception $e) {
+        if (!$times) {
+            throw $e;
+        }
+        $times--;
+        if ($sleep) {
+            usleep($sleep * 1000);
+        }
+        goto beginning;
+    }
+}
+
+/**
  * 当前开发环境
+ *
  * @return string '','2','-dev'
  */
 function environment()
@@ -652,6 +683,7 @@ function environment()
 /**
  * 构造模块基类
  * Class ViewBase
+ *
  * @package ounun
  */
 abstract class v
@@ -847,12 +879,11 @@ abstract class v
     {
         url_check('/robots.txt');
         $filename = \ounun::$dir_app . 'robots.txt';
-        print_r(['$filename'=>$filename]);
-        $type     = 'text/plain';
-        $time     = 14400;
+        print_r(['$filename' => $filename]);
+        $type = 'text/plain';
+        $time = 14400;
         if (file_exists($filename)) {
             $mtime = filemtime($filename);
-            $etag  = ob_etaghandler()
             expires($time, $mtime, $mtime, $type);
             readfile($filename);
         } else {

@@ -80,7 +80,7 @@ class redis extends \ounun\cache\driver
     {
         $this->_times['write']  = ((int)$this->_times['write']) + 1;
         if($add_prefix){
-            $key    = $this->cache_key_get($key);
+            $key    = $this->key_get($key);
         }
         // first
         $first     = false;
@@ -119,7 +119,7 @@ class redis extends \ounun\cache\driver
     {
         $this->_times['read']  = ((int)$this->_times['read']) + 1;
         if($add_prefix){
-            $key    = $this->cache_key_get($key);
+            $key    = $this->key_get($key);
         }
 
         $content = $this->_handler->get($key);
@@ -148,7 +148,7 @@ class redis extends \ounun\cache\driver
     public function delete(string $key, bool $add_prefix = true)
     {
         if($add_prefix){
-            $key    = $this->cache_key_get($key);
+            $key    = $this->key_get($key);
         }
         return $this->_handler->del($key);
     }
@@ -160,5 +160,123 @@ class redis extends \ounun\cache\driver
     public function clear()
     {
         return $this->_handler->flushDB();
+    }
+
+
+    /**
+     * 获取实际标签名
+     * @param string $key 标签名
+     * @param bool $add_prefix 是否活加前缀
+     * @return string
+     */
+    public function list_key_get(string $key,bool $add_prefix = true): string
+    {
+        if ($this->_options['prefix_tag']) {
+            if ($this->_options['prefix']) {
+                return $this->_options['prefix'] . ':' . $this->_options['prefix_tag'] . ':' . $key;
+            }
+            return 'c:' . $this->_options['prefix_tag'] . ':' . $key;
+        }
+        if ($this->_options['prefix']) {
+            return $this->_options['prefix'] . ':t:' . $key;
+        }
+        return 'c:t:' . $key;
+    }
+
+    /**
+     * 自增缓存（针对数值缓存）
+     * @param string $key 缓存变量名
+     * @param int $step 步长
+     * @param bool $add_prefix 是否活加前缀
+     * @return int
+     */
+    public function incr(string $key, int $step = 1, bool $add_prefix = true)
+    {
+        if ($this->has($key)) {
+            $value  = $this->get($key, $add_prefix) + $step;
+            $expire = $this->_options['expire'];
+        } else {
+            $value  = $step;
+            $expire = 0;
+        }
+        return $this->set($key, $value, $expire, $add_prefix) ? $value : 0;
+    }
+
+    /**
+     * 自减缓存（针对数值缓存）
+     * @param string $key 缓存变量名
+     * @param int $step 步长
+     * @param bool $add_prefix 是否活加前缀
+     * @return int
+     */
+    public function decr(string $key, int $step = 1, bool $add_prefix = true)
+    {
+        if ($this->has($key, $add_prefix)) {
+            $value  = $this->get($key) - $step;
+            $expire = $this->_options['expire'];
+        } else {
+            $value  = -$step;
+            $expire = 0;
+        }
+        return $this->set($key, $value, $expire, $add_prefix) ? $value : 0;
+    }
+
+    /**
+     * 获取实际的缓存标识
+     * @param string $key 缓存名
+     * @param bool $add_prefix 是否活加前缀
+     * @return string
+     */
+    public function key_get(string $key, bool $add_prefix = true): string
+    {
+        if ($add_prefix && $this->_options['prefix']) {
+            return $this->_options['prefix'] . ':' . $key;
+        }
+        return $key;
+    }
+
+    public function key_set($key)
+    {
+        // TODO: Implement key() method.
+    }
+
+    public function val($val)
+    {
+        // TODO: Implement val() method.
+    }
+
+    public function read()
+    {
+        // TODO: Implement read() method.
+    }
+
+    public function write()
+    {
+        // TODO: Implement write() method.
+    }
+
+    public function get2($sub_key)
+    {
+        // TODO: Implement get2() method.
+    }
+
+    public function set2($sub_key, $sub_val)
+    {
+        // TODO: Implement set2() method.
+    }
+
+    public function delete2()
+    {
+        // TODO: Implement delete2() method.
+    }
+
+    public function filename()
+    {
+        // TODO: Implement filename() method.
+    }
+
+    public function mod()
+    {
+        // TODO: Implement mod() method.
     }
 }

@@ -45,7 +45,7 @@ class mysql extends \ounun\cache\driver
      * @param string $name 缓存变量名
      * @return string
      */
-    protected function cache_key_get($name)
+    protected function key_get($name)
     {
         return $this->options['path'] . $this->options['prefix'] . md5($name) . '.php';
     }
@@ -70,7 +70,7 @@ class mysql extends \ounun\cache\driver
      */
     public function get($name, $default = false)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         if (is_file($filename)) {
             // 判断是否过期
             $mtime = filemtime($filename);
@@ -104,7 +104,7 @@ class mysql extends \ounun\cache\driver
             $expire = 0 === $expire ? 10 * 365 * 24 * 3600 : $expire;
             $expire = time() + $expire;
         }
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         if ($this->tag && !is_file($filename)) {
             $first = true;
         }
@@ -159,7 +159,7 @@ class mysql extends \ounun\cache\driver
      */
     public function rm($name)
     {
-        return unlink($this->cache_key_get($name));
+        return unlink($this->key_get($name));
     }
 
     /**
@@ -185,5 +185,50 @@ class mysql extends \ounun\cache\driver
     public function delete(string $key, bool $add_prefix = true)
     {
         // TODO: Implement delete() method.
+    }
+
+    public function key_set($key)
+    {
+        // TODO: Implement key() method.
+    }
+
+    public function val($val)
+    {
+        // TODO: Implement val() method.
+    }
+
+    public function read()
+    {
+        // TODO: Implement read() method.
+    }
+
+    public function write()
+    {
+        // TODO: Implement write() method.
+    }
+
+    public function get2($sub_key)
+    {
+        // TODO: Implement get2() method.
+    }
+
+    public function set2($sub_key, $sub_val)
+    {
+        // TODO: Implement set2() method.
+    }
+
+    public function delete2()
+    {
+        // TODO: Implement delete2() method.
+    }
+
+    public function filename()
+    {
+        // TODO: Implement filename() method.
+    }
+
+    public function mod()
+    {
+        // TODO: Implement mod() method.
     }
 }

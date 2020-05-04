@@ -66,6 +66,26 @@ class memcached extends \ounun\cache\driver
     }
 
     /**
+     * 设定Memcached服务器
+     * @param array $servers array(['host','port','weight'],['host','port','weight'],...)
+     * @return bool
+     */
+//    public function config_memcached(array $servers, $mod = 'def', $expire = 0, $format_string = false, $large_scale = false, $auth = false)
+//    {
+//        if (0 == $this->_driver_type) {
+//            $this->_driver_type = self::Type_Memcached;
+//            $this->_driver       = new cache\driver\memcached($mod, $expire, $format_string, $large_scale, $auth);
+//            if (is_array($servers)) {
+//                foreach ($servers as $v) {
+//                    $this->_driver->add_server($v['host'], $v['port'], $v['weight']);
+//                }
+//            }
+//        } else {
+//            trigger_error("ERROR! Repeat Seting:Cache->config_memcached().", E_USER_ERROR);
+//        }
+//    }
+
+    /**
      * 写入缓存
      * @param  string    $key         缓存变量名
      * @param  mixed     $value       存储数据
@@ -77,7 +97,7 @@ class memcached extends \ounun\cache\driver
     {
         $this->_times['write']  = ((int)$this->_times['write']) + 1;
         if($add_prefix){
-            $key    = $this->cache_key_get($key);
+            $key    = $this->get_key($key);
         }
         // first
         $first      = false;
@@ -113,7 +133,7 @@ class memcached extends \ounun\cache\driver
     {
         $this->_times['read']  = ((int)$this->_times['read']) + 1;
         if($add_prefix){
-            $key    = $this->cache_key_get($key);
+            $key    = $this->get_key($key);
         }
         $content     = $this->_handler->get($key);
         if (empty($content)) {
@@ -141,7 +161,7 @@ class memcached extends \ounun\cache\driver
     public function delete(string $key, bool $add_prefix = true, $ttl = false)
     {
         if($add_prefix){
-            $key    = $this->cache_key_get($key);
+            $key    = $this->get_key($key);
         }
         return false === $ttl
                 ? $this->_handler->delete($key)
@@ -155,5 +175,50 @@ class memcached extends \ounun\cache\driver
     public function clear()
     {
         return $this->_handler->flush();
+    }
+
+    public function key_set($key)
+    {
+        // TODO: Implement key() method.
+    }
+
+    public function val($val)
+    {
+        // TODO: Implement val() method.
+    }
+
+    public function read()
+    {
+        // TODO: Implement read() method.
+    }
+
+    public function write()
+    {
+        // TODO: Implement write() method.
+    }
+
+    public function get2($sub_key)
+    {
+        // TODO: Implement get2() method.
+    }
+
+    public function set2($sub_key, $sub_val)
+    {
+        // TODO: Implement set2() method.
+    }
+
+    public function delete2()
+    {
+        // TODO: Implement delete2() method.
+    }
+
+    public function filename()
+    {
+        // TODO: Implement filename() method.
+    }
+
+    public function mod()
+    {
+        // TODO: Implement mod() method.
     }
 }

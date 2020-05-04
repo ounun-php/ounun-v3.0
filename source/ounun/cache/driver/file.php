@@ -49,6 +49,7 @@ class file extends \ounun\cache\driver
         $this->init();
     }
 
+
     /**
      * 初始化检查
      * @access private
@@ -72,7 +73,7 @@ class file extends \ounun\cache\driver
      * @param bool $auto 是否自动创建目录
      * @return string
      */
-    public function cache_key_get(string $name, $auto = false)
+    public function key_get(string $name, $auto = false)
     {
         $name = md5($name);
         if ($this->_options['cache_subdir']) {
@@ -111,7 +112,7 @@ class file extends \ounun\cache\driver
      */
     public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         if (!is_file($filename)) {
             return $default;
         }
@@ -151,7 +152,7 @@ class file extends \ounun\cache\driver
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        $filename = $this->cache_key_get($name, true);
+        $filename = $this->key_get($name, true);
         if ($this->tag && !is_file($filename)) {
             $first = true;
         }
@@ -219,7 +220,7 @@ class file extends \ounun\cache\driver
      */
     public function rm($name)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         return $this->unlink($filename);
     }
 
@@ -301,5 +302,89 @@ class file extends \ounun\cache\driver
     public function delete(string $key, bool $add_prefix = true)
     {
         // TODO: Implement delete() method.
+    }
+
+    public function key_set($key)
+    {
+        // TODO: Implement key() method.
+    }
+
+    public function val($val)
+    {
+        // TODO: Implement val() method.
+    }
+
+    public function read()
+    {
+        // TODO: Implement read() method.
+    }
+
+    public function write()
+    {
+        // TODO: Implement write() method.
+    }
+
+    public function get2($sub_key)
+    {
+        // TODO: Implement get2() method.
+    }
+
+    public function set2($sub_key, $sub_val)
+    {
+        // TODO: Implement set2() method.
+    }
+
+    public function delete2()
+    {
+        // TODO: Implement delete2() method.
+    }
+
+    public function filename()
+    {
+        // TODO: Implement filename() method.
+    }
+
+    public function mod()
+    {
+        // TODO: Implement mod() method.
+    }
+
+    /**
+     * 读取缓存并删除
+     * @param string $key 缓存变量名
+     * @param bool $add_prefix 是否活加前缀
+     * @return mixed
+     */
+    public function pull(string $key, bool $add_prefix = true)
+    {
+        $result = $this->get($key, null, $add_prefix);
+        if ($result) {
+            $this->delete($key, $add_prefix);
+            return $result;
+        }
+        return null;
+    }
+
+    /**
+     * 追加（数组）缓存
+     * @param string $key 缓存变量名
+     * @param mixed $value 存储数据
+     * @param int $expire 有效时间 0为永久
+     * @param int $max_length 最大长度
+     * @param bool $add_prefix 是否活加前缀
+     * @return void
+     */
+    public function push(string $key, $value, int $max_length = 1000, int $expire = 0, bool $add_prefix = true): void
+    {
+        $item = $this->get($key, [], $add_prefix);
+        if (!is_array($item)) {
+            throw new \InvalidArgumentException('only array cache can be push');
+        }
+        $item[] = $value;
+        if (count($item) > $max_length) {
+            array_shift($item);
+        }
+        $item = array_unique($item);
+        $this->set($key, $item, $expire, $add_prefix);
     }
 }

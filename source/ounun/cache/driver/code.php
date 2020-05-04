@@ -72,7 +72,7 @@ class code extends \ounun\cache\driver
      * @param bool $auto 是否自动创建目录
      * @return string
      */
-    public function cache_key_get(string $name, $auto = false)
+    public function key_get(string $name, $auto = false)
     {
         $name = md5($name);
         if ($this->_options['cache_subdir']) {
@@ -111,7 +111,7 @@ class code extends \ounun\cache\driver
      */
     public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         if (!is_file($filename)) {
             return $default;
         }
@@ -151,7 +151,7 @@ class code extends \ounun\cache\driver
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
         }
-        $filename = $this->cache_key_get($name, true);
+        $filename = $this->key_get($name, true);
         if ($this->tag && !is_file($filename)) {
             $first = true;
         }
@@ -219,7 +219,7 @@ class code extends \ounun\cache\driver
      */
     public function rm($name)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         return $this->unlink($filename);
     }
 
@@ -333,5 +333,40 @@ class code extends \ounun\cache\driver
     public function delete(string $key, bool $add_prefix = true)
     {
         // TODO: Implement delete() method.
+    }
+
+    public function key_set($key)
+    {
+        // TODO: Implement key() method.
+    }
+
+    public function val($val)
+    {
+        // TODO: Implement val() method.
+    }
+
+    public function get2($sub_key)
+    {
+        // TODO: Implement get2() method.
+    }
+
+    public function set2($sub_key, $sub_val)
+    {
+        // TODO: Implement set2() method.
+    }
+
+    public function delete2()
+    {
+        // TODO: Implement delete2() method.
+    }
+
+    public function filename()
+    {
+        // TODO: Implement filename() method.
+    }
+
+    public function mod()
+    {
+        // TODO: Implement mod() method.
     }
 }

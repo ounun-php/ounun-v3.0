@@ -24,8 +24,6 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 构造函数
-     * @access public
-     *
      * @param array $options
      */
     public function __construct($options = [])
@@ -41,18 +39,16 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 取得变量的存储文件名
-     * @access protected
      * @param string $name 缓存变量名
      * @return string
      */
-    protected function cache_key_get($name)
+    protected function key_get($name)
     {
         return $this->options['path'] . $this->options['prefix'] . md5($name) . '.php';
     }
 
     /**
      * 判断缓存是否存在
-     * @access public
      * @param string $name 缓存变量名
      * @return mixed
      */
@@ -63,14 +59,13 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 读取缓存
-     * @access public
      * @param string $name 缓存变量名
      * @param mixed $default 默认值
      * @return mixed
      */
     public function get($name, $default = false)
     {
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         if (is_file($filename)) {
             // 判断是否过期
             $mtime = filemtime($filename);
@@ -87,7 +82,6 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 写入缓存
-     * @access   public
      * @param string $name 缓存变量名
      * @param mixed $value 存储数据
      * @param integer|\DateTime $expire 有效时间（秒）
@@ -104,7 +98,7 @@ class sqlite extends \ounun\cache\driver
             $expire = 0 === $expire ? 10 * 365 * 24 * 3600 : $expire;
             $expire = time() + $expire;
         }
-        $filename = $this->cache_key_get($name);
+        $filename = $this->key_get($name);
         if ($this->tag && !is_file($filename)) {
             $first = true;
         }
@@ -119,7 +113,6 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 自增缓存（针对数值缓存）
-     * @access public
      * @param string $name 缓存变量名
      * @param int $step 步长
      * @return false|int
@@ -136,7 +129,6 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 自减缓存（针对数值缓存）
-     * @access public
      * @param string $name 缓存变量名
      * @param int $step 步长
      * @return false|int
@@ -153,18 +145,16 @@ class sqlite extends \ounun\cache\driver
 
     /**
      * 删除缓存
-     * @access public
      * @param string $name 缓存变量名
      * @return boolean
      */
     public function rm($name)
     {
-        return unlink($this->cache_key_get($name));
+        return unlink($this->key_get($name));
     }
 
     /**
      * 清除缓存
-     * @access   public
      * @param string $tag 标签名
      * @return bool
      */
@@ -185,5 +175,50 @@ class sqlite extends \ounun\cache\driver
     public function delete(string $key, bool $add_prefix = true)
     {
         // TODO: Implement delete() method.
+    }
+
+    public function key_set($key)
+    {
+        // TODO: Implement key() method.
+    }
+
+    public function val($val)
+    {
+        // TODO: Implement val() method.
+    }
+
+    public function read()
+    {
+        // TODO: Implement read() method.
+    }
+
+    public function write()
+    {
+        // TODO: Implement write() method.
+    }
+
+    public function get2($sub_key)
+    {
+        // TODO: Implement get2() method.
+    }
+
+    public function set2($sub_key, $sub_val)
+    {
+        // TODO: Implement set2() method.
+    }
+
+    public function delete2()
+    {
+        // TODO: Implement delete2() method.
+    }
+
+    public function filename()
+    {
+        // TODO: Implement filename() method.
+    }
+
+    public function mod()
+    {
+        // TODO: Implement mod() method.
     }
 }
