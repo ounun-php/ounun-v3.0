@@ -110,7 +110,7 @@ class html extends \ounun\cache\driver
      */
     public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
-        $filename = $this->key_get($name);
+        $filename = $this->key_get($key);
         if (!is_file($filename)) {
             return $default;
         }
@@ -134,6 +134,10 @@ class html extends \ounun\cache\driver
         }
     }
 
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
+    {
+        // TODO: Implement set() method.
+    }
     /**
      * 写入缓存
      * @access public
@@ -142,7 +146,7 @@ class html extends \ounun\cache\driver
      * @param integer|\DateTime $expire 有效时间（秒）
      * @return boolean
      */
-    public function set($name, $value, $expire = null)
+    public function set2($name, $value, $expire = null)
     {
         if (is_null($expire)) {
             $expire = $this->options['expire'];
@@ -349,10 +353,6 @@ class html extends \ounun\cache\driver
         // TODO: Implement get2() method.
     }
 
-    public function set2($sub_key, $sub_val)
-    {
-        // TODO: Implement set2() method.
-    }
 
     public function delete2()
     {

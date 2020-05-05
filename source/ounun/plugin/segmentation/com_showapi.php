@@ -1,6 +1,6 @@
 <?php
 
-namespace ounun\sdk;
+namespace ounun\plugin\segmentation;
 
 class com_showapi
 {

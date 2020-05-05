@@ -89,17 +89,4 @@ class c
     const Format_Html = 'html';
     /** @var string Html Table - 输出Ajax格式 */
     const Format_Html_Table = 'html_table';
-
-    /** @var string 字符串 - 字段类型 */
-    const Data_Type_String = 'string';
-    /** @var string 整数 - 字段类型 */
-    const Data_Type_Int = 'int';
-    /** @var string 浮点数 - 字段类型 */
-    const Data_Type_Float = 'float';
-    /** @var string 枚举 - 字段类型 */
-    const Data_Type_Enum = 'enum';
-    /** @var string bool - 字段类型 */
-    const Data_Type_Bool = 'bool';
-    /** @var string 下线(子集) - 字段类型 */
-    const Data_Type_Child = 'child';
 }

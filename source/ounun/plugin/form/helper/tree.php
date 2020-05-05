@@ -3,11 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-<<<<<<< HEAD:source/ounun/plugin/form/helper/tree.php
-namespace ounun\extension\form\helper;
-=======
-namespace ounun\plugin;
->>>>>>> aef5797d5959163c445dfd77a6b522bf215f4c39:source/ounun/plugin/tree.php
+namespace ounun\plugin\form\helper;
 
 class tree
 {

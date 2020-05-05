@@ -819,7 +819,17 @@ abstract class v
         }
         $method       = $url_mods[0];
         \ounun::$view = $this;
+        $this->_initialize($method);
         $this->$method($url_mods);
+    }
+
+    /**
+     * 初始化
+     * @param string $method
+     */
+    protected function _initialize(string $method)
+    {
+
     }
 
     /**

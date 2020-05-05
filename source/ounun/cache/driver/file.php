@@ -46,17 +46,6 @@ class file extends \ounun\cache\driver
         if (substr($this->_options['path'], -1) != '/') {
             $this->_options['path'] .= '/';
         }
-        $this->init();
-    }
-
-
-    /**
-     * 初始化检查
-     * @access private
-     * @return boolean
-     */
-    private function init()
-    {
         // 创建项目缓存目录
         if (!is_dir($this->_options['path'])) {
             if (mkdir($this->_options['path'], 0755, true)) {
@@ -501,7 +490,7 @@ class file extends \ounun\cache\driver
         // TODO: Implement list_length() method.
     }
 
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '')
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
     {
         // TODO: Implement set() method.
     }

@@ -20,27 +20,27 @@ class cache
     const Expire_Middle = 300;
     /** @var int 有效期 长,1小时（秒） */
     const Expire_Long = 3600;
+    /** 有效Cache类型 */
+    const Driver_Type_Valid = [
+        driver\code::Type,
+        driver\file::Type,
+        driver\html::Type,
+        driver\memcached::Type,
+        driver\mysql::Type,
+        driver\sqlite::Type,
+        driver\redis::Type
+    ];
 
     /** @var string storage_key  库名称 */
     public $storage_key = '';
-    /** @var string storage_path 路径名称 */
-    public $storage_path = '';
-    /** @var bool  是否活加前缀 */
-    protected $_add_prefix = false;
 
     /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
     protected $_driver_type = 0;
     /** @var driver 缓存驱动 */
     protected $_driver;
 
-
     /** @var array 数据 */
     protected $_value = [];
-    /** @var int 缓存有效时长 */
-    protected $_expire = 0;
-    /** @var bool false:没读    true:已读 */
-    protected $_is_read = false;
-
 
     /** @var array */
     static protected $_instances = [];
@@ -53,7 +53,7 @@ class cache
     static public function i(string $storage_key = 'data', array $config = [])
     {
         if (empty(static::$_instances[$storage_key])) {
-            $cache                            = new self($config);
+            $cache                            = new static($config);
             $cache->storage_key               = $storage_key;
             static::$_instances[$storage_key] = $cache;
         }
@@ -67,25 +67,12 @@ class cache
      */
     public function __construct(array $config = [])
     {
-        $this->_is_read     = false;
         $this->_driver_type = $config['driver_type'];
-        // Cache
-        if (driver\code::Type == $config['driver_type']) {
-            $this->_driver = new driver\code($config);
-        } elseif (driver\file::Type == $config['driver_type']) {
-            $this->_driver = new driver\file($config);
-        } elseif (driver\html::Type == $config['driver_type']) {
-            $this->_driver = new driver\html($config);
-        } elseif (driver\memcached::Type == $config['driver_type']) {
-            $this->_driver = new driver\memcached($config);
-        } elseif (driver\mysql::Type == $config['driver_type']) {
-            $this->_driver = new driver\mysql($config);
-        } elseif (driver\sqlite::Type == $config['driver_type']) {
-            $this->_driver = new driver\sqlite($config);
-        } elseif (driver\redis::Type == $config['driver_type']) {
-            $this->_driver = new driver\redis($config);
-        } else {
-            $this->_driver = new driver\file($config);
+        if($this->_driver_type && in_array($this->_driver_type,static::Driver_Type_Valid)){
+            $cls = "driver\{$this->_driver_type}";
+            $this->_driver = new $cls($config);
+        }else{
+            trigger_error("Can't support driver_type:{$this->_driver_type}", E_USER_ERROR);
         }
     }
 

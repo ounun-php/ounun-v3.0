@@ -89,21 +89,16 @@ class html
         // Cache
         $this->_cdn_type   = $config['cdn_type'];
         $this->_cache_type = $config['driver_type'];
-        if (driver\file::Type == $config['driver_type']) {
-            $config['format_string'] = true;
-            $this->_cache_driver     = new driver\file($config);
-        } elseif (driver\memcached::Type == $config['driver_type']) {
-            $config['format_string'] = false;
-            $this->_cache_driver     = new driver\memcached($config);
-        } elseif (driver\redis::Type == $config['driver_type']) {
-            $config['format_string'] = false;
-            $this->_cache_driver     = new driver\redis($config);
-        } else {
-            $config['format_string'] = true;
-            $this->_cache_type       = driver\redis::Type;
-            $this->_cache_driver     = new driver\redis($config);
-        }
         $this->_cache_key = $key;
+        if($this->_cdn_type
+            && static::Cache_Valid[$this->_cdn_type]
+            && is_array(static::Cache_Valid[$this->_cdn_type])
+            && in_array( $this->_cache_type,static::Cache_Valid[$this->_cdn_type])){
+            $cls = "driver\{$this->_cache_type}";
+            $this->_cache_driver = new $cls($config);
+        }else{
+            trigger_error("Can't support cdn_type:{$this->_cdn_type} cache_type:{$this->_cache_type}", E_USER_ERROR);
+        }
     }
 
     /**

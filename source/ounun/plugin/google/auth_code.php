@@ -4,7 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-namespace ounun\sdk\google;
+namespace ounun\plugin\google;
 /**
  * PHP Class for handling Google Authenticator 2-factor authentication
  *

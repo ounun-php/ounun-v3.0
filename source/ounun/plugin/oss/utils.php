@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ounun\sdk\oss;
+namespace ounun\plugin\oss;
 
 
 class utils

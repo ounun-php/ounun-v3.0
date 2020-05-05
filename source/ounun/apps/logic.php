@@ -13,7 +13,7 @@ abstract class logic
     const Error_Msg = [];
 
     /** @var self 实例 */
-    protected static $_instance;
+    static protected $_instance;
 
     /**
      * @param \ounun\db\pdo $db

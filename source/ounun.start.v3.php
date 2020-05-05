@@ -931,7 +931,8 @@ class ounun
      */
     static public function load_class($class)
     {
-        //  echo __FILE__.':'.__LINE__.' $class:'."{$class}\n";
+//        echo // __FILE__.':'.__LINE__. ' $class:'.
+//            "{$class}<br />\n";
         $file = static::load_class_file_exists($class);
         if ($file) {
             require $file;

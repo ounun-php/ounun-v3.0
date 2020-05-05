@@ -40,11 +40,10 @@ class mysql extends \ounun\cache\driver
     }
 
 
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true,array $options = [])
     {
         // TODO: Implement get() method.
     }
-
 
     public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
     {
@@ -136,7 +135,7 @@ class mysql extends \ounun\cache\driver
         // TODO: Implement key_get() method.
     }
 
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '')
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
     {
         // TODO: Implement set() method.
     }

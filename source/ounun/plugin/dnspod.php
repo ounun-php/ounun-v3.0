@@ -8,7 +8,7 @@
  *
  */
 
-namespace ounun\sdk;
+namespace ounun\plugin;
 
 class dnspod
 {

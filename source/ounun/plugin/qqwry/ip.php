@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\plugin\qqwry;
 
 /**
@@ -28,13 +29,15 @@ namespace ounun\plugin\qqwry;
 class ip
 {
     /** @var string  本插件所在目录 */
-    const Dir_Plugins = __DIR__ . 'ip.php/';
+    const Dir_Plugins = __DIR__ . '/';
 
     /** @var self    实例 */
     protected static $_instance;
 
     /**
      * 返回数据库连接对像
+     * @param string $charset
+     * @return ip
      */
     public static function i($charset = 'gbk'): self
     {
@@ -94,7 +97,7 @@ class ip
 
     /**
      * 返回压缩后可进行比较的IP地址
-     * @param  string $ip
+     * @param string $ip
      * @return string
      */
     private function packip($ip)
@@ -152,13 +155,13 @@ class ip
         if (!$this->fp) {
             return null; // 如果数据文件没有被正确打开，则直接返回空
         }
-        $location = [];
+        $location        = [];
         $location ['ip'] = gethostbyname($ip); // 将输入的域名转化为IP地址
-        $ip = $this->packip($location ['ip']); // 将输入的IP地址转化为可比较的IP地址
+        $ip              = $this->packip($location ['ip']); // 将输入的IP地址转化为可比较的IP地址
         // 不合法的IP地址会被转化为255.255.255.255
         // 对分搜索
-        $l = 0; // 搜索的下边界
-        $u = $this->totalip; // 搜索的上边界
+        $l      = 0; // 搜索的下边界
+        $u      = $this->totalip; // 搜索的上边界
         $findip = $this->lastip; // 如果没有找到就返回最后一条IP记录（QQWry.Dat的版本信息）
         while ($l <= $u) // 当上边界小于下边界时，查找失败
         {
@@ -187,10 +190,10 @@ class ip
         //获取查找到的IP地理位置信息
         fseek($this->fp, $findip);
         $location ['beginip'] = long2ip($this->long()); // 用户IP所在范围的开始地址
-        $offset = $this->long3();
+        $offset               = $this->long3();
         fseek($this->fp, $offset);
         $location ['endip'] = long2ip($this->long()); // 用户IP所在范围的结束地址
-        $byte = fread($this->fp, 1); // 标志字节
+        $byte               = fread($this->fp, 1); // 标志字节
         switch (ord($byte)) {
             case 1 : // 标志字节为1，表示国家和区域信息都被同时重定向
                 $countryOffset = $this->long3(); // 重定向地址
@@ -205,7 +208,7 @@ class ip
                         break;
                     default : // 否则，表示国家信息没有被重定向
                         $location ['country'] = $this->string($byte);
-                        $location ['area'] = $this->area();
+                        $location ['area']    = $this->area();
                         break;
                 }
                 break;
@@ -217,12 +220,12 @@ class ip
                 break;
             default : // 否则，表示国家信息没有被重定向
                 $location ['country'] = $this->string($byte);
-                $location ['area'] = $this->area();
+                $location ['area']    = $this->area();
                 break;
         }
         if ('utf-8' == $this->charset) {
             $location ['country'] = mb_convert_encoding($location ['country'], "UTF-8", "GBK");
-            $location ['area'] = mb_convert_encoding($location ['area'], "UTF-8", "GBK");
+            $location ['area']    = mb_convert_encoding($location ['area'], "UTF-8", "GBK");
         }
         if ($location ['country'] == " CZ88.NET") { // CZ88.NET表示没有有效信息
             $location ['country'] = "未知";
@@ -239,14 +242,14 @@ class ip
     /**
      * 构造函数，打开 QQWry.Dat 文件并初始化类中的信息
      *
-     * @param string $filename
+     * @param string $charset
      */
     function __construct($charset = 'gbk')
     {
         $filename = static::Dir_Plugins . 'res/qqwryip.dat';
-        if (($this->fp = @fopen($filename, 'rb')) !== false) {
+        if (($this->fp = fopen($filename, 'rb')) !== false) {
             $this->firstip = $this->long();
-            $this->lastip = $this->long();
+            $this->lastip  = $this->long();
             $this->totalip = ($this->lastip - $this->firstip) / 7;
             //注册析构函数，使其在程序执行结束时执行
             //register_shutdown_function ( array (&$this, '_IpLocation' ) );

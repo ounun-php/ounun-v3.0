@@ -18,6 +18,11 @@ class utils
     const Type_Json = 'json';
     /** @var string 字符串类型 */
     const Type_String = 'string';
+    /** @var string 枚举 - 字段类型 */
+    const Type_Enum = 'enum';
+    /** @var string 下线(子集) - 字段类型 */
+    const Type_Child = 'child';
+
     /** @var string 日期转秒数0点0分 */
     const Type_Date2Time_00 = 'd2t00';
     /** @var string 日期转秒数23点59分59秒 */

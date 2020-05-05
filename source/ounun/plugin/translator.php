@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ounun\sdk;
+namespace ounun\plugin;
 
 
 use ounun\utils\caiji;
