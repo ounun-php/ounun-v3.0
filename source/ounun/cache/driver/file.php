@@ -23,7 +23,7 @@ class file extends \ounun\cache\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't',
+        'prefix_list'   => 't',
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
@@ -73,7 +73,7 @@ class file extends \ounun\cache\driver
      * @param bool $auto 是否自动创建目录
      * @return string
      */
-    public function key_get(string $name, $auto = false)
+    public function key_get2(string $name, $auto = false)
     {
         $name = md5($name);
         if ($this->_options['cache_subdir']) {
@@ -112,7 +112,7 @@ class file extends \ounun\cache\driver
      */
     public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        $filename = $this->key_get($name);
+        $filename = $this->key_get($key,$add_prefix);
         if (!is_file($filename)) {
             return $default;
         }
@@ -144,7 +144,7 @@ class file extends \ounun\cache\driver
      * @param integer|\DateTime $expire 有效时间（秒）
      * @return boolean
      */
-    public function set($name, $value, $expire = null)
+    public function set2($name, $value, $expire = null)
     {
         if (is_null($expire)) {
             $expire = $this->options['expire'];
@@ -329,11 +329,6 @@ class file extends \ounun\cache\driver
         // TODO: Implement get2() method.
     }
 
-    public function set2($sub_key, $sub_val)
-    {
-        // TODO: Implement set2() method.
-    }
-
     public function delete2()
     {
         // TODO: Implement delete2() method.
@@ -386,5 +381,133 @@ class file extends \ounun\cache\driver
         }
         $item = array_unique($item);
         $this->set($key, $item, $expire, $add_prefix);
+    }
+
+    /**
+     * 自增缓存（针对数值缓存）
+     * @param string    $name        缓存变量名
+     * @param int       $step        步长
+     * @param  bool     $add_prefix  是否活加前缀
+     * @return int
+     */
+    public function increase(string $name,int $step = 1, bool $add_prefix = true)
+    {
+        if ($this->has($name)) {
+            $value  = $this->get($name,$add_prefix) + $step;
+            $expire = $this->_options['expire'];
+        } else {
+            $value  = $step;
+            $expire = 0;
+        }
+        return $this->set($name, $value, $expire,$add_prefix) ? $value : 0;
+    }
+
+    /**
+     * 自减缓存（针对数值缓存）
+     * @param string    $name        缓存变量名
+     * @param int       $step        步长
+     * @param  bool     $add_prefix  是否活加前缀
+     * @return int
+     */
+    public function decrease(string $name, int $step = 1, bool $add_prefix = true)
+    {
+        if ($this->has($name,$add_prefix)) {
+            $value  = $this->get($name) - $step;
+            $expire = $this->_options['expire'];
+        } else {
+            $value  = -$step;
+            $expire = 0;
+        }
+        return $this->set($name, $value, $expire,$add_prefix) ? $value : 0;
+    }
+
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
+    {
+        // TODO: Implement incrby() method.
+    }
+
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
+    {
+        // TODO: Implement decrby() method.
+    }
+
+    public function exists(string $key, bool $add_prefix = true): bool
+    {
+        // TODO: Implement exists() method.
+    }
+
+    public function expire(string $key, int $expire = 0, bool $add_prefix = true): bool
+    {
+        // TODO: Implement expire() method.
+    }
+
+    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    {
+        // TODO: Implement hash_hget() method.
+    }
+
+    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
+    {
+        // TODO: Implement hash_hset() method.
+    }
+
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
+    {
+        // TODO: Implement hash_hincrby() method.
+    }
+
+    public function hash_hexists(string $key, string $field, bool $add_prefix = true): bool
+    {
+        // TODO: Implement hash_hexists() method.
+    }
+
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
+    {
+        // TODO: Implement hash_hdel() method.
+    }
+
+    public function hash_hgetall(string $key, $default = [], bool $add_prefix = true): array
+    {
+        // TODO: Implement hash_hgetall() method.
+    }
+
+    public function list_lpush(string $key, $value, bool $add_prefix = true): int
+    {
+        // TODO: Implement list_lpush() method.
+    }
+
+    public function list_lpop(string $key = '', bool $add_prefix = true)
+    {
+        // TODO: Implement list_lpop() method.
+    }
+
+    public function list_rpush(string $key, $value, bool $add_prefix = true): int
+    {
+        // TODO: Implement list_rpush() method.
+    }
+
+    public function list_rpop(string $key = '', bool $add_prefix = true)
+    {
+        // TODO: Implement list_rpop() method.
+    }
+
+    public function list_lrange(string $key, int $start = 0, int $end = -1, bool $add_prefix = true): array
+    {
+        // TODO: Implement list_lrange() method.
+    }
+
+    public function list_length(string $key, bool $add_prefix = true): int
+    {
+        // TODO: Implement list_length() method.
+    }
+
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '')
+    {
+        // TODO: Implement set() method.
+    }
+
+    public function key_get(string $key, bool $add_prefix = true, bool $is_list = false): string
+    {
+        // TODO: Implement key_get() method.
     }
 }

@@ -15,31 +15,28 @@ abstract class driver
 {
     /** @var mixed 驱动句柄 */
     protected $_handler;
-    /** @var string 缓存标签(标识名) */
-    protected $_tagset_tag = '';
 
-    /** @var array 缓存 read:读取次数 write:写入次数 */
-    protected $_times = ['read' => 0, 'write' => 0,];
+    /** @var array 缓存 get read:读取次数 set write:写入次数 */
+    protected $_times = ['get' => 0, 'set' => 0,];
 
     /** @var array 缓存参数(配制数组) */
     protected $_options = [
-        // 'module'        => '', // 模块名称   转 prefix
-        // 'filename'      => '', // 文件名
         'expire'    => 0,  // 有效时间 0为永久
         'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
 
-        'format_string' => false, // bool false:混合数据 true:字符串
-        'large_scale'   => false, // bool false:少量    true:大量
-        'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't'
+        'format_string' => false, // bool false:混合数据  true:字符串
+        'data_compress' => false, // bool false:不压缩    true:压缩
+        'large_scale'   => false, // bool false:少量      true:大量
+
+        'prefix'      => '',    // 模块名称
+        'prefix_list' => 't',
     ];
 
     /** @var array 数据 */
-    protected $_data = [];
+    protected $_value = [];
 
     /** @var array ['key'=>$key,'value'=>$value] 设置key的过期时间，超过时间后，将会自动删除该key */
     protected $_expires = [];
-
 
     /**
      * 读取缓存
@@ -56,9 +53,28 @@ abstract class driver
      * @param mixed $value 存储数据
      * @param int $expire 有效时间（秒）
      * @param bool $add_prefix 是否活加前缀
+     * @param string $list_key 汇总集合list标识
      * @return bool
      */
-    abstract public function set(string $key, $value, int $expire = 0, bool $add_prefix = true);
+    abstract public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '');
+
+    /**
+     * 增加之后的value值。（针对数值缓存）
+     * @param string $key 缓存变量名
+     * @param int $increment 步长
+     * @param bool $add_prefix 是否活加前缀
+     * @return int
+     */
+    abstract public function incrby(string $key, int $increment = 1, bool $add_prefix = true);
+
+    /**
+     * 返回一个数字：减少之后的value值。（针对数值缓存）
+     * @param string $key 缓存变量名
+     * @param int $increment 步长
+     * @param bool $add_prefix 是否活加前缀
+     * @return int
+     */
+    abstract public function decrby(string $key, int $increment = 1, bool $add_prefix = true);
 
     /**
      * 返回key是否存在
@@ -86,31 +102,71 @@ abstract class driver
     abstract public function delete(string $key, bool $add_prefix = true);
 
     /**
-     * 获取实际的缓存标识
-     * @param string $key 缓存名
-     * @param bool $add_prefix 是否活加前缀
+     * 清除所有缓存
+     * @return bool
+     */
+    abstract public function clear();
+
+    /**
+     * 返回 key 指定的哈希集中该字段所关联的值
+     * @param string $key
+     * @param string $field
+     * @param int $default
+     * @param bool $add_prefix
+     * @return int|string
+     */
+    abstract public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true);
+
+    /**
+     * 设置 key 指定的哈希集中指定字段的值。
+     * 如果 key 指定的哈希集不存在，会创建一个新的哈希集并与 key 关联。
+     * 如果字段在哈希集中存在，它将被重写。
+     * @param string $key
+     * @param string $field
+     * @param mixed $value
+     * @param bool $add_prefix
      * @return string
      */
-    abstract public function key_get(string $key, bool $add_prefix = true): string;
+    abstract public function hash_hset(string $key, string $field, $value, bool $add_prefix = true);
 
     /**
-     * 自增缓存（针对数值缓存）
-     * @param string $key 缓存变量名
-     * @param int $step 步长
-     * @param bool $add_prefix 是否活加前缀
-     * @return int
+     * 增加 key 指定的哈希集中指定字段的数值。如果 key 不存在，会创建一个新的哈希集并与 key 关联。如果字段不存在，则字段的值在该操作执行前被设置为 0
+     *   HINCRBY 支持的值的范围限定在 64位 有符号整数
+     * @param string $key
+     * @param string $field
+     * @param int $increment
+     * @param bool $add_prefix
+     * @return string
      */
-    abstract public function incr(string $key, int $step = 1, bool $add_prefix = true): int;
+    abstract public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true);
 
     /**
-     * 自减缓存（针对数值缓存）
-     * @param string $key 缓存变量名
-     * @param int $step 步长
-     * @param bool $add_prefix 是否活加前缀
-     * @return int
+     * 返回hash里面field是否存在
+     * @param string $key
+     * @param string $field
+     * @param bool $add_prefix
+     * @return bool
      */
-    abstract public function decr(string $key, int $step = 1, bool $add_prefix = true): int;
+    abstract public function hash_hexists(string $key, string $field, bool $add_prefix = true): bool;
 
+    /**
+     * 从 key 指定的哈希集中移除指定的域。在哈希集中不存在的域将被忽略。
+     *  如果 key 指定的哈希集不存在，它将被认为是一个空的哈希集，该命令将返回0。
+     * @param string $key
+     * @param string $field
+     * @param bool $add_prefix
+     * @return bool|int
+     */
+    abstract public function hash_hdel(string $key, string $field, bool $add_prefix = true);
+
+    /**
+     * 返回 key 指定的哈希集中所有的字段和值
+     * @param string $key
+     * @param array $default
+     * @param bool $add_prefix
+     * @return array
+     */
+    abstract public function hash_hgetall(string $key, $default = [], bool $add_prefix = true): array;
 
     /**
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
@@ -165,13 +221,6 @@ abstract class driver
      */
     abstract public function list_length(string $key, bool $add_prefix = true): int;
 
-    /**
-     * 获取实际标签名
-     * @param string $key 标签名
-     * @param bool $add_prefix 是否活加前缀
-     * @return string
-     */
-    abstract public function list_key_get(string $key, bool $add_prefix = true): string;
 
     /**
      * 删除缓存标签
@@ -181,19 +230,34 @@ abstract class driver
      */
     public function list_clear(string $key, bool $add_prefix = true): void
     {
+        // 缓存标签列表
         $keys = $this->list_lrange($key, 0, -1, $add_prefix);
         // 指定标签清除
-        $this->multiple_delete($keys, false);
-
-        $this->delete($this->list_key_get($key), false);
+        $this->multiple_delete($keys, $add_prefix);
+        // 消除list
+        $key = $this->key_get($key, $add_prefix, true);
+        $this->delete($key, false);
     }
 
     /**
-     * 取得  prefix | module:名称
+     * 获取实际的缓存标识
+     * @param string $key 缓存名
+     * @param bool $add_prefix 是否活加前缀
+     * @param bool $is_list 是否列表前缀
      * @return string
      */
-    public function prefix()
+    abstract public function key_get(string $key, bool $add_prefix = true, bool $is_list = false): string;
+
+    /**
+     * 取得  prefix | module:名称
+     * @param bool $is_list
+     * @return string
+     */
+    public function prefix(bool $is_list = false)
     {
+        if ($is_list) {
+            return $this->_options['prefix_list'];
+        }
         return $this->_options['prefix'];
     }
 
@@ -228,18 +292,18 @@ abstract class driver
      * 返回缓存读取次数
      * @return int
      */
-    public function times_read_get(): int
+    public function times_get(): int
     {
-        return $this->_times['read'];
+        return $this->_times['get'];
     }
 
     /**
      * 返回缓存写入次数
      * @return int
      */
-    public function times_write_get(): int
+    public function times_set(): int
     {
-        return $this->_times['write'];
+        return $this->_times['set'];
     }
 
     /**
@@ -294,7 +358,6 @@ abstract class driver
         }
         return true;
     }
-
 
     /**
      * 返回句柄对象，可执行其它高级方法

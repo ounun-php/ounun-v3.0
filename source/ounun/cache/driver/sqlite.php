@@ -37,139 +37,31 @@ class sqlite extends \ounun\cache\driver
 
     }
 
-    /**
-     * 取得变量的存储文件名
-     * @param string $name 缓存变量名
-     * @return string
-     */
-    protected function key_get($name)
+
+    public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        return $this->options['path'] . $this->options['prefix'] . md5($name) . '.php';
+        // TODO: Implement get() method.
     }
 
-    /**
-     * 判断缓存是否存在
-     * @param string $name 缓存变量名
-     * @return mixed
-     */
-    public function has($name)
+
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
     {
-        return $this->get($name) ? true : false;
+        // TODO: Implement incrby() method.
     }
 
-    /**
-     * 读取缓存
-     * @param string $name 缓存变量名
-     * @param mixed $default 默认值
-     * @return mixed
-     */
-    public function get($name, $default = false)
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
     {
-        $filename = $this->key_get($name);
-        if (is_file($filename)) {
-            // 判断是否过期
-            $mtime = filemtime($filename);
-            if ($mtime < time()) {
-                // 清除已经过期的文件
-                unlink($filename);
-                return $default;
-            }
-            return include $filename;
-        } else {
-            return $default;
-        }
+        // TODO: Implement decrby() method.
     }
 
-    /**
-     * 写入缓存
-     * @param string $name 缓存变量名
-     * @param mixed $value 存储数据
-     * @param integer|\DateTime $expire 有效时间（秒）
-     * @return bool
-     */
-    public function set($name, $value, $expire = null)
+    public function exists(string $key, bool $add_prefix = true): bool
     {
-        if (is_null($expire)) {
-            $expire = $this->options['expire'];
-        }
-        if ($expire instanceof \DateTime) {
-            $expire = $expire->getTimestamp();
-        } else {
-            $expire = 0 === $expire ? 10 * 365 * 24 * 3600 : $expire;
-            $expire = time() + $expire;
-        }
-        $filename = $this->key_get($name);
-        if ($this->tag && !is_file($filename)) {
-            $first = true;
-        }
-        $ret = file_put_contents($filename, ("<?php return " . var_export($value, true) . ";"));
-        // 通过设置修改时间实现有效期
-        if ($ret) {
-            isset($first) && $this->tag_item_set($filename);
-            touch($filename, $expire);
-        }
-        return $ret;
+        // TODO: Implement exists() method.
     }
 
-    /**
-     * 自增缓存（针对数值缓存）
-     * @param string $name 缓存变量名
-     * @param int $step 步长
-     * @return false|int
-     */
-    public function inc($name, $step = 1)
+    public function expire(string $key, int $expire = 0, bool $add_prefix = true): bool
     {
-        if ($this->has($name)) {
-            $value = $this->get($name) + $step;
-        } else {
-            $value = $step;
-        }
-        return $this->set($name, $value, 0) ? $value : false;
-    }
-
-    /**
-     * 自减缓存（针对数值缓存）
-     * @param string $name 缓存变量名
-     * @param int $step 步长
-     * @return false|int
-     */
-    public function dec($name, $step = 1)
-    {
-        if ($this->has($name)) {
-            $value = $this->get($name) - $step;
-        } else {
-            $value = -$step;
-        }
-        return $this->set($name, $value, 0) ? $value : false;
-    }
-
-    /**
-     * 删除缓存
-     * @param string $name 缓存变量名
-     * @return boolean
-     */
-    public function rm($name)
-    {
-        return unlink($this->key_get($name));
-    }
-
-    /**
-     * 清除缓存
-     * @param string $tag 标签名
-     * @return bool
-     */
-    public function clear($tag = null)
-    {
-        if ($tag) {
-            // 指定标签清除
-            $keys = $this->tag_item_get($tag);
-            foreach ($keys as $key) {
-                unlink($key);
-            }
-            $this->rm('tag_' . md5($tag));
-            return true;
-        }
-        array_map("unlink", glob($this->options['path'] . ($this->options['prefix'] ? $this->options['prefix'] . '/' : '') . '*.php'));
+        // TODO: Implement expire() method.
     }
 
     public function delete(string $key, bool $add_prefix = true)
@@ -177,48 +69,78 @@ class sqlite extends \ounun\cache\driver
         // TODO: Implement delete() method.
     }
 
-    public function key_set($key)
+    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
     {
-        // TODO: Implement key() method.
+        // TODO: Implement hash_hget() method.
     }
 
-    public function val($val)
+    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
     {
-        // TODO: Implement val() method.
+        // TODO: Implement hash_hset() method.
     }
 
-    public function read()
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
     {
-        // TODO: Implement read() method.
+        // TODO: Implement hash_hincrby() method.
     }
 
-    public function write()
+    public function hash_hexists(string $key, string $field, bool $add_prefix = true): bool
     {
-        // TODO: Implement write() method.
+        // TODO: Implement hash_hexists() method.
     }
 
-    public function get2($sub_key)
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
     {
-        // TODO: Implement get2() method.
+        // TODO: Implement hash_hdel() method.
     }
 
-    public function set2($sub_key, $sub_val)
+    public function hash_hgetall(string $key, $default = [], bool $add_prefix = true): array
     {
-        // TODO: Implement set2() method.
+        // TODO: Implement hash_hgetall() method.
     }
 
-    public function delete2()
+    public function list_lpush(string $key, $value, bool $add_prefix = true): int
     {
-        // TODO: Implement delete2() method.
+        // TODO: Implement list_lpush() method.
     }
 
-    public function filename()
+    public function list_lpop(string $key = '', bool $add_prefix = true)
     {
-        // TODO: Implement filename() method.
+        // TODO: Implement list_lpop() method.
     }
 
-    public function mod()
+    public function list_rpush(string $key, $value, bool $add_prefix = true): int
     {
-        // TODO: Implement mod() method.
+        // TODO: Implement list_rpush() method.
+    }
+
+    public function list_rpop(string $key = '', bool $add_prefix = true)
+    {
+        // TODO: Implement list_rpop() method.
+    }
+
+    public function list_lrange(string $key, int $start = 0, int $end = -1, bool $add_prefix = true): array
+    {
+        // TODO: Implement list_lrange() method.
+    }
+
+    public function list_length(string $key, bool $add_prefix = true): int
+    {
+        // TODO: Implement list_length() method.
+    }
+
+    public function key_get(string $key, bool $add_prefix = true, bool $is_list = false): string
+    {
+        // TODO: Implement key_get() method.
+    }
+
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '')
+    {
+        // TODO: Implement set() method.
+    }
+
+    public function clear()
+    {
+        // TODO: Implement clear() method.
     }
 }

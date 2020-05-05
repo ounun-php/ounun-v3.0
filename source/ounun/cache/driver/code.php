@@ -23,7 +23,7 @@ class code extends \ounun\cache\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_tag'    => 't',
+        'prefix_list'   => 't',
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
@@ -46,16 +46,6 @@ class code extends \ounun\cache\driver
         if (substr($this->_options['path'], -1) != '/') {
             $this->_options['path'] .= '/';
         }
-        $this->init();
-    }
-
-    /**
-     * 初始化检查
-     * @access private
-     * @return boolean
-     */
-    private function init()
-    {
         // 创建项目缓存目录
         if (!is_dir($this->_options['path'])) {
             if (mkdir($this->_options['path'], 0755, true)) {
@@ -72,7 +62,7 @@ class code extends \ounun\cache\driver
      * @param bool $auto 是否自动创建目录
      * @return string
      */
-    public function key_get(string $name, $auto = false)
+    public function key_get2(string $name, $auto = false)
     {
         $name = md5($name);
         if ($this->_options['cache_subdir']) {
@@ -91,16 +81,6 @@ class code extends \ounun\cache\driver
         return $filename;
     }
 
-    /**
-     * 判断缓存是否存在
-     * @access public
-     * @param string $name 缓存变量名
-     * @return bool
-     */
-    public function has(string $key, bool $add_prefix = true)
-    {
-        return $this->get($key) ? true : false;
-    }
 
     /**
      * 读取缓存
@@ -109,7 +89,7 @@ class code extends \ounun\cache\driver
      * @param mixed $default 默认值
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get2(string $key, $default = 0, bool $add_prefix = true)
     {
         $filename = $this->key_get($name);
         if (!is_file($filename)) {
@@ -143,7 +123,7 @@ class code extends \ounun\cache\driver
      * @param integer|\DateTime $expire 有效时间（秒）
      * @return boolean
      */
-    public function set($name, $value, $expire = null)
+    public function set2($name, $value, $expire = null)
     {
         if (is_null($expire)) {
             $expire = $this->options['expire'];
@@ -171,45 +151,7 @@ class code extends \ounun\cache\driver
         }
     }
 
-    /**
-     * 自增缓存（针对数值缓存）
-     * @access public
-     * @param string $name 缓存变量名
-     * @param int $step 步长
-     * @return false|int
-     */
-    public function inc($name, $step = 1)
-    {
-        if ($this->has($name)) {
-            $value  = $this->get($name) + $step;
-            $expire = $this->expire;
-        } else {
-            $value  = $step;
-            $expire = 0;
-        }
 
-        return $this->set($name, $value, $expire) ? $value : false;
-    }
-
-    /**
-     * 自减缓存（针对数值缓存）
-     * @access public
-     * @param string $name 缓存变量名
-     * @param int $step 步长
-     * @return false|int
-     */
-    public function dec($name, $step = 1)
-    {
-        if ($this->has($name)) {
-            $value  = $this->get($name) - $step;
-            $expire = $this->expire;
-        } else {
-            $value  = -$step;
-            $expire = 0;
-        }
-
-        return $this->set($name, $value, $expire) ? $value : false;
-    }
 
     /**
      * 删除缓存
@@ -217,7 +159,7 @@ class code extends \ounun\cache\driver
      * @param string $name 缓存变量名
      * @return boolean
      */
-    public function rm($name)
+    public function rm2($name)
     {
         $filename = $this->key_get($name);
         return $this->unlink($filename);
@@ -229,7 +171,7 @@ class code extends \ounun\cache\driver
      * @param string $tag 标签名
      * @return boolean
      */
-    public function clear($tag = null)
+    public function clear2($tag = null)
     {
         if ($tag) {
             // 指定标签清除
@@ -261,7 +203,7 @@ class code extends \ounun\cache\driver
      * 清空文件夹函数和清空文件夹后删除空文件夹函数的处理
      * @param $path
      */
-    private function deldir($path)
+    private function deldir2($path)
     {
         //如果是目录则继续
         if (is_dir($path)) {
@@ -291,7 +233,7 @@ class code extends \ounun\cache\driver
      * @return bool
      * @return boolean
      */
-    private function unlink($path)
+    private function unlink2($path)
     {
         return is_file($path) && unlink($path);
     }
@@ -301,7 +243,7 @@ class code extends \ounun\cache\driver
      * @param string $filename
      * @return mixed
      */
-    static public function read(string $filename)
+    static public function read2(string $filename)
     {
         if (file_exists($filename)) {
             return require $filename;
@@ -317,7 +259,7 @@ class code extends \ounun\cache\driver
      * @param bool   $recursive
      * @return mixed
      */
-    static public function write(string $filename, $data, bool $recursive = false)
+    static public function write2(string $filename, $data, bool $recursive = false)
     {
         if($recursive){
             $dir      = dirname($filename);
@@ -330,43 +272,108 @@ class code extends \ounun\cache\driver
     }
 
 
+    public function get(string $key, $default = 0, bool $add_prefix = true)
+    {
+        // TODO: Implement get() method.
+    }
+
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true)
+    {
+        // TODO: Implement set() method.
+    }
+
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
+    {
+        // TODO: Implement incrby() method.
+    }
+
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
+    {
+        // TODO: Implement decrby() method.
+    }
+
+    public function exists(string $key, bool $add_prefix = true): bool
+    {
+        // TODO: Implement exists() method.
+    }
+
+    public function expire(string $key, int $expire = 0, bool $add_prefix = true): bool
+    {
+        // TODO: Implement expire() method.
+    }
+
     public function delete(string $key, bool $add_prefix = true)
     {
         // TODO: Implement delete() method.
     }
 
-    public function key_set($key)
+    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
     {
-        // TODO: Implement key() method.
+        // TODO: Implement hash_hget() method.
     }
 
-    public function val($val)
+    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
     {
-        // TODO: Implement val() method.
+        // TODO: Implement hash_hset() method.
     }
 
-    public function get2($sub_key)
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
     {
-        // TODO: Implement get2() method.
+        // TODO: Implement hash_hincrby() method.
     }
 
-    public function set2($sub_key, $sub_val)
+    public function hash_hexists(string $key, string $field, bool $add_prefix = true): bool
     {
-        // TODO: Implement set2() method.
+        // TODO: Implement hash_hexists() method.
     }
 
-    public function delete2()
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
     {
-        // TODO: Implement delete2() method.
+        // TODO: Implement hash_hdel() method.
     }
 
-    public function filename()
+    public function hash_hgetall(string $key, $default = [], bool $add_prefix = true): array
     {
-        // TODO: Implement filename() method.
+        // TODO: Implement hash_hgetall() method.
     }
 
-    public function mod()
+    public function list_lpush(string $key, $value, bool $add_prefix = true): int
     {
-        // TODO: Implement mod() method.
+        // TODO: Implement list_lpush() method.
+    }
+
+    public function list_lpop(string $key = '', bool $add_prefix = true)
+    {
+        // TODO: Implement list_lpop() method.
+    }
+
+    public function list_rpush(string $key, $value, bool $add_prefix = true): int
+    {
+        // TODO: Implement list_rpush() method.
+    }
+
+    public function list_rpop(string $key = '', bool $add_prefix = true)
+    {
+        // TODO: Implement list_rpop() method.
+    }
+
+    public function list_lrange(string $key, int $start = 0, int $end = -1, bool $add_prefix = true): array
+    {
+        // TODO: Implement list_lrange() method.
+    }
+
+    public function list_length(string $key, bool $add_prefix = true): int
+    {
+        // TODO: Implement list_length() method.
+    }
+
+    public function key_get(string $key, bool $add_prefix = true, bool $is_list = false): string
+    {
+        // TODO: Implement key_get() method.
+    }
+
+    public function clear()
+    {
+        // TODO: Implement clear() method.
     }
 }

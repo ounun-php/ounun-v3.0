@@ -36,8 +36,6 @@ class cache
 
     /** @var array 数据 */
     protected $_value = [];
-    /** @var string key */
-    protected $_key = '';
     /** @var int 缓存有效时长 */
     protected $_expire = 0;
     /** @var bool false:没读    true:已读 */
@@ -93,20 +91,27 @@ class cache
 
     /**
      * 读取数据中$key的值
+     * @param string $key 缓存变量名
+     * @param mixed $default 默认值
+     * @param bool $add_prefix 是否活加前缀
      * @return mixed
      */
-    public function get()
+    public function get(string $key, $default = 0, bool $add_prefix = true)
     {
-        if ($this->_is_read) {
-            return $this->_value;
+        return $this->_driver->get($key, $default, $add_prefix);
+    }
+
+    /**
+     * 读取数据中$key的值
+     * @param string $sub_key
+     * @return mixed
+     */
+    public function get_sub(string $key, string $sub_key, $default = 0, bool $add_prefix = true)
+    {
+        if ($this->_value && is_array($this->_value)) {
+            return $this->_value[$sub_key];
         }
-        if (empty($this->_key)) {
-            trigger_error("ERROR! key is null.", E_USER_ERROR);
-        }
-        // read
-        $this->_is_read = true;
-        $this->_value   = $this->_driver->get($this->_key);
-        return $this->_value;
+        return null;
     }
 
     /**
@@ -121,29 +126,16 @@ class cache
 
     /**
      * 缓存KEY
+     * @param string $key
+     * @param bool $add_prefix
      * @return string
      */
-    public function get_key()
+    public function key_get(string $key, bool $add_prefix = false)
     {
-        return $this->_key;
-        // return $this->_driver->filename();
+        return $this->_driver->key_get($key,$add_prefix);
     }
 
-    /**
-     * 读取数据中$key的值
-     * @param string $sub_key
-     * @return mixed
-     */
-    public function get_sub($sub_key)
-    {
-        if (!$this->_is_read) {
-            $this->get();
-        }
-        if ($this->_value && is_array($this->_value)) {
-            return $this->_value[$sub_key];
-        }
-        return null;
-    }
+
 
     /**
      * 简单方式，获取$key对应值$val
