@@ -13,7 +13,7 @@ namespace ounun\cache\driver;
  *
  * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
  */
-abstract class redis extends \ounun\cache\driver
+class redis extends \ounun\cache\driver
 {
     /** @var string redis类型 */
     const Type = 'redis';
@@ -110,7 +110,7 @@ abstract class redis extends \ounun\cache\driver
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
-     * @param array $options 参数
+     * @param array $options   参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
     public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
@@ -121,7 +121,10 @@ abstract class redis extends \ounun\cache\driver
         if (empty($val)) {
             return $default;
         }
-
+        // 是否返回压缩后的数据
+        if($options['compress']){
+            return $val;
+        }
         // 数据压缩
         if ($this->_options['data_compress'] && function_exists('gzcompress')) {
             $val = gzuncompress($val);
@@ -140,7 +143,11 @@ abstract class redis extends \ounun\cache\driver
      * @param bool $add_prefix 是否活加前缀
      * @return bool
      */
-    abstract public function exists(string $key, bool $add_prefix = true): bool;
+    public function exists(string $key, bool $add_prefix = true): bool
+    {
+        $key = $this->key_get($key, $add_prefix);
+        return $this->_handler->exists($key);
+    }
 
     /**
      * 设置key的过期时间，超过时间后，将会自动删除该key
@@ -149,7 +156,14 @@ abstract class redis extends \ounun\cache\driver
      * @param bool $add_prefix 是否活加前缀
      * @return bool
      */
-    abstract public function expire(string $key, int $expire = 0, bool $add_prefix = true): bool;
+    public function expire(string $key, int $expire = 0, bool $add_prefix = true): bool
+    {
+        if($expire <=0){
+            return true;
+        }
+        $key = $this->key_get($key,$add_prefix);
+        return $this->_handler->expire($key,$expire);
+    }
 
     /**
      * 删除缓存
@@ -159,9 +173,7 @@ abstract class redis extends \ounun\cache\driver
      */
     public function delete(string $key, bool $add_prefix = true)
     {
-        if ($add_prefix) {
-            $key = $this->key_get($key);
-        }
+        $key = $this->key_get($key,$add_prefix);
         return $this->_handler->del($key);
     }
 

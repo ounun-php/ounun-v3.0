@@ -43,7 +43,7 @@ abstract class driver
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
-     * @param array $options   参数
+     * @param array $options   参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
     abstract public function get(string $key, $default = 0, bool $add_prefix = true, array $options = []);

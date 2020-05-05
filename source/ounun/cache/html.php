@@ -1,32 +1,40 @@
 <?php
-
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
 
 namespace ounun\cache;
 
-use ounun\template;
-
 class html
 {
-    /** Cache最小文件大小           */
-    const Cache_Mini_Size = 2024;
-    /** Cache生成过程最长临时过度时间 */
-    const Cache_Time_Interval = 300;
-
-    /** 全部 - Cdn 类型  */
+    /** 全部 html/etag/expiry/mtime(Redis,Memcached,Html) - Cdn 类型  */
     const Cdn_Type_Full = 1;
     /** CDN只存etag/expiry/mtime(Redis,Memcached,Sqlite) - Cdn 类型   */
     const Cdn_Type_Min = 2;
 
+    /** Cache最小文件大小           */
+    const Cache_Mini_Size = 2024;
+    /** Cache生成过程最长临时过度时间 */
+    const Cache_Time_Interval = 300;
+    /** 有效Cache数据类型 */
+    const Cache_Valid = [
+        self::Cdn_Type_Full => [driver\redis::Type, driver\memcached::Type, driver\html::Type],
+        self::Cdn_Type_Min  => [driver\redis::Type, driver\memcached::Type, driver\sqlite::Type],
+    ];
+
     /** @var bool */
     public $stop = false;
 
+    /** @var int cdn类型 */
+    protected $_cdn_type = 2;
     /** @var driver 缓存驱动 */
     protected $_cache_driver;
     /** @var string 页面key */
     protected $_cache_key = '';
     /** @var array 数据 */
     protected $_cache_value = [];
-    /** @var string 类型 */
+    /** @var string cache类型 */
     protected $_cache_type = '';
     /** @var string 缓存文件 */
     protected $_cache_filename = '';
@@ -70,11 +78,8 @@ class html
         // 初始化参数
         $this->_time_expire = $expire;
         $this->_time_curr   = time();
-
-        $this->_cache_time = 0;
-
-        $this->_is_trim  = $trim;
-        $this->_is_debug = $debug;
+        $this->_cache_time  = 0;
+        $this->_is_trim     = $trim;
         // 是否支持gzip
         if (stripos($_SERVER['HTTP_ACCEPT_ENCODING'], 'gzip') === false) {
             $this->_is_gzip = false;
@@ -82,6 +87,7 @@ class html
             $this->_is_gzip = true;
         }
         // Cache
+        $this->_cdn_type   = $config['cdn_type'];
         $this->_cache_type = $config['driver_type'];
         if (driver\file::Type == $config['driver_type']) {
             $config['format_string'] = true;
@@ -94,8 +100,8 @@ class html
             $this->_cache_driver     = new driver\redis($config);
         } else {
             $config['format_string'] = true;
-            $this->_cache_type       = driver\file::Type;
-            $this->_cache_driver     = new driver\file($config);
+            $this->_cache_type       = driver\redis::Type;
+            $this->_cache_driver     = new driver\redis($config);
         }
         $this->_cache_key = $key;
     }
@@ -130,13 +136,13 @@ class html
     {
         $this->cache_time();
         \ounun\debug::header('time', $this->_cache_time, __FUNCTION__, __LINE__);
-        \ounun\debug::header('expire', $this->_time_expire,  __FUNCTION__, __LINE__);
+        \ounun\debug::header('expire', $this->_time_expire, __FUNCTION__, __LINE__);
         if ($this->_cache_time + $this->_time_expire > $this->_time_curr) {
-            \ounun\debug::header('xypc', $this->filename(),  __FUNCTION__, __LINE__);
+            \ounun\debug::header('xypc', $this->filename(), __FUNCTION__, __LINE__);
             return true;
         }
         $cache_time_t = $this->cache_time_tmp();
-        \ounun\debug::header('time_t', $cache_time_t,  __FUNCTION__, __LINE__);
+        \ounun\debug::header('time_t', $cache_time_t, __FUNCTION__, __LINE__);
         if ($cache_time_t + self::Cache_Time_Interval > $this->_time_curr) {
             \ounun\debug::header('xypc_t', $this->filename() . '.t time:' . $cache_time_t, __FUNCTION__, __LINE__);
             return true;
@@ -151,12 +157,12 @@ class html
      */
     public function run_execute(bool $output)
     {
-        \ounun\debug::header('xypm', $this->filename(),  __FUNCTION__, __LINE__);
+        \ounun\debug::header('xypm', $this->filename(), __FUNCTION__, __LINE__);
         $this->stop = false;
         $this->cache_time_tmp_set();
         // 生成
         // ob_start();
-        template::ob_start();
+        \ounun\template::ob_start();
         register_shutdown_function([$this, 'callback'], $output);
     }
 
@@ -202,11 +208,11 @@ class html
         ob_clean();
         ob_implicit_flush(1);
         // 写文件
-        \ounun\debug::header('xypm_size', $filesize,  __FUNCTION__, __LINE__);
+        \ounun\debug::header('xypm_size', $filesize, __FUNCTION__, __LINE__);
         if ($filesize > self::Cache_Mini_Size) {
-            \ounun\debug::header('xypm_ok', $this->filename(),  __FUNCTION__, __LINE__);
+            \ounun\debug::header('xypm_ok', $this->filename(), __FUNCTION__, __LINE__);
 
-            $buffer = template::trim($buffer, $this->_is_trim);
+            $buffer = \ounun\template::trim($buffer, $this->_is_trim);
             $buffer = gzencode($buffer, 9);
             $this->cache_html($buffer);
             $this->_cache_time = $this->cache_time();
@@ -215,7 +221,7 @@ class html
             }
         } else {
             $this->clean();
-            \ounun\debug::header('xypm_noc', 'nocache',  __FUNCTION__, __LINE__);
+            \ounun\debug::header('xypm_noc', 'nocache', __FUNCTION__, __LINE__);
             if ($output) {
                 header('Content-Length: ' . $filesize);
                 exit($buffer);
@@ -282,10 +288,10 @@ class html
         $this->_cache_time = 0;
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename();
-            \ounun\debug::header('filename', $filename,  __FUNCTION__, __LINE__);
+            \ounun\debug::header('filename', $filename, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_time = filemtime($filename);
-                \ounun\debug::header('cache_time', $this->_cache_time,  __FUNCTION__, __LINE__);
+                \ounun\debug::header('cache_time', $this->_cache_time, __FUNCTION__, __LINE__);
             }
         } else {
             $this->_cache_time = (int)$this->_cache_value['filemtime'];
@@ -310,7 +316,7 @@ class html
             if (file_exists($filename)) {
                 $this->_cache_time_t = filemtime($filename);
                 $this->_cache_size_t = filesize($filename);
-                \ounun\debug::header('time', $this->_cache_time_t,  __FUNCTION__, __LINE__);
+                \ounun\debug::header('time', $this->_cache_time_t, __FUNCTION__, __LINE__);
             }
         } else {
             $this->_cache_time_t = (int)$this->_cache_value['filemtime_t'];
@@ -335,7 +341,7 @@ class html
         $this->_cache_time_t = time();
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename() . '.t';
-            \ounun\debug::header('file', $filename,  __FUNCTION__, __LINE__);
+            \ounun\debug::header('file', $filename, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 touch($filename);
             } else {
@@ -362,7 +368,7 @@ class html
         }
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename();
-            \ounun\debug::header('file', $filename,  __FUNCTION__, __LINE__);
+            \ounun\debug::header('file', $filename, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_size = filesize($filename);
                 \ounun\debug::header('size', $this->_cache_size, __FUNCTION__, __LINE__);
@@ -383,7 +389,7 @@ class html
         if (driver\file::Type == $this->_cache_type) {
             $this->_cache_driver->set($this->_cache_key, $html, $this->_time_expire);
             $filename = $this->filename() . '.t';
-            \ounun\debug::header('delfile', $filename,  __FUNCTION__, __LINE__);
+            \ounun\debug::header('delfile', $filename, __FUNCTION__, __LINE__);
             if (file_exists($filename)) {
                 unlink($filename);
             }
