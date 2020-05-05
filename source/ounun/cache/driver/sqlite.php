@@ -38,7 +38,7 @@ class sqlite extends \ounun\cache\driver
     }
 
 
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
         // TODO: Implement get() method.
     }

@@ -110,7 +110,7 @@ class file extends \ounun\cache\driver
      * @param mixed $default 默认值
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
         $filename = $this->key_get($key,$add_prefix);
         if (!is_file($filename)) {

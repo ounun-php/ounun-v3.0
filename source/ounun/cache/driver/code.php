@@ -27,7 +27,7 @@ class code extends \ounun\cache\driver
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
-        'data_code'     => false,
+        'data_code'     => true,
 
         'data_compress' => false,
     ];
@@ -272,12 +272,12 @@ class code extends \ounun\cache\driver
     }
 
 
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
         // TODO: Implement get() method.
     }
 
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true)
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
     {
         // TODO: Implement set() method.
     }

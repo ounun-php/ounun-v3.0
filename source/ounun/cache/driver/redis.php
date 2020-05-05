@@ -30,8 +30,8 @@ abstract class redis extends \ounun\cache\driver
         'data_compress' => false, // bool false:不压缩    true:压缩
         'large_scale'   => false, // bool false:少量      true:大量
 
-        'prefix'        => '',    // 模块名称
-        'prefix_list'   => 't',
+        'prefix'      => '',    // 模块名称
+        'prefix_list' => 't',
 
         'host'       => '127.0.0.1',
         'port'       => 6379,
@@ -75,10 +75,10 @@ abstract class redis extends \ounun\cache\driver
      * @param mixed $value 存储数据
      * @param int $expire 有效时间（秒）
      * @param bool $add_prefix 是否活加前缀
-     * @param string $list_key 汇总集合list标识
+     * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '')
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
     {
         $this->_times['set'] = ((int)$this->_times['set']) + 1;
         $key1                = $this->key_get($key, $add_prefix);
@@ -94,8 +94,8 @@ abstract class redis extends \ounun\cache\driver
         $result = $this->_handler->set($key1, $value);
         if ($result) {
             // 汇总集合
-            if ($list_key) {
-                $this->list_lpush($list_key, $key, $add_prefix);
+            if ($options['list_key']) {
+                $this->list_lpush($options['list_key'], $key, $add_prefix);
             }
             // 有效时间（秒）
             if ($expire) {
@@ -110,9 +110,10 @@ abstract class redis extends \ounun\cache\driver
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
+     * @param array $options 参数
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
         $this->_times['get'] = ((int)$this->_times['get']) + 1;
         $key                 = $this->key_get($key, $add_prefix);

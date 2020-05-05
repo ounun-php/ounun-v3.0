@@ -129,7 +129,7 @@ class memcached extends \ounun\cache\driver
      * @param  bool      $add_prefix  是否活加前缀
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
         $this->_times['read']  = ((int)$this->_times['read']) + 1;
         if($add_prefix){

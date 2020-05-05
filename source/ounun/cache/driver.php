@@ -43,9 +43,10 @@ abstract class driver
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
+     * @param array $options   参数
      * @return mixed
      */
-    abstract public function get(string $key, $default = 0, bool $add_prefix = true);
+    abstract public function get(string $key, $default = 0, bool $add_prefix = true, array $options = []);
 
     /**
      * 写入缓存
@@ -53,10 +54,10 @@ abstract class driver
      * @param mixed $value 存储数据
      * @param int $expire 有效时间（秒）
      * @param bool $add_prefix 是否活加前缀
-     * @param string $list_key 汇总集合list标识
+     * @param array $options   参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
-    abstract public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, string $list_key = '');
+    abstract public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = []);
 
     /**
      * 增加之后的value值。（针对数值缓存）

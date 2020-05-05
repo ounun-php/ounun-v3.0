@@ -28,8 +28,7 @@ class html extends \ounun\cache\driver
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
         'data_code'     => false,
-
-        'data_compress' => false,
+        'data_compress' => true,
     ];
 
     protected $expire;
@@ -109,7 +108,7 @@ class html extends \ounun\cache\driver
      * @param mixed $default 默认值
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
         $filename = $this->key_get($name);
         if (!is_file($filename)) {
