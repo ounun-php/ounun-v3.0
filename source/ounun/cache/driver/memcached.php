@@ -26,6 +26,7 @@ class memcached extends \ounun\cache\driver
         'prefix'        => '',    // 模块名称
         'prefix_list'   => 't',
 
+
         'servers'      => [
             ['127.0.0.1',11211,100],
             // ['127.0.0.1',11211,100]

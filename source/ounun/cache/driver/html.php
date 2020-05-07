@@ -27,7 +27,6 @@ class html extends \ounun\cache\driver
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,
-        'data_code'     => false,
         'data_compress' => true,
     ];
 

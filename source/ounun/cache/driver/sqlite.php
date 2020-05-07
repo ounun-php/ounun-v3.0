@@ -17,9 +17,17 @@ class sqlite extends \ounun\cache\driver
 
     /** @var array  */
     protected $options = [
-        'prefix' => '',
+        'expire'    => 0,  // 有效时间 0为永久  等于 10*365*24*3600（10年）
+        'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
+
+        'format_string' => false, // bool false:混合数据  true:字符串
+        'data_compress' => false, // bool false:不压缩    true:压缩
+        'large_scale'   => false, // bool false:少量      true:大量
+
+        'prefix'      => '',    // 模块名称
+        'prefix_list' => 't',
+
         'path'   => '',
-        'expire' => 0, // 等于 10*365*24*3600（10年）
     ];
 
     /**

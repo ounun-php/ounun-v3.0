@@ -53,6 +53,9 @@ class cache
     static public function i(string $storage_key = 'data', array $config = [])
     {
         if (empty(static::$_instances[$storage_key])) {
+            if (empty($config)) {
+                $config = \ounun::$global['cache'][$storage_key];
+            }
             $cache                            = new static($config);
             $cache->storage_key               = $storage_key;
             static::$_instances[$storage_key] = $cache;
@@ -68,47 +71,74 @@ class cache
     public function __construct(array $config = [])
     {
         $this->_driver_type = $config['driver_type'];
-        if($this->_driver_type && in_array($this->_driver_type,static::Driver_Type_Valid)){
-            $cls = "driver\{$this->_driver_type}";
+        if ($this->_driver_type && in_array($this->_driver_type, static::Driver_Type_Valid)) {
+            $cls           = "driver\{$this->_driver_type}";
             $this->_driver = new $cls($config);
-        }else{
+        } else {
             trigger_error("Can't support driver_type:{$this->_driver_type}", E_USER_ERROR);
         }
     }
 
     /**
-     * 读取数据中$key的值
+     * 读取缓存
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
+     * @param array $options 参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true)
+    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
     {
-        return $this->_driver->get($key, $default, $add_prefix);
+        return $this->_driver->get($key, $default, $add_prefix, $options);
     }
 
     /**
-     * 读取数据中$key的值
-     * @param string $sub_key
-     * @return mixed
+     * 写入缓存
+     * @param string $key 缓存变量名
+     * @param mixed $value 存储数据
+     * @param int $expire 有效时间（秒）
+     * @param bool $add_prefix 是否活加前缀
+     * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
+     * @return bool
      */
-    public function get_sub(string $key, string $sub_key, $default = 0, bool $add_prefix = true)
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
     {
-        if ($this->_value && is_array($this->_value)) {
-            return $this->_value[$sub_key];
+        return $this->_driver->set($key, $value, $expire, $add_prefix, $options);
+    }
+
+    /**
+     * 返回 key 指定的哈希集中该字段所关联的值
+     * @param string $key
+     * @param string $field
+     * @param int $default
+     * @param bool $add_prefix
+     * @return int|string
+     */
+    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    {
+        if ($this->_value[$key] && isset($this->_value[$key][$field])) {
+            return $this->_value[$key][$field];
         }
-        return null;
+        $this->_value[$key][$field] = $this->_driver->hash_hget($key, $field, $default, $add_prefix);
+        return $this->_value[$key][$field];
     }
 
+
     /**
-     * 读取数据
-     * @param $keys
-     * @return mixed|null
+     * 设置 key 指定的哈希集中指定字段的值。
+     * 如果 key 指定的哈希集不存在，会创建一个新的哈希集并与 key 关联。
+     * 如果字段在哈希集中存在，它将被重写。
+     * @param string $key
+     * @param string $field
+     * @param mixed $value
+     * @param bool $add_prefix
+     * @return bool|int
      */
-    public function get_read()
+    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
     {
-        return $this->_driver->read();
+        $this->_value[$key][$field] = $value;
+
+        return $this->_driver->hash_hset($key, $field, $value, $add_prefix);
     }
 
     /**
@@ -119,141 +149,18 @@ class cache
      */
     public function key_get(string $key, bool $add_prefix = false)
     {
-        return $this->_driver->key_get($key,$add_prefix);
-    }
-
-
-
-    /**
-     * 简单方式，获取$key对应值$val
-     *   $sub_key不等于null时 为$val里的$sub_key的值
-     * @param string $key
-     * @param string $key_sub
-     * @param int $default
-     * @param bool $add_prefix
-     * @return mixed
-     */
-    public function get_fast(string $key, $default = 0, string $key_sub = '', bool $add_prefix = false)
-    {
-        $value = $this->_driver->get($key, $default, $add_prefix);
-        if ($key_sub) {
-            return $value[$key_sub];
-        }
-        return $value;
+        return $this->_driver->key_get($key, $add_prefix);
     }
 
     /**
-     * 简单方式，获取$key对应值$val
-     *   $sub_key不等于null时 为$val里的$sub_key的值
-     * @param string $key
-     * @param string $key_sub
-     * @return bool|int|mixed|null
-     */
-    public function get_fast2($key, $key_sub = '')
-    {
-        $this->_driver->key_set($key);
-        if ($key_sub) {
-            return $this->_driver->get($key_sub);
-        }
-        return $this->_driver->read();
-    }
-
-
-    /**
-     * 写入已设定的数据$sub_key为$sub_val
-     * @return bool
-     */
-    public function set()
-    {
-        if (false == $this->_is_read) {
-            trigger_error("ERROR! value is null.", E_USER_ERROR);
-        }
-        return $this->_driver->set($this->_key, $this->_value, $this->_expire);
-    }
-
-    /**
-     * 写入已设定的数据
-     * @return bool
-     */
-    public function set_write()
-    {
-        return $this->_driver->write();
-    }
-
-    /**
-     * 设定数据keys
-     * @param string $key
-     * @param bool $add_prefix
-     */
-    public function set_key(string $key, bool $add_prefix = false)
-    {
-        $this->_is_read    = false;
-        $this->_value      = null;
-        $this->_add_prefix = $add_prefix;
-        $this->_key        = "{$this->_add_prefix}:{$key}";
-    }
-
-    /**
-     * 设定数据Value
-     * @param mixed $val
-     * @param int $expire
-     * @param bool $add_prefix
-     */
-    public function set_value($val, int $expire = 0, bool $add_prefix = false)
-    {
-        $this->_is_read    = true;
-        $this->_value      = $val;
-        $this->_expire     = $expire;
-        $this->_add_prefix = $add_prefix;
-    }
-
-
-    /**
-     * 设定数据中$sub_key为$sub_val
-     * @param string $sub_key
-     * @param mixed $sub_val
-     */
-    public function set_sub(string $sub_key, $sub_val)
-    {
-        if (!$this->_is_read) {
-            $this->get();
-        }
-        if (empty($this->_value)) {
-            $this->_value = [];
-        }
-        $this->_value[$sub_key] = $sub_val;
-    }
-
-    /**
-     * 简单方式，设定$key对应值$val
-     * @param string $key
-     * @param mixed $val
-     * @param int $expire
-     * @param bool $add_prefix
-     * @return bool
-     */
-    public function set_fast(string $key, $val, int $expire = 0, bool $add_prefix = false)
-    {
-        return $this->_driver->set($key, $val, $expire, $add_prefix);
-    }
-
-    /**
-     * 判断缓存是否存在
+     * 返回key是否存在
      * @param string $key 缓存变量名
-     * @return mixed
-     */
-    public function has(string $key)
-    {
-        return $this->_driver->get($key) ? true : false;
-    }
-
-    /**
-     * 删除数据
+     * @param bool $add_prefix 是否活加前缀
      * @return bool
      */
-    public function delete()
+    public function exists(string $key, bool $add_prefix = false)
     {
-        return $this->_driver->delete($this->_key);
+        return $this->_driver->exists($key, $add_prefix);
     }
 
 
@@ -262,7 +169,7 @@ class cache
      * @param string $key
      * @param bool $add_prefix
      */
-    public function delete_fast(string $key, bool $add_prefix = false)
+    public function delete(string $key, bool $add_prefix = false)
     {
         $this->_driver->delete($key, $add_prefix);
     }
@@ -274,25 +181,17 @@ class cache
      */
     public function data($key, callable $callback)
     {
+        if (isset($this->_value[$key])) {
+            return $this->_value[$key];
+        }
         /** @var int 最后更新时间，大于这个时间数据都过期 */
         $last_time = (int)\ounun::$global['cache']['last_time'];
-        if (!$this->_value[$key]) {
-            $this->set_key($key);
-            $c = $this->get();
-            if ($c == null) {
-                $this->_value[$key] = $callback();
-                $this->set_key($key);
-                $this->set_value(['t' => time(), 'v' => $this->_value[$key]]);
-                $this->set();
-            } elseif (!is_array($c) || (int)$c['t'] < $last_time) {
-                $this->_value[$key] = $callback();
-                $this->set_key($key);
-                $this->set_value(['t' => time(), 'v' => $this->_value[$key]]);
-                $this->set();
-            } else {
-                $this->_value[$key] = $c['v'];
-            }
+        $c         = $this->_driver->get($key, [], true);
+        if ($c && $c['v'] && $c['t'] > $last_time) {
+            $this->_value[$key] = $c['v'];
         }
+        $this->_value[$key] = $callback();
+        $this->_driver->set($key, ['t' => time(), 'v' => $this->_value[$key]], 0, true);
         return $this->_value[$key];
     }
 
@@ -304,6 +203,6 @@ class cache
         $this->_value[$key] = null;
         unset($this->_value[$key]);
 
-        $this->delete_fast($key);
+        $this->delete($key, true);
     }
 }

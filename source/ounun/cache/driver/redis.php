@@ -237,7 +237,7 @@ class redis extends \ounun\cache\driver
      * @param string $field
      * @param mixed $value
      * @param bool $add_prefix
-     * @return string
+     * @return bool|int
      */
     public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
     {
