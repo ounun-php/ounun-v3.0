@@ -1105,7 +1105,8 @@ class ounun
                 }
             }
         }
-        // print_r(\ounun::$routes_cache);
+
+        print_r(\ounun::$routes_cache);
         $class_filename = '';
         $class_name     = '';
         $addon_tag      = '';

@@ -27,7 +27,7 @@ class sqlite extends \ounun\cache\driver
         'prefix'      => '',    // 模块名称
         'prefix_list' => 't',
 
-        'path'   => '',
+        'path'        => '',
     ];
 
     /**
