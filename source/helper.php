@@ -1,6 +1,4 @@
 <?php
-/** Ounun版本号 */
-define('Ounun_Version', '3.2.1');
 /** 是否Cli - 环境常量 */
 define('Is_Cli', PHP_SAPI == 'cli' ? true : false);
 /** 是否Win - 环境常量 */
@@ -23,6 +21,9 @@ defined('Dir_Cache') || define('Dir_Cache', Dir_Data . 'cache/');
 defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
 defined('Environment') || define('Environment', environment());
+/** Ounun版本号 */
+define('Ounun_Version', '3.2.1');
+// 测试环境
 if (Environment) {
     /** 开始时间戳 **/
     define('Ounun_Start_Time', microtime(true));
@@ -582,11 +583,26 @@ function expires(int $expires = 0, string $etag = '', int $last_modified = 0, st
 }
 
 /**
+ * 获得libs Data数据
+ *
+ * @param string $filename
+ * @return mixed
+ */
+function data(string $filename)
+{
+    if (file_exists($filename)) {
+        return require $filename;
+    }
+    return null;
+}
+
+/**
  * error 404
  * @param string $msg
  */
 function error404(string $msg = ''): void
 {
+    header('Cache-Control: no-cache, must-revalidate, max-age=0');
     header('HTTP/1.1 404 Not Found');
     exit('<html>
             <head>
@@ -612,17 +628,16 @@ function error404(string $msg = ''): void
 }
 
 /**
- * 获得libs Data数据
- *
- * @param string $filename
- * @return mixed
+ * error 404
+ * @param string $error_msg
+ * @param string $error_html
  */
-function data(string $filename)
+function error_php(string $error_msg, string $error_html = ''): void
 {
-    if (file_exists($filename)) {
-        return require $filename;
+    if($error_html){
+        echo $error_html;
     }
-    return null;
+    trigger_error($error_msg, E_USER_ERROR);
 }
 
 /**
@@ -664,7 +679,7 @@ function environment()
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
     }
-    /** @var string $env_file 读取环境配制 */
+    // 读取环境配制
     $env_file = Dir_Root . '.environment.php';
     if (is_file($env_file)) {
         $ini = require $env_file;

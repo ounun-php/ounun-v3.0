@@ -115,9 +115,9 @@ class ounun
     static public $url_addon_pre = '';
 
     /** @var string 应用模板类型 pc www */
-    static public $tpl_type = 'www';
+    static public $tpl_type = 'pc';
     /** @var string 应用模板类型[默认] */
-    static public $tpl_type_default = 'www';
+    static public $tpl_type_default = 'pc';
     /** @var string 模板-样式 */
     static public $tpl_style = 'default';
     /** @var string 模板-样式[默认] */
@@ -177,28 +177,34 @@ class ounun
         $key = 'app_root_paths';
         if (isset($config_ini[$key])) {
             $vs            = $config_ini[$key];
-            $is_dir_root   = false;
-            $is_dir_vendor = false;
-
+            // $is_dir_root   = false;
+            // $is_dir_vendor = false;
 
             if ($vs && is_array($vs)) {
                 foreach ($vs as $v) {
                     if (is_array($v) && $v['path']) {
-                        if ($v['path'] == Dir_Root) {
-                            $is_dir_root = true;
-                        }
-                        if ($v['path'] == Dir_Vendor . 'cms.cc/') {
-                            $is_dir_vendor = true;
-                        }
+//                        if ($v['path'] == Dir_Root) {
+//                            $is_dir_root = true;
+//                        }
+//                        if ($v['path'] == Dir_Vendor . 'cms.cc/') {
+//                            $is_dir_vendor = true;
+//                        }
                         static::add_paths_app_root($v['path'], $v['is_auto_helper'], $v['is_auto_command']);
                     }
                 }
-            }
-            if (!$is_dir_root && file_exists(Dir_Root)) {
-                static::add_paths_app_root(Dir_Root, true, true);
-            }
-            if (!$is_dir_vendor && file_exists(Dir_Vendor . 'cms.cc/')) {
-                static::add_paths_app_root(Dir_Vendor . 'cms.cc/', true, true);
+            }else{
+//                if (!$is_dir_root && file_exists(Dir_Root)) {
+//                    static::add_paths_app_root(Dir_Root, true, true);
+//                }
+//                if (!$is_dir_vendor && file_exists(Dir_Vendor . 'cms.cc/')) {
+//                    static::add_paths_app_root(Dir_Vendor . 'cms.cc/', true, true);
+//                }
+                if (file_exists(Dir_Root)) {
+                    static::add_paths_app_root(Dir_Root, true, true);
+                }
+                if (file_exists(Dir_Vendor . 'cms.cc/')) {
+                    static::add_paths_app_root(Dir_Vendor . 'cms.cc/', true, true);
+                }
             }
         }
 
@@ -1049,7 +1055,7 @@ class ounun
     ];
 
     /** 路由数据(默认) */
-    static public $routes_default = ['app_name' => 'www', 'url' => '/'];
+    static public $routes_default = ['app_name' => 'web', 'url' => '/'];
 
     /** 路由数据 */
     static public $routes_cache = [];
@@ -1106,7 +1112,7 @@ class ounun
             }
         }
 
-        print_r(\ounun::$routes_cache);
+        // print_r(\ounun::$routes_cache);
         $class_filename = '';
         $class_name     = '';
         $addon_tag      = '';
@@ -1204,6 +1210,7 @@ function start(array $mod, string $host)
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc v3.2.1; ounun.org v3.1.2;');
+
     // 设定 模块与方法(缓存)
     /** @var v $classname */
     list($filename, $classname, $addon_tag, $mod) = ounun::routes_get($mod);
@@ -1281,10 +1288,10 @@ function start(array $mod, string $host)
             new $classname($mod, $addon_tag);
             exit();
         } else {
-            $error = "Can't find controller:'{$classname}' filename:" . $filename;
+            $error = "LINE:".__LINE__." Can't find controller:'{$classname}' filename:" . $filename;
         }
     } else {
-        $error = "Can't find controller:{$classname}";
+        $error = "LINE:".__LINE__." Can't find controller:{$classname}";
     }
     header('HTTP/1.1 404 Not Found');
     trigger_error($error, E_USER_ERROR);

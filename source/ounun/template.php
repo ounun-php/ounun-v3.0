@@ -208,6 +208,7 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(\ounun::$tpl_dirs) . " <br />
               </div>";
+        // error_get_last();
         trigger_error("Can't find Template:{$filename}", E_USER_ERROR);
     }
 
