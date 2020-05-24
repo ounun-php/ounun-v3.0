@@ -36,7 +36,7 @@ class addons
     {
         /** @var self $addon */
         foreach ($addons as $addon) {
-            if (is_array($addon) && $addon['apps'] && $addon['url']) {
+            if (is_array($addon) && $addon['apps']) {
                 static::mount_single($addon['apps'], (string)$addon['url'], (string)$addon['view_class'], (string)$addon['auto']);
 //          }else if($addon){
 //                $addon::mount_single($addon,$addon::Addon_Tag);

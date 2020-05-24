@@ -634,7 +634,7 @@ function error404(string $msg = ''): void
  */
 function error_php(string $error_msg, string $error_html = ''): void
 {
-    if($error_html){
+    if ($error_html) {
         echo $error_html;
     }
     trigger_error($error_msg, E_USER_ERROR);
@@ -705,6 +705,9 @@ abstract class v
 {
     /** @var \ounun\db\pdo DB */
     public static $db_v;
+
+    /** @var string 插件标识 */
+    public $addon_tag = '';
 
     /** @return \ounun\db\pdo DB */
     public static function db_v_get()
@@ -825,15 +828,17 @@ abstract class v
 
     /**
      * ounun_view constructor.
-     * @param $url_mods
+     * @param array $url_mods
+     * @param string $addon_tag
      */
-    public function __construct($url_mods)
+    public function __construct($url_mods, $addon_tag = '')
     {
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];
         }
-        $method       = $url_mods[0];
-        \ounun::$view = $this;
+        $method          = $url_mods[0];
+        \ounun::$view    = $this;
+        $this->addon_tag = $addon_tag;
         $this->_initialize($method);
         $this->$method($url_mods);
     }

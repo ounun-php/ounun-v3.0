@@ -22,34 +22,41 @@ class restful extends \v
 
     protected $_http_version = 'HTTP/1.1';
 
-    public function __construct($mod)
+    /** @var string 插件标识 */
+    protected $_addon_tag = '';
+
+    /**
+     * ounun_view constructor.
+     * @param array $url_mods
+     * @param string $addon_tag
+     */
+    public function __construct($url_mods, $addon_tag = '')
     {
-        $rs = $this->_construct_before($mod);
+        $rs = $this->_construct_before($url_mods);
         if (error_is($rs)) {
             out($rs);
         }
         //
         $this->_method       = strtoupper($_SERVER['REQUEST_METHOD']);
         $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
+        $this->_addon_tag    = $addon_tag;
         $this->_request_gets = $_GET;
         $this->_request_post = $_POST;
         $data                = file_get_contents('php://input');
         if ($data) {
             $this->_request_inputs = json_decode_array($data);
         }
-        if ($this->_class) {
-            if (!$mod) {
-                $mod = [\ounun::def_method];
-            }
-            $class = "{$this->_class}\\{$mod[0]}";
-            if (class_exists($class)) {
-                \ounun::$view = $this;
-                static::$tpl  = true;  // 不去初始化template
-                $this->init_page(\ounun::$url_addon_pre . '/' . ($mod[0] && $mod[0] != \ounun::def_method ? $mod[0] . '.php' : ''), false, true);
-                new $class($mod, $this);
-            } else {
-                parent::__construct($mod);
-            }
+        if (!$url_mods) {
+            $url_mods = [\ounun::def_method];
+        }
+        $class = "{$this->_class}\\{$url_mods[0]}";
+        if (class_exists($class)) {
+            \ounun::$view = $this;
+            static::$tpl  = true;  // 不去初始化template
+            $this->init_page(\ounun::$url_addon_pre . '/' . ($url_mods[0] && $url_mods[0] != \ounun::def_method ? $url_mods[0] . '.php' : ''), false, true);
+            new $class($url_mods, $this);
+        } else {
+            error_php('$class:'.$class.'  class_exists');
         }
     }
 
@@ -66,12 +73,12 @@ class restful extends \v
      * @param string $methods
      * @param string $domain
      */
-    static public function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*')
+    static public function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE,OPTIONS', string $domain = '*', string $headers = '*')
     {
         header('Access-Control-Allow-Credentials: true');
         header('Access-Control-Allow-Origin: ' . $domain);
         header('Access-Control-Allow-Methods: ' . $methods);
-        header('Access-Control-Allow-Headers: authentication,origin,x-requested-with,content-type,accept,token,appid,unitid');
+        header('Access-Control-Allow-Headers: ' . $headers);
     }
 
     /**
