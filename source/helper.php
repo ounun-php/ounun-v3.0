@@ -831,7 +831,7 @@ abstract class v
      * @param array $url_mods
      * @param string $addon_tag
      */
-    public function __construct($url_mods, $addon_tag = '')
+    public function __construct(array $url_mods, string $addon_tag = '')
     {
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];

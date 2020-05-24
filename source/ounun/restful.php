@@ -6,20 +6,24 @@
 
 namespace ounun;
 
-class restful extends \v
+class restful
 {
-    protected $_class;
-
+    /** @var string method */
     protected $_method;
 
-    protected $_request_gets;
+    /** @var array gets */
+    protected $_request_gets = [];
 
-    protected $_request_post;
+    /** @var array post */
+    protected $_request_post = [];
 
-    protected $_request_inputs;
+    /** @var array inputs */
+    protected $_request_inputs = [];
 
+    /** @var string accept */
     protected $_http_accept;
 
+    /** @var string http_version */
     protected $_http_version = 'HTTP/1.1';
 
     /** @var string 插件标识 */
@@ -30,7 +34,7 @@ class restful extends \v
      * @param array $url_mods
      * @param string $addon_tag
      */
-    public function __construct($url_mods, $addon_tag = '')
+    public function __construct(array $url_mods, string $addon_tag = '')
     {
         $rs = $this->_construct_before($url_mods);
         if (error_is($rs)) {
@@ -49,14 +53,11 @@ class restful extends \v
         if (!$url_mods) {
             $url_mods = [\ounun::def_method];
         }
-        $class = "{$this->_class}\\{$url_mods[0]}";
-        if (class_exists($class)) {
-            \ounun::$view = $this;
-            static::$tpl  = true;  // 不去初始化template
-            $this->init_page(\ounun::$url_addon_pre . '/' . ($url_mods[0] && $url_mods[0] != \ounun::def_method ? $url_mods[0] . '.php' : ''), false, true);
+        $class = "\\addons\\{$addon_tag}\\api\\{$url_mods[0]}";
+        if ($addon_tag && class_exists($class)) {
             new $class($url_mods, $this);
         } else {
-            error_php('$class:'.$class.'  class_exists');
+            error404('$class:' . $class);
         }
     }
 
@@ -166,67 +167,67 @@ class restful extends \v
         return $this->_method;
     }
 
-    /**
-     * @param mixed $raw_data
-     * @param int $status_code
-     * @param string $request_content_type
-     */
-    public function out($raw_data, int $status_code = 200, string $request_content_type = '')
-    {
-        $request_content_type = $request_content_type ?? $this->_http_accept;
-        static::headers_set($request_content_type, $status_code, $this->_http_version);
+//    /**
+//     * @param mixed $raw_data
+//     * @param int $status_code
+//     * @param string $request_content_type
+//     */
+//    public function out($raw_data, int $status_code = 200, string $request_content_type = '')
+//    {
+//        $request_content_type = $request_content_type ?? $this->_http_accept;
+//        static::headers_set($request_content_type, $status_code, $this->_http_version);
+//
+//        if (strpos($request_content_type, 'application/json') !== false) {
+//            $response = $this->encode_json($raw_data);
+//        } else if (strpos($request_content_type, 'text/html') !== false) {
+//            $response = $this->encode_html($raw_data);
+//        } else if (strpos($request_content_type, 'application/xml') !== false) {
+//            $response = $this->encode_xml($raw_data);
+//        } else {
+//            $response = $this->encode_json($raw_data);
+//        }
+//        exit($response);
+//    }
 
-        if (strpos($request_content_type, 'application/json') !== false) {
-            $response = $this->encode_json($raw_data);
-        } else if (strpos($request_content_type, 'text/html') !== false) {
-            $response = $this->encode_html($raw_data);
-        } else if (strpos($request_content_type, 'application/xml') !== false) {
-            $response = $this->encode_xml($raw_data);
-        } else {
-            $response = $this->encode_json($raw_data);
-        }
-        exit($response);
-    }
 
+//    /**
+//     * @param $response_data
+//     * @return string
+//     */
+//    public function encode_html($response_data)
+//    {
+//        if (is_array($response_data)) {
+//            $html_response = '<table style="border: darkcyan solid 1px;">';
+//            foreach ($response_data as $key => $value) {
+//                $html_response .= "<tr><td>" . $key . "</td><td>" . $value . "</td></tr>";
+//            }
+//            $html_response .= "</table>";
+//            return $html_response;
+//        }
+//        return $response_data;
+//    }
 
-    /**
-     * @param $response_data
-     * @return string
-     */
-    public function encode_html($response_data)
-    {
-        if (is_array($response_data)) {
-            $html_response = '<table style="border: darkcyan solid 1px;">';
-            foreach ($response_data as $key => $value) {
-                $html_response .= "<tr><td>" . $key . "</td><td>" . $value . "</td></tr>";
-            }
-            $html_response .= "</table>";
-            return $html_response;
-        }
-        return $response_data;
-    }
+//    /**
+//     * @param $response_data
+//     * @return false|string
+//     */
+//    public function encode_json($response_data)
+//    {
+//        $jsonResponse = json_encode($response_data);
+//        return $jsonResponse;
+//    }
 
-    /**
-     * @param $response_data
-     * @return false|string
-     */
-    public function encode_json($response_data)
-    {
-        $jsonResponse = json_encode($response_data);
-        return $jsonResponse;
-    }
-
-    /**
-     * @param $response_data
-     * @return mixed
-     */
-    public function encode_xml($response_data)
-    {
-        // 创建 SimpleXMLElement 对象
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
-        foreach ($response_data as $key => $value) {
-            $xml->addChild($key, $value);
-        }
-        return $xml->asXML();
-    }
+//    /**
+//     * @param $response_data
+//     * @return mixed
+//     */
+//    public function encode_xml($response_data)
+//    {
+//        // 创建 SimpleXMLElement 对象
+/*        $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');*/
+//        foreach ($response_data as $key => $value) {
+//            $xml->addChild($key, $value);
+//        }
+//        return $xml->asXML();
+//    }
 }

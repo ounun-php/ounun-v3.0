@@ -1212,7 +1212,7 @@ function start(array $url_mods, string $host)
     // 设定 模块与方法(缓存)
     /** @var v $classname */
     list($filename, $classname, $addon_tag, $url_mods) = ounun::routes_get($url_mods);
-    echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
+    // echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
     // exit();
     // 设定 模块与方法
 //    if (empty($filename)) {
