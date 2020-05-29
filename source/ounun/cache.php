@@ -34,7 +34,7 @@ class cache
     /** @var string storage_key  库名称 */
     public $storage_key = '';
 
-    /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
+    /** @var string 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
     protected $_driver_type = 0;
     /** @var driver 缓存驱动 */
     protected $_driver;
@@ -204,5 +204,21 @@ class cache
         unset($this->_value[$key]);
 
         $this->delete($key, true);
+    }
+
+    /**
+     * @return driver 返回缓存驱动
+     */
+    public function driver()
+    {
+        return $this->_driver;
+    }
+
+    /**
+     * @return string 返回驱动类型
+     */
+    public function driver_type()
+    {
+        return $this->_driver_type;
     }
 }

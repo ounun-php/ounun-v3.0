@@ -1082,10 +1082,10 @@ class ounun
 
     /**
      * 模块 快速路由
-     * @param array $mod
+     * @param array $url_mods
      * @return array
      */
-    static public function routes_get(array $mod = [])
+    static public function routes_get(array $url_mods = [])
     {
         $app_name = (static::$app_name == static::App_Name_Web || in_array(static::$app_name, static::App_Names)) ? static::$app_name : static::App_Name_Web;
         // 这里修正URL兼容源生与重写
@@ -1117,10 +1117,10 @@ class ounun
         $addon_tag = '';
 
         /** @var addons $apps */
-        if ($mod[1] && ($route = static::$routes_cache["{$mod[0]}/$mod[1]"]) && $apps = $route['apps']) {
+        if ($url_mods[1] && ($route = static::$routes_cache["{$url_mods[0]}/$url_mods[1]"]) && $apps = $route['apps']) {
+            array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-            array_shift($mod);
-        } elseif ($mod[0] && ($route = static::$routes_cache[$mod[0]]) && $apps = $route['apps']) {
+        } elseif ($url_mods[0] && ($route = static::$routes_cache[$url_mods[0]]) && $apps = $route['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } elseif (($route = static::$routes_cache['']) && $apps = $route['apps']) {
             $addon_tag = $apps::Addon_Tag;
@@ -1138,14 +1138,13 @@ class ounun
 
         // api
         if ($app_name == static::App_Name_Api) {
-            if ($mod[0]) {
-                array_shift($mod);
+            if ($url_mods[0]) {
+                array_shift($url_mods);
             }
             $filename   = Dir_Ounun . 'ounun/restful.php';
             $class_name = "\\ounun\\restful";
-            return [$filename, $class_name, $addon_tag, $mod];
+            return [$filename, $class_name, $addon_tag, $url_mods];
         }
-
         // paths
         if ($class_filename) {
             $paths = static::$maps_paths['addons'];
@@ -1155,17 +1154,17 @@ class ounun
                     // echo "\$filename:{$filename0}\n";
                     if (is_file($filename)) {
                         //  echo " --> \$filename000:{$filename}\n";
-                        if ($mod[1]) {
-                            array_shift($mod);
-                        } else {
-                            $mod = [static::def_method];
+                        if ($url_mods[1]) {
+                            array_shift($url_mods);
+                        } elseif (empty($url_mods)) {
+                            $url_mods = [static::def_method];
                         }
-                        return [$filename, $class_name, $addon_tag, $mod];
+                        return [$filename, $class_name, $addon_tag, $url_mods];
                     }
                 }
             } // if ($paths
         }
-        return ['', '', '', $mod];
+        return ['', '', '', $url_mods];
     }
 }
 
@@ -1186,17 +1185,17 @@ function start(array $url_mods, string $host)
     ounun::load_config(Dir_App, false);
 
     // Routes
-    // print_r(['{$host}/{$mod[0]}'=>"{$host}/{$mod[0]}",'$host'=>$host,'$mod'=>$mod]);
-    if ($url_mods && $url_mods[0] && ounun::$routes["{$host}/{$url_mods[0]}"]) {
-        $mod_0 = array_shift($url_mods);
-        $cfg_0 = ounun::$routes["{$host}/{$mod_0}"];
+    // print_r(['{$host}/{$mod[0]}' => "{$host}/{$url_mods[0]}", '$host' => $host, '$mod' => $url_mods]);
+    if ($url_mods && $url_mods[0] && $cfg_0 = ounun::$routes["{$host}/{$url_mods[0]}"]) {
+        array_shift($url_mods);
+        // $cfg_0 = ounun::$routes["{$host}/{$mod_0}"];
     } elseif (ounun::$routes[$host]) {
         $cfg_0 = ounun::$routes[$host];
     } else {
         $cfg_0 = ounun::$routes_default;
     }
 
-    // print_r(['$cfg_0'=>$cfg_0,'ounun::$routes_default'=>ounun::$routes_default,'ounun::$routes'=>ounun::$routes]);
+    // print_r(['$url_mods' => $url_mods, '$cfg_0' => $cfg_0, 'ounun::$routes_default' => ounun::$routes_default, 'ounun::$routes' => ounun::$routes]);
     // apps_domain_set
     ounun::app_name_path_set((string)$cfg_0['app_name'], (string)$cfg_0['path'], Dir_Root, '', Dir_Data, Dir_Ounun);
     // add_paths_app_instance
@@ -1212,8 +1211,8 @@ function start(array $url_mods, string $host)
     // 设定 模块与方法(缓存)
     /** @var v $classname */
     list($filename, $classname, $addon_tag, $url_mods) = ounun::routes_get($url_mods);
-    // echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
-    // exit();
+//    echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
+//    exit();
     // 设定 模块与方法
 //    if (empty($filename)) {
 //        if (is_array($mod) && $mod[0]) {

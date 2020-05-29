@@ -375,9 +375,4 @@ class file
     {
         return rtrim(preg_replace("|[\/]+|", '/', $path), '/') . '/';
     }
-
-    static function errormsgs()
-    {
-        return self::$_error_msg;
-    }
 }

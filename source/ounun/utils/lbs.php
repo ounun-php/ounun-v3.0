@@ -19,7 +19,7 @@ class lbs
      * @param float $distince 距离 (千米)
      * @return array 符合距离范围的所有的点
      */
-    static public function get_nearby_store(float $longitude, float $latitude, float $distince)
+    static public function nearby_store_get(float $longitude, float $latitude, float $distince)
     {
         list($minlng, $maxlng, $minlat, $maxlat) = static::get_nearby_by_longitude_and_latitude_and_distince($longitude, $latitude, $distince);
 

@@ -184,30 +184,6 @@ class str
     }
 
     /**
-     * 随机生成一组字符串
-     * @return string
-     */
-    static public function uniqid(): string
-    {
-        $uniqid_prefix   = '';
-        $uniqid_filename = '/tmp/php_session_uniqid.txt';
-        if (!file_exists($uniqid_filename)) {
-            $uniqid_prefix = \substr(\uniqid('', false), 3);
-            @file_put_contents($uniqid_filename, $uniqid_prefix);
-        }
-        if (!$uniqid_prefix) {
-            if (file_exists($uniqid_filename)) {
-                $uniqid_prefix = @file_get_contents($uniqid_filename);
-            }
-            if (!$uniqid_prefix) {
-                $uniqid_prefix = \substr(\uniqid('', false), 3);
-            }
-        }
-        $session_id = \uniqid($uniqid_prefix, true);
-        return \substr($session_id, 0, 24) . \substr($session_id, 25);
-    }
-
-    /**
      * XSS漏洞过滤
      * @param string $val
      * @return string
