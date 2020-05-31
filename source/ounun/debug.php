@@ -209,9 +209,10 @@ class debug
     }
 
     /** @var self 单例模式 */
-    static protected $_instance;
+    static protected $_instances;
 
     /**
+     * @param string $channel
      * @param string $filename 输出文件名
      * @param bool $is_out_buffer 是否输出 buffer
      * @param bool $is_out_get 是否输出 get
@@ -221,11 +222,11 @@ class debug
      * @param bool $is_bof 倒序(后面的日志写到前面)
      * @return $this 调试日志单例
      */
-    public static function i($filename = 'debug.txt', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true, $is_run_time = true, $is_bof = true): self
+    public static function i($channel = 'comm', $filename = 'debug.txt', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true, $is_run_time = true, $is_bof = true): self
     {
-        if (empty(static::$_instance)) {
-            static::$_instance = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url, $is_run_time, $is_bof);
+        if (empty(static::$_instances)) {
+            static::$_instances = new static(date('Y-m-d').'_'.$channel.'_'.$filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url, $is_run_time, $is_bof);
         }
-        return static::$_instance;
+        return static::$_instances;
     }
 }

@@ -88,7 +88,8 @@ class template
      * (兼容)返回一个 模板文件地址(绝对目录,相对root)
      * @param string $filename
      * @param string $addon_tag
-     * @param array $types
+     * @param bool $show_debug
+     * @param bool $remember_dir_current
      * @return string
      */
     public function tpl_fixed(string $filename, string $addon_tag, bool $show_debug = true, bool $remember_dir_current = true): string
@@ -131,18 +132,18 @@ class template
                         }
                     } // end $types
                 } // end $styles
-            } elseif ('app' == $tpl_dir['type']) {
-                foreach ($types as $type) {
-                    $filename2 = "{$tpl_dir['path']}" . \ounun::$app_name . "/template/{$type}/{$addon_tag2}{$filename}";
-                    // echo "line:".__LINE__." filename:{$filename2} <br />\n";
-                    if (is_file($filename2)) {
-                        if ($remember_dir_current) {
-                            $this->_dir_current = dirname($filename2) . '/';
-                        }
-                        return $filename2;
-                    }
-                }
-                // }elseif ('app' == $tpl_dir['type']){
+//            } elseif ('app' == $tpl_dir['type']) {
+//                foreach ($types as $type) {
+//                    $filename2 = "{$tpl_dir['path']}" . \ounun::$app_name . "/template/{$type}/{$addon_tag2}{$filename}";
+//                    // echo "line:".__LINE__." filename:{$filename2} <br />\n";
+//                    if (is_file($filename2)) {
+//                        if ($remember_dir_current) {
+//                            $this->_dir_current = dirname($filename2) . '/';
+//                        }
+//                        return $filename2;
+//                    }
+//                }
+//          }elseif ('addons' == $tpl_dir['type']){
             } else {
                 foreach ($types as $type) {
                     $filename2 = "{$tpl_dir['path']}{$addon_tag2}template/{$type}/{$filename}";

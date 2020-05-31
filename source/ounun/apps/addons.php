@@ -62,7 +62,7 @@ class addons
             'auto'       => $is_auto_reg_subclass,
         ];
         //
-        \ounun::add_addons($addon_apps);
+        \ounun::addons_set($addon_apps);
         //
         if ($is_auto_reg_subclass && empty($view_class)) {
             /** @var array $addons_view_class addon_subclass */

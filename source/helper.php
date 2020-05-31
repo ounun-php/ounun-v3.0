@@ -680,15 +680,19 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     // 读取环境配制
+    $ini      = [];
     $env_file = Dir_Root . '.environment.php';
     if (is_file($env_file)) {
         $ini = require $env_file;
-        if (empty($ini)) {
-            $GLOBALS['_environment_'] = '';
-        } else {
-            $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment']) ? $ini['global']['environment'] : '';
-            \ounun::environment_set($ini);
+    } else {
+        $env_file = Dir_Root . 'environment.example.php';
+        if (is_file($env_file)) {
+            $ini = require $env_file;
         }
+    }
+    if ($ini && is_array($ini)) {
+        $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment']) ? $ini['global']['environment'] : '';
+        \ounun::environment_set($ini);
     } else {
         $GLOBALS['_environment_'] = '2';
     }
@@ -967,7 +971,7 @@ abstract class v
         if ($_GET['t']) {
             error404();
         }
-        go_url(\ounun::$root_static . 'favicon.ico?t=' . time(), false, 301);
+        go_url(\ounun::$url_static . 'favicon.ico?t=' . time(), false, 301);
     }
 
     /**
