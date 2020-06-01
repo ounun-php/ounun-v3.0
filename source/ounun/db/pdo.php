@@ -252,7 +252,6 @@ class pdo
                     //\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$this->_charset}'"
                 ];
             }
-            error_php('');
             $this->_pdo = new \PDO($dsn, $this->_username, $this->_password, $options);
         }
         return $this;
@@ -828,7 +827,6 @@ class pdo
     {
         return $this->_pdo;
     }
-
 
     /**
      * 开启事务
