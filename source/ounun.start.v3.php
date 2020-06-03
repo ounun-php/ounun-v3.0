@@ -541,6 +541,8 @@ class ounun
         $dir_data && static::$dir_data = $dir_data;
         // Ounun目录
         $dir_ounun && static::$dir_ounun = $dir_ounun;
+
+        \ounun\debug::header(['$app_name'=>static::$app_name,'$app_path'=>static::$app_path,'$dir_root'=>static::$dir_root],'',__FILE__,__LINE__);
     }
 
     /**
@@ -1099,7 +1101,7 @@ class ounun
             }
         }
 
-        // print_r([\ounun::$routes_cache,$mod]);
+        // print_r([\ounun::$routes_cache,$url_mods]);
 
         // 插件路由
         $addon_tag = '';
@@ -1107,23 +1109,17 @@ class ounun
         /** @var addons $apps */
         if ($url_mods[1] && ($route = static::$routes_cache["{$url_mods[0]}/$url_mods[1]"]) && $apps = $route['apps']) {
             array_shift($url_mods);
+            array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
         } elseif ($url_mods[0] && ($route = static::$routes_cache[$url_mods[0]]) && $apps = $route['apps']) {
+            array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
         } elseif (($route = static::$routes_cache['']) && $apps = $route['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
-            error_php('ounun::$routes_cache[\'\'] There is no default value。');
+            error_php('ounun::$routes_cache[\'\']: There is no default value。'.PHP_EOL
+                               .'routes_cache:'.json_encode(ounun::$routes_cache).'');
         }
-        if ($route['view_class']) {
-            $class_filename = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
-        } else {
-            $class_filename = "{$addon_tag}/{$app_name}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
-        }
-        static::$url_addon_pre = $route['url'] ? '/' . $route['url'] : '';
-
         // api
         if ($app_name == static::App_Name_Api) {
             if ($url_mods[0]) {
@@ -1133,6 +1129,18 @@ class ounun
             $class_name = "\\ounun\\restful";
             return [$filename, $class_name, $addon_tag, $url_mods];
         }
+
+        // view_class
+        if ($route['view_class']) {
+            $class_filename = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
+        } else {
+            $class_filename = "{$addon_tag}/{$app_name}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
+        }
+        // print_r([$class_filename,$class_name]);
+        static::$url_addon_pre = $route['url'] ? '/' . $route['url'] : '';
+
         // paths
         if ($class_filename) {
             $paths = static::$maps_paths['addons'];
@@ -1142,9 +1150,7 @@ class ounun
                     // echo "\$filename:{$filename0}\n";
                     if (is_file($filename)) {
                         //  echo " --> \$filename000:{$filename}\n";
-                        if ($url_mods[1]) {
-                            array_shift($url_mods);
-                        } elseif (empty($url_mods)) {
+                        if (empty($url_mods)) {
                             $url_mods = [static::def_method];
                         }
                         return [$filename, $class_name, $addon_tag, $url_mods];
@@ -1183,7 +1189,12 @@ function start(array $url_mods, string $host)
         $cfg_0 = ounun::$routes_default;
     }
 
-    // print_r(['$url_mods' => $url_mods, '$cfg_0' => $cfg_0, 'ounun::$routes_default' => ounun::$routes_default, 'ounun::$routes' => ounun::$routes]);
+//    print_r([
+//        '$url_mods' => $url_mods,
+//        '$cfg_0' => $cfg_0,
+//        // 'ounun::$routes_default' => ounun::$routes_default,
+//        // 'ounun::$routes' => ounun::$routes
+//    ]);
     // apps_domain_set
     ounun::app_set((string)$cfg_0['app_name'], (string)$cfg_0['path'], Dir_Root, '', Dir_Data, Dir_Ounun);
     // add_paths_app_instance
@@ -1297,4 +1308,3 @@ spl_autoload_register('\\ounun::load_class');
 ounun::paths_class_set(Dir_Ounun, 'ounun', false);
 /** 加载common.php */
 require __DIR__ . '/helper.php';
-

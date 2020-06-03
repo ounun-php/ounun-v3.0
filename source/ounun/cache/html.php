@@ -6,6 +6,9 @@
 
 namespace ounun\cache;
 
+use ounun\debug;
+use ounun\template;
+
 class html
 {
     /** 全部 html/etag/expiry/mtime(Redis,Memcached,Html) - Cdn 类型  */
@@ -89,14 +92,14 @@ class html
         // Cache
         $this->_cdn_type   = $config['cdn_type'];
         $this->_cache_type = $config['driver_type'];
-        $this->_cache_key = $key;
-        if($this->_cdn_type
+        $this->_cache_key  = $key;
+        if ($this->_cdn_type
             && static::Cache_Valid[$this->_cdn_type]
             && is_array(static::Cache_Valid[$this->_cdn_type])
-            && in_array( $this->_cache_type,static::Cache_Valid[$this->_cdn_type])){
-            $cls = "driver\{$this->_cache_type}";
+            && in_array($this->_cache_type, static::Cache_Valid[$this->_cdn_type])) {
+            $cls                 = "driver\{$this->_cache_type}";
             $this->_cache_driver = new $cls($config);
-        }else{
+        } else {
             trigger_error("Can't support cdn_type:{$this->_cdn_type} cache_type:{$this->_cache_type}", E_USER_ERROR);
         }
     }
@@ -152,12 +155,12 @@ class html
      */
     public function run_execute(bool $output)
     {
-        \ounun\debug::header('xypm', $this->filename(), __FUNCTION__, __LINE__);
+        debug::header($this->filename(),'xypm',  __FILE__, __LINE__);
         $this->stop = false;
         $this->cache_time_tmp_set();
         // 生成
         // ob_start();
-        \ounun\template::ob_start();
+        template::ob_start();
         register_shutdown_function([$this, 'callback'], $output);
     }
 

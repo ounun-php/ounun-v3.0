@@ -270,30 +270,23 @@ class debug
      *
      * @param string $k
      * @param mixed $v
-     * @param bool $debug
-     * @param string $function
+     * @param string $filename
      * @param int $line
      */
-    static public function header(string $k, $v, string $function = '', int $line = 0)
+    static public function header($v,string $k = '', string $filename = '', int $line = 0)
     {
-        $debug = (\ounun::$global['debug'] && \ounun::$global['debug']['header']) ?? false;
-        if ($debug && !headers_sent()) {
+        if (static::is_header() && !headers_sent()) {
+            $key = [];
             static::$_header_idx++;
-            if ($line) {
-                $key[] = $line;
-                if ($function) {
-                    $key[] = $function;
-                }
-                if ($k) {
-                    $key[] = $k;
-                }
-            } else {
-                $key[] = $k;
-                if ($function) {
-                    $key[] = $function;
-                }
-            }
+
+            $k && $key[] = $k;
+            $filename && $key[] = basename($filename);
+            $line && $key[] = $line;
+
             $key = implode('-', $key);
+            if(is_array($v) || is_object($v)){
+                $v   = stripslashes(json_encode($v, JSON_UNESCAPED_UNICODE));
+            }
             $idx = str_pad(static::$_header_idx, 4, '0', STR_PAD_LEFT);
             header("o{$idx}-{$key}: {$v}", false);
         }
@@ -328,5 +321,14 @@ class debug
                 $is_bof, $is_run_time);
         }
         return static::$_instances[$channel];
+    }
+
+    /**
+     * 是否开启 http头debug
+     * @return bool
+     */
+    public static function is_header()
+    {
+        return (\ounun::$global['debug'] && \ounun::$global['debug']['header']) ?? false;
     }
 }

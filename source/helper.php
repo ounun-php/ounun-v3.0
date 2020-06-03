@@ -793,19 +793,15 @@ abstract class v
     public static $debug;
 
     /**
+     * @param string $channel
      * @param string $filename
-     * @param bool $is_out_buffer
-     * @param bool $is_out_get
-     * @param bool $is_out_post
-     * @param bool $is_out_url
-     * @param bool $is_run_time
-     * @param bool $is_bof
      */
-    public static function debug_init($filename = '404', $is_out_buffer = true, $is_out_get = false, $is_out_post = false, $is_out_url = false, $is_run_time = false, $is_bof = false)
+    public static function debug_init($channel = 'comm', $filename = '404.txt')
     {
         if (empty(static::$debug)) {
-            static::$debug = new \ounun\debug(\ounun::$dir_data . 'logs/' . $filename . '_' . date('Ymd') . '.txt', $is_out_buffer, $is_out_get, $is_out_post, $is_out_url, $is_run_time, $is_bof);
+            static::$debug = \ounun\debug::i($channel, $filename);
         }
+        return static::$debug;
     }
 
     /**
@@ -913,9 +909,8 @@ abstract class v
     {
         url_check('/robots.txt');
         $filename = \ounun::$dir_app . 'robots.txt';
-        print_r(['$filename' => $filename]);
-        $type = 'text/plain';
-        $time = 14400;
+        $type     = 'text/plain';
+        $time     = 14400;
         if (file_exists($filename)) {
             $mtime = filemtime($filename);
             expires($time, $mtime, $mtime, $type);
