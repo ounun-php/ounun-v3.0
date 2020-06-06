@@ -20,7 +20,9 @@ class tree
 
 	function set($data)
 	{
-		if (isset($data[$this->field_parentid]) && intval($data[$this->field_parentid]) < 1) $data[$this->field_parentid] = null;
+		if (isset($data[$this->field_parentid]) && intval($data[$this->field_parentid]) < 1) {
+            $data[$this->field_parentid] = null;
+        }
 		unset($data['parentids'], $data['childids']);
 		if (isset($data[$this->field_id]) && $data[$this->field_id])
 		{

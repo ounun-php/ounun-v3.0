@@ -38,8 +38,6 @@ class addons
         foreach ($addons as $addon) {
             if (is_array($addon) && $addon['apps']) {
                 static::mount_single($addon['apps'], (string)$addon['url'], (string)$addon['view_class'], (string)$addon['auto']);
-//          }else if($addon){
-//                $addon::mount_single($addon,$addon::Addon_Tag);
             } else {
                 trigger_error("Can't find addon_tag:" . json_encode_unescaped($addon), E_USER_ERROR);
             }
@@ -113,7 +111,7 @@ class addons
     }
 
     /** @var array 插件子模块 */
-    public static function addons_view_class()
+    static public function addons_view_class()
     {
         return static::$_addons_view_class;
     }
@@ -166,7 +164,7 @@ class addons
      * 环境配制
      * @return array
      */
-    static public function env_config()
+    static public function verb_config()
     {
         return [];
     }

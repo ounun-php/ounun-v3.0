@@ -542,7 +542,7 @@ class ounun
         // Ounun目录
         $dir_ounun && static::$dir_ounun = $dir_ounun;
 
-        \ounun\debug::header(['$app_name'=>static::$app_name,'$app_path'=>static::$app_path,'$dir_root'=>static::$dir_root],'',__FILE__,__LINE__);
+        \ounun\debug::header(['$app_name' => static::$app_name, '$app_path' => static::$app_path, '$dir_root' => static::$dir_root], '', __FILE__, __LINE__);
     }
 
     /**
@@ -1077,7 +1077,11 @@ class ounun
      */
     static public function routes_get(array $url_mods = [])
     {
-        $app_name = (static::$app_name == static::App_Name_Web || in_array(static::$app_name, static::App_Names)) ? static::$app_name : static::App_Name_Web;
+        // 修正App_Name
+        $app_name = (static::$app_name == static::App_Name_Web || in_array(static::$app_name, static::App_Names))
+            ? static::$app_name
+            : static::App_Name_Web;
+
         // 这里修正URL兼容源生与重写
         if ($app_name == static::App_Name_Control) {
             foreach (static::$maps_installed_addons as $apps) {
@@ -1101,7 +1105,7 @@ class ounun
             }
         }
 
-        // print_r([\ounun::$routes_cache,$url_mods]);
+        \ounun\debug::header(\ounun::$routes_cache, '', __FILE__, __LINE__);
 
         // 插件路由
         $addon_tag = '';
@@ -1117,8 +1121,8 @@ class ounun
         } elseif (($route = static::$routes_cache['']) && $apps = $route['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
-            error_php('ounun::$routes_cache[\'\']: There is no default value。'.PHP_EOL
-                               .'routes_cache:'.json_encode(ounun::$routes_cache).'');
+            error_php('ounun::$routes_cache[\'\']: There is no default value。' . PHP_EOL
+                . 'routes_cache:' . json_encode(ounun::$routes_cache) . '');
         }
         // api
         if ($app_name == static::App_Name_Api) {
@@ -1189,12 +1193,6 @@ function start(array $url_mods, string $host)
         $cfg_0 = ounun::$routes_default;
     }
 
-//    print_r([
-//        '$url_mods' => $url_mods,
-//        '$cfg_0' => $cfg_0,
-//        // 'ounun::$routes_default' => ounun::$routes_default,
-//        // 'ounun::$routes' => ounun::$routes
-//    ]);
     // apps_domain_set
     ounun::app_set((string)$cfg_0['app_name'], (string)$cfg_0['path'], Dir_Root, '', Dir_Data, Dir_Ounun);
     // add_paths_app_instance
@@ -1205,11 +1203,15 @@ function start(array $url_mods, string $host)
     ounun::lang_set($lang);
 
     // 开始 重定义头
-    header('X-Powered-By: cms.cc v3.2.1; ounun.org v3.1.2;');
+    header('X-Powered-By: cms.cc; ounun.org;');
+
+    \ounun\debug::header(['$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
     // 设定 模块与方法(缓存)
     /** @var v $classname */
     list($filename, $classname, $addon_tag, $url_mods) = ounun::routes_get($url_mods);
+
+    \ounun\debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 //    echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
 //    exit();
     // 设定 模块与方法

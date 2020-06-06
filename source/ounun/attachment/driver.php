@@ -20,6 +20,7 @@ abstract class driver
     /** @var array  如果是*，代表任意类型 */
     public $allow_exts = ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'txt', 'zip', 'rar', 'doc', 'docx', 'xls', 'ppt', 'pdf'];
 
+    /** @var int 文件最大数 */
     public $filesize_max = 1024;
 
     /** @var string 目录名称 */

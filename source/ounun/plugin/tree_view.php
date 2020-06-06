@@ -5,7 +5,7 @@
  */
 namespace ounun\plugin;
 
-class treeview
+class tree_view
 {
 	public $data = [];
 
