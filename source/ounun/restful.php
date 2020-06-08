@@ -47,10 +47,11 @@ class restful
         if ($data) {
             $this->_request_inputs = json_decode_array($data);
         }
-        if (!$url_mods) {
+        if (empty($url_mods)) {
             $url_mods = [\ounun::def_method];
         }
         $class = "\\addons\\{$addon_tag}\\api\\{$url_mods[0]}";
+        debug::header(['$class'=>$class,$url_mods],'',__FILE__,__LINE__);
         if ($addon_tag && class_exists($class)) {
             new $class($url_mods, $this);
         } else {

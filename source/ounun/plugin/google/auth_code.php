@@ -5,6 +5,9 @@
  */
 
 namespace ounun\plugin\google;
+
+use ounun\debug;
+
 /**
  * PHP Class for handling Google Authenticator 2-factor authentication
  *
@@ -103,6 +106,7 @@ class auth_code
 
         for ($i = -$discrepancy; $i <= $discrepancy; $i++) {
             $calculatedCode = $this->code_get($secret, $currentTimeSlice + $i);
+            debug::header([$calculatedCode, $code, $secret, $calculatedCode == $code ? '1' : 0,$currentTimeSlice + $i], '', __FILE__, __LINE__);
             if ($calculatedCode == $code) {
                 return true;
             }

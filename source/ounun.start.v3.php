@@ -1124,11 +1124,9 @@ class ounun
             error_php('ounun::$routes_cache[\'\']: There is no default value。' . PHP_EOL
                 . 'routes_cache:' . json_encode(ounun::$routes_cache) . '');
         }
+
         // api
         if ($app_name == static::App_Name_Api) {
-            if ($url_mods[0]) {
-                array_shift($url_mods);
-            }
             $filename   = Dir_Ounun . 'ounun/restful.php';
             $class_name = "\\ounun\\restful";
             return [$filename, $class_name, $addon_tag, $url_mods];
@@ -1213,72 +1211,6 @@ function start(array $url_mods, string $host)
 
     \ounun\debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 //    echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
-//    exit();
-    // 设定 模块与方法
-//    if (empty($filename)) {
-//        if (is_array($mod) && $mod[0]) {
-//            $filename  = ounun::load_controller("controller/{$mod[0]}.php");
-//            $addon_tag = $mod[0];
-//            if ($filename) {
-//                $module    = $mod[0];
-//                $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
-//                if ($mod[1]) {
-//                    array_shift($mod);
-//                } else {
-//                    $mod = [ounun::def_method];
-//                }
-//            } else {
-//                if ($mod[1]) {
-//                    $filename = ounun::load_controller("controller/{$mod[0]}/{$mod[1]}.php");
-//                    if ($filename) {
-//                        $module    = $mod[0] . '\\' . $mod[1];
-//                        $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
-//                        if ($mod[2]) {
-//                            array_shift($mod);
-//                            array_shift($mod);
-//                        } else {
-//                            $mod = [ounun::def_method];
-//                        }
-//                    } else {
-//                        $filename = ounun::load_controller("controller/{$mod[0]}/index.php");
-//                        if ($filename) {
-//                            $module    = "{$mod[0]}\\index";
-//                            $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
-//                            array_shift($mod);
-//                        }
-//                    }
-//                } else {
-//                    $filename = ounun::load_controller("controller/{$mod[0]}/index.php");
-//                    if ($filename) {
-//                        $module = "{$mod[0]}\\index";
-//                        /** @var v $classname */
-//                        $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
-//                        $mod       = [ounun::def_method];
-//                    }
-//                } // end --------- if ($mod[1])
-//            } // end ------------- \Dir_App . "module/" . $mod[0] . '.php';
-//            // echo "\$filename:".__LINE__." -->:{$filename}\n";
-//        } else {
-//            // 默认模块 与 默认方法
-//            $module    = ounun::def_module;
-//            $addon_tag = ounun::def_module;
-//            /** @var v $classname */
-//            $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
-//            $filename  = ounun::load_controller("controller/index.php");
-//            if ($filename) {
-//                $mod = [ounun::def_method];
-//            }
-//        }
-//        // echo "\$filename:".__LINE__." -->:{$filename}\n";
-//        if (empty($filename)) {
-//            $module    = ounun::def_module;
-//            $addon_tag = ounun::def_module;
-//            /** @var v $classname */
-//            $classname = '\\app\\' . ounun::$app_name . '\\controller\\' . $module;
-//            $filename  = ounun::load_controller("controller/index.php");
-//        }
-//        // echo "\$filename:".__LINE__." -->:{$filename}\n";
-//    }
 
     // 包括模块文件
     if ($filename) {
