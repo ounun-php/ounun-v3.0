@@ -117,15 +117,6 @@ class addons
     }
 
     /**
-     * 插件子模块 字段
-     * @return array
-     */
-    static protected function addons_view_class_field(string $view_class, string $view_name, bool $top = false, bool $enable = true)
-    {
-        return ['view_class' => $view_class, 'view_name' => $view_name, 'top' => $top, 'enable' => $enable];
-    }
-
-    /**
      * 菜单数据
      * @return array
      */
@@ -149,9 +140,13 @@ class addons
             }
         }
         if ($sub) {
+            $default = static::Addon_Tag . '/index.html';
+            if (static::Addon_Tag == 'control') {
+                $default = static::Addon_Tag . '/admin/index.html';
+            }
             $menu = [
                 'name'    => static::Addon_Name,
-                'default' => static::Addon_Tag . '/index.html',
+                'default' => $default,
                 'sub'     => $sub,
             ];
         } else {
