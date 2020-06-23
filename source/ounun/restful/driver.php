@@ -30,6 +30,7 @@ abstract class driver
     /** GET 返回资源信息 */
     public function GET()
     {
+        header('HTTP/1.1 405 Method Not Allowed');
         $rs = succeed([static::class.'::'.explode(':',__METHOD__)[2], $this->_restful->input_get(), $this->_restful->gets_get(), $this->_restful->post_get()]);
         out($rs);
     }
@@ -37,6 +38,7 @@ abstract class driver
     /** POST 创建资源信息 */
     public function POST()
     {
+        header('HTTP/1.1 405 Method Not Allowed');
         $rs = succeed([static::class.'::'.explode(':',__METHOD__)[2], $this->_restful->input_get(), $this->_restful->gets_get(), $this->_restful->post_get()]);
         out($rs);
     }
@@ -44,6 +46,7 @@ abstract class driver
     /** PUT 更新资源信息 */
     public function PUT()
     {
+        header('HTTP/1.1 405 Method Not Allowed');
         $rs = succeed([static::class.'::'.explode(':',__METHOD__)[2], $this->_restful->input_get(), $this->_restful->gets_get(), $this->_restful->post_get()]);
         out($rs);
     }
@@ -51,6 +54,7 @@ abstract class driver
     /** DELETE 删除资源信息 */
     public function DELETE()
     {
+        header('HTTP/1.1 405 Method Not Allowed');
         $rs = succeed([static::class.'::'.explode(':',__METHOD__)[2], $this->_restful->input_get(), $this->_restful->gets_get(), $this->_restful->post_get()]);
         out($rs);
     }
