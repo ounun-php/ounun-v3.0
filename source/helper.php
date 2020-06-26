@@ -258,6 +258,10 @@ function go_msg(string $msg, string $url = ''): void
     }
 }
 
+/**  */
+function l(string $s){
+
+}
 
 /**
  * 彈出alert對話框

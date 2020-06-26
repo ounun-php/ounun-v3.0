@@ -130,16 +130,14 @@ class ounun
     /** @var array 站点SEO */
     static public $seo_site = ['sitename' => '', 'keywords' => '', 'description' => '', 'slogan' => ''];
     /** @var array 页面SEO */
-    static public $seo_page = ['title' => '', 'keywords' => '', 'description' => '', 'h1' => '', 'etag' => ''];
+    // static public $seo_page = ['title' => '', 'keywords' => '', 'description' => '', 'h1' => '', 'etag' => ''];
 
-    /** @var i18n 语言包 */
-    static public $i18n;
     /** @var string 当前语言 */
     static public $lang = 'zh_cn';
     /** @var string 默认语言 */
     static public $lang_default = 'zh_cn';
     /** @var array 支持的语言 */
-    public static $langs = [
+    static public $lang_supports = [
         "en_us" => "English", // "zh"=>"繁體中文",
         "zh_cn" => "简体中文", // "ja"=>"日本語",
     ];
@@ -351,41 +349,9 @@ class ounun
         }
         if ($lang_support_list && is_array($lang_support_list)) {
             foreach ($lang_support_list as $lang => $lang_name) {
-                static::$langs[$lang] = $lang_name;
+                static::$lang_supports[$lang] = $lang_name;
             }
         }
-    }
-
-    /**
-     * 语言包
-     * @return i18n
-     */
-    static public function i18n_get()
-    {
-        if (empty(static::$i18n)) {
-            if (static::$app_name) {
-                $i18ns = ['app\\' . static::$app_name . '\\i18n', 'utils\\i18n', 'ounun\\apps\\i18n'];
-                if (static::$lang && static::$lang != static::$lang_default) {
-                    array_unshift($i18ns, 'app\\' . static::$app_name . '\\i18n\\' . static::$lang);
-                }
-            } else {
-                $i18ns = ['utils\\i18n', 'ounun\\apps\\i18n'];
-                if (static::$lang && static::$lang != static::$lang_default) {
-                    array_unshift($i18ns, 'app\\i18n\\' . static::$lang);
-                }
-            }
-            foreach ($i18ns as $i18n) {
-                $file = static::load_class_file_exists($i18n);
-                // echo ' \$i18n -->1:'.$i18n." \$file:".$file."\n";
-                if ($file) {
-                    // echo ' \$i18n -->2:'.$i18n."\n";
-                    static::$i18n = $i18n;
-                    require $file;
-                    break;
-                }
-            }
-        }
-        return static::$i18n;
     }
 
     /**
@@ -413,11 +379,15 @@ class ounun
      */
     static public function seo_page_set(string $title = '', string $keywords = '', string $description = '', string $h1 = '', string $etag = '')
     {
-        $title && static::$seo_page['title'] = $title;
-        $keywords && static::$seo_page['keywords'] = $keywords;
-        $description && static::$seo_page['description'] = $description;
-        $h1 && static::$seo_page['h1'] = $h1;
-        $etag && static::$seo_page['etag'] = $etag;
+        $seo_page = [];
+
+        $title && $seo_page['{$seo_title}'] = $title;
+        $keywords && $seo_page['{$seo_keywords}'] = $keywords;
+        $description && $seo_page['{$seo_description}'] = $description;
+        $h1 && $seo_page['{$seo_h1}'] = $h1;
+        $etag && $seo_page['{$seo_etag}'] = $etag;
+
+        $seo_page && static::$tpl_replace_str = array_merge(static::$tpl_replace_str, []);
     }
 
     /**
@@ -727,11 +697,11 @@ class ounun
             '{$site_description}' => static::$seo_site['description'],
             '{$site_slogan}'      => static::$seo_site['slogan'],
             // seo_page
-            '{$seo_title}'        => static::$seo_page['title'],
-            '{$seo_keywords}'     => static::$seo_page['keywords'],
-            '{$seo_description}'  => static::$seo_page['description'],
-            '{$seo_h1}'           => static::$seo_page['h1'],
-            '{$seo_etag}'         => static::$seo_page['etag'],
+//            '{$seo_title}'        => static::$seo_page['title'],
+//            '{$seo_keywords}'     => static::$seo_page['keywords'],
+//            '{$seo_description}'  => static::$seo_page['description'],
+//            '{$seo_h1}'           => static::$seo_page['h1'],
+//            '{$seo_etag}'         => static::$seo_page['etag'],
 
             '{$app_name}'   => static::$app_name,
             '{$app_domain}' => static::$app_domain,
@@ -1172,7 +1142,7 @@ class ounun
 function start(array $url_mods, string $host)
 {
     // 语言
-    if ($url_mods && $url_mods[0] && ounun::$langs[$url_mods[0]]) {
+    if ($url_mods && $url_mods[0] && ounun::$lang_supports[$url_mods[0]]) {
         $lang = array_shift($url_mods);
     } else {
         $lang = ounun::$lang ? ounun::$lang : ounun::$lang_default;
@@ -1210,7 +1180,7 @@ function start(array $url_mods, string $host)
     list($filename, $classname, $addon_tag, $url_mods) = ounun::routes_get($url_mods);
 
     \ounun\debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
-//    echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
+//   echo "\$filename:" . __LINE__ . " -->\$filename:{$filename} \$classname:{$classname} \$addon_tag:{$addon_tag} \$mod:" . json_encode_unescaped($url_mods) . "\n";
 
     // 包括模块文件
     if ($filename) {
