@@ -1,6 +1,7 @@
 <?php
+
 /** 是否Cli - 环境常量 */
-define('Is_Cli', PHP_SAPI == 'cli' ? true : false);
+define('Is_Cli', PHP_SAPI == 'cli');
 /** 是否Win - 环境常量 */
 define('Is_Win', strpos(PHP_OS, 'WIN') !== false);
 /** root根目录 **/
@@ -29,6 +30,33 @@ if (Environment) {
     define('Ounun_Start_Time', microtime(true));
     /** 开始内存量 **/
     define('Ounun_Start_Memory', memory_get_usage());
+}
+
+use ounun\cache\html;
+use ounun\template;
+use ounun\debug;
+use ounun\db\pdo;
+
+/**
+ * 语言包
+ * @param string $s
+ * @return string
+ */
+function l(string $s)
+{
+    if ($l = $GLOBALS['_lang_']) {
+        if ($lang = $l[\ounun::$lang]) {
+            if ($s2 = $lang[$s]) {
+                return $s2;
+            }
+        }
+        if ($lang_default = $l[\ounun::$lang_default]) {
+            if ($s2 = $lang_default[$s]) {
+                return $s2;
+            }
+        }
+    }
+    return $s;
 }
 
 /**
@@ -126,7 +154,7 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
 
 /**
  * 得到 原生 URL(去问号后的 QUERY_STRING)
- * @param $uri
+ * @param string $uri
  * @return string URL
  */
 function url_original(string $uri = ''): string
@@ -157,11 +185,11 @@ function url_to_mod(string $uri): array
 
 /**
  * URL去重
- * @param  $url_original  string     网址
- * @param  $ext_req       bool       网址可否带参加数
- * @param  $domain        string     是否捡查 域名
+ * @param string $url_original 网址
+ * @param bool $ext_req 网址可否带参加数
+ * @param string $domain 是否捡查 域名
  */
-function url_check(string $url_original = "", bool $ext_req = true, string $domain = '')
+function url_check(string $url_original = '', bool $ext_req = true, string $domain = '')
 {
     // URL去重
     $url       = explode('?', $_SERVER['REQUEST_URI'], 2);
@@ -199,7 +227,7 @@ function url_check(string $url_original = "", bool $ext_req = true, string $doma
 function go_note(string $url1, string $url2, string $note, bool $top = false): void
 {
     $top  = "\t" . ($top ? 'window.top.' : '');
-    $note = $note ? $note : '点击“确定”继续操作  点击“取消” 中止操作';
+    $note ??= '点击“确定”继续操作  点击“取消” 中止操作';
     echo '<script type="text/javascript">' . "\n";
     if ($url2) {
         $url1 = $top . "location.href='{$url1}';\n";
@@ -245,8 +273,8 @@ function go_back(): void
 }
 
 /**
- * @param $msg
- * @param $url
+ * @param string $msg
+ * @param string $url
  */
 function go_msg(string $msg, string $url = ''): void
 {
@@ -256,11 +284,6 @@ function go_msg(string $msg, string $url = ''): void
         echo msg($msg);
         go_back();
     }
-}
-
-/**  */
-function l(string $s){
-
 }
 
 /**
@@ -343,7 +366,7 @@ function error(string $msg = '', int $status = 1, $data = null, $extend = [])
 
 /**
  * 确认是否错误 数据
- * @param $data
+ * @param mixed $data
  * @return bool
  */
 function error_is($data)
@@ -357,7 +380,7 @@ function error_is($data)
 
 /**
  * 返回错误提示信息
- * @param $data
+ * @param mixed $data
  * @return string
  */
 function error_message($data): string
@@ -367,7 +390,7 @@ function error_message($data): string
 
 /**
  * 返回错误代码
- * @param $data
+ * @param mixed $data
  * @return int
  */
 function error_code($data): int
@@ -399,7 +422,7 @@ function succeed($data, string $message = '', $extend = [])
 
 /**
  * 返回 数据
- * @param $data
+ * @param mixed $data
  * @return mixed
  */
 function succeed_data($data)
@@ -450,7 +473,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
 
 /**
  * 获得 json字符串数据
- * @param $data
+ * @param mixed $data
  * @return string
  */
 function json_encode_unescaped($data): string
@@ -518,7 +541,7 @@ function base64_url_decode(string $string = null): string
 
 /**
  * 编号 转 字符串
- * @param  $id int to encode
+ * @param int $id to encode
  * @return string
  */
 function short_url_encode(int $id = 0): string
@@ -537,7 +560,7 @@ function short_url_encode(int $id = 0): string
 
 /**
  * 字符串 转 编号
- * @param  $string string 字符串
+ * @param string $string 字符串
  * @return int
  */
 function short_url_decode(string $string = ''): int
@@ -602,13 +625,14 @@ function data(string $filename)
 
 /**
  * error 404
+ *
  * @param string $msg
  */
 function error404(string $msg = ''): void
 {
     header('Cache-Control: no-cache, must-revalidate, max-age=0');
     header('HTTP/1.1 404 Not Found');
-    exit('<html>
+    exit('<html lang="zh">
             <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
                 <title>404 Not Found</title>
@@ -633,6 +657,7 @@ function error404(string $msg = ''): void
 
 /**
  * error 404
+ *
  * @param string $error_msg
  * @param string $error_html
  */
@@ -655,7 +680,7 @@ function error_php(string $error_msg, string $error_html = ''): void
  *
  * @throws \Exception
  */
-function retry($times, callable $callback, $sleep = 0)
+function retry(int $times, callable $callback, int $sleep = 0)
 {
     $times--;
     beginning:
@@ -711,32 +736,33 @@ function environment()
  */
 abstract class v
 {
-    /** @var \ounun\db\pdo DB */
-    public static $db_v;
+    /** @var pdo|null DB */
+    public static ?pdo $db_v;
 
     /** @var string 插件标识 */
-    public $addon_tag = '';
+    public string $addon_tag = '';
 
-    /** @return \ounun\db\pdo DB */
+    /** @return pdo|null DB */
     public static function db_v_get()
     {
         if (empty(static::$db_v)) {
-            static::$db_v = \ounun\db\pdo::i(\ounun::database_default_get());
+            static::$db_v = pdo::i(\ounun::database_default_get());
         }
         return static::$db_v;
     }
 
     /** @var int cache_html_time */
-    public static $cache_html_time = 2678400; // 31天
+    public static int $cache_html_time = 2678400; // 31天
 
     /** @var bool html_trim */
-    public static $cache_html_trim = true;
+    public static bool $cache_html_trim = true;
 
-    /** @var ounun\cache\html cache_html */
-    public static $cache_html;
+    /** @var html|null cache_html */
+    public static html $cache_html;
 
     /**
      * Cache
+     *
      * @param $key
      */
     public function cache_html($key)
@@ -747,13 +773,14 @@ abstract class v
             $key2               = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
             $debug              = \ounun::$global['debug'];
             $debug              = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
-            static::$cache_html = new \ounun\cache\html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
+            static::$cache_html = new html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
             static::$cache_html->run(true);
         }
     }
 
     /**
      * 是否马上输出cache
+     *
      * @param bool $output
      */
     public function cache_html_stop(bool $output)
@@ -764,8 +791,8 @@ abstract class v
         }
     }
 
-    /** @var  \ounun\template  Template句柄容器 */
-    public static $tpl;
+    /** @var  template|null  Template句柄容器 */
+    public static ?template $tpl;
 
     /**
      * (兼容)返回一个 模板文件地址(绝对目录,相对root)
@@ -793,25 +820,26 @@ abstract class v
         return static::$tpl->tpl_curr($filename, $addon_tag);
     }
 
-    /** @var \ounun\debug 调试 相关 */
-    public static $debug;
+    /** @var debug|null debug调试相关 */
+    public static ?debug $debug;
 
     /**
      * @param string $channel
      * @param string $filename
+     * @return debug|null
      */
-    public static function debug_init($channel = 'comm', $filename = '404.txt')
+    public static function debug_init(string $channel = 'comm',string $filename = '404.txt')
     {
         if (empty(static::$debug)) {
-            static::$debug = \ounun\debug::i($channel, $filename);
+            static::$debug = debug::i($channel, $filename);
         }
         return static::$debug;
     }
 
     /**
      * 调试日志
-     * @param $k
-     * @param $log
+     * @param string $k
+     * @param mixed $log
      */
     public function debug_logs(string $k, $log)
     {
@@ -865,7 +893,8 @@ abstract class v
      * @param int $cache_html_time
      * @param bool $cache_html_trim
      */
-    public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '', int $cache_html_time = 0, bool $cache_html_trim = true)
+    public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
+                              int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
         \ounun::url_page(\ounun::$url_addon_pre . $page_file);
@@ -885,7 +914,7 @@ abstract class v
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new \ounun\template(\ounun::$tpl_style, \ounun::$tpl_style_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
+            static::$tpl = new template(\ounun::$tpl_style, \ounun::$tpl_style_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
         }
 
         // db

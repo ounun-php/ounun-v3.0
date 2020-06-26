@@ -1,6 +1,7 @@
 <?php
 
 use ounun\apps\addons;
+use ounun\template;
 use ounun\apps\i18n;
 
 /**
@@ -38,111 +39,114 @@ class ounun
     ];
 
     /** @var array 公共配制数据 */
-    static public $global = [];
+    public static array $global = [];
     /** @var array 公共配制数据(插件) */
-    static public $global_addons = [];
+    public static array $global_addons = [];
     /** @var array 公共配制数据(应用) */
-    static public $global_app = [];
+    public static array $global_app = [];
     /** @var v */
-    static public $view;
+    public static v $view;
     /** @var array DB配制数据 */
-    static public $database = [];
+    public static array $database = [];
     /** @var string 默认 数据库 */
-    static public $database_default = '';
+    public static string $database_default = '';
 
     /** @var array 自动加载路径paths */
-    static public $maps_paths = [];
+    public static array $maps_paths = [];
     /** @var array 自动加载路径maps */
-    static public $maps_class = [];
+    public static array $maps_class = [];
     /** @var array 已安装的功能模块(插件) */
-    public static $maps_installed_addons = [];
+    public static array $maps_installed_addons = [];
 
     /** @var string 根目录 */
-    static public $dir_root = '';
+    public static string $dir_root = '';
     /** @var string 根目录(App) */
-    static public $dir_app = '';
+    public static string $dir_app = '';
     /** @var string Data目录 */
-    static public $dir_data = '';
+    public static string $dir_data = '';
     /** @var string Ounun目录 */
-    static public $dir_ounun = __DIR__ . '/';
+    public static string $dir_ounun = __DIR__ . '/';
 
     /** @var string 当前APP */
-    static public $app_name = '';
+    public static string $app_name = '';
     /** @var string 当前APP Path */
-    static public $app_path = '';
+    public static string $app_path = '';
+
+    /** @var string 项目站点名称 */
+    //public static string $app_sitename = '';
 
     /** @var string 域名Domain */
-    static public $app_domain = '';
+    public static string $app_domain = '';
     /** @var string 项目代号 */
-    static public $app_code = '';
-    /** @var string 项目站点名称 */
-    // static public $app_sitename = '';
+    public static string $app_code = '';
     /** @var string 当前版本号(本地cache) 1.1.1 */
-    static public $app_version = '1.1.1';
+    public static string $app_version = '1.1.1';
     /** @var string 当前app之前通信内问key */
-    static public $app_key_communication_private = '';
+    public static string $app_key_communication_private = '';
 
     /** @var string 当前面页(文件名)  Page Base */
-    static public $page_base_file = '';
+    public static string $page_base_file = '';
     /** @var string 当前面页(网址)    Page URL */
-    static public $page_url = '';
+    public static string $page_url = '';
 
     /** @var string Www Page */
-    static public $page_www = '';
+    public static string $page_www = '';
     /** @var string Mobile Page */
-    static public $page_wap = '';
+    public static string $page_wap = '';
     /** @var string Mip Page */
-    static public $page_mip = '';
+    public static string $page_mip = '';
 
     /** @var string Www URL */
-    static public $root_www = '';
+    public static string $root_www = '';
     /** @var string Mobile URL */
-    static public $root_wap = '';
+    public static string $root_wap = '';
     /** @var string Mip URL */
-    static public $root_mip = '';
+    public static string $root_mip = '';
 
     /** @var string Api URL */
-    static public $root_api = '';
+    public static string $root_api = '';
     /** @var string Res URL */
-    static public $url_res = '';
+    public static string $url_res = '';
     /** @var string Static URL */
-    static public $url_static = '';
+    public static string $url_static = '';
     /** @var string Upload URL */
-    static public $url_upload = '';
+    public static string $url_upload = '';
     /** @var string StaticG URL */
-    static public $url_static_g = '';
+    public static string $url_static_g = '';
     /** @var string 为插件时网址前缀URL */
-    static public $url_addon_pre = '';
+    public static string $url_addon_pre = '';
 
     /** @var string 应用模板类型 pc www */
-    static public $tpl_type = 'pc';
+    public static string $tpl_type = 'pc';
     /** @var string 应用模板类型[默认] */
-    static public $tpl_type_default = 'pc';
+    public static string $tpl_type_default = 'pc';
     /** @var string 模板-样式 */
-    static public $tpl_style = 'default';
+    public static string $tpl_style = 'default';
     /** @var string 模板-样式[默认] */
-    static public $tpl_style_default = 'default';
+    public static string $tpl_style_default = 'default';
     /** @var array Template view目录 */
-    static public $tpl_dirs = [];
+    public static array $tpl_dirs = [];
     /** @var array 模板替换数据组 */
-    static public $tpl_replace_str = [];
-
-    /** @var array 站点SEO */
-    static public $seo_site = ['sitename' => '', 'keywords' => '', 'description' => '', 'slogan' => ''];
-    /** @var array 页面SEO */
-    // static public $seo_page = ['title' => '', 'keywords' => '', 'description' => '', 'h1' => '', 'etag' => ''];
-
+    public static array $tpl_replace_array = [];
+    /** @var array 命令s */
+    public static array $commands = [];
+    
     /** @var string 当前语言 */
-    static public $lang = 'zh_cn';
+    public static string $lang = 'zh_cn';
     /** @var string 默认语言 */
-    static public $lang_default = 'zh_cn';
+    public static string $lang_default = 'zh_cn';
     /** @var array 支持的语言 */
-    static public $lang_supports = [
+    public static array $lang_supports = [
         "en_us" => "English", // "zh"=>"繁體中文",
         "zh_cn" => "简体中文", // "ja"=>"日本語",
     ];
-    /** @var array 命令s */
-    static public $commands = [];
+    /** @var array 站点SEO */
+    public static array $seo_site = [
+        'sitename'    => '',
+        'keywords'    => '',
+        'description' => '',
+        'slogan'      => ''
+    ];
 
     /**
      * 本地环境变量设定 (应用)
@@ -387,7 +391,7 @@ class ounun
         $h1 && $seo_page['{$seo_h1}'] = $h1;
         $etag && $seo_page['{$seo_etag}'] = $etag;
 
-        $seo_page && static::$tpl_replace_str = array_merge(static::$tpl_replace_str, []);
+        $seo_page && static::$tpl_replace_array = array_merge(static::$tpl_replace_array, []);
     }
 
     /**
@@ -558,12 +562,13 @@ class ounun
      */
     static public function domain_set(string $app_domain = '', string $app_code = '', string $app_version = '', string $app_key_communication_private = '')
     {
+        /** 项目站点名称 */
+        // $app_sitename &&  static::$app_sitename = $app_sitename;
+
         /** 项目主域名 */
         $app_domain && static::$app_domain = $app_domain;
         /** 项目代号 */
         $app_code && static::$app_code = $app_code;
-        /** 项目站点名称 */
-        // $app_sitename &&  static::$app_sitename = $app_sitename;
         /** 当前版本号(本地cache) 1.1.1 */
         $app_version && static::$app_version = $app_version;
         /** 当前app之前通信内问key */
@@ -582,7 +587,8 @@ class ounun
      * @param string $url_upload
      * @param string $url_static_g
      */
-    static public function urls_set(string $root_www, string $root_wap, string $root_mip, string $root_api, string $url_res, string $url_upload, string $url_static, string $url_static_g)
+    static public function urls_set(string $root_www, string $root_wap, string $root_mip, string $root_api,
+                                    string $url_res, string $url_upload, string $url_static, string $url_static_g)
     {
         /** Www URL */
         static::$root_www = $root_www;
@@ -653,7 +659,7 @@ class ounun
     {
         if ($data && is_array($data)) {
             foreach ($data as $key => $value) {
-                static::$tpl_replace_str[$key] = $value;
+                static::$tpl_replace_array[$key] = $value;
             }
         }
     }
@@ -665,7 +671,7 @@ class ounun
      */
     static public function template_replace_str_set(string $key, string $value)
     {
-        static::$tpl_replace_str[$key] = $value;
+        static::$tpl_replace_array[$key] = $value;
     }
 
     /**
@@ -705,7 +711,7 @@ class ounun
 
             '{$app_name}'   => static::$app_name,
             '{$app_domain}' => static::$app_domain,
-        ], static::$tpl_replace_str);
+        ], static::$tpl_replace_array);
     }
 
 
@@ -804,7 +810,7 @@ class ounun
      */
     static public function root_url_curr_get()
     {
-        if (static::$tpl_style == \ounun\template::Type_Mip) {
+        if (static::$tpl_style == template::Type_Mip) {
             return static::$root_mip;
         } elseif (static::$tpl_style == \ounun\template::Type_Wap) {
             return static::$root_wap;
@@ -845,7 +851,6 @@ class ounun
      * 添加App路径(根目录)
      * @param string $path
      * @param bool $is_auto_helper
-     * @param bool $is_auto_command
      */
     static public function paths_root_set(string $path, ?bool $is_auto_helper = false)
     {
@@ -1006,17 +1011,13 @@ class ounun
     }
 
     /** 路由数据 */
-    static public $routes = [
-        //         'www.866bet.com/api'  => ['app_name'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
-        //                 '138.vc/api'  => ['app_name'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
-        //        'www2.866bet.com/api'  => ['app_name'=>'api', 'cls'=> 'site' ],         /* 数据接口 */
-    ];
+    public static array $routes = [];
 
     /** 路由数据(默认) */
-    static public $routes_default = ['app_name' => self::App_Name_Web, 'url' => '/'];
+    public static array $routes_default = ['app_name' => self::App_Name_Web, 'url' => '/'];
 
     /** 路由数据 */
-    public static $routes_cache = [];
+    public static array $routes_cache = [];
 
     /**
      * 设定路由数据
