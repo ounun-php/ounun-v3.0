@@ -905,7 +905,7 @@ class pdo
      * @param int $param 值数据类型 PDO::PARAM_INT
      * @return bool
      */
-    public function is_repeat(string $field, string $value, int $param = \PDO::PARAM_STR): bool
+    public function exists(string $field, $value, int $param = \PDO::PARAM_STR): bool
     {
         if ($field) {
             $k  = $this->_param2types($param);
@@ -970,14 +970,12 @@ class pdo
             case 'i':
                 return \PDO::PARAM_INT;
                 break;
+            case 's':
             case 'd':
                 return \PDO::PARAM_STR;
                 break;
             case 'b':
                 return \PDO::PARAM_LOB;
-                break;
-            case 's':
-                return \PDO::PARAM_STR;
                 break;
             case 'null':
                 return \PDO::PARAM_NULL;
@@ -1023,7 +1021,7 @@ class pdo
      */
     protected function _keys_parse(string $sql)
     {
-        $splits = preg_split('/(\:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $splits = preg_split('/(:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         // $splits = preg_split('/(\:[^ |^,|\|;)]+)/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY); // 支持中文字段
         $result = [];
         foreach ($splits as $v) {

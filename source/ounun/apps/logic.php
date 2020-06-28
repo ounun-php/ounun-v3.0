@@ -16,17 +16,17 @@ abstract class logic
     /** @var self 实例 */
     protected static logic $_instance;
 
+    /** @var model 数据模型 */
+    protected model $_model;
+
     /**
      * @param pdo $db
      * @return $this 返回数据库连接对像
      */
-    public static function i(?pdo $db = null): self
+    public static function i(?model $model = null): self
     {
         if (empty(static::$_instance)) {
-            if (empty($db)) {
-                $db = \v::db_v_get();
-            }
-            static::$_instance = new static($db);
+            static::$_instance = new static($model);
         }
         return static::$_instance;
     }
@@ -37,12 +37,11 @@ abstract class logic
      * cms constructor.
      * @param pdo $db
      */
-    public function __construct(?pdo $db = null)
+    public function __construct(?model $model = null)
     {
-        if ($db) {
-            $this->_db = $db;
+        if ($model) {
+            $this->_model = $model;
         }
-        static::$_instance = $this;
         // 控制器初始化
         $this->_initialize();
     }
