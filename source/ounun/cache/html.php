@@ -20,50 +20,44 @@ class html
     const Cache_Mini_Size = 2024;
     /** Cache生成过程最长临时过度时间 */
     const Cache_Time_Interval = 300;
-    /** 有效Cache数据类型 */
-    const Cache_Valid = [
-        self::Cdn_Type_Full => [driver\redis::Type, driver\memcached::Type, driver\html::Type],
-        self::Cdn_Type_Min  => [driver\redis::Type, driver\memcached::Type, driver\sqlite::Type],
-    ];
-
-    /** @var bool */
-    public $stop = false;
 
     /** @var int cdn类型 */
     protected $_cdn_type = 2;
     /** @var driver 缓存驱动 */
-    protected $_cache_driver;
+    protected ?driver $_cache_driver;
     /** @var string 页面key */
-    protected $_cache_key = '';
+    protected string $_cache_key = '';
     /** @var array 数据 */
-    protected $_cache_value = [];
+    protected array $_cache_value = [];
     /** @var string cache类型 */
-    protected $_cache_type = '';
+    protected string $_cache_type = '';
     /** @var string 缓存文件 */
-    protected $_cache_filename = '';
+    protected string $_cache_filename = '';
 
     /** @var int */
-    protected $_cache_time = -1;
+    protected int $_cache_time = -1;
     /** @var int */
-    protected $_cache_time_t = -1;
+    protected int $_cache_time_t = -1;
     /** @var int */
-    protected $_cache_size = -1;
+    protected int $_cache_size = -1;
     /** @var int */
-    protected $_cache_size_t = -1;
+    protected int $_cache_size_t = -1;
 
     /** @var int 当前时间 */
-    protected $_time_curr;
+    protected int $_time_curr;
     /** @var int 缓存时间长度 */
-    protected $_time_expire = 3600;
+    protected int $_time_expire = 3600;
 
+    /** @var bool */
+    public bool $stop = false;
 
     // 下面 高级应用
     /** @var bool 是否 启用压缩 */
-    protected $_is_gzip = true;
+    protected bool $_is_gzip = true;
     /** @var bool 是否 去空格换行 */
-    protected $_is_trim = false;
+    protected bool $_is_trim = false;
     /** @var bool false:没读    true:已读 */
-    protected $_is_read = false;
+    protected bool $_is_read = false;
 
     /**
      * html constructor.
@@ -93,10 +87,12 @@ class html
         $this->_cdn_type   = $config['cdn_type'];
         $this->_cache_type = $config['driver_type'];
         $this->_cache_key  = $key;
+
+        $cache_valid = $this->valid($this->_cdn_type);
         if ($this->_cdn_type
-            && static::Cache_Valid[$this->_cdn_type]
-            && is_array(static::Cache_Valid[$this->_cdn_type])
-            && in_array($this->_cache_type, static::Cache_Valid[$this->_cdn_type])) {
+            && $cache_valid
+            && is_array($cache_valid)
+            && in_array($this->_cache_type, $cache_valid)) {
             $cls                 = "driver\{$this->_cache_type}";
             $this->_cache_driver = new $cls($config);
         } else {
@@ -151,7 +147,7 @@ class html
 
     /**
      * [2/3] 执行缓存程序
-     * @param bool $outpt ( 是否输出 )
+     * @param bool $output ( 是否输出 )
      */
     public function run_execute(bool $output)
     {
@@ -258,6 +254,19 @@ class html
         }
 
         return $this->_cache_driver->delete($this->_cache_key);
+    }
+
+    /** 有效Cache数据类型
+     * @param $cdn_type
+     * @return array
+     */
+    public function valid($cdn_type)
+    {
+        if($cdn_type == self::Cdn_Type_Min){
+            return [driver\redis::Type, driver\memcached::Type, driver\sqlite::Type];
+        }
+        // if(self::Cdn_Type_Full)
+        return  [driver\redis::Type, driver\memcached::Type, driver\html::Type];
     }
 
     /**

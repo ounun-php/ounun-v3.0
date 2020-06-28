@@ -9,33 +9,33 @@ namespace ounun;
 class debug
 {
     /** @var array  日志数组 */
-    private $_logs = [];
+    private array $_logs = [];
     /** @var string 输出文件名 */
-    private $_logs_buffer = '';
+    private string $_logs_buffer = '';
     /** @var int    输出文件名 */
-    private $_time = 0;
+    private int $_time = 0;
 
     /** @var string 输出文件名 */
-    private $_filename = '';
+    private string $_filename = '';
     /** @var bool 是否添加到文件开头EOF */
-    private $_is_bof = true;
+    private bool $_is_bof = true;
     /** @var bool 是否输出 run time */
-    private $_is_run_time = true;
+    private bool $_is_run_time = true;
 
     /** @var bool 是否输出 buffer */
-    private $_is_out_buffer = true;
+    private bool $_is_out_buffer = true;
     /** @var bool 是否输出 get */
-    private $_is_out_get = true;
+    private bool $_is_out_get = true;
     /** @var bool 是否输出 post */
-    private $_is_out_post = true;
+    private bool $_is_out_post = true;
     /** @var bool 是否输出 url */
-    private $_is_out_url = true;
+    private bool $_is_out_url = true;
     /** @var bool 是否输出 cookie */
-    private $_is_out_cookie = true;
+    private bool $_is_out_cookie = true;
     /** @var bool 是否输出 session */
-    private $_is_out_session = true;
+    private bool $_is_out_session = true;
     /** @var bool 是否输出 server */
-    private $_is_out_server = false;
+    private bool $_is_out_server = false;
 
 
     /**

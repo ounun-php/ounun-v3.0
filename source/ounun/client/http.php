@@ -142,7 +142,9 @@ class http
         $host    = $matches['host'];
         $path    = $matches['path'] ? $matches['path'] . ($matches['query'] ? '?' . $matches['query'] : '') : '/';
         $port    = $matches['port'] ? $matches['port'] : 80;
-        if ($referer == '') $referer = URL;
+        if ($referer == '') {
+            $referer = $url;
+        }
         $out = "$this->method $path HTTP/1.1\r\n";
         $out .= "Accept: */*\r\n";
         $out .= "Referer: $referer\r\n";
@@ -196,7 +198,6 @@ class http
     {
         $dir = dirname($file);
         if (!is_dir($dir)) {
-            import('helper.folder');
             folder::create($dir);
         }
         return file_put_contents($file, $this->data);
@@ -238,7 +239,9 @@ class http
     public function get_mime($file)
     {
         $ext = fileext($file);
-        if ($ext == '') return '';
+        if ($ext == '') {
+            return '';
+        }
         $mime_types = config('mime');
         return isset($mime_types[$ext]) ? $mime_types[$ext] : '';
     }

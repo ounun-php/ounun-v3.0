@@ -171,9 +171,9 @@ class pdo
 
     /**
      * @param string $table 表名
-     * @return $this
+     * @return pdo
      */
-    public function table(string $table = ''): self
+    public function table(string $table = ''): pdo
     {
         if ($this->_table || $table) {
             $this->_clean();

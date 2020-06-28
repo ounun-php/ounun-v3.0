@@ -9,22 +9,22 @@ namespace ounun;
 class restful
 {
     /** @var string method */
-    protected $_method;
+    protected string $_method;
 
     /** @var array gets */
-    protected $_request_gets = [];
+    protected array $_request_gets = [];
 
     /** @var array post */
-    protected $_request_post = [];
+    protected array $_request_post = [];
 
     /** @var array inputs */
-    protected $_request_inputs = [];
+    protected array $_request_inputs = [];
 
     /** @var string accept */
-    protected $_http_accept;
+    protected string $_http_accept;
 
     /** @var string 插件标识 */
-    protected $_addon_tag = '';
+    protected string $_addon_tag = '';
 
     /**
      * ounun_view constructor.

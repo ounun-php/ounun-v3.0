@@ -20,30 +20,31 @@ class cache
     const Expire_Middle = 300;
     /** @var int 有效期 长,1小时（秒） */
     const Expire_Long = 3600;
+
     /** 有效Cache类型 */
-    const Driver_Type_Valid = [
-        driver\code::Type,
-        driver\file::Type,
-        driver\html::Type,
-        driver\memcached::Type,
-        driver\mysql::Type,
-        driver\sqlite::Type,
-        driver\redis::Type
-    ];
+//    const Driver_Type_Valid = [
+//        driver\code::Type,
+//        driver\file::Type,
+//        driver\html::Type,
+//        driver\memcached::Type,
+//        driver\mysql::Type,
+//        driver\sqlite::Type,
+//        driver\redis::Type
+//    ];
 
     /** @var string storage_key  库名称 */
-    public $storage_key = '';
+    public string $storage_key = '';
 
-    /** @var string 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
-    protected $_driver_type = 0;
+    /** @var int 驱动类型  0:[错误,没设定驱动] 1:File 2:Memcache 3:Redis */
+    protected int $_driver_type = 0;
     /** @var driver 缓存驱动 */
-    protected $_driver;
+    protected driver $_driver;
 
     /** @var array 数据 */
-    protected $_value = [];
+    protected array $_value = [];
 
     /** @var array */
-    static protected $_instances = [];
+    protected static array $_instances = [];
 
     /**
      * @param string $storage_key
@@ -71,9 +72,13 @@ class cache
     public function __construct(array $config = [])
     {
         $this->_driver_type = $config['driver_type'];
-        if ($this->_driver_type && in_array($this->_driver_type, static::Driver_Type_Valid)) {
+        if ($this->_driver_type) {
             $cls           = "driver\{$this->_driver_type}";
-            $this->_driver = new $cls($config);
+            if (is_subclass_of($cls, \ounun\cache\driver::class)) {
+                $this->_driver = new $cls($config);
+            }else{
+                trigger_error("Can't support \$cls:{$cls}", E_USER_ERROR);
+            }
         } else {
             trigger_error("Can't support driver_type:{$this->_driver_type}", E_USER_ERROR);
         }

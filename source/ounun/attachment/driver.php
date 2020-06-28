@@ -11,36 +11,36 @@ use ounun\utils\file;
 
 abstract class driver
 {
-    static public $url_site = '/';
+    public static string $url_site = '/';
 
-    static public $url_upload = '';
+    public static string $url_upload = '';
 
-    static public $path_upload = '';
+    public static string $path_upload = '';
 
     /** @var array  如果是*，代表任意类型 */
-    public $allow_exts = ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'txt', 'zip', 'rar', 'doc', 'docx', 'xls', 'ppt', 'pdf'];
+    public array $allow_exts = ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'txt', 'zip', 'rar', 'doc', 'docx', 'xls', 'ppt', 'pdf'];
 
     /** @var int 文件最大数 */
-    public $filesize_max = 1024;
+    public int $filesize_max = 1024;
 
     /** @var string 目录名称 */
-    protected $_dir;
+    protected string $_dir;
 
     /** @var int 错误代码 */
-    protected $_error_code = 0;
+    protected int $_error_code = 0;
 
     /** @var string 文件名称 */
-    protected $_filename = '';
+    protected string $_filename = '';
 
-    protected $_source;
+    protected string $_source;
 
-    protected $_target;
+    protected string $_target;
 
-    protected $_time;
+    protected int $_time;
 
 
     /** @var array 文件列表 */
-    protected $_files = [];
+    protected array $_files = [];
 
 
     /**

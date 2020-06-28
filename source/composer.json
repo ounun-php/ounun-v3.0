@@ -25,7 +25,9 @@
     "ext-xmlrpc": "*",
     "ext-simplexml": "*",
     "ext-iconv": "*",
-    "php": "7.4.*"
+    "php": "7.4.*",
+    "ext-fileinfo": "*",
+    "ext-imagick": "*"
   },
   "require-dev": {
     "swoole/ide-helper": "@dev",

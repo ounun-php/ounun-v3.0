@@ -17,10 +17,10 @@ abstract class driver
     protected $_handler;
 
     /** @var array 缓存 get read:读取次数 set write:写入次数 */
-    protected $_times = ['get' => 0, 'set' => 0,];
+    protected array $_times = ['get' => 0, 'set' => 0,];
 
     /** @var array 缓存参数(配制数组) */
-    protected $_options = [
+    protected array $_options = [
         'expire'    => 0,  // 有效时间 0为永久
         'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
 
@@ -33,10 +33,10 @@ abstract class driver
     ];
 
     /** @var array 数据 */
-    protected $_value = [];
+    protected array $_value = [];
 
     /** @var array ['key'=>$key,'value'=>$value] 设置key的过期时间，超过时间后，将会自动删除该key */
-    protected $_expires = [];
+    protected array $_expires = [];
 
     /**
      * 读取缓存

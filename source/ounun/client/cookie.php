@@ -9,9 +9,9 @@ namespace ounun\client;
 
 class cookie
 {
-    protected $_prefix = '';
-    protected $_path = '/';
-    protected $_domain = '';
+    protected string $_prefix = '';
+    protected string $_path = '/';
+    protected string $_domain = '';
 
     public function __construct($prefix = 'cc_', $path = '/', $domain = '')
     {

@@ -130,7 +130,7 @@ class ounun
     public static array $tpl_replace_array = [];
     /** @var array 命令s */
     public static array $commands = [];
-    
+
     /** @var string 当前语言 */
     public static string $lang = 'zh_cn';
     /** @var string 默认语言 */
@@ -694,7 +694,7 @@ class ounun
             '{$root_api}'  => static::$root_api,
 
             '{$root_res}'         => static::$url_res,
-            '{$root_upload}'      => static::$url_upload, '/public/upload/' => static::$url_upload,
+            '{$root_upload}'      => static::$url_upload, '/public/uploads/' => static::$url_upload,
             '{$root_static}'      => static::$url_static, '/public/static/' => static::$url_static,
             '{$root_static_g}'    => static::$url_static_g, '/public/static_g/' => static::$url_static_g,
             // seo_site
@@ -702,13 +702,7 @@ class ounun
             '{$site_keywords}'    => static::$seo_site['keywords'],
             '{$site_description}' => static::$seo_site['description'],
             '{$site_slogan}'      => static::$seo_site['slogan'],
-            // seo_page
-//            '{$seo_title}'        => static::$seo_page['title'],
-//            '{$seo_keywords}'     => static::$seo_page['keywords'],
-//            '{$seo_description}'  => static::$seo_page['description'],
-//            '{$seo_h1}'           => static::$seo_page['h1'],
-//            '{$seo_etag}'         => static::$seo_page['etag'],
-
+            // app_name
             '{$app_name}'   => static::$app_name,
             '{$app_domain}' => static::$app_domain,
         ], static::$tpl_replace_array);
@@ -857,6 +851,7 @@ class ounun
         if (empty($path)) {
             return;
         }
+
         /** src-0 \         自动加载 */
         ounun::paths_class_set($path . 'src/', '', false);
         /** src-0 \addons   自动加载  */
@@ -886,8 +881,6 @@ class ounun
         string $paths_app_curr, bool $is_auto_helper = true,
         array $tpl_dirs = [], string $tpl_style = '', string $tpl_style_default = '', string $tpl_type = '', string $tpl_type_default = '')
     {
-        /** controller add_paths */
-        // static::paths_class_set($paths_app_root, $namespace_prefix, true);
         /** load_config */
         static::load_config($paths_app_curr, $is_auto_helper);
         /** template_set */

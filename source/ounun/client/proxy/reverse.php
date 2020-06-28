@@ -15,51 +15,51 @@ class reverse
     const Chunk_Size = 102400;
 
     /** @var bool 是否ssl */
-    public $is_ssl = false;
+    public bool $is_ssl = false;
     /** @var bool false: 高速，不转发 true:正常代理 */
-    public $is_header = false;
+    public bool $is_header = false;
     /** @var bool false: 数据缓存后，内容直接输出  true:数据缓存后，再跳转 */
     // public $is_jump = false;
 
     /** @var string 缓存数据 */
-    public $content = '';
+    public string $content = '';
 
     /** @var string 服务器版本 */
-    protected $_server_version = 'Ounun.org Download Server';
+    protected string $_server_version = 'Ounun.org Download Server';
     /** @var string 服务器源网址root */
-    protected $_server_url_root = '';
+    protected string $_server_url_root = '';
     /** @var string 服务器源path */
-    protected $_server_path = '';
+    protected string $_server_path = '';
     /** @var string 服务器源file */
-    protected $_server_file = '';
+    protected string $_server_file = '';
 
     /** @var int 端口 */
-    protected $_port = 80;
+    protected int $_port = 80;
     /** @var string 主机名 */
-    protected $_host = '';
+    protected string $_host = '';
     /** @var string 服务器ip */
-    protected $_ip = '127.0.0.1';
+    protected string $_ip = '127.0.0.1';
 
     /** @var int 在服务器端 缓存时间 0:默认已缓存就不更新了 */
-    protected $_cache_life = 0;
+    protected int $_cache_life = 0;
     /** @var int 在客户端   缓存时间 */
-    protected $_cache_time = 72000;
+    protected int $_cache_time = 72000;
     /** @var string 遇到cc的参数就更新缓存; */
-    protected $_cache_clean_param = 'clean';
+    protected string $_cache_clean_param = 'clean';
     /** @var string 根目录 */
-    protected $_cache_path_root = '';
+    protected string $_cache_path_root = '';
     /** @var string 本地目录名称 */
-    protected $_cache_filename = '';
+    protected string $_cache_filename = '';
 
     /** @var int */
-    protected $_http_code = 200;
+    protected int $_http_code = 200;
     /** @var int */
-    protected $_last_modified = 0;
+    protected int $_last_modified = 0;
     /** @var string */
-    protected $_http_if_modified_304 = '';
+    protected string $_http_if_modified_304 = '';
 
     /** @var array 替换数据[0],[1] */
-    protected $_data_replace = [];
+    protected array $_data_replace = [];
 
     /**
      * reverse constructor.

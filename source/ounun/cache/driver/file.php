@@ -14,11 +14,11 @@ class file extends \ounun\cache\driver
     const Type          = 'file';
 
     /** @var array 配制 */
-    protected $_options = [
+    protected array $_options = [
         // 'module'     => '', // 模块名称   转 prefix
         // 'filename'   => '', // 文件名
-        'expire'        => 0,  // 有效时间 0为永久
-        'serialize'     => ['json_encode_unescaped','json_decode_array'], // encode decode
+        'expire'    => 0,  // 有效时间 0为永久
+        'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
 
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量

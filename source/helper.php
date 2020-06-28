@@ -828,7 +828,7 @@ abstract class v
      * @param string $filename
      * @return debug|null
      */
-    public static function debug_init(string $channel = 'comm',string $filename = '404.txt')
+    public static function debug_init(string $channel = 'comm', string $filename = '404.txt')
     {
         if (empty(static::$debug)) {
             static::$debug = debug::i($channel, $filename);

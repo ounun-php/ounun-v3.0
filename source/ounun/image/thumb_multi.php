@@ -22,7 +22,6 @@ namespace ounun\image;
  * Class multi_thumb
  * @package ounun\image
  */
-
 class thumb_multi extends \Imagick
 {
     /**
@@ -34,8 +33,9 @@ class thumb_multi extends \Imagick
      * @return self
      * @throws \Exception
      */
-    public static function create($images, $width, $height,$background = 'white', $format = 'jpg'){
-        if (empty($images)){
+    public static function create($images, $width, $height, $background = 'white', $format = 'jpg')
+    {
+        if (empty($images)) {
             throw new \Exception("No images!");
         }
 
@@ -50,14 +50,15 @@ class thumb_multi extends \Imagick
      * @param $images
      * @throws \ImagickException
      */
-    public function composite($images){
+    public function composite($images)
+    {
         $images_keys      = array_keys($images);
         $composite_config = $this->calc_composite_images_pos_and_size($images);
 
-        foreach ($composite_config as $index => $cfg){
+        foreach ($composite_config as $index => $cfg) {
             $imgKey = $images_keys[$index];
-            $img = new \Imagick($images[$imgKey]);
-            $img = $this->composite_thumb($img, $cfg);
+            $img    = new \Imagick($images[$imgKey]);
+            $img    = $this->composite_thumb($img, $cfg);
             $this->compositeImage($img, self::COMPOSITE_OVER, $cfg['to']['x'], $cfg['to']['y']);
         }
     }
@@ -68,7 +69,8 @@ class thumb_multi extends \Imagick
      * @return \Imagick
      * @throws \ImagickException
      */
-    protected function composite_thumb(\Imagick $img, $cfg){
+    protected function composite_thumb(\Imagick $img, $cfg)
+    {
         $img->cropThumbnailImage($cfg['size']['width'], $cfg['size']['height']);
         return $img;
     }
@@ -78,47 +80,48 @@ class thumb_multi extends \Imagick
      * @return array
      * @throws \ImagickException
      */
-    protected function calc_composite_images_pos_and_size($images){
+    protected function calc_composite_images_pos_and_size($images)
+    {
         $width  = $this->getImageWidth();
         $height = $this->getImageHeight();
 
-        switch(count($images)){
+        switch (count($images)) {
             case 0:
                 throw new \ImagickException("No images!");
             case 1:
                 // | 0 |
                 return [
                     0 => [
-                        'to'   => [ 'x' => 0,          'y' => 0             ],
-                        'size' => [ 'width' => $width, 'height' => $height, ]
+                        'to'   => ['x' => 0, 'y' => 0],
+                        'size' => ['width' => $width, 'height' => $height,]
                     ]
                 ];
             case 2:
                 // | 0 | 1 |
                 return [
                     0 => [
-                        'to'   => [ 'x' => 0, 'y' => 0 ],
-                        'size' => [ 'width' => $width / 2,  'height' => $height, ]
+                        'to'   => ['x' => 0, 'y' => 0],
+                        'size' => ['width' => $width / 2, 'height' => $height,]
                     ],
                     1 => [
-                        'to'   => [ 'x' => $width / 2, 'y' => 0],
-                        'size' => [ 'width' => $width / 2, 'height' => $height, ]
+                        'to'   => ['x' => $width / 2, 'y' => 0],
+                        'size' => ['width' => $width / 2, 'height' => $height,]
                     ]
                 ];
             case 3:
                 // | 0 | 1 | 2 |
                 return [
                     0 => [
-                        'to'   => [ 'x' => 0, 'y' => 0 ],
-                        'size' => [ 'width' => $width / 2,  'height' => $height / 2, ]
+                        'to'   => ['x' => 0, 'y' => 0],
+                        'size' => ['width' => $width / 2, 'height' => $height / 2,]
                     ],
                     1 => [
-                        'to'   => [ 'x' => $width / 2, 'y' => 0],
-                        'size' => [  'width' => $width / 2, 'height' => $height,  ]
+                        'to'   => ['x' => $width / 2, 'y' => 0],
+                        'size' => ['width' => $width / 2, 'height' => $height,]
                     ],
                     2 => [
-                        'to'   => [ 'x' => 0, 'y' => $height / 2 ],
-                        'size' => [ 'width' => $width / 2, 'height' => $height / 2,  ]
+                        'to'   => ['x' => 0, 'y' => $height / 2],
+                        'size' => ['width' => $width / 2, 'height' => $height / 2,]
                     ],
                 ];
             default:   // >= 4:
@@ -126,20 +129,20 @@ class thumb_multi extends \Imagick
                 // | 2 | 3 |
                 return [
                     0 => [
-                        'to'   => [ 'x' => 0, 'y' => 0 ],
-                        'size' => [ 'width' => $width / 2, 'height' => $height / 2, ]
+                        'to'   => ['x' => 0, 'y' => 0],
+                        'size' => ['width' => $width / 2, 'height' => $height / 2,]
                     ],
                     1 => [
-                        'to'   => [ 'x' => $width / 2, 'y' => 0],
-                        'size' => [ 'width' => $width / 2, 'height' => $height / 2, ]
+                        'to'   => ['x' => $width / 2, 'y' => 0],
+                        'size' => ['width' => $width / 2, 'height' => $height / 2,]
                     ],
                     2 => [
-                        'to'   => [ 'x' => 0, 'y' => $height / 2 ],
-                        'size' => [ 'width' => $width / 2, 'height' => $height / 2, ]
+                        'to'   => ['x' => 0, 'y' => $height / 2],
+                        'size' => ['width' => $width / 2, 'height' => $height / 2,]
                     ],
                     3 => [
-                        'to'   => [ 'x' => $width / 2, 'y' => $height / 2],
-                        'size' => [ 'width' => $width / 2, 'height' => $height / 2,  ]
+                        'to'   => ['x' => $width / 2, 'y' => $height / 2],
+                        'size' => ['width' => $width / 2, 'height' => $height / 2,]
                     ],
                 ];
         }

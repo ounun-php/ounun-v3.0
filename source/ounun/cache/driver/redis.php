@@ -22,7 +22,7 @@ class redis extends \ounun\cache\driver
     protected $_handler;
 
     /** @var array 配制 */
-    protected $_options = [
+    protected array $_options = [
         'expire'    => 0,  // 有效时间 0为永久
         'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
 

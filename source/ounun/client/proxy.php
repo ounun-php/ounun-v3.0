@@ -7,9 +7,9 @@ namespace ounun\client;
 class proxy
 {
     protected static $instance;
-    public $header = null;
-    public $isOk = null;
-    public $body = null;
+    public array $header = [];
+    public bool $isOk = false;
+    public string $body = '';
 
     /*实例*/
     public static function i()
@@ -18,9 +18,9 @@ class proxy
             self::$instance = new static;
         }
 
-        self::$instance->header = null;
-        self::$instance->isOk   = null;
-        self::$instance->body   = null;
+        self::$instance->header = [];
+        self::$instance->isOk   = false;
+        self::$instance->body   = '';
 
         return self::$instance;
     }

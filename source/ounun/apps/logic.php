@@ -3,8 +3,10 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\apps;
 
+use \ounun\db\pdo;
 
 abstract class logic
 {
@@ -12,13 +14,13 @@ abstract class logic
     const Error_Msg = [];
 
     /** @var self 实例 */
-    static protected $_instance;
+    protected static logic $_instance;
 
     /**
-     * @param \ounun\db\pdo $db
+     * @param pdo $db
      * @return $this 返回数据库连接对像
      */
-    public static function i(\ounun\db\pdo $db = null): self
+    public static function i(?pdo $db = null): self
     {
         if (empty(static::$_instance)) {
             if (empty($db)) {
@@ -29,31 +31,13 @@ abstract class logic
         return static::$_instance;
     }
 
-    /** @var \ounun\db\pdo */
-    public $db;
 
-    /** @var string */
-    public $table = '';
-    /** @var array 数据表结构 */
-    public $table_options = [
-        'fields'          => [],
-        'primary'         => '',
-        'readonly'        => [],
-        'create_autofill' => [],
-        'update_autofill' => [],
-        'filters_input'   => [],
-        'filters_output'  => [],
-        'validators'      => [],
-        'options'         => []
-    ];
-    /** @var array 数据 */
-    protected $_data = [];
 
     /**
      * cms constructor.
-     * @param \ounun\db\pdo $db
+     * @param pdo $db
      */
-    public function __construct(\ounun\db\pdo $db = null)
+    public function __construct(?pdo $db = null)
     {
         if ($db) {
             $this->_db = $db;

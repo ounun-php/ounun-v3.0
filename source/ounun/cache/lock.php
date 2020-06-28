@@ -10,7 +10,7 @@ use ounun\cache\driver\redis;
 class lock
 {
     /** @var array */
-    static protected $_instances = [];
+    protected static array $_instances = [];
 
     /**
      * @param string $storage_key

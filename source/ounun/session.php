@@ -6,6 +6,8 @@
 
 namespace ounun;
 
+use ounun\session\storage;
+
 class session
 {
     protected $options = [];

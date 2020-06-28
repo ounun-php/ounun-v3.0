@@ -68,7 +68,6 @@ class download extends driver
         return array_map([$this, 'file'], $file);
     }
 
-
     /**
      * oss 图床
      * @param string $image_url

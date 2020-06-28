@@ -33,29 +33,30 @@ class template
     ];
 
     /** @var bool 是否开启ob_start */
-    static protected $_ob_start = false;
+    protected static bool $_ob_start = false;
 
     /** @var string 模板目录(当前) */
-    protected $_dir_current;
+    protected string $_dir_current;
 
     /** @var string 插目目录名 */
-    protected $_addon_tag;
+    protected string $_addon_tag;
 
     /** @var string 风格 */
-    protected $_style;
+    protected string $_style;
     /** @var string 风格(默认) */
-    protected $_style_default;
+    protected string $_style_default;
 
     /** @var string 模板类型 */
-    protected $_type;
+    protected string $_type;
     /** @var string 模板类型(默认为pc) */
-    protected $_type_default;
+    protected string $_type_default;
 
     /** @var bool 是否去空格 换行 */
-    protected $_is_trim = false;
+    protected bool $_is_trim = false;
 
     /**
      * 创建对像 template constructor.
+     *
      * @param string $tpl_style 风格
      * @param string $tpl_style_default 风格(默认)
      * @param string $tpl_type 类型
@@ -86,6 +87,7 @@ class template
 
     /**
      * (兼容)返回一个 模板文件地址(绝对目录,相对root)
+     *
      * @param string $filename
      * @param string $addon_tag
      * @param bool $show_debug
@@ -165,6 +167,7 @@ class template
 
     /**
      * (兼容)返回一个 模板文件地址(相对目录)
+     *
      * @param string $filename
      * @param string $addon_tag
      * @return string
@@ -195,6 +198,7 @@ class template
 
     /**
      * 报错
+     *
      * @param string $filename
      * @param string $addon_tag
      */
@@ -215,7 +219,6 @@ class template
 
     /**
      * 替换
-     * @param bool $trim
      */
     public function replace()
     {
@@ -254,11 +257,11 @@ class template
             /*            $pattern = ['/<!--.*?-->/', '/[^:\-\"]\/\/[^\S].*?\n/', '/\/\*.*?\*\//', '/[\n\r\t]*?/', '/\s{2,}/', '/>\s?</', '/<!--.*?-->/', '/\"\s?>/'];*/
 //            $replacement = ['', '', '', '', ' ', '><', '', '">'];
 //            $buffer = preg_replace($pattern, $replacement, $buffer);
-            $buffer = preg_replace_callback('/\<script(.*?)\>([\s\S]*?)<\/script\>/m', function ($matches) {
+            $buffer = preg_replace_callback('/<script(.*?)>([\s\S]*?)<\/script>/m', function ($matches) {
                 $matches_2 = preg_replace(['/<!--[\s\S]*?-->/m', '/\/\*[\s\S]*?\*\//m', '/[^\S]\/\/.*/', '/\s{2,}/m',], ['', '', '', ' ',], $matches[2]);
                 return "<script{$matches[1]}>{$matches_2}</script>";
             }, $buffer);
-            $buffer = preg_replace_callback('/\<style(.*?)\>([\s\S]*?)<\/style\>/m', function ($matches) {
+            $buffer = preg_replace_callback('/<style(.*?)>([\s\S]*?)<\/style>/m', function ($matches) {
                 $matches_2 = preg_replace(['/\/\*[\s\S]*?\*\//m', '/\s{2,}/m',], ['', '',], $matches[2]);
                 return "<style{$matches[1]}>{$matches_2}</style>";
             }, $buffer);

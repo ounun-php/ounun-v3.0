@@ -11,15 +11,15 @@ class memcached extends \ounun\cache\driver
     /** @var string memcached类型 */
     const Type          = 'memcached';
 
-    /** @var \Memcached  */
+    /** @var \Memcached|null */
     protected $_handler;
 
     /** @var array 配制 */
-    protected $_options = [
+    protected array $_options = [
         // 'module'     => '', // 模块名称   转 prefix
         // 'filename'   => '', // 文件名
-        'expire'        => 0,  // 有效时间 0为永久
-        'serialize'     => ['json_encode_unescaped','json_decode_array'], // encode decode
+        'expire'    => 0,  // 有效时间 0为永久
+        'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
 
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
@@ -27,8 +27,8 @@ class memcached extends \ounun\cache\driver
         'prefix_list'   => 't',
 
 
-        'servers'      => [
-            ['127.0.0.1',11211,100],
+        'servers'  => [
+            ['127.0.0.1', 11211, 100],
             // ['127.0.0.1',11211,100]
         ],
         'timeout'  => 0, // 超时时间（单位：毫秒）

@@ -79,12 +79,14 @@ class c
     const Format_Xml = 'xml';
     /** @var string XML - 输出Ajax格式 */
     const Format_Xml_Simple = 'xml_simple';
+
     /** @var string JsonP - 输出Ajax格式 */
     const Format_Jsonp = 'jsonp';
     /** @var string JsonP - 输出Ajax格式 */
     const Format_Eval = 'eval';
     /** @var string JavaScript - 输出Ajax格式 */
     const Format_JS = 'javascript';
+
     /** @var string Html - 输出Ajax格式 */
     const Format_Html = 'html';
     /** @var string Html Table - 输出Ajax格式 */
