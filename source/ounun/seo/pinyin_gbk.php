@@ -16,7 +16,7 @@ define('Dir_Plugins_Pinyin', __DIR__ . '/');
  */
 class pinyin_gbk
 {
-    protected $_data = [];
+    protected array $_data = [];
 
     /**
      * Constructor

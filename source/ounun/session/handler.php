@@ -18,16 +18,16 @@ use ounun\db\pdo;
 class handler implements \SessionHandlerInterface, \SessionUpdateTimestampHandlerInterface
 {
     /** @var pdo */
-    private $_db;
+    private pdo $_db;
 
     /** @var string */
-    private $_session_table = 'session';
+    private string $_session_table = 'session';
 
     /** @var string 唯一ID uniqid */
-    private $_session_id = '';
+    private string $_session_id = '';
 
     /** @var string 用在 cookie 或者 URL 中的会话名称 */
-    private $_session_name = 'PHPSESSID';
+    private string $_session_name = 'PHPSESSID';
 
     /**
      * session constructor.
@@ -35,7 +35,7 @@ class handler implements \SessionHandlerInterface, \SessionUpdateTimestampHandle
      * @param string $session_table
      * @param string $session_name
      */
-    public function __construct(pdo $db, string $session_table, string $session_name)
+    public function __construct(pdo $db, string $session_table, string $session_name = 'PHPSESSID')
     {
         $this->_db = $db;
         $this->_session_table = $session_table;

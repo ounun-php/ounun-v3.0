@@ -7,9 +7,9 @@ namespace ounun\plugin;
 
 class tree_view
 {
-	public $data = [];
+    public array $data = [];
 
-    public $html = '';
+    public string $html = '';
 
 	public function __construct($data = [])
 	{

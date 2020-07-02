@@ -17,7 +17,7 @@ use ounun\debug;
  */
 class auth_code
 {
-    protected $_code_length = 6;
+    protected int $_code_length = 6;
 
     /**
      * Create new secret.
@@ -51,12 +51,12 @@ class auth_code
             $timeSlice = floor(time() / 30);
         }
 
-        $secretkey = $this->_base32_decode($secret);
+        $secret_key = $this->_base32_decode($secret);
 
         // Pack time into binary string
         $time = chr(0) . chr(0) . chr(0) . chr(0) . pack('N*', $timeSlice);
         // Hash it with users secret key
-        $hm = hash_hmac('SHA1', $time, $secretkey, true);
+        $hm = hash_hmac('SHA1', $time, $secret_key, true);
         // Use last nipple of result as index/offset
         $offset = ord(substr($hm, -1)) & 0x0F;
         // grab 4 bytes of the result
@@ -78,15 +78,16 @@ class auth_code
      * @param string $name
      * @param string $secret
      * @param string $title
+     * @param string $url_root
      * @return string
      */
-    public function qrcode_google_url_get($name, $secret, $title = null)
+    public function qrcode_google_url_get($name, $secret, $title = null,$url_root = 'https://qr.7pk.cn/')
     {
         $urlencoded = urlencode('otpauth://totp/' . urlencode($name) . '?secret=' . $secret . '');
         if (isset($title)) {
             $urlencoded .= urlencode('&issuer=' . urlencode($title));
         }
-        return 'https://qr.7pk.cn/qrout.php?c=' . $urlencoded . '';
+        return $url_root.'qrout.php?c=' . $urlencoded . '';
     }
 
     /**

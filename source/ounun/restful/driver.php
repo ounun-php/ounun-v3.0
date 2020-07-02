@@ -6,18 +6,19 @@
 
 namespace ounun\restful;
 
+use \ounun\restful;
 
 abstract class driver
 {
     /** @var array */
-    protected $_url_mods;
-    /** @var \ounun\restful */
-    protected $_restful;
+    protected array $_url_mods;
+    /** @var restful */
+    protected ?restful $_restful;
 
-    public function __construct(array $url_mods = [], ?\ounun\restful $restful = null)
+    public function __construct(array $url_mods = [], ?restful $restful = null)
     {
         $this->_url_mods = $url_mods;
-        $this->_restful  = $restful ?? new \ounun\restful($url_mods);
+        $this->_restful  = $restful ?? new restful($url_mods);
 
         $m = $this->_restful->method_get();
         if ('GET' == $m || 'POST' == $m || 'PUT' == $m || 'DELETE' == $m) {

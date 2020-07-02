@@ -206,7 +206,7 @@ class template
     {
         echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
                     <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} ".($addon_tag?"\$addon_tag:{$addon_tag}":'')."<br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_style} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />

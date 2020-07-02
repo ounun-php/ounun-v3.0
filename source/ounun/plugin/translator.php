@@ -8,7 +8,7 @@ use ounun\utils\caiji;
 
 class translator
 {
-    public static $langs = [
+    public static array $langs = [
         'zh'  => '中文',
         'en'  => '英语',
         'fra' => '法语',

@@ -206,8 +206,8 @@ class utils
         $rs   = [];
         $rows = trim($rows);
         if($rows){
-            $rowss = explode("\n",$rows);
-            if($rowss &&  is_array($rowss)){
+            $rows2 = explode("\n",$rows);
+            if($rows2 &&  is_array($rows2)){
                 foreach ($rows  as $v){
                     $v = trim($v);
                     if($v){

@@ -10,8 +10,8 @@ namespace ounun\image;
 class watermark
 {
     public string $source;
-    public ?int $thumb_width = null;
-    public ?int $thumb_height = null;
+    public int $thumb_width = 0;
+    public int $thumb_height = 0;
     public int $thumb_quality = 100;
     public $watermark;
     public $watermark_ext;

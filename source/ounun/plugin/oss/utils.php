@@ -7,20 +7,20 @@ namespace ounun\plugin\oss;
 class utils
 {
     /** @var string  */
-    protected $_src_dir    = '';
+    protected string $_src_dir = '';
 
     /** @var string  */
-    protected $_taget_dir  = '';
+    protected string $_target_dir = '';
 
     /**
      * utils constructor.
      * @param string $src_dir
-     * @param string $taget_dir
+     * @param string $target_dir
      */
-    public function __construct(string $src_dir,string $taget_dir)
+    public function __construct(string $src_dir,string $target_dir)
     {
-        $this->_src_dir   = $src_dir;
-        $this->_taget_dir = $taget_dir;
+        $this->_src_dir    = $src_dir;
+        $this->_target_dir = $target_dir;
     }
 
     /**
@@ -36,22 +36,22 @@ class utils
                 if($file=="." || $file=="..") {
                     continue;
                 }elseif(is_dir($src_dir2.$file)) {
-                    if(!file_exists($this->_taget_dir.$dir)) {
-                        echo "mkdir \t -> ".$this->_taget_dir.$dir."\n";
-                        mkdir($this->_taget_dir.$dir,0777,true);
+                    if(!file_exists($this->_target_dir.$dir)) {
+                        echo "mkdir \t -> ".$this->_target_dir.$dir."\n";
+                        mkdir($this->_target_dir.$dir,0777,true);
                     }
                     //echo Dir_Src.$dir.$file." --> d\n";
                     $this->scan("{$dir}{$file}/");
                 } else {
-                    $taget_file2 = $this->_taget_dir.$dir.$file;
-                    if(!file_exists($taget_file2)) {
-                        $dir3 = dirname($taget_file2);
+                    $target_file2 = $this->_target_dir.$dir.$file;
+                    if(!file_exists($target_file2)) {
+                        $dir3 = dirname($target_file2);
                         if(!file_exists($dir3)) {
                             echo "mkdir \t -> ".$dir3."\n";
                             mkdir($dir3,0777,true);
                         }
-                        echo "{$dir3} \t ->  ".$src_dir2.$file." \t -> ".$taget_file2."\n";
-                        copy($src_dir2.$file,$taget_file2);
+                        echo "{$dir3} \t ->  ".$src_dir2.$file." \t -> ".$target_file2."\n";
+                        copy($src_dir2.$file,$target_file2);
                     }
                 }
             }

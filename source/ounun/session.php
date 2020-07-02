@@ -10,9 +10,9 @@ use ounun\session\storage;
 
 class session
 {
-    protected $options = [];
+    protected array $options = [];
 
-    protected $started = false;
+    protected bool $started = false;
 
     public function __construct($options = [])
     {

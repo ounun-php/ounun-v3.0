@@ -15,16 +15,16 @@ class cookie
     const Overtime_Max = 600;
 
     /** @var string 通信私钥 */
-    static protected $key_private = '';
+    protected static string $key_private = '';
     /** @var string cookie前缀 */
-    static protected $key_pre = '';
+    protected static string $key_pre = '';
     /** @var string 登录cookie Key */
-    static protected $key_cookie = '';
+    protected static string $key_cookie = '';
 
     /** @var string cookie域名 */
-    static protected $domain = '';
+    protected static string $domain = '';
     /** @var int 登录校验 超时间 */
-    static protected $overtime_max = 600;
+    protected static int $overtime_max = 600;
 
     /**
      * 设定 私钥&域名&ookie前缀&登录cookie Key

@@ -21,17 +21,6 @@ class cache
     /** @var int 有效期 长,1小时（秒） */
     const Expire_Long = 3600;
 
-    /** 有效Cache类型 */
-//    const Driver_Type_Valid = [
-//        driver\code::Type,
-//        driver\file::Type,
-//        driver\html::Type,
-//        driver\memcached::Type,
-//        driver\mysql::Type,
-//        driver\sqlite::Type,
-//        driver\redis::Type
-//    ];
-
     /** @var string storage_key  库名称 */
     public string $storage_key = '';
 

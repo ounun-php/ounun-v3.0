@@ -10,8 +10,8 @@ namespace ounun\plugin\tar;
 
 class tar extends tar_lib
 {
-    var $filelist = [];
-    var $filealias = [];
+    public array $filelist = [];
+    public array $filealias = [];
 
     function tar($tarname, $filelist, $filealias = [])
     {

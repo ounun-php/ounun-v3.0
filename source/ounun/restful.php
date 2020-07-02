@@ -60,6 +60,8 @@ class restful
     }
 
     /**
+     * 构建前执行
+     *
      * @param $mod
      * @return bool|array
      */

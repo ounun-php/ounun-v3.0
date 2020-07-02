@@ -8,8 +8,8 @@ namespace ounun\plugin;
 
 class xmlrpc_client
 {
-    protected $url;
-    protected $method;
+    protected string $url;
+    protected string $method;
     protected $output_options;
 
     public function __construct($url, $method = 'POST')

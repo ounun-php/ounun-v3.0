@@ -504,4 +504,5 @@ class str
     {
         return static::sanitize($string, false);
     }
+
 }

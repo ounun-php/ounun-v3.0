@@ -6,6 +6,8 @@
 namespace ounun\page;
 
 
+use ounun\db\pdo;
+
 /**
  * 主要功能: 分頁,有問題問我吧,沒時間寫注
  * Class base_max
@@ -33,56 +35,56 @@ class base
     ];
 
     /** @var string  提示串 */
-    protected $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
+    protected string $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
     /** @var array   默认页 */
-    protected $_config_page_tag_default = ['<li>', '</li>',''];
+    protected array $_config_page_tag_default = ['<li>', '</li>', ''];
     /** @var array   当前页面时 */
-    protected $_config_page_tag_curr = ['<li class="now">', '</li>',''];
+    protected array $_config_page_tag_curr = ['<li class="now">', '</li>', ''];
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
-    protected $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
+    protected array $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
     /** @var int     最多显示几页 */
-    protected $_config_show_max  = 9;
+    protected int $_config_show_max = 9;
     /** @var int     一页显示几条数据 */
-    protected $_config_rows      = 20;
+    protected int $_config_rows = 20;
     /** @var array   第一页 */
-    protected $_config_index     = [];
+    protected array $_config_index = [];
     /** @var string  获取数据总数 */
-    protected $_config_count_sql = 'count(*)';
+    protected string $_config_count_sql = 'count(*)';
     /** @var bool 是否最后一页为首页  false:第一页为首页  true:最后一页为首页 */
-    protected $_page_end_index = false;
+    protected bool $_page_end_index = false;
 
     /** @var string */
-    protected $_where_str  = '';
+    protected string $_where_str = '';
     /** @var array */
-    protected $_where_bind = [];
+    protected array $_where_bind = [];
 
-    /** @var \ounun\db\pdo */
-    protected $_db;
+    /** @var pdo */
+    protected pdo $_db;
     /** @var string */
-    protected $_table;
+    protected string $_table;
     /** @var string */
-    protected $_url;
+    protected string $_url;
 
     /** @var int 数量总量 */
-    protected $_total;
+    protected int $_total;
     /** @var int 页数总量(除去首页) */
-    protected $_total_page      = 0;
+    protected int $_total_page = 0;
     /** @var int 页数总量(总数) */
-    protected $_total_page_real = 1;
+    protected int $_total_page_real = 1;
 
     /** @var int 当前所在页数 */
-    protected $_page_curr      = 1;
+    protected int $_page_curr = 1;
 
     /**
      * 创建一个分页类
      * page constructor.
-     * @param \ounun\db\pdo $db
+     * @param pdo $db
      * @param string $table
      * @param string $url
      * @param array $where
      * @param array $config
      */
-    public function __construct(\ounun\db\pdo $db, string $table, string $url, array $where = [], array $config = [])
+    public function __construct(pdo $db, string $table, string $url, array $where = [], array $config = [])
     {
         $this->_db = $db;
         $this->_table = $table;
@@ -214,9 +216,9 @@ class base
             $sub_end   = false;
             $sub_start = 1;
         }
-        $sub_index = $page_curr > 0 ? true : false;
-        $sub_next = ($page_curr < $this->_total_page && $this->_total_page > 1) ? true : false;
-        $sub_previous = ($page_curr > 1 && $this->_total_page > 1) ? true : false;
+        $sub_index = $page_curr > 0;
+        $sub_next = $page_curr < $this->_total_page && $this->_total_page > 1;
+        $sub_previous = $page_curr > 1 && $this->_total_page > 1;
 
         // 载入np数据
         $rs = [];

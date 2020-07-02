@@ -9,14 +9,19 @@ namespace ounun;
 /** 常量 */
 class c
 {
+    /** @var int 成功 - 状态 */
+    const Status_Success = 0;
+
     /** @var int 否 - 状态 */
     const Status_No = 0;
     /** @var int 是 - 状态 */
     const Status_Yes = 1;
+
     /** @var int 禁用 - 状态 */
     const Status_Disabled = 1000;
     /** @var int 开启 - 状态 */
     const Status_Enabled = 1010;
+
     /** @var int 关 - 状态 */
     const Status_Off = 2000;
     /** @var int 开 - 状态 */

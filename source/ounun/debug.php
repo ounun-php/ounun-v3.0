@@ -16,27 +16,26 @@ class debug
     private int $_time = 0;
 
     /** @var string 输出文件名 */
-    private string $_filename = '';
+    private string $_filename;
     /** @var bool 是否添加到文件开头EOF */
-    private bool $_is_bof = true;
+    private bool $_is_bof;
     /** @var bool 是否输出 run time */
-    private bool $_is_run_time = true;
+    private bool $_is_run_time;
 
     /** @var bool 是否输出 buffer */
-    private bool $_is_out_buffer = true;
+    private bool $_is_out_buffer;
     /** @var bool 是否输出 get */
-    private bool $_is_out_get = true;
+    private bool $_is_out_get;
     /** @var bool 是否输出 post */
-    private bool $_is_out_post = true;
+    private bool $_is_out_post;
     /** @var bool 是否输出 url */
-    private bool $_is_out_url = true;
+    private bool $_is_out_url;
     /** @var bool 是否输出 cookie */
-    private bool $_is_out_cookie = true;
+    private bool $_is_out_cookie;
     /** @var bool 是否输出 session */
-    private bool $_is_out_session = true;
+    private bool $_is_out_session;
     /** @var bool 是否输出 server */
-    private bool $_is_out_server = false;
-
+    private bool $_is_out_server;
 
     /**
      * 构造函数
@@ -190,7 +189,10 @@ class debug
         exit($buffer);
     }
 
-    /** 析构调试相关 */
+    /**
+     * 析构调试相关
+     * @param bool $is_end 是否当前请求 最后一次写入
+     */
     public function write(bool $is_end = false)
     {
         if (!$this->_filename) {
@@ -273,7 +275,7 @@ class debug
      * @param string $filename
      * @param int $line
      */
-    static public function header($v,string $k = '', string $filename = '', int $line = 0)
+    static public function header($v, string $k = '', string $filename = '', int $line = 0)
     {
         if (static::is_header() && !headers_sent()) {
             $key = [];
@@ -284,8 +286,8 @@ class debug
             $line && $key[] = $line;
 
             $key = implode('-', $key);
-            if(is_array($v) || is_object($v)){
-                $v   = stripslashes(json_encode($v, JSON_UNESCAPED_UNICODE));
+            if (is_array($v) || is_object($v)) {
+                $v = stripslashes(json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $idx = str_pad(static::$_header_idx, 4, '0', STR_PAD_LEFT);
             header("o{$idx}-{$key}: {$v}", false);

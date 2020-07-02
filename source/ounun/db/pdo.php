@@ -45,83 +45,83 @@ class pdo
     const Update_Add = 'add';
 
     /** @var \PDO  pdo */
-    protected $_pdo = null; // pdo
+    protected ?\PDO $_pdo = null; // pdo
     /** @var \PDOStatement  stmt */
-    protected $_stmt = null; // stmt
+    protected ?\PDOStatement $_stmt = null; // stmt
 
 
     /** @var string */
-    protected $_last_sql = '';
+    protected string $_last_sql = '';
     /** @var int */
-    protected $_query_times = 0;
+    protected int $_query_times = 0;
 
     /** @var string 数据库名称 */
-    protected $_database = '';
+    protected string $_database = '';
     /** @var string 用户名 */
-    protected $_username = '';
+    protected string $_username = '';
     /** @var string 用户密码 */
-    protected $_password = '';
+    protected string $_password = '';
     /** @var string 数据库主机名称 */
-    protected $_host = '';
-    /** @var string 数据库主机端口 */
-    protected $_port = 3306;
+    protected string $_host = '';
+    /** @var int 数据库主机端口 */
+    protected int $_port = 3306;
     /** @var string 数据库charset */
-    protected $_charset = 'utf8'; //'utf8mb4','utf8','gbk',latin1;
+    protected string $_charset = 'utf8'; //'utf8mb4','utf8','gbk',latin1;
     /** @var string pdo驱动默认为mysql */
-    protected $_driver = 'mysql';
+    protected string $_driver = 'mysql';
     /** @var string table前缀 - 替换成的前缀 */
-    protected $_table_prefix_replace = 'v1';
+    protected string $_table_prefix_replace = 'v1';
     /** @var string table前缀 - 被替换的常量 */
-    protected $_table_prefix_search = '#@_';
+    protected string $_table_prefix_search = '#@_';
 
     /** @var string 当前table */
-    protected $_table = '';
+    protected string $_table = '';
     /** @var string 参数 */
-    protected $_option = '';
+    protected string $_option = '';
     /** @var array 字段 */
-    protected $_fields = [];
+    protected array $_fields = [];
     /** @var array 排序字段 */
-    protected $_order = [];
+    protected array $_order = [];
     /** @var array 分组字段 */
-    protected $_group = [];
+    protected array $_group = [];
     /** @var string limit条件 */
-    protected $_limit = '';
+    protected string $_limit = '';
     /** @var string 滤掉name和id两个字段都重复的记录 */
-    protected $_distinct = '';
+    protected string $_distinct = '';
     /** @var string where条件 */
-    protected $_where = '';
+    protected string $_where = '';
     /** @var string having条件 */
-    protected $_having = '';
+    protected string $_having = '';
     /** @var string 返回关联数据 assoc */
-    protected $_assoc = '';
+    protected string $_assoc = '';
     /** @var array 条件参数keys */
-    protected $_bind_keys = [];
+    protected array $_bind_keys = [];
     /** @var array 条件参数 */
-    protected $_bind_param = [];
+    protected array $_bind_param = [];
     /** @var array 插入时已存在数据 更新内容 */
-    protected $_duplicate = [];
+    protected array $_duplicate = [];
     /** @var string 插入时已存在数据 更新的扩展 */
-    protected $_duplicate_ext = '';
+    protected string $_duplicate_ext = '';
     /** @var string 关联表 */
-    protected $_join = '';
+    protected string $_join = '';
 
     /** @var bool  debug */
-    protected $_is_debug = false; // debug
+    protected bool $_is_debug = false; // debug
     /** @var bool 多条 */
-    protected $_is_multiple = false;
+    protected bool $_is_multiple = false;
     /** @var bool 是否替换插入 */
-    protected $_is_replace = false;
+    protected bool $_is_replace = false;
     /** @var bool  条件参数 默认true:执行execute  绑定false:bind_param */
 //    protected $_is_execute  = true;
 
 
     /** @var array DB 相关 */
-    private static $_instance = [];
+    private static array $_instance = [];
 
     /**
      * @param string $tag
      * @param array $config
-     * @return $this 返回数据库连接对像
+     * @return pdo|null 返回数据库连接对像
      */
     public static function i(string $tag = '', array $config = []): ?self
     {

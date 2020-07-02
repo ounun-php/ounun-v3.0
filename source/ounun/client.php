@@ -29,10 +29,6 @@ class client
     const Retina_Type_Yes = 1;
     const Retina_Type_Not = 0;
 
-    // 是否IOS6系统
-    const Ios6_Yes = 1;
-    const Ios6_No = 0;
-
     // 是否微信打开
     const Wechat_Msg_Yes = 1;
     const Wechat_Msg_No = 0;
@@ -41,13 +37,7 @@ class client
     const App_Installed_Yes = 1;
     const App_Installed_Not = 0;
 
-    // -------------------------------------------------------
-
-    const Status_Off = 0;
-    const Status_On = 1;
-    const Status_Success = 0;
-
-
+    // 菜单
     const Menu_Currentself = 1;
     const Menu_History = 2;
     const Menu_Conditional = 3;
@@ -86,6 +76,10 @@ class client
     const Browser_Type_Android = 4;
     const Browser_Type_XzApp = 5;
     const Browser_Type_Unknown = 0;
+
+    //
+    const Device_Mobile = 'wap';
+    const Device_Desktop = 'pc';
 
     // 得到agent完整类型信息
     public static function device_info_get()

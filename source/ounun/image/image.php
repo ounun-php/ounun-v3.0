@@ -3,16 +3,17 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\image;
 
 class image
 {
-    private $src;
-    private $actions = [];
-    private $resize_width = 0;
-    private $resize_height = 0;
+    private string $src;
+    private array $actions = [];
+    private int $resize_width = 0;
+    private int $resize_height = 0;
 
-    private $image = null;
+    private $image;
     private $image_info = [];
     private $crop_width = 0;
     private $crop_height = 0;
@@ -42,7 +43,7 @@ class image
         if ($height > 0 && $width == 0) {
             $width = $height;
         }
-        $this->resize_width = $width;
+        $this->resize_width  = $width;
         $this->resize_height = $height;
 
         return $this;
@@ -59,8 +60,8 @@ class image
         if ($height > 0 && $width == 0) {
             $width = $height;
         }
-        $this->crop_width = $width;
-        $this->crop_height = $height;
+        $this->crop_width    = $width;
+        $this->crop_height   = $height;
         $this->crop_position = min(intval($position), 9);
 
         return $this;
@@ -101,10 +102,10 @@ class image
         if ($ext == 'jpg') {
             $ext = 'jpeg';
         }
-        $func = 'image' . $ext;
+        $func         = 'image' . $ext;
         $real_quality = $this->realQuality($quality);
-        $saved = false;
-        $image = $this->image();
+        $saved        = false;
+        $image        = $this->image();
         imagealphablending($image, false);
         imagesavealpha($image, true);
         if (is_null($real_quality)) {
@@ -145,10 +146,10 @@ class image
             return false;
         }
         $this->image_info = getimagesize($this->src);
-        $actions = array_unique($this->actions);
-        $src_image = $this->image;
+        $actions          = array_unique($this->actions);
+        $src_image        = $this->image;
         foreach ($actions as $action) {
-            $method = 'do' . ucfirst($action);
+            $method    = 'do' . ucfirst($action);
             $src_image = $this->{$method}($src_image);
         }
         $this->image = $src_image;
@@ -176,7 +177,7 @@ class image
 
     protected function doResize($src_image)
     {
-        $newimage = $this->modify($src_image, $this->resize_width, $this->resize_height,
+        $newimage            = $this->modify($src_image, $this->resize_width, $this->resize_height,
             $this->image_info[0], $this->image_info[1]);
         $this->image_info[0] = $this->resize_width;
         $this->image_info[1] = $this->resize_height;
@@ -232,13 +233,13 @@ class image
     public function toBase64($prefix = 'data:image/%s;base64,')
     {
         $filename = tempnam('tmp', 'base64');
-        $prefix = sprintf($prefix, $this->getExt());
-        $result = $this->saveTo($filename);
+        $prefix   = sprintf($prefix, $this->getExt());
+        $result   = $this->saveTo($filename);
         if (!$result) {
             return false;
         }
         $content = file_get_contents($filename);
-        $base64 = base64_encode($content);
+        $base64  = base64_encode($content);
         unlink($filename);
 
         return $prefix . $base64;
@@ -247,9 +248,9 @@ class image
 
     private function getCropDestPoint()
     {
-        $s_width = $this->image_info[0];
+        $s_width  = $this->image_info[0];
         $s_height = $this->image_info[1];
-        $dst_x = $dst_y = 0;
+        $dst_x    = $dst_y = 0;
         if ($this->crop_width == '0' || $this->crop_width > $s_width) {
             $this->crop_width = $s_width;
         }

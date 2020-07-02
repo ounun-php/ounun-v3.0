@@ -8,10 +8,10 @@ namespace ounun\spl;
 class subject implements \SplSubject
 {
     /** @var \SplObjectStorage */
-    protected $_storage;
+    protected \SplObjectStorage $_storage;
 
     /** @var array 当前事件 */
-    public $event_paras;
+    public array $event_paras;
 
     /**
      * subject constructor.

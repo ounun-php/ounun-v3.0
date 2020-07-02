@@ -66,10 +66,10 @@ class observer implements \SplObserver
     ];
 
     /** @var array 配制 */
-    protected $_config = [];
+    protected array $_config = [];
 
     /** @var array 插件数据 */
-    protected static $_plugin = [];
+    protected static array $_plugin = [];
 
     public function __construct(string $config_filename)
     {
