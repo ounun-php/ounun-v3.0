@@ -48,7 +48,7 @@ class restful
             $this->_request_inputs = json_decode_array($data);
         }
         if (empty($url_mods)) {
-            $url_mods = [\ounun::def_method];
+            $url_mods = [\ounun::Def_Method];
         }
         $class = "\\addons\\{$addon_tag}\\api\\{$url_mods[0]}";
         debug::header(['$class'=>$class,$url_mods],'',__FILE__,__LINE__);

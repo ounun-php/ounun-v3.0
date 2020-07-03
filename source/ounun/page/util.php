@@ -33,7 +33,7 @@ class util
      */
     static public function page_set(string $url, string $url_key = 'p')
     {
-        $default_url = \ounun::url_page(\ounun::$url_addon_pre.$url);
+        $default_url = \ounun::url_page(\ounun::$addon_curr_path.$url);
         self::value_set($url_key, $url);
     }
 
@@ -45,7 +45,7 @@ class util
      */
     static public function page_get(string $default_url, string $url_key = 'p')
     {
-        $default_url = \ounun::url_page(\ounun::$url_addon_pre.$default_url);
+        $default_url = \ounun::url_page(\ounun::$addon_curr_path.$default_url);
         return self::value_get($url_key, $default_url);
     }
 

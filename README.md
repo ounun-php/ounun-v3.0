@@ -10,8 +10,8 @@ ounun v3.4
 
 
 插件配制
-#/storage/app/<app>/runtime.php
+#/storage/addons/global.<addons>.php
 
 
 语言包
-/storage/app/<app>/lang_zh.php
+/storage/app/<app>/lang.<lang>.php

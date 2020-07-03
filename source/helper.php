@@ -1,4 +1,15 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
+
+use ounun\c;
+use ounun\cache\html;
+use ounun\template;
+use ounun\debug;
+use ounun\db\pdo;
+use ounun;
 
 /** 是否Cli - 环境常量 */
 define('Is_Cli', PHP_SAPI == 'cli');
@@ -10,14 +21,14 @@ defined('Dir_Root') || define('Dir_Root', realpath(__DIR__ . '/../') . '/');
 defined('Dir_Ounun') || define('Dir_Ounun', __DIR__ . '/');
 /** libs目录 **/
 defined('Dir_Vendor') || define('Dir_Vendor', Dir_Root . 'vendor/');
+/** Storage目录 **/
+defined('Dir_Storage') || define('Dir_Storage', Dir_Root . 'storage/');
 /** data目录 **/
-defined('Dir_Extend') || define('Dir_Extend', Dir_Root . 'extend/');
-/** template目录 **/
-//defined('Dir_Template') || define('Dir_Template', Dir_Root . 'template/');
-/** data目录 **/
-defined('Dir_Data') || define('Dir_Data', Dir_Root . 'data/');
+defined('Dir_Data') || define('Dir_Data', Dir_Storage . 'data/');
 /** cache目录 **/
-defined('Dir_Cache') || define('Dir_Cache', Dir_Data . 'cache/');
+defined('Dir_Cache') || define('Dir_Cache', Dir_Storage . 'cache/');
+/** cache html目录 **/
+defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
 /** app目录 **/
 defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
@@ -31,11 +42,6 @@ if (Environment) {
     /** 开始内存量 **/
     define('Ounun_Start_Memory', memory_get_usage());
 }
-
-use ounun\cache\html;
-use ounun\template;
-use ounun\debug;
-use ounun\db\pdo;
 
 /**
  * 语言包
@@ -440,27 +446,27 @@ function succeed_data($data)
 function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
-        $type = \ounun\c::Format_Json;
+        $type = c::Format_Json;
     }
     switch ($type) {
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\c::Format_Json :
+        case c::Format_Json :
             header('Content-Type:application/json; charset=utf-8');
             exit(json_encode($data, $json_options));
         // 返回xml格式数据
-        case \ounun\c::Format_Xml :
+        case c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
             exit(\ounun\db\utils::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
-        case \ounun\c::Format_Jsonp:
+        case c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
             if (empty($jsonp_callback)) {
                 $jsonp_callback = (isset($_GET['jsonp_callback']) && $_GET['jsonp_callback']) ? $_GET['jsonp_callback'] : 'jsonp_callback';
             }
             exit($jsonp_callback . '(' . json_encode($data, $json_options) . ');');
         // 返回可执行的js脚本
-        case  \ounun\c::Format_JS :
-        case  \ounun\c::Format_Eval :
+        case  c::Format_JS :
+        case  c::Format_Eval :
             header('Content-Type:application/javascript; charset=utf-8');
             exit($data);
         // 返回可执行的js脚本
@@ -721,7 +727,7 @@ function environment()
     }
     if ($ini && is_array($ini)) {
         $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment']) ? $ini['global']['environment'] : '';
-        \ounun::environment_set($ini);
+        ounun::environment_set($ini);
     } else {
         $GLOBALS['_environment_'] = '2';
     }
@@ -866,7 +872,7 @@ abstract class v
     public function __construct(array $url_mods, string $addon_tag = '')
     {
         if (!$url_mods) {
-            $url_mods = [\ounun::def_method];
+            $url_mods = [\ounun::Def_Method];
         }
         $method          = $url_mods[0];
         \ounun::$view    = $this;
@@ -897,7 +903,7 @@ abstract class v
                               int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun::url_page(\ounun::$url_addon_pre . $page_file);
+        \ounun::url_page(\ounun::$addon_curr_path . $page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html

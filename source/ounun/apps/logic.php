@@ -20,7 +20,7 @@ abstract class logic
     protected model $_model;
 
     /**
-     * @param pdo $db
+     * @param model|null $model
      * @return $this 返回数据库连接对像
      */
     public static function i(?model $model = null): self
@@ -30,7 +30,7 @@ abstract class logic
         }
         return static::$_instance;
     }
-    
+
     /**
      * cms constructor.
      * @param pdo $db

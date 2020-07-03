@@ -10,16 +10,16 @@ namespace ounun\wechat;
 
 class crypt
 {
-    private $_app_id;
+    private string $_app_id;
 
-    private $_session_key;
+    private string $_session_key;
 
     /**
      * 构造函数
      * @param string $session_key 用户在小程序登录后获取的会话密钥
      * @param string $app_id 小程序的appid
      */
-    public function __construct($app_id, $session_key)
+    public function __construct(string $app_id, string $session_key)
     {
         $this->_session_key = $session_key;
         $this->_app_id      = $app_id;

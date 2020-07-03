@@ -30,7 +30,7 @@ abstract class addons
 
     /**
      * 加载模块
-     * @param string $addons
+     * @param array $addons
      */
     static public function mount_multi(array $addons)
     {
@@ -91,6 +91,7 @@ abstract class addons
 
     /**
      * 关连 插件
+     * @param string $addon_apps
      * @return array
      */
     static public function addons_related(string $addon_apps = '')
@@ -109,7 +110,7 @@ abstract class addons
         return $addons;
     }
 
-    /** @var array 插件子模块 */
+    /** @return array 插件子模块 */
     static public function addons_view_class()
     {
         return static::$_addons_view_class;
