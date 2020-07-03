@@ -3,13 +3,11 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
 use ounun\c;
 use ounun\cache\html;
 use ounun\template;
 use ounun\debug;
 use ounun\db\pdo;
-use ounun;
 
 /** 是否Cli - 环境常量 */
 define('Is_Cli', PHP_SAPI == 'cli');
@@ -672,6 +670,9 @@ function error_php(string $error_msg, string $error_html = ''): void
     if ($error_html) {
         echo $error_html;
     }
+    echo '<pre>'.PHP_EOL;
+    debug_print_backtrace();
+    echo PHP_EOL.'</pre>';
     trigger_error($error_msg, E_USER_ERROR);
 }
 

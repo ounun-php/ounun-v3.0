@@ -53,7 +53,7 @@ abstract class addons
     static public function mount_single($addon_apps, string $addon_url, string $view_class = '', bool $is_auto_reg_subclass = false)
     {
         // addon
-        \ounun::$routes_cache[$addon_url] = [
+        \ounun::$apps_cache[$addon_url] = [
             'apps'       => $addon_apps,
             'url'        => $addon_url,
             'view_class' => $view_class,
@@ -75,7 +75,7 @@ abstract class addons
                         } else {
                             $url = $addon_url . $addon['view_class'];
                         }
-                        \ounun::$routes_cache[$url] = [
+                        \ounun::$apps_cache[$url] = [
                             'apps'       => $addon_apps,
                             'url'        => $url,
                             'view_class' => $addon['view_class'],
