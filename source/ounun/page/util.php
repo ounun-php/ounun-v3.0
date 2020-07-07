@@ -8,10 +8,11 @@ namespace ounun\page;
 class util
 {
     /**
-     * @param string $url_original URL
      * @param array $data_query 数据
      * @param array $replace_ext 要替换的数据
      * @param array $skip 忽略的数据 如:page
+     * @param string $url_key
+     * @param string $url_original URL
      * @return string
      */
     static public function url(array $data_query = [], array $replace_ext = [], array $skip = [],string $url_key = 'p',string $url_original = '')
@@ -33,7 +34,7 @@ class util
      */
     static public function page_set(string $url, string $url_key = 'p')
     {
-        $default_url = \ounun::url_page(\ounun::$addon_curr_path.$url);
+        $default_url = \ounun::url_page(\ounun::$addon_path_curr.$url);
         self::value_set($url_key, $url);
     }
 
@@ -45,13 +46,14 @@ class util
      */
     static public function page_get(string $default_url, string $url_key = 'p')
     {
-        $default_url = \ounun::url_page(\ounun::$addon_curr_path.$default_url);
+        $default_url = \ounun::url_page(\ounun::$addon_path_curr.$default_url);
         return self::value_get($url_key, $default_url);
     }
 
     /**
      * 设定当前页
      * @param int $page 页数
+     * @param string $page_key
      */
     static public function curr_set(int $page = 1, string $page_key = 'page')
     {

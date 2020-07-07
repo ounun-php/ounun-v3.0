@@ -277,12 +277,12 @@ class str
      */
     static public function letter_first($s0)
     {
-        $firstchar_ord = ord(strtoupper($s0{0}));
-        if (($firstchar_ord >= 65 && $firstchar_ord <= 91) || ($firstchar_ord >= 48 && $firstchar_ord <= 57)) {
-            return $s0{0};
+        $first_char_ord = ord(strtoupper($s0[0]));
+        if (($first_char_ord >= 65 && $first_char_ord <= 91) || ($first_char_ord >= 48 && $first_char_ord <= 57)) {
+            return $s0[0];
         }
         $s   = mb_convert_encoding($s0, "GBK", "UTF-8");
-        $asc = ord($s{0}) * 256 + ord($s{1}) - 65536;
+        $asc = ord($s[0]) * 256 + ord($s[1]) - 65536;
         if ($asc >= -20319 and $asc <= -20284) return "A";
         if ($asc >= -20283 and $asc <= -19776) return "B";
         if ($asc >= -19775 and $asc <= -19219) return "C";
@@ -306,7 +306,7 @@ class str
         if ($asc >= -12556 and $asc <= -11848) return "X";
         if ($asc >= -11847 and $asc <= -11056) return "Y";
         if ($asc >= -11055 and $asc <= -10247) return "Z";
-        return "1";//null
+        return '1';//null
     }
 
     /**

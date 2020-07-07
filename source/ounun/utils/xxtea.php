@@ -81,8 +81,9 @@ function xxtea_key($key)
 if (!extension_loaded('xxtea')) {
     function xxtea_encrypt($str, $key)
     {
-        if ($str == "")
+        if ($str == ""){
             return "";
+        }
         $v = xxtea_str2long($str, true);
         $k = xxtea_str2long($key, false);
         if (count($k) < 4) {

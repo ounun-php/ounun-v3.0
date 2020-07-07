@@ -3,16 +3,19 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 use ounun\c;
 use ounun\cache\html;
 use ounun\template;
 use ounun\debug;
-use ounun\db\pdo;
 
 /** 是否Cli - 环境常量 */
 define('Is_Cli', PHP_SAPI == 'cli');
 /** 是否Win - 环境常量 */
 define('Is_Win', strpos(PHP_OS, 'WIN') !== false);
+/** Ounun版本号 */
+define('Ounun_Version', '3.4.0');
+
 /** root根目录 **/
 defined('Dir_Root') || define('Dir_Root', realpath(__DIR__ . '/../') . '/');
 /** libs库文件目录 **/
@@ -27,12 +30,9 @@ defined('Dir_Data') || define('Dir_Data', Dir_Storage . 'data/');
 defined('Dir_Cache') || define('Dir_Cache', Dir_Storage . 'cache/');
 /** cache html目录 **/
 defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
-/** app目录 **/
-defined('Dir_App') || define('Dir_App', Dir_Root . 'app/');
 /** Environment目录 **/
 defined('Environment') || define('Environment', environment());
-/** Ounun版本号 */
-define('Ounun_Version', '3.2.1');
+
 // 测试环境
 if (Environment) {
     /** 开始时间戳 **/
@@ -90,7 +90,6 @@ function ip(): string
     }
     return $hdr_ip;
 }
-
 
 /**
  * 输出带参数的URL
@@ -355,10 +354,7 @@ function https_is()
  */
 function error(string $msg = '', int $status = 1, $data = null, $extend = [])
 {
-    $rs = [
-        'msg'    => $msg,
-        'status' => $status,
-    ];
+    $rs = ['msg' => $msg, 'status' => $status,];
     if ($data) {
         $rs['data'] = $data;
     }
@@ -410,18 +406,11 @@ function error_code($data): int
  */
 function succeed($data, string $message = '', $extend = [])
 {
+    $rs = ['msg' => $message, 'status' => 0, 'data' => $data];
     if ($extend) {
-        return array_merge($extend, [
-            'msg'    => $message,
-            'status' => 0,
-            'data'   => $data
-        ]);
+        return array_merge($extend, $rs);
     }
-    return [
-        'msg'    => $message,
-        'status' => 0,
-        'data'   => $data
-    ];
+    return $rs;
 }
 
 /**
@@ -670,9 +659,9 @@ function error_php(string $error_msg, string $error_html = ''): void
     if ($error_html) {
         echo $error_html;
     }
-    echo '<pre>'.PHP_EOL;
+    echo '<pre>' . PHP_EOL;
     debug_print_backtrace();
-    echo PHP_EOL.'</pre>';
+    echo PHP_EOL . '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
 }
 
@@ -743,21 +732,6 @@ function environment()
  */
 abstract class v
 {
-    /** @var pdo|null DB */
-    public static ?pdo $db_v;
-
-    /** @var string 插件标识 */
-    public string $addon_tag = '';
-
-    /** @return pdo|null DB */
-    public static function db_v_get()
-    {
-        if (empty(static::$db_v)) {
-            static::$db_v = pdo::i(\ounun::database_default_get());
-        }
-        return static::$db_v;
-    }
-
     /** @var int cache_html_time */
     public static int $cache_html_time = 2678400; // 31天
 
@@ -765,70 +739,16 @@ abstract class v
     public static bool $cache_html_trim = true;
 
     /** @var html|null cache_html */
-    public static html $cache_html;
-
-    /**
-     * Cache
-     *
-     * @param $key
-     */
-    public function cache_html($key)
-    {
-        if ('' == Environment && \ounun::$global['cache_html']) {
-            $cfg                = \ounun::$global['cache_html'];
-            $cfg['mod']         = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type;
-            $key2               = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
-            $debug              = \ounun::$global['debug'];
-            $debug              = $debug && isset($debug['header']) ? $debug['header'] : ('' != Environment);
-            static::$cache_html = new html($cfg, $key2, static::$cache_html_time, static::$cache_html_trim, $debug);
-            static::$cache_html->run(true);
-        }
-    }
-
-    /**
-     * 是否马上输出cache
-     *
-     * @param bool $output
-     */
-    public function cache_html_stop(bool $output)
-    {
-        if (static::$cache_html) {
-            static::$cache_html->stop($output);
-            static::$tpl->replace();
-        }
-    }
+    public static ?html $cache_html;
 
     /** @var  template|null  Template句柄容器 */
     public static ?template $tpl;
 
-    /**
-     * (兼容)返回一个 模板文件地址(绝对目录,相对root)
-     * @param string $filename
-     * @param string $addon_tag
-     * @param bool $show_debug
-     * @return string
-     */
-    static public function tpl_fixed(string $filename, string $addon_tag = '', bool $show_debug = true): string
-    {
-        $tpl = static::$tpl->tpl_fixed($filename, $addon_tag, $show_debug);
-        if ($tpl) {
-            return $tpl;
-        }
-        return '';
-    }
-
-    /**
-     * (兼容)返回一个 模板文件地址(相对目录)
-     * @param string $filename
-     * @return string
-     */
-    static public function tpl_curr(string $filename, string $addon_tag = ''): string
-    {
-        return static::$tpl->tpl_curr($filename, $addon_tag);
-    }
-
     /** @var debug|null debug调试相关 */
     public static ?debug $debug;
+
+    /** @var string 插件标识 */
+    public string $addon_tag = '';
 
     /**
      * @param string $channel
@@ -865,6 +785,64 @@ abstract class v
         }
     }
 
+
+    /**
+     * Cache
+     *
+     * @param $key
+     */
+    public function cache_html($key)
+    {
+        if ('' == Environment && \ounun::$global['cache_html']) {
+            $cache_config        = \ounun::$global['cache_html'];
+            $cache_config['mod'] = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type;
+            $key                 = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
+            static::$cache_html  = new html($cache_config, $key, static::$cache_html_time, static::$cache_html_trim);
+            static::$cache_html->run(true);
+        }
+    }
+
+    /**
+     * 是否马上输出cache
+     *
+     * @param bool $output
+     */
+    public function cache_html_stop(bool $output)
+    {
+        if (static::$cache_html) {
+            static::$cache_html->stop($output);
+            static::$tpl->replace();
+        }
+    }
+
+    /**
+     * (兼容)返回一个 模板文件地址(绝对目录,相对root)
+     * @param string $filename
+     * @param string $addon_tag
+     * @param bool $show_debug
+     * @return string
+     */
+    static public function tpl_fixed(string $filename, string $addon_tag = '', bool $show_debug = true): string
+    {
+        $tpl = static::$tpl->tpl_fixed($filename, $addon_tag, $show_debug);
+        if ($tpl) {
+            return $tpl;
+        }
+        return '';
+    }
+
+    /**
+     * (兼容)返回一个 模板文件地址(相对目录)
+     * @param string $filename
+     * @param string $addon_tag
+     * @return string
+     */
+    static public function tpl_curr(string $filename, string $addon_tag = ''): string
+    {
+        return static::$tpl->tpl_curr($filename, $addon_tag);
+    }
+
+
     /**
      * ounun_view constructor.
      * @param array $url_mods
@@ -872,12 +850,13 @@ abstract class v
      */
     public function __construct(array $url_mods, string $addon_tag = '')
     {
-        if (!$url_mods) {
+        if (empty($url_mods)) {
             $url_mods = [\ounun::Def_Method];
         }
-        $method          = $url_mods[0];
-        \ounun::$view    = $this;
-        $this->addon_tag = $addon_tag;
+        $method       = $url_mods[0];
+        \ounun::$view = $this;
+
+        $addon_tag && $this->addon_tag = $addon_tag;
         $this->_initialize($method);
         $this->$method($url_mods);
     }
@@ -904,7 +883,7 @@ abstract class v
                               int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun::url_page(\ounun::$addon_curr_path . $page_file);
+        \ounun::url_page(\ounun::$addon_path_curr . $page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html
@@ -948,7 +927,7 @@ abstract class v
     public function robots($mod)
     {
         url_check('/robots.txt');
-        $filename = \ounun::$dir_app . 'robots.txt';
+        $filename = Dir_Root . 'env/app.robots.' . \ounun::$app_name . '.txt';
         $type     = 'text/plain';
         $time     = 14400;
         if (file_exists($filename)) {
@@ -969,7 +948,7 @@ abstract class v
     public function ads($mod)
     {
         url_check('/ads.txt');
-        $filename = \ounun::$dir_app . 'ads.txt';
+        $filename = Dir_Root . 'env/app.ads.' . \ounun::$app_name . '.txt';
         $type     = 'text/plain';
         $time     = 14400;
         if (file_exists($filename)) {
@@ -988,22 +967,18 @@ abstract class v
      */
     public function favicon($mod)
     {
-        $filename = Dir_Root . 'public/static/favicon.ico';
-        $type     = 'image/x-icon';
-        $time     = 14400;
-        if (file_exists($filename)) {
-            $mtime = filemtime($filename);
-            expires($time, $mtime, $mtime, $type);
-            readfile($filename);
-        } else {
-            $filename = Dir_Root . 'public/favicon.ico';
+        $filenames = [Dir_Root . 'public/static/favicon.ico', Dir_Root . 'public/favicon.ico'];
+        $type      = 'image/x-icon';
+        $time      = 14400;
+        foreach ($filenames as $filename) {
             if (file_exists($filename)) {
                 $mtime = filemtime($filename);
                 expires($time, $mtime, $mtime, $type);
                 readfile($filename);
+                exit();
             }
         }
-        if ($_GET['t']) {
+        if ($_GET['t'] || empty(\ounun::$url_static)) {
             error404();
         }
         go_url(\ounun::$url_static . 'favicon.ico?t=' . time(), false, 301);

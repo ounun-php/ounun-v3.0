@@ -9,16 +9,16 @@ namespace ounun\plugin;
 class rss
 {
     /** @var string RSS头 */
-    public $rss_header;
+    public string $rss_header;
 
     /** @var string 频道 */
-    public $rss_channel;
+    public string $rss_channel;
 
     /** @var string 图片 */
-    public $rss_image;
+    public string $rss_image;
 
     /** @var string 项目 */
-    public $rss_item;
+    public string $rss_item;
 
     /**
      * rss constructor.

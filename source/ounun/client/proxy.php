@@ -7,8 +7,11 @@ namespace ounun\client;
 class proxy
 {
     protected static $instance;
+
+    public bool $is_ok = false;
+
     public array $header = [];
-    public bool $isOk = false;
+
     public string $body = '';
 
     /*实例*/
@@ -19,7 +22,7 @@ class proxy
         }
 
         self::$instance->header = [];
-        self::$instance->isOk   = false;
+        self::$instance->is_ok  = false;
         self::$instance->body   = '';
 
         return self::$instance;

@@ -22,7 +22,7 @@ class html
     const Cache_Time_Interval = 300;
 
     /** @var int cdn类型 */
-    protected $_cdn_type = 2;
+    protected int $_cdn_type = 2;
     /** @var driver 缓存驱动 */
     protected ?driver $_cache_driver;
     /** @var string 页面key */
@@ -48,9 +48,6 @@ class html
     /** @var int 缓存时间长度 */
     protected int $_time_expire = 3600;
 
-    /** @var bool */
-    public bool $stop = false;
-
     // 下面 高级应用
     /** @var bool 是否 启用压缩 */
     protected bool $_is_gzip = true;
@@ -58,6 +55,9 @@ class html
     protected bool $_is_trim = false;
     /** @var bool false:没读    true:已读 */
     protected bool $_is_read = false;
+
+    /** @var bool */
+    public bool $stop = false;
 
     /**
      * html constructor.
@@ -67,9 +67,8 @@ class html
      * @param string $key
      * @param int $expire
      * @param bool $trim
-     * @param bool $debug
      */
-    public function __construct($config, string $key = '', int $expire = 3600, bool $trim = true, bool $debug = true)
+    public function __construct($config, string $key = '', int $expire = 3600, bool $trim = true)
     {
         $this->stop = false;
         // 初始化参数

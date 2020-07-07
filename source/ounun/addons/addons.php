@@ -4,7 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-namespace ounun\apps;
+namespace ounun\addons;
 
 use ounun\db\pdo;
 
@@ -36,8 +36,8 @@ abstract class addons
     {
         /** @var self $addon */
         foreach ($addons as $addon) {
-            if (is_array($addon) && $addon['apps']) {
-                static::mount_single($addon['apps'], (string)$addon['url'], (string)$addon['view_class'], (string)$addon['auto']);
+            if (is_array($addon) && $addon['addon']) {
+                static::mount_single($addon['addon'], (string)$addon['url'], (string)$addon['view_class'], (string)$addon['auto']);
             } else {
                 trigger_error("Can't find addon_tag:" . json_encode_unescaped($addon), E_USER_ERROR);
             }
@@ -53,8 +53,8 @@ abstract class addons
     static public function mount_single($addon_apps, string $addon_url, string $view_class = '', bool $is_auto_reg_subclass = false)
     {
         // addon
-        \ounun::$apps_cache[$addon_url] = [
-            'apps'       => $addon_apps,
+        \ounun::$addons_mount[$addon_url] = [
+            'addon'       => $addon_apps,
             'url'        => $addon_url,
             'view_class' => $view_class,
             'auto'       => $is_auto_reg_subclass,
@@ -75,8 +75,8 @@ abstract class addons
                         } else {
                             $url = $addon_url . $addon['view_class'];
                         }
-                        \ounun::$apps_cache[$url] = [
-                            'apps'       => $addon_apps,
+                        \ounun::$addons_mount[$url] = [
+                            'addon'       => $addon_apps,
                             'url'        => $url,
                             'view_class' => $addon['view_class'],
                             'auto'       => false,

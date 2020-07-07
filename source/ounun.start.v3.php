@@ -4,7 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-use ounun\apps\addons;
+use ounun\addons\addons;
 use ounun\debug;
 use ounun\template;
 
@@ -44,18 +44,23 @@ class ounun
         self::App_Name_Command,
     ];
 
+    /** @var v */
+    public static v $view;
+
     /** @var array 公共配制数据 */
     public static array $global = [];
     /** @var array 公共配制数据(插件) */
     public static array $global_addons = [];
     /** @var array 公共配制数据(应用) */
     public static array $global_apps = [];
-    /** @var v */
-    public static v $view;
+
     /** @var array DB配制数据 */
     public static array $database = [];
     /** @var string 默认 数据库 */
     public static string $database_default = '';
+
+    /** @var array 命令s */
+    public static array $commands = [];
 
     /** @var array 自动加载路径paths */
     public static array $maps_paths = [];
@@ -63,6 +68,11 @@ class ounun
     public static array $maps_class = [];
     /** @var array 已安装的功能模块(插件) */
     public static array $maps_installed_addons = [];
+    /** @var array 插件addon      映射数据 */
+    public static array $maps_addon = [];
+
+    /** @var string 当前插件addon  网址Url前缀Path(URL) */
+    public static string $addon_path_curr = '';
 
     /** @var string 当前APP */
     public static string $app_name = '';
@@ -121,14 +131,6 @@ class ounun
     /** @var array 模板替换数据组 */
     public static array $tpl_replace_array = [];
 
-    /** @var string 当前插件addon  网址Url前缀Path(URL) */
-    public static string $addon_curr_path = '';
-    /** @var array 插件addon      映射数据 */
-    public static array  $addon_maps = [];
-
-    /** @var array 命令s */
-    public static array $commands = [];
-
     /** @var string 当前语言 */
     public static string $lang = 'zh_cn';
     /** @var string 默认语言 */
@@ -163,177 +165,177 @@ class ounun
      * 本地环境变量设定 (应用)
      * @param string $app_name
      */
-    static public function environment_app_set(string $app_name)
-    {
-        // 为空时直接返回
-        if (empty($app_name)) {
-            return;
-        }
-        $config_ini = static::$global_apps[$app_name];
-
-        // print_r(['$app_name'=>$app_name,'$config_ini'=>$config_ini]);
-        if ($config_ini) {
-            static::environment_set($config_ini);
-        }
-    }
+//    static public function environment_app_set(string $app_name)
+//    {
+//        // 为空时直接返回
+//        if (empty($app_name)) {
+//            return;
+//        }
+//        $config_ini = static::$global_apps[$app_name];
+//
+//        // print_r(['$app_name'=>$app_name,'$config_ini'=>$config_ini]);
+//        if ($config_ini) {
+//            static::environment_set($config_ini);
+//        }
+//    }
 
     /**
      * 本地环境变量设定
      * @param array $config_ini
      */
-    static public function environment_set(array $config_ini = [])
-    {
-        // 为空时直接返回
-        if (empty($config_ini)) {
-            return;
-        }
-
-        // 添加App路径(根目录)
-        $key = 'paths';
-        if (isset($config_ini[$key])) {
-            $vs = $config_ini[$key];
-
-            if ($vs && is_array($vs)) {
-                foreach ($vs as $v) {
-                    if (is_array($v) && $v['path']) {
-                        static::path_set($v['path'], $v['is_auto_helper']);
-                    }
-                }
-            } else {
-                if (file_exists(Dir_Root)) {
-                    static::path_set(Dir_Root, true);
-                }
-                if (file_exists(Dir_Vendor . 'cms.cc/')) {
-                    static::path_set(Dir_Vendor . 'cms.cc/', true);
-                }
-            }
-        }
-
-        // app数据
-        $key = 'apps';
-        if (isset($config_ini[$key])) {
-            $config = $config_ini[$key];
-            if ($config && is_array($config)) {
-                $routes_default = $config['default'] ?? [];
-                unset($config['default']);
-                if ($config && $routes_default) {
-                    static::apps_set($config, $routes_default, []);
-                }
-            }
-        }
-
-        // 挂载模块路由
-        $key = 'routes';
-        if (isset($config_ini[$key])) {
-            $addons = $config_ini[$key];
-            if ($addons && is_array($addons)) {
-                addons::mount_multi($addons);
-            }
-        }
-
-        // 域名&项目代号&当前app之前通信内问key
-        $key = 'domain';
-        if (isset($config_ini[$key])) {
-            $vs = $config_ini[$key];
-            if ($vs && is_array($vs)) {
-                static::domain_set($vs['domain'], $vs['code'], $vs['version'], $vs['key']);
-            }
-        }
-
-        // 统计 / 备案号 / Baidu / xzh / 配制cache_file
-        $key = 'global';
-        if (isset($config_ini[$key])) {
-            $config = $config_ini[$key];
-            if ($config && is_array($config)) {
-                static::global_set($config);
-            }
-        }
-
-        // 设定模板目录
-        $key = 'template_paths';
-        if (isset($config_ini[$key])) {
-            $tpl_dirs = $config_ini[$key];
-            if ($tpl_dirs && is_array($tpl_dirs)) {
-                static::template_paths_set($tpl_dirs);
-            }
-        }
-
-        // html变量替换
-        $key = 'template_array';
-        if (isset($config_ini[$key])) {
-            $config = $config_ini[$key];
-            if ($config && is_array($config)) {
-                static::template_array_set($config);
-            }
-        }
-
-        // 配制database
-        $key = 'databases';
-        if (isset($config_ini[$key])) {
-            $config = $config_ini[$key];
-            if ($config && is_array($config)) {
-                static::database_set($config, $config_ini['database_default']);
-            }
-        }
-
-        // 设定语言 & 设定支持的语言
-        $key = 'lang';
-        if (isset($config_ini[$key])) {
-            $config = $config_ini[$key];
-            if ($config && is_array($config)) {
-                static::lang_set('', $config['default'], $config['support']);
-            }
-        }
-
-        // 设定路由数据
-        $key = 'urls';
-        if (isset($config_ini[$key])) {
-            $urls = $config_ini[$key];
-            if ($urls && is_array($urls)) {
-                static::urls_set($urls['root_www'], $urls['root_wap'], $urls['root_mip'], $urls['root_api'], $urls['url_res'], $urls['url_upload'], $urls['url_static'], $urls['url_static_g']);
-            }
-        }
-
-        // 设定站点页面SEO
-        $key = 'seo_site';
-        if (isset($config_ini[$key])) {
-            $config = $config_ini[$key];
-            static::seo_site_set($config['sitename'], $config['keywords'], $config['description'], $config['slogan']);
-        }
-
-//        // 设定站点页面SEO
-//        $key = 'seo_page';
+//    static public function environment_set(array $config_ini = [])
+//    {
+//        // 为空时直接返回
+//        if (empty($config_ini)) {
+//            return;
+//        }
+//
+//        // 添加App路径(根目录)
+//        $key = 'paths';
+//        if (isset($config_ini[$key])) {
+//            $vs = $config_ini[$key];
+//
+//            if ($vs && is_array($vs)) {
+//                foreach ($vs as $v) {
+//                    if (is_array($v) && $v['path']) {
+//                        static::path_set($v['path'], $v['is_auto_helper']);
+//                    }
+//                }
+//            } else {
+//                if (file_exists(Dir_Root)) {
+//                    static::path_set(Dir_Root, true);
+//                }
+//                if (file_exists(Dir_Vendor . 'cms.cc/')) {
+//                    static::path_set(Dir_Vendor . 'cms.cc/', true);
+//                }
+//            }
+//        }
+//
+//        // app数据
+//        $key = 'apps';
 //        if (isset($config_ini[$key])) {
 //            $config = $config_ini[$key];
-//            static::seo_page_set((string)$config['title'], (string)$config['keywords'], (string)$config['description'], (string)$config['h1'], (string)$config['etag']);
+//            if ($config && is_array($config)) {
+//                $routes_default = $config['default'] ?? [];
+//                unset($config['default']);
+//                if ($config && $routes_default) {
+//                    static::apps_set($config, $routes_default, []);
+//                }
+//            }
 //        }
-
-        // 公共配制数据(应用)
-//        $key = '__app__';
+//
+//        // 挂载模块路由
+//        $key = 'routes';
 //        if (isset($config_ini[$key])) {
-//            $configs = $config_ini[$key];
-//            if ($configs && is_array($configs)) {
-//                foreach ($configs as $app_name => $config) {
-//                    if ($config && is_array($config)) {
-//                        static::global_addons_set($config, '', $app_name);
-//                    }
-//                }
+//            $addons = $config_ini[$key];
+//            if ($addons && is_array($addons)) {
+//                addons::mount_multi($addons);
 //            }
-//        } // end if
-
-        // 公共配制数据(插件)
-//        $key = '__addons__';
+//        }
+//
+//        // 域名&项目代号&当前app之前通信内问key
+//        $key = 'domain';
 //        if (isset($config_ini[$key])) {
-//            $configs = $config_ini[$key];
-//            if ($configs && is_array($configs)) {
-//                foreach ($configs as $addon_tag => $config) {
-//                    if ($config && is_array($config)) {
-//                        static::global_addons_set($config, $addon_tag, '');
-//                    }
-//                }
+//            $vs = $config_ini[$key];
+//            if ($vs && is_array($vs)) {
+//                static::domain_set($vs['domain'], $vs['code'], $vs['version'], $vs['key']);
 //            }
-//        } // end if
-    }
+//        }
+//
+//        // 统计 / 备案号 / Baidu / xzh / 配制cache_file
+//        $key = 'global';
+//        if (isset($config_ini[$key])) {
+//            $config = $config_ini[$key];
+//            if ($config && is_array($config)) {
+//                static::global_set($config);
+//            }
+//        }
+//
+//        // 设定模板目录
+//        $key = 'template_paths';
+//        if (isset($config_ini[$key])) {
+//            $tpl_dirs = $config_ini[$key];
+//            if ($tpl_dirs && is_array($tpl_dirs)) {
+//                static::template_paths_set($tpl_dirs);
+//            }
+//        }
+//
+//        // html变量替换
+//        $key = 'template_array';
+//        if (isset($config_ini[$key])) {
+//            $config = $config_ini[$key];
+//            if ($config && is_array($config)) {
+//                static::template_array_set($config);
+//            }
+//        }
+//
+//        // 配制database
+//        $key = 'databases';
+//        if (isset($config_ini[$key])) {
+//            $config = $config_ini[$key];
+//            if ($config && is_array($config)) {
+//                static::database_set($config, $config_ini['database_default']);
+//            }
+//        }
+//
+//        // 设定语言 & 设定支持的语言
+//        $key = 'lang';
+//        if (isset($config_ini[$key])) {
+//            $config = $config_ini[$key];
+//            if ($config && is_array($config)) {
+//                static::lang_set('', $config['default'], $config['support']);
+//            }
+//        }
+//
+//        // 设定路由数据
+//        $key = 'urls';
+//        if (isset($config_ini[$key])) {
+//            $urls = $config_ini[$key];
+//            if ($urls && is_array($urls)) {
+//                static::urls_set($urls['root_www'], $urls['root_wap'], $urls['root_mip'], $urls['root_api'], $urls['url_res'], $urls['url_upload'], $urls['url_static'], $urls['url_static_g']);
+//            }
+//        }
+//
+//        // 设定站点页面SEO
+//        $key = 'seo_site';
+//        if (isset($config_ini[$key])) {
+//            $config = $config_ini[$key];
+//            static::seo_site_set($config['sitename'], $config['keywords'], $config['description'], $config['slogan']);
+//        }
+//
+////        // 设定站点页面SEO
+////        $key = 'seo_page';
+////        if (isset($config_ini[$key])) {
+////            $config = $config_ini[$key];
+////            static::seo_page_set((string)$config['title'], (string)$config['keywords'], (string)$config['description'], (string)$config['h1'], (string)$config['etag']);
+////        }
+//
+//        // 公共配制数据(应用)
+////        $key = '__app__';
+////        if (isset($config_ini[$key])) {
+////            $configs = $config_ini[$key];
+////            if ($configs && is_array($configs)) {
+////                foreach ($configs as $app_name => $config) {
+////                    if ($config && is_array($config)) {
+////                        static::global_addons_set($config, '', $app_name);
+////                    }
+////                }
+////            }
+////        } // end if
+//
+//        // 公共配制数据(插件)
+////        $key = '__addons__';
+////        if (isset($config_ini[$key])) {
+////            $configs = $config_ini[$key];
+////            if ($configs && is_array($configs)) {
+////                foreach ($configs as $addon_tag => $config) {
+////                    if ($config && is_array($config)) {
+////                        static::global_addons_set($config, $addon_tag, '');
+////                    }
+////                }
+////            }
+////        } // end if
+//    }
 
     /**
      * 设定语言 & 设定支持的语言
@@ -636,14 +638,11 @@ class ounun
                 }
             }
         }
+
         // 风格
-        if ($tpl_style) {
-            static::$tpl_style = $tpl_style;
-        }
+        $tpl_style && static::$tpl_style = $tpl_style;
         // 风格(默认)
-        if ($tpl_style_default) {
-            static::$tpl_style_default = $tpl_style_default;
-        }
+        $tpl_style_default &&  static::$tpl_style_default = $tpl_style_default;
 
         // 类型
         if ($tpl_type) {
@@ -968,20 +967,19 @@ class ounun
 
     /** 应用app数据 */
     public static array $apps = [];
-
     /** 应用app数据(默认) */
     public static array $apps_default = ['app_name' => self::App_Name_Web, 'url' => '/'];
 
-    /** 应用app数据 */
-    public static array $apps_cache = [];
+    /** 插件addons挂载数据 */
+    public static array $addons_mount = [];
 
     /**
      * 设定路由数据
      * @param array $apps
      * @param array $apps_default
-     * @param array $apps_cache
+     * @param array $addons_mount
      */
-    static public function apps_set(array $apps, array $apps_default = [], array $apps_cache = [])
+    static public function apps_set(array $apps, array $apps_default = [], array $addons_mount = [])
     {
         if ($apps) {
             foreach ($apps as $k => $v) {
@@ -991,8 +989,8 @@ class ounun
         if ($apps_default) {
             static::$apps_default = $apps_default;
         }
-        if ($apps_cache) {
-            static::$apps_cache = $apps_cache;
+        if ($addons_mount) {
+            static::$addons_mount = $addons_mount;
         }
     }
 
@@ -1012,17 +1010,17 @@ class ounun
         // 插件路由
         $addon_tag = '';
         /** @var addons $apps */
-        if ($url_mods[1] && ($route = static::$apps_cache["{$url_mods[0]}/$url_mods[1]"]) && $apps = $route['apps']) {
+        if ($url_mods[1] && ($route = static::$addons_mount["{$url_mods[0]}/$url_mods[1]"]) && $apps = $route['apps']) {
             array_shift($url_mods);
             array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-        } elseif ($url_mods[0] && ($route = static::$apps_cache[$url_mods[0]]) && $apps = $route['apps']) {
+        } elseif ($url_mods[0] && ($route = static::$addons_mount[$url_mods[0]]) && $apps = $route['apps']) {
             array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-        } elseif (($route = static::$apps_cache['']) && $apps = $route['apps']) {
+        } elseif (($route = static::$addons_mount['']) && $apps = $route['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
-            error_php('ounun::$apps_cache[\'\']: There is no default value -> $apps_cache:' . json_encode(ounun::$apps_cache) . '');
+            error_php('ounun::$apps_cache[\'\']: There is no default value -> $apps_cache:' . json_encode(ounun::$addons_mount) . '');
         }
 
         // api
@@ -1040,7 +1038,7 @@ class ounun
             $class_filename = "{$addon_tag}/{$app_name}.php";
             $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
         }
-        static::$addon_curr_path = $route['url'] ? '/' . $route['url'] : '';
+        static::$addon_path_curr = $route['url'] ? '/' . $route['url'] : '';
 
         // paths
         if ($class_filename) {
@@ -1090,7 +1088,7 @@ function start(array $url_mods, string $host)
     ounun::$app_path = (string)$apps['path'];     // 当前APP Path
 
     // load_config
-    ounun::path_set(Dir_Root, \ounun::$app_name);
+    ounun::path_set(Dir_Root, true);
     // template_set
     ounun::template_paths_set([], (string)$apps['tpl_style'], (string)$apps['tpl_style_default'], (string)$apps['tpl_type'], (string)$apps['tpl_type_default']);
 
@@ -1116,7 +1114,7 @@ function start(array $url_mods, string $host)
         $error = "LINE:" . __LINE__ . " Can't find controller:{$classname}";
     }
     header('HTTP/1.1 404 Not Found');
-    trigger_error($error, E_USER_ERROR);
+    error_php($error);
 }
 
 /** Web */

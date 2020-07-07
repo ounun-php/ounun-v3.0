@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\page;
 
 
@@ -15,25 +16,6 @@ use ounun\db\pdo;
  */
 class base
 {
-    /** 翻页配制 */
-    const Config = [
-        'page_tag_default'  => ['', ''],
-        'page_tag_curr'     => ['<b>', '</b>', ' '],
-        'page_tag_name'     => ['第一页', '上一页', '下一页', '最后一页'],
-        'index'             => [
-                                    ['/list_{total_page}.html', '/']
-                               ]
-    ];
-    /** 翻页配制li */
-    const Config_Li = [
-        'page_tag_default'  => ['<li>', '</li>'],
-        'page_tag_curr'     => ['<li class="active">', '</li>', ' '],
-        'page_tag_name'     => ['第一页', '上一页', '下一页', '最后一页'],
-        'index'             => [
-                                    ['/list_{total_page}.html', '/']
-                               ]
-    ];
-
     /** @var string  提示串 */
     protected string $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
     /** @var array   默认页 */
@@ -42,21 +24,22 @@ class base
     protected array $_config_page_tag_curr = ['<li class="now">', '</li>', ''];
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
     protected array $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
-    /** @var int     最多显示几页 */
-    protected int $_config_show_max = 9;
-    /** @var int     一页显示几条数据 */
-    protected int $_config_rows = 20;
     /** @var array   第一页 */
     protected array $_config_index = [];
     /** @var string  获取数据总数 */
     protected string $_config_count_sql = 'count(*)';
-    /** @var bool 是否最后一页为首页  false:第一页为首页  true:最后一页为首页 */
-    protected bool $_page_end_index = false;
+    /** @var int     最多显示几页 */
+    protected int $_config_show_max = 9;
+    /** @var int     一页显示几条数据 */
+    protected int $_config_rows = 20;
 
     /** @var string */
     protected string $_where_str = '';
     /** @var array */
     protected array $_where_bind = [];
+
+    /** @var bool 是否最后一页为首页  false:第一页为首页  true:最后一页为首页 */
+    protected bool $_page_end_index = false;
 
     /** @var pdo */
     protected pdo $_db;
@@ -86,14 +69,14 @@ class base
      */
     public function __construct(pdo $db, string $table, string $url, array $where = [], array $config = [])
     {
-        $this->_db = $db;
+        $this->_db    = $db;
         $this->_table = $table;
-        $this->_url = $url;
+        $this->_url   = $url;
 
-        if($where && is_array($where)){
-            foreach (['str','bind'] as $key){
-                if($where[$key]){
-                    $m = "_where_{$key}";
+        if ($where && is_array($where)) {
+            foreach (['str', 'bind'] as $key) {
+                if ($where[$key]) {
+                    $m        = "_where_{$key}";
                     $this->$m = $where[$key];
                 }
             }
@@ -109,10 +92,10 @@ class base
     public function config_set(array $config)
     {
         // print_r($config);
-        if($config && is_array($config)){
-            foreach (['note','page_tag_default','page_tag_curr','page_tag_name','show_max','rows','index','count_sql'] as $key){
-                if($config[$key]){
-                    $m = "_config_{$key}";
+        if ($config && is_array($config)) {
+            foreach (['note', 'page_tag_default', 'page_tag_curr', 'page_tag_name', 'show_max', 'rows', 'index', 'count_sql'] as $key) {
+                if ($config[$key]) {
+                    $m        = "_config_{$key}";
                     $this->$m = $config[$key];
                 }
             }
@@ -135,30 +118,30 @@ class base
         $title = $title ? "{$title}-" : '';
         $pages = [];
 
-        $data  = $this->_data($page, $end_index);
-        $note  = $this->_note_set();
+        $data = $this->_data($page, $end_index);
+        $note = $this->_note_set();
 
         $url_prev = '';
         $url_next = '';
         foreach ($data as $v) {
             if ($v['begin']) {
-                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['begin']) . '" title="' . $title . '第' . $v['begin'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[0]) . '</a>' . $tag_default[1];
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['begin']) . '" title="' . $title . '第' . $v['begin'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[0]) . '</a>' . $tag_default[1];
             } elseif ($v['previous']) {
                 $url_prev = $this->_url_set($v['previous']);
-                $pages[] = $tag_default[0] . '<a href="' . $url_prev . '" title="' . $title . '第' . $v['previous'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[1]) . '</a>' . $tag_default[1];
+                $pages[]  = $tag_default[0] . '<a href="' . $url_prev . '" title="' . $title . '第' . $v['previous'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[1]) . '</a>' . $tag_default[1];
             } elseif ($v['next']) {
                 $url_next = $this->_url_set($v['next']);
-                $pages[] = $tag_default[0] . '<a href="' . $url_next . '" title="' . $title . '第' . $v['next'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[2]) . '</a>' . $tag_default[1];
+                $pages[]  = $tag_default[0] . '<a href="' . $url_next . '" title="' . $title . '第' . $v['next'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[2]) . '</a>' . $tag_default[1];
             } elseif ($v['end']) {
-                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['end']) . '" title="' . $title . '第' . $v['end'] . '页" '.$tag_default[2].'>' . htmlspecialchars($tag_name[3]) . '</a>' . $tag_default[1];
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['end']) . '" title="' . $title . '第' . $v['end'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[3]) . '</a>' . $tag_default[1];
             } elseif ($v['default']) {
                 if ($this->_page_curr == $v['default']) {
-                    $pages[] = $tag_curr[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" '.$tag_curr[2].' onclick="return false">' . $v['default'] . '</a>' . $tag_curr[1];
+                    $pages[] = $tag_curr[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" ' . $tag_curr[2] . ' onclick="return false">' . $v['default'] . '</a>' . $tag_curr[1];
                 } else {
-                    $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" '.$tag_default[2].'>' . $v['default'] . '</a>' . $tag_default[1];
+                    $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" ' . $tag_default[2] . '>' . $v['default'] . '</a>' . $tag_default[1];
                 }
             } elseif ($v['index']) {
-                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set(0) . '" title="' . $title .$tag_name[4]. '" '.$tag_default[2].'>' . htmlspecialchars($tag_name[4]) . '</a>' . $tag_default[1];
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set(0) . '" title="' . $title . $tag_name[4] . '" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[4]) . '</a>' . $tag_default[1];
             }
         }
         return [
@@ -181,14 +164,14 @@ class base
      */
     protected function _data(int $page_curr = 0, bool $end_index = false): array
     {
-        $page_middle            = ceil($this->_config_show_max / 2);
+        $page_middle = ceil($this->_config_show_max / 2);
 
         $this->_total           = $this->total_size();
         $this->_total_page_real = ceil($this->_total / $this->_config_rows);
-        if($end_index){
-            $this->_total_page  = $this->_total_page_real - 1;
-        }else{
-            $this->_total_page  = $this->_total_page_real;
+        if ($end_index) {
+            $this->_total_page = $this->_total_page_real - 1;
+        } else {
+            $this->_total_page = $this->_total_page_real;
         }
 
         $page_curr = $end_index ? ($page_curr < 1 ? 0 : $page_curr) : ($page_curr < 1 ? 1 : $page_curr);
@@ -216,8 +199,8 @@ class base
             $sub_end   = false;
             $sub_start = 1;
         }
-        $sub_index = $page_curr > 0;
-        $sub_next = $page_curr < $this->_total_page && $this->_total_page > 1;
+        $sub_index    = $page_curr > 0;
+        $sub_next     = $page_curr < $this->_total_page && $this->_total_page > 1;
         $sub_previous = $page_curr > 1 && $this->_total_page > 1;
 
         // 载入np数据
@@ -229,7 +212,7 @@ class base
             $rs[] = ['default' => $i];
         }
         $sub_next && $rs[] = ['next' => $page_curr + 1];
-        $sub_end && $rs[]  = ['end'  => $this->_total_page];
+        $sub_end && $rs[] = ['end' => $this->_total_page];
         return $rs;
     }
 
@@ -286,7 +269,7 @@ class base
      */
     public function limit_offset(): int
     {
-        if ($this->_page_end_index && $this->_page_curr == 0 ) {
+        if ($this->_page_end_index && $this->_page_curr == 0) {
             $start = $this->_total - $this->_config_rows;
         } else {
             $start = ($this->_page_curr - 1) * $this->_config_rows;
@@ -315,23 +298,23 @@ class base
         $replace = [];
         $url     = str_replace('{page}', $page, $this->_url);
         if ($this->_config_index) {
-            if ($this->_page_end_index ) {
-                if( $page == 0 ){
-                    foreach ($this->_config_index as $v){
+            if ($this->_page_end_index) {
+                if ($page == 0) {
+                    foreach ($this->_config_index as $v) {
                         $search[]  = str_replace('{total_page}', $this->_total_page, $v[0]);
                         $replace[] = $v[1];
                     }
                 }
             } else {
-                if (1 == $page){
-                    foreach ($this->_config_index as $v){
+                if (1 == $page) {
+                    foreach ($this->_config_index as $v) {
                         $search[]  = $v[0];
                         $replace[] = $v[1];
                     }
                 }
             }
         }
-        if($search){
+        if ($search) {
             $url = str_replace($search, $replace, $url);
         }
         return $url;

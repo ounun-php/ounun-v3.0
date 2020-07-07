@@ -43,7 +43,7 @@ abstract class driver
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
-     * @param array $options   参数 ['compress'=>$compress 是否返回压缩后的数据 ]
+     * @param array $options 参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
     abstract public function get(string $key, $default = 0, bool $add_prefix = true, array $options = []);
@@ -54,7 +54,7 @@ abstract class driver
      * @param mixed $value 存储数据
      * @param int $expire 有效时间（秒）
      * @param bool $add_prefix 是否活加前缀
-     * @param array $options   参数 ['list_key'=>$list_key 汇总集合list标识 ]
+     * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
     abstract public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = []);
@@ -270,7 +270,8 @@ abstract class driver
     protected function serialize($data): string
     {
         $serialize = $this->_options['serialize'][0] ?? function ($data) {
-                return \serialize($data);
+                return \json_encode($data, JSON_UNESCAPED_UNICODE);
+                // return \serialize($data);
             };
         return $serialize($data);
     }
@@ -283,7 +284,8 @@ abstract class driver
     protected function unserialize(string $data)
     {
         $unserialize = $this->_options['serialize'][1] ?? function ($data) {
-                return \unserialize($data);
+                return \json_decode($data, true);
+                // return \unserialize($data);
             };
         return $unserialize($data);
     }

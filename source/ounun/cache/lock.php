@@ -9,13 +9,13 @@ use ounun\cache\driver\redis;
 
 class lock
 {
-    /** @var array */
+    /** @var array<self> */
     protected static array $_instances = [];
 
     /**
      * @param string $storage_key
      * @param array $config
-     * @return $this
+     * @return self
      */
     static public function i(string $storage_key = 'data', array $config = [])
     {

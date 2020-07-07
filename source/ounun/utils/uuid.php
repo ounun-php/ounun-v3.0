@@ -11,7 +11,9 @@ class uuid
 {
     public static function v3($namespace, $name)
     {
-        if (!self::is_valid($namespace)) return false;
+        if (!self::is_valid($namespace)) {
+            return false;
+        }
 
         // Get hexadecimal components of namespace
         $nhex = str_replace(['-', '{', '}'], '', $namespace);

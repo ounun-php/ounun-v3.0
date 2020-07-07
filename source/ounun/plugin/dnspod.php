@@ -12,13 +12,13 @@ namespace ounun\plugin;
 
 class dnspod
 {
-    private $_token = '';
-    private $_id = 0;
-    private $_lang = 'cn';
-    private $_error_on_empty = 'no';
-    private $_format = 'json';
+    private string $_token = '';
+    private int $_id = 0;
+    private string $_lang = 'cn';
+    private string $_error_on_empty = 'no';
+    private string $_format = 'json';
 
-    public $grade_list = [
+    public array $grade_list = [
         'D_Free'    => '免费套餐',
         'D_Plus'    => '豪华 VIP套餐',
         'D_Extra'   => '企业I VIP套餐',
@@ -31,7 +31,7 @@ class dnspod
         'DP_Ultra'  => '企业旗舰版',
     ];
 
-    public $status_list = [
+    public array $status_list = [
         'enable' => '启用',
         'pause'  => '暂停',
         'spam'   => '封禁',
@@ -78,6 +78,8 @@ class dnspod
      * @param string $type A CNAME MX TXT NS AAAA SRV 显性URL 隐性URL
      * @param int $ttl
      * @param int $mx
+     * @param string $line
+     * @return array|mixed
      */
     public function record_create($domain_id, $value, $sub_domain = '@', $type = 'CNAME', $ttl = 600, $mx = 10, $line = '默认')
     {

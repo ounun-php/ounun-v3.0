@@ -285,7 +285,7 @@ class caiji
         $html = null;
 
         if (!empty($curl)) {
-            if ($curl->isOk) {
+            if ($curl->is_ok) {
 
                 $html = $curl->body;
                 if ($from_encode == 'auto') {

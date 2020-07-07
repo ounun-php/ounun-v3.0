@@ -7,7 +7,6 @@
 namespace ounun\plugin;
 
 use ounun\utils\caiji;
-use WebSocket\Client;
 
 /**
  * 谷歌浏览器

@@ -4,9 +4,8 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-namespace ounun\apps;
+namespace ounun\addons;
 
-use \ounun\db\pdo;
 
 abstract class logic
 {
@@ -33,15 +32,12 @@ abstract class logic
 
     /**
      * cms constructor.
-     * @param pdo $db
+     * @param model|null $model
      */
     public function __construct(?model $model = null)
     {
-        if ($model) {
-            $this->_model = $model;
-        }
-        // 控制器初始化
-        $this->_initialize();
+        $this->logic_set($model);
+        $this->_initialize(); // 控制器初始化
     }
 
     /**
@@ -50,9 +46,21 @@ abstract class logic
     abstract protected function _initialize();
 
     /**
+     * 数据模型set
+     * @param $model
+     */
+    public function logic_set($model)
+    {
+        if ($model && is_subclass_of($model, model::class)) {
+            $this->_model = $model;
+            $this->_model->logic_set($this);
+        }
+    }
+
+    /**
      * 错误代码
      * @param int $error_code
-     * @param null $data
+     * @param mixed $data
      * @param array $extend
      * @return array
      */

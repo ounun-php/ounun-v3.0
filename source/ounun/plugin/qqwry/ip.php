@@ -28,9 +28,6 @@ namespace ounun\plugin\qqwry;
  */
 class ip
 {
-    /** @var string  本插件所在目录 */
-    const Dir_Plugins = __DIR__ . '/';
-
     /** @var self    实例 */
     protected static $_instance;
 
@@ -56,12 +53,12 @@ class ip
      * 第一条IP记录的偏移地址
      * @var int
      */
-    private $firstip;
+    private int $first_ip;
     /**
      * 最后一条IP记录的偏移地址
      * @var int
      */
-    private $lastip;
+    private int $lastip;
     /**
      * IP记录的总条数（不包含版本信息记录）
      * @var int
@@ -131,7 +128,7 @@ class ip
         $byte = fread($this->fp, 1); // 标志字节
         switch (ord($byte)) {
             case 0 : // 没有区域信息
-                $area = "";
+                $area = '';
                 break;
             case 1 :
             case 2 : // 标志字节为1或2，表示区域信息被重定向
@@ -166,7 +163,7 @@ class ip
         while ($l <= $u) // 当上边界小于下边界时，查找失败
         {
             $i = floor(($l + $u) / 2); // 计算近似中间记录
-            fseek($this->fp, $this->firstip + $i * 7);
+            fseek($this->fp, $this->first_ip + $i * 7);
             $beginip = strrev(fread($this->fp, 4)); // 获取中间记录的开始IP地址
             // strrev函数在这里的作用是将little-endian的压缩IP地址转化为big-endian的格式
             // 以便用于比较，后面相同。
@@ -181,7 +178,7 @@ class ip
                     $l = $i + 1; // 将搜索的下边界修改为中间记录加一
                 } else // 用户的IP在中间记录的IP范围内时
                 {
-                    $findip = $this->firstip + $i * 7;
+                    $findip = $this->first_ip + $i * 7;
                     break; // 则表示找到结果，退出循环
                 }
             }
@@ -246,11 +243,12 @@ class ip
      */
     function __construct($charset = 'gbk')
     {
-        $filename = static::Dir_Plugins . 'res/qqwryip.dat';
+        // 本插件所在目录
+        $filename = __DIR__ . '/res/qqwryip.dat';
         if (($this->fp = fopen($filename, 'rb')) !== false) {
-            $this->firstip = $this->long();
-            $this->lastip  = $this->long();
-            $this->totalip = ($this->lastip - $this->firstip) / 7;
+            $this->first_ip = $this->long();
+            $this->lastip   = $this->long();
+            $this->totalip  = ($this->lastip - $this->first_ip) / 7;
             //注册析构函数，使其在程序执行结束时执行
             //register_shutdown_function ( array (&$this, '_IpLocation' ) );
         }

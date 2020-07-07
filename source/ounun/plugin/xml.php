@@ -132,7 +132,7 @@ class xml
         return ($xml_array);
     }
 
-    static public function file_get_xmlarray($file, $root = null)
+    static public function file_get_xmlarray($file, $root = '')
     {
         if (false === ($contents = file_get_contents($file))
             || !($arr = static::xml2array($contents))) {

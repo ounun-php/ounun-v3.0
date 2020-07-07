@@ -1,7 +1,7 @@
 <?php
 
 
-namespace ounun\apps;
+namespace ounun\addons;
 
 use \ounun\db\pdo;
 
@@ -9,6 +9,8 @@ abstract class model
 {
     /** @var self 实例 */
     protected static $_instance;
+    /** @var mixed 逻辑类 */
+    protected $_logic;
 
     /**
      * @param pdo $db
@@ -18,12 +20,13 @@ abstract class model
     {
         if (empty(static::$_instance)) {
             if (empty($db)) {
-                $db = \v::db_v_get();
+                $db = pdo::i();
             }
             static::$_instance = new static($db);
         }
         return static::$_instance;
     }
+
 
     /** @var array 数据 */
     protected array $_data = [];
@@ -32,7 +35,7 @@ abstract class model
     public pdo $db;
 
     /** @var string */
-    public string $table = '';
+    public string $table;
 
     /** @var array 数据表结构 */
     public array $options = [
@@ -61,10 +64,20 @@ abstract class model
         $this->_initialize();
     }
 
-    /**
-     * 控制器初始化
-     */
+    /** 初始化 */
     abstract protected function _initialize();
+
+    /** 逻辑类get */
+    public function logic_get()
+    {
+        return $this->_logic;
+    }
+
+    /** 逻辑类set */
+    public function logic_set($logic)
+    {
+        $this->_logic = $logic;
+    }
 
     /**
      * @param $name

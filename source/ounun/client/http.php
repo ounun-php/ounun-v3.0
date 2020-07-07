@@ -8,16 +8,17 @@ namespace ounun\client;
 
 class http
 {
-    public $method;
-    public $cookie;
-    public $post;
-    public $header;
-    public $ContentType;
-    public $data;
-    /** @var int 错误代码 */
-    public $error_code;
+    public string $method;
+    public string $cookie;
+    public string $post;
+    public string $header;
+    public string $content_type;
+    public array $data;
+
     /** @var string 错误信息 */
-    public $error_msg;
+    public string $error_msg;
+    /** @var int 错误代码 */
+    public int $error_code;
 
     /** @var $this */
     protected static $_instances = [];
@@ -94,8 +95,8 @@ class http
 
     public function post($url, $data = [], $referer = '', $limit = 0, $timeout = 30, $block = true)
     {
-        $this->method      = 'POST';
-        $this->ContentType = "Content-Type: application/x-www-form-urlencoded\r\n";
+        $this->method       = 'POST';
+        $this->content_type = "Content-Type: application/x-www-form-urlencoded\r\n";
         if ($data) {
             $post = '';
             foreach ($data as $k => $v) {
@@ -116,7 +117,7 @@ class http
     {
         $this->method      = 'POST';
         $boundary          = "AaB03x";
-        $this->ContentType = "Content-Type: multipart/form-data; boundary={$boundary}\r\n";
+        $this->content_type = "Content-Type: multipart/form-data; boundary={$boundary}\r\n";
         if ($data) {
             foreach ($data as $k => $v) {
                 $this->post .= "--{$boundary}\r\n";
@@ -153,7 +154,7 @@ class http
         $out .= "Host: $host\r\n";
         if ($this->cookie) $out .= "Cookie: $this->cookie\r\n";
         if ($this->method == 'POST') {
-            $out .= $this->ContentType;
+            $out .= $this->content_type;
             $out .= "Content-Length: " . strlen($this->post) . "\r\n";
             $out .= "Cache-Control: no-cache\r\n";
             $out .= "Connection: Close\r\n\r\n";

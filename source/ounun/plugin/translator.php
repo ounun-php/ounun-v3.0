@@ -42,7 +42,7 @@ class translator
         'cht' => '繁体中文'
     ];
 
-    public static $allow_langs = [
+    public static array $allow_langs = [
         'baidu'  => [
             'zh'  => 'zh',
             'en'  => 'en',
@@ -154,7 +154,13 @@ class translator
         return $return['success'] ? $return['data'] : $q;
     }
 
-    /*百度翻译接口*/
+    /**
+     * 百度翻译接口
+     * @param $q
+     * @param $from
+     * @param $to
+     * @return bool[]
+     */
     public static function api_baidu($q, $from, $to)
     {
         $apiConf = $GLOBALS['_sc']['c']['translate']['baidu'];
@@ -183,16 +189,22 @@ class translator
         return $return;
     }
 
-    /*有道翻译接口*/
+    /**
+     * 有道翻译接口
+     * @param $q
+     * @param $from
+     * @param $to
+     * @return bool[]
+     */
     public static function api_youdao($q, $from, $to)
     {
-        $apiConf = $GLOBALS['_sc']['c']['translate']['youdao'];
+        $api_conf = $GLOBALS['_sc']['c']['translate']['youdao'];
 
         $salt = time();
-        $sign = $apiConf['appkey'] . $q . $salt . $apiConf['key'];
+        $sign = $api_conf['appkey'] . $q . $salt . $api_conf['key'];
         $sign = md5($sign);
         $data = caiji::html_get('https://openapi.youdao.com/api',
-            null, null, 'utf-8', array('from' => $from, 'to' => $to, 'appKey' => $apiConf['appkey'], 'salt' => $salt, 'sign' => $sign, 'q' => $q));
+            null, null, 'utf-8', array('from' => $from, 'to' => $to, 'appKey' => $api_conf['appkey'], 'salt' => $salt, 'sign' => $sign, 'q' => $q));
         $data = json_decode($data);
 
         $return = array('success' => false);
@@ -211,14 +223,19 @@ class translator
         return $return;
     }
 
-    /*腾讯翻译接口*/
+    /**
+     * 腾讯翻译接口
+     * @param $q
+     * @param $from
+     * @param $to
+     * @return bool[]
+     */
     public static function api_qq($q, $from, $to)
     {
         $api_conf = \ounun::$global['translate']['qq'];
 
-        $secret_id  = $api_conf['secretid'];
-        $secret_key = $api_conf['secretkey'];
-
+        $secret_id  = $api_conf['secret_id'];
+        $secret_key = $api_conf['secret_key'];
 
         $param               = [];
         $param["Nonce"]      = rand();
@@ -264,18 +281,22 @@ class translator
         return $return;
     }
 
+    /**
+     * @param $api_type
+     * @return array|mixed|string[]|null
+     */
     public static function api_langs_get($api_type)
     {
-        $allowLangs = self::$allow_langs[$api_type];
-        if (!empty($allowLangs) && is_array($allowLangs)) {
-            foreach ($allowLangs as $k => $v) {
+        $allow_langs = self::$allow_langs[$api_type];
+        if (!empty($allow_langs) && is_array($allow_langs)) {
+            foreach ($allow_langs as $k => $v) {
                 if (empty(self::$langs[$k])) {
-                    unset($allowLangs[$k]);
+                    unset($allow_langs[$k]);
                 } else {
-                    $allowLangs[$k] = self::$langs[$k];
+                    $allow_langs[$k] = self::$langs[$k];
                 }
             }
         }
-        return is_array($allowLangs) ? $allowLangs : null;
+        return is_array($allow_langs) ? $allow_langs : null;
     }
 }

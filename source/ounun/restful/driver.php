@@ -12,8 +12,9 @@ abstract class driver
 {
     /** @var array */
     protected array $_url_mods;
+
     /** @var restful */
-    protected ?restful $_restful;
+    protected restful $_restful;
 
     public function __construct(array $url_mods = [], ?restful $restful = null)
     {

@@ -10,7 +10,11 @@ class xmlrpc_client
 {
     protected string $url;
     protected string $method;
-    protected $output_options;
+
+    protected array $output_options;
+
+    protected int $error_code;
+    protected string $error_msg;
 
     public function __construct($url, $method = 'POST')
     {
@@ -21,16 +25,17 @@ class xmlrpc_client
     function request($method, $params, $output_options = [])
     {
         $request = xmlrpc_encode_request($method, $params, $output_options);
-        $context = stream_context_create(array('http' => array('method' => $this->method, 'header' => "Content-Type: text/xml", 'content' => $request)));
-        $data    = @file_get_contents($this->url, false, $context);
+        $options = ['http' => ['method' => $this->method, 'header' => "Content-Type: text/xml", 'content' => $request]];
+        $context = stream_context_create($options);
+        $data    = file_get_contents($this->url, false, $context);
         if (!$data) {
-            $this->error = 'can not get webservice response';
+            $this->error_msg = 'can not get webservice response';
             return false;
         }
         $response = xmlrpc_decode($data);
         if (is_array($response) && xmlrpc_is_fault($response)) {
-            $this->error = $response['faultString'];
-            $this->errno = $response['faultCode'];
+            $this->error_msg  = $response['faultString'];
+            $this->error_code = $response['faultCode'];
             return false;
         }
         return $response;

@@ -8,24 +8,28 @@ namespace ounun\plugin;
 
 class sendmail
 {
-    public $mailer,
-        $delimiter,
-        $charset,
-        $from,
-        $sign,
-        $smtp_host,
-        $smtp_port,
-        $smtp_auth,
-        $smtp_username,
-        $smtp_password;
+    public string $delimiter;
+    public string $charset;
+    public string  $from;
+    public string  $sign;
 
-    function __construct($mailer = 1, $delimiter = 1, $charset = 'utf-8', $from = null, $sign = null, $smtp_host = null, $smtp_port = 25, $smtp_auth = true, $smtp_username = null, $smtp_password = null)
+    public string  $smtp_host;
+    public int  $smtp_port;
+    public bool  $smtp_auth;
+    public string  $smtp_username;
+    public string  $smtp_password;
+
+    public int $mailer;
+
+    function __construct($mailer = 1, $delimiter = 1, $charset = 'utf-8', $from = '', $sign = '', $smtp_host = '', $smtp_port = 25, $smtp_auth = true, $smtp_username = '', $smtp_password = '')
     {
         $this->mailer        = $mailer;
+
         $this->delimiter     = $delimiter == 1 ? "\r\n" : ($delimiter == 2 ? "\r" : "\n");
         $this->charset       = $charset;
         $this->from          = $from;
         $this->sign          = $sign;
+
         $this->smtp_host     = $smtp_host;
         $this->smtp_port     = $smtp_port ? $smtp_port : 25;
         $this->smtp_auth     = $smtp_auth;
@@ -41,11 +45,11 @@ class sendmail
         $from    = is_null($from) ? '=?' . $this->charset . '?B?' . base64_encode('CmsTop') . "?= <$this->from>" : (preg_match('/^(.+?) \<(.+?)\>$/', $from, $m) ? '=?' . $this->charset . '?B?' . base64_encode($m[1]) . "?= <$m[2]>" : $from);
         if (strpos($to, ',')) {
             foreach (explode(',', $to) as $touser) {
-                $tousers[] = preg_match('/^(.+?) \<(.+?)\>$/', $touser, $m) ? '=?' . $this->charset . '?B?' . base64_encode($m[1]) . "?= <$m[2]>" : $touser;
+                $tousers[] = preg_match('/^(.+?) <(.+?)>$/', $touser, $m) ? '=?' . $this->charset . '?B?' . base64_encode($m[1]) . "?= <$m[2]>" : $touser;
             }
             $to = implode(',', $tousers);
         }
-        $headers = "From: $from{$this->delimiter}X-Priority: 3{$this->delimiter}X-Mailer: CmsTop $version{$this->delimiter}MIME-Version: 1.0{$this->delimiter}Content-type: text/html; charset=$this->charset{$this->delimiter}Content-Transfer-Encoding: base64{$this->delimiter}";
+        $headers = "From: $from{$this->delimiter}X-Priority: 3{$this->delimiter}X-Mailer: Ounun v" . \ounun::$app_version . "{$this->delimiter}MIME-Version: 1.0{$this->delimiter}Content-type: text/html; charset=$this->charset{$this->delimiter}Content-Transfer-Encoding: base64{$this->delimiter}";
         if ($this->mailer == 1) {
             return @mail($to, $subject, $message, $headers);
         } elseif ($this->mailer == 2) {
