@@ -726,7 +726,7 @@ function environment()
  * 公共配制数据
  *
  * @param string $key
- * @param mixed  $default
+ * @param mixed $default
  * @return mixed
  */
 function global_all(string $key, $default)
@@ -749,10 +749,9 @@ function global_apps(string $key, $default, string $app_name = '')
 {
     $app_name ??= \ounun::$app_name;
     if ($app_name) {
-
-        $tag      = \ounun::$global_apps[$app_name];
-        if ($tag && $tag[$key]) {
-            return $tag[$key];
+        $tag = \ounun::$global_apps[$app_name];
+        if ($tag && $value = $tag[$key]) {
+            return $value;
         }
     }
     return $default;
@@ -768,11 +767,20 @@ function global_apps(string $key, $default, string $app_name = '')
  */
 function global_addons(string $key, string $addon_tag, $default)
 {
-    if (\ounun::$global_addons) {
-        $tag = \ounun::$global_addons[$addon_tag];
-        if ($tag && $tag[$key]) {
-            return $tag[$key];
+    // 加载
+    if (!isset(\ounun::$global_addons[$addon_tag])) {
+        $filename = Dir_Storage . 'runtime/.global_' . $addon_tag . '.php';
+        if (is_file($filename)) {
+            require $filename;
+        } else {
+            \ounun::$global_addons[$addon_tag] = [];
         }
+    }
+
+    // 转换翻译
+    $tag = \ounun::$global_addons[$addon_tag];
+    if ($tag && $value = $tag[$key]) {
+        return $value;
     }
     return $default;
 }

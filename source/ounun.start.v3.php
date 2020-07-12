@@ -1071,12 +1071,22 @@ function start(array $url_mods, string $host)
     ounun::$app_name = (string)$apps['app_name']; // 当前APP
     ounun::$app_path = (string)$apps['path'];     // 当前APP Path
 
+    // runtime_apps
+    $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
+    if (is_file($filename)){
+        require $filename;
+    }
+
+    // lang
     ounun::lang_set($lang);
 
     // path_set
-    ounun::path_set(Dir_Root, true);
+    foreach (ounun::$paths as $v){
+        ounun::path_set($v['path'], (bool)$v['is_auto_helper'],ounun::$app_name);
+    }
+
     // template_set
-    ounun::tpl_theme_set([], (string)$apps['tpl_style'], (string)$apps['tpl_style_default'], (string)$apps['tpl_type'], (string)$apps['tpl_type_default']);
+    ounun::tpl_theme_set( (string)$apps['tpl_style'], (string)$apps['tpl_style_default'], (string)$apps['tpl_type'], (string)$apps['tpl_type_default']);
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org;');
