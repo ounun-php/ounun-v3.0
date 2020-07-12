@@ -62,15 +62,27 @@ class ounun
     /** @var array 命令s */
     public static array $commands = [];
 
+    /** @var array 添加App路径(根目录) */
+    public static array $paths = [];
+
+    /** 应用app数据 */
+    public static array $apps = [];
+    /** 应用app数据(默认) */
+    public static array $apps_default = ['app_name' => self::App_Name_Web, 'url' => '/'];
+
+
     /** @var array 自动加载路径paths */
     public static array $maps_paths = [];
     /** @var array 自动加载路径maps */
     public static array $maps_class = [];
     /** @var array 已安装的功能模块(插件) */
     public static array $maps_installed_addons = [];
-    /** @var array 插件addon      映射数据 */
-    public static array $maps_addon = [];
 
+
+    /** @var array 插件addons挂载数据 */
+    public static array $addons_mount = [];
+    /** @var array 插件addons网址映射url前缀Path(URL)数据 */
+    public static array $addons_paths = [];
     /** @var string 当前插件addon  网址Url前缀Path(URL) */
     public static string $addon_path_curr = '';
 
@@ -78,6 +90,7 @@ class ounun
     public static string $app_name = '';
     /** @var string 当前APP Url前缀Path */
     public static string $app_path = '';
+
     /** @var string 域名Domain */
     public static string $app_domain = '';
     /** @var string 项目代号 */
@@ -117,17 +130,18 @@ class ounun
     /** @var string Upload URL */
     public static string $url_upload = '';
 
-    /** @var string 应用模板类型 pc www */
+    /** @var string 应用模板类型pc/wap/mip - 模板 */
     public static string $tpl_type = 'pc';
-    /** @var string 应用模板类型[默认] */
+    /** @var string 应用模板类型[默认] - 模板 */
     public static string $tpl_type_default = 'pc';
-    /** @var string 模板-样式 */
-    public static string $tpl_style = 'default';
-    /** @var string 模板-样式[默认] */
-    public static string $tpl_style_default = 'default';
+
+    /** @var string 主题风格 */
+    public static string $tpl_theme = 'default';
+    /** @var string 主题风格[默认] - 模板 */
+    public static string $tpl_theme_default = 'default';
 
     /** @var array Template view目录 */
-    public static array $tpl_dirs = [];
+    public static array $tpl_paths = [];
     /** @var array 模板替换数据组 */
     public static array $tpl_replace_array = [];
 
@@ -150,6 +164,7 @@ class ounun
 
     /**
      * 添加命令行
+     *
      * @param array $commands
      */
     static public function commands_set(array $commands)
@@ -339,6 +354,7 @@ class ounun
 
     /**
      * 设定语言 & 设定支持的语言
+     *
      * @param string $lang
      * @param string $lang_default
      * @param array $lang_support_list 设定支持的语言
@@ -356,6 +372,19 @@ class ounun
                 static::$lang_supports[$lang] = $lang_name;
             }
         }
+        // 加载语言包
+        if (static::$lang) {
+            $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang . '.php';
+            if (is_file($file)) {
+                require $file;
+            }
+        }
+        if (static::$lang_default && static::$lang != static::$lang_default) {
+            $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang_default . '.php';
+            if (is_file($file)) {
+                require $file;
+            }
+        }
     }
 
     /**
@@ -365,16 +394,17 @@ class ounun
      * @param string $description
      * @param string $slogan
      */
-    static public function seo_site_set(string $sitename = '', string $keywords = '', string $description = '', string $slogan = '')
-    {
-        $sitename && static::$seo_site['sitename'] = $sitename;
-        $keywords && static::$seo_site['keywords'] = $keywords;
-        $description && static::$seo_site['description'] = $description;
-        $slogan && static::$seo_site['slogan'] = $slogan;
-    }
+//    static public function seo_site_set(string $sitename = '', string $keywords = '', string $description = '', string $slogan = '')
+//    {
+//        $sitename && static::$seo_site['sitename'] = $sitename;
+//        $keywords && static::$seo_site['keywords'] = $keywords;
+//        $description && static::$seo_site['description'] = $description;
+//        $slogan && static::$seo_site['slogan'] = $slogan;
+//    }
 
     /**
      * 设定页面的SEO
+     *
      * @param string $title
      * @param string $keywords
      * @param string $description
@@ -394,6 +424,7 @@ class ounun
 
     /**
      * 设定公共配制数据
+     *
      * @param array $config
      */
     static public function global_set(array $config = [])
@@ -407,6 +438,7 @@ class ounun
 
     /**
      * 设定公共配制数据(应用)
+     *
      * @param array $config
      * @param string $app_name
      */
@@ -427,6 +459,7 @@ class ounun
 
     /**
      * 设定公共配制数据(插件)
+     *
      * @param array $config
      * @param string $addon_tag
      */
@@ -447,58 +480,8 @@ class ounun
     }
 
     /**
-     * 公共配制数据
-     * @param string $config_key
-     * @param $default
-     * @return mixed|string
-     */
-    public static function global_get(string $config_key, $default)
-    {
-        if (\ounun::$global && \ounun::$global[$config_key]) {
-            return \ounun::$global[$config_key];
-        }
-        return $default;
-    }
-
-    /**
-     * 公共配制数据(应用)
-     * @param string $key
-     * @param $default
-     * @param string $app_name
-     * @return mixed
-     */
-    public static function global_apps_get(string $key, $default, string $app_name = '')
-    {
-        if (\ounun::$global_apps) {
-            $app_name ??= static::$app_name;
-            $tag      = \ounun::$global_apps[$app_name];
-            if ($tag && $tag[$key]) {
-                return $tag[$key];
-            }
-        }
-        return $default;
-    }
-
-    /**
-     * 公共配制数据(插件)
-     * @param string $key
-     * @param mixed $default
-     * @param string $addon_tag
-     * @return mixed
-     */
-    public static function global_addons_get(string $key, string $addon_tag, $default)
-    {
-        if (\ounun::$global_addons) {
-            $tag = \ounun::$global_addons[$addon_tag];
-            if ($tag && $tag[$key]) {
-                return $tag[$key];
-            }
-        }
-        return $default;
-    }
-
-    /**
      * 设定DB配制数据
+     *
      * @param array $database_config
      * @param string $database_default
      */
@@ -516,6 +499,7 @@ class ounun
 
     /**
      * 默认 数据库
+     *
      * @return string
      */
     static public function database_default_get()
@@ -528,6 +512,7 @@ class ounun
 
     /**
      * 添加$addon
+     *
      * @param string $addon_apps
      */
     static public function addons_set(string $addon_apps)
@@ -539,6 +524,7 @@ class ounun
 
     /**
      * 添加App路径(根目录)
+     *
      * @param string $path_root
      * @param string $app_name
      * @param bool $is_auto_helper
@@ -616,49 +602,62 @@ class ounun
     }
 
     /**
-     * 设定 模板及模板根目录
-     * @param array $tpl_dirs 模板根目录
+     * 设定 模板类型/主题风格
      *
-     * @param string $tpl_style 风格
-     * @param string $tpl_style_default 风格(默认)
      * @param string $tpl_type 类型
      * @param string $tpl_type_default 类型(默认)
+     * @param string $tpl_theme 风格
+     * @param string $tpl_theme_default 风格(默认)
      */
-    static public function template_paths_set(array $tpl_dirs = [],
-                                              string $tpl_style = '', string $tpl_style_default = '',
-                                              string $tpl_type = '', string $tpl_type_default = '')
+    static public function tpl_theme_set(string $tpl_type = '', string $tpl_type_default = '',
+                                         string $tpl_theme = '', string $tpl_theme_default = '')
+    {
+        // 类型
+        $tpl_type && static::$tpl_type = $tpl_type;
+        // 类型(默认)
+        $tpl_type_default && static::$tpl_type_default = $tpl_type_default;
+
+        // 主题风格
+        $tpl_theme && static::$tpl_theme = $tpl_theme;
+        // 主题风格(默认)
+        $tpl_theme_default && static::$tpl_theme_default = $tpl_theme_default;
+    }
+
+
+    /**
+     * 设定 模板tpl根目录
+     * @param array $paths 模板tpl根目录
+     */
+    static public function tpl_paths_set(array $paths = [])
     {
         // 模板根目录
-        if ($tpl_dirs && is_array($tpl_dirs)) {
-            foreach ($tpl_dirs as $tpl_dir) {
+        if ($paths && is_array($paths)) {
+            foreach ($paths as $tpl_dir) {
                 // print_r(['__LINE__'=>__LINE__,'$tpl_dir'=>$tpl_dir]);
-                if (!in_array($tpl_dir, static::$tpl_dirs) && is_dir($tpl_dir['path'])) {
-                    // print_r(['__LINE__'=>__LINE__,'$tpl_dir'=>$tpl_dir]);
-                    static::$tpl_dirs[] = $tpl_dir;
+                if (!in_array($tpl_dir, static::$tpl_paths) && is_dir($tpl_dir['path'])) {
+                    static::$tpl_paths[] = $tpl_dir;
                 }
             }
-        }
-
-        // 风格
-        $tpl_style && static::$tpl_style = $tpl_style;
-        // 风格(默认)
-        $tpl_style_default &&  static::$tpl_style_default = $tpl_style_default;
-
-        // 类型
-        if ($tpl_type) {
-            static::$tpl_type = $tpl_type;
-        }
-        // 类型(默认)
-        if ($tpl_type_default) {
-            static::$tpl_type_default = $tpl_type_default;
         }
     }
 
     /**
      * 设定模板替换
+     *
+     * @param string $key
+     * @param string $value
+     */
+    static public function tpl_replace_array_set(string $key, string $value)
+    {
+        static::$tpl_replace_array[$key] = $value;
+    }
+
+    /**
+     * 设定模板替换
+     *
      * @param array $data
      */
-    static public function template_array_set(?array $data)
+    static public function tpl_replace_array_multi_set(?array $data)
     {
         if ($data && is_array($data)) {
             foreach ($data as $key => $value) {
@@ -668,20 +667,11 @@ class ounun
     }
 
     /**
-     * 设定模板替换
-     * @param string $key
-     * @param string $value
-     */
-    static public function template_replace_str_set(string $key, string $value)
-    {
-        static::$tpl_replace_array[$key] = $value;
-    }
-
-    /**
      * 赋值(默认) $seo + $url
+     *
      * @return array
      */
-    static public function template_replace_str_get()
+    static public function tpl_replace_array_get()
     {
         return array_merge([
             '{$page_url}'  => static::$page_url,      // $lang/$app_path/$base_url,
@@ -716,9 +706,9 @@ class ounun
      * @param string $lang
      * @return string
      */
-    static public function url_page(string $url = '', $lang = '')
+    static public function url_page_get(string $url = '', $lang = '')
     {
-        if (!$lang) {
+        if (empty($lang)) {
             $lang = static::$lang;
         }
         if ($url !== '' && $url[0] == '/') {
@@ -794,9 +784,9 @@ class ounun
      */
     static public function root_curr_get()
     {
-        if (static::$tpl_style == template::Type_Mip) {
+        if (static::$tpl_theme == template::Type_Mip) {
             return static::$root_mip;
-        } elseif (static::$tpl_style == template::Type_Wap) {
+        } elseif (static::$tpl_theme == template::Type_Wap) {
             return static::$root_wap;
         }
         return static::$root_www;
@@ -965,14 +955,6 @@ class ounun
         }
     }
 
-    /** 应用app数据 */
-    public static array $apps = [];
-    /** 应用app数据(默认) */
-    public static array $apps_default = ['app_name' => self::App_Name_Web, 'url' => '/'];
-
-    /** 插件addons挂载数据 */
-    public static array $addons_mount = [];
-
     /**
      * 设定路由数据
      * @param array $apps
@@ -1009,6 +991,7 @@ class ounun
 
         // 插件路由
         $addon_tag = '';
+
         /** @var addons $apps */
         if ($url_mods[1] && ($route = static::$addons_mount["{$url_mods[0]}/$url_mods[1]"]) && $apps = $route['apps']) {
             array_shift($url_mods);
@@ -1074,7 +1057,6 @@ function start(array $url_mods, string $host)
     } else {
         $lang = ounun::$lang ?? ounun::$lang_default;
     }
-    ounun::lang_set($lang);
 
     // 应用app
     if ($url_mods && $url_mods[0] && $apps = ounun::$apps["{$host}/{$url_mods[0]}"]) {
@@ -1084,13 +1066,17 @@ function start(array $url_mods, string $host)
     } else {
         $apps = ounun::$apps_default;
     }
+
+    // 设定
     ounun::$app_name = (string)$apps['app_name']; // 当前APP
     ounun::$app_path = (string)$apps['path'];     // 当前APP Path
 
-    // load_config
+    ounun::lang_set($lang);
+
+    // path_set
     ounun::path_set(Dir_Root, true);
     // template_set
-    ounun::template_paths_set([], (string)$apps['tpl_style'], (string)$apps['tpl_style_default'], (string)$apps['tpl_type'], (string)$apps['tpl_type_default']);
+    ounun::tpl_theme_set([], (string)$apps['tpl_style'], (string)$apps['tpl_style_default'], (string)$apps['tpl_type'], (string)$apps['tpl_type_default']);
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org;');

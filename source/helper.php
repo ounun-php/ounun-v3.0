@@ -705,23 +705,76 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     // 读取环境配制
-    $ini      = [];
-    $env_file = Dir_Root . '.environment.php';
-    if (is_file($env_file)) {
-        $ini = require $env_file;
+    $file = Dir_Storage . 'runtime/.environment.php';
+    if (is_file($file)) {
+        require $file;
     } else {
-        $env_file = Dir_Root . 'environment.example.php';
-        if (is_file($env_file)) {
-            $ini = require $env_file;
+        $file = Dir_Root . 'env/environment.example.php';
+        if (is_file($file)) {
+            require $file;
+        } else {
+            error_php('FileNotFound:' . $file);
         }
     }
-    if ($ini && is_array($ini)) {
-        $GLOBALS['_environment_'] = ($ini && $ini['global'] && $ini['global']['environment']) ? $ini['global']['environment'] : '';
-        ounun::environment_set($ini);
-    } else {
+    if (!isset($GLOBALS['_environment_'])) {
         $GLOBALS['_environment_'] = '2';
     }
     return $GLOBALS['_environment_'];
+}
+
+/**
+ * 公共配制数据
+ *
+ * @param string $key
+ * @param mixed  $default
+ * @return mixed
+ */
+function global_all(string $key, $default)
+{
+    if ($value = \ounun::$global[$key]) {
+        return $value;
+    }
+    return $default;
+}
+
+/**
+ * 公共配制数据(应用)
+ *
+ * @param string $key
+ * @param mixed $default
+ * @param string $app_name
+ * @return mixed
+ */
+function global_apps(string $key, $default, string $app_name = '')
+{
+    $app_name ??= \ounun::$app_name;
+    if ($app_name) {
+
+        $tag      = \ounun::$global_apps[$app_name];
+        if ($tag && $tag[$key]) {
+            return $tag[$key];
+        }
+    }
+    return $default;
+}
+
+/**
+ * 公共配制数据(插件)
+ *
+ * @param string $key
+ * @param mixed $default
+ * @param string $addon_tag
+ * @return mixed
+ */
+function global_addons(string $key, string $addon_tag, $default)
+{
+    if (\ounun::$global_addons) {
+        $tag = \ounun::$global_addons[$addon_tag];
+        if ($tag && $tag[$key]) {
+            return $tag[$key];
+        }
+    }
+    return $default;
 }
 
 /**
@@ -751,6 +804,8 @@ abstract class v
     public string $addon_tag = '';
 
     /**
+     * 调试初始化
+     *
      * @param string $channel
      * @param string $filename
      * @return debug|null
@@ -785,9 +840,8 @@ abstract class v
         }
     }
 
-
     /**
-     * Cache
+     * 网页Cache
      *
      * @param $key
      */
@@ -795,8 +849,8 @@ abstract class v
     {
         if ('' == Environment && \ounun::$global['cache_html']) {
             $cache_config        = \ounun::$global['cache_html'];
-            $cache_config['mod'] = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type;
-            $key                 = \ounun::$app_name . '_' . \ounun::$tpl_style . '_' . \ounun::$tpl_type . '_' . $key;
+            $cache_config['mod'] = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_theme . '_' . \ounun::$tpl_type;
+            $key                 = \ounun::$app_name . '_' . \ounun::$tpl_theme . '_' . \ounun::$tpl_type . '_' . $key;
             static::$cache_html  = new html($cache_config, $key, static::$cache_html_time, static::$cache_html_trim);
             static::$cache_html->run(true);
         }
@@ -817,6 +871,7 @@ abstract class v
 
     /**
      * (兼容)返回一个 模板文件地址(绝对目录,相对root)
+     *
      * @param string $filename
      * @param string $addon_tag
      * @param bool $show_debug
@@ -833,6 +888,7 @@ abstract class v
 
     /**
      * (兼容)返回一个 模板文件地址(相对目录)
+     *
      * @param string $filename
      * @param string $addon_tag
      * @return string
@@ -845,6 +901,7 @@ abstract class v
 
     /**
      * ounun_view constructor.
+     *
      * @param array $url_mods
      * @param string $addon_tag
      */
@@ -863,6 +920,7 @@ abstract class v
 
     /**
      * 初始化
+     *
      * @param string $method
      */
     protected function _initialize(string $method)
@@ -872,6 +930,7 @@ abstract class v
 
     /**
      * 初始化Page
+     *
      * @param string $page_file
      * @param bool $is_cache_html
      * @param bool $ext_req
@@ -883,7 +942,7 @@ abstract class v
                               int $cache_html_time = 0, bool $cache_html_trim = true)
     {
         // url_check
-        \ounun::url_page(\ounun::$addon_path_curr . $page_file);
+        \ounun::url_page_get(\ounun::$addon_path_curr . $page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html
@@ -900,17 +959,13 @@ abstract class v
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new template(\ounun::$tpl_style, \ounun::$tpl_style_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
-        }
-
-        // db
-        if (empty(static::$db_v)) {
-            static::$db_v = \ounun\db\pdo::i(\ounun::database_default_get());
+            static::$tpl = new template(\ounun::$tpl_theme, \ounun::$tpl_theme_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
         }
     }
 
     /**
      * 默认 首页
+     *
      * @param array $mod
      */
     public function index($mod)
@@ -922,6 +977,7 @@ abstract class v
 
     /**
      * 默认 robots.txt文件
+     *
      * @param array $mod
      */
     public function robots($mod)
@@ -943,6 +999,7 @@ abstract class v
 
     /**
      * 默认 ads.txt文件    google.com
+     *
      * @param array $mod
      */
     public function ads($mod)
@@ -986,6 +1043,7 @@ abstract class v
 
     /**
      * 没定的方法
+     *
      * @param string $method
      * @param String $arguments
      */

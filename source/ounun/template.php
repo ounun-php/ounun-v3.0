@@ -111,7 +111,7 @@ class template
         } else {
             $addon_tag2 = '';
         }
-        foreach (\ounun::$tpl_dirs as $tpl_dir) {
+        foreach (\ounun::$tpl_paths as $tpl_dir) {
             // print_r($tpl_dir);
             if ('root' == $tpl_dir['type']) {
                 // $styles
@@ -209,7 +209,7 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(\ounun::$tpl_dirs) . " <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(\ounun::$tpl_paths) . " <br />
               </div>";
         // error_get_last();
         trigger_error("Can't find Template:{$filename}", E_USER_ERROR);
@@ -270,7 +270,7 @@ class template
         }
 
         // 替换
-        return strtr($buffer, \ounun::template_replace_str_get());
+        return strtr($buffer, \ounun::tpl_replace_array_get());
     }
 
     /**
