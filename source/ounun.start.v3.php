@@ -373,18 +373,18 @@ class ounun
             }
         }
         // 加载语言包
-        if (static::$lang) {
+        if (static::$lang && static::$lang != static::$lang_default) {
             $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang . '.php';
             if (is_file($file)) {
                 require $file;
             }
         }
-        if (static::$lang_default && static::$lang != static::$lang_default) {
-            $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang_default . '.php';
-            if (is_file($file)) {
-                require $file;
-            }
-        }
+//        if (static::$lang_default && static::$lang != static::$lang_default) {
+//            $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang_default . '.php';
+//            if (is_file($file)) {
+//                require $file;
+//            }
+//        }
     }
 
     /**
