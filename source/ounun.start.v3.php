@@ -132,12 +132,12 @@ class ounun
 
     /** @var string 应用模板类型pc/wap/mip - 模板 */
     public static string $tpl_type = 'pc';
-    /** @var string 应用模板类型[默认] - 模板 */
+    /** @var string 应用模板类型pc/wap/mip[默认] - 模板 */
     public static string $tpl_type_default = 'pc';
 
-    /** @var string 主题风格 */
+    /** @var string 主题风格(主题目录) */
     public static string $tpl_theme = 'default';
-    /** @var string 主题风格[默认] - 模板 */
+    /** @var string 主题风格(主题目录)[默认] - 模板 */
     public static string $tpl_theme_default = 'default';
 
     /** @var array Template view目录 */
