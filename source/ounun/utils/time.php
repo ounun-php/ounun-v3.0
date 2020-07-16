@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\utils;
 
 class time
@@ -65,54 +66,49 @@ class time
 
     public function __construct($date = null)
     {
-        $this->set_date($date);
+        $this->date_set($date);
     }
 
     public function totime($date = null)
     {
-        if (is_string($date))
-        {
-            if (!$date) return time();
+        if (is_string($date)) {
+            if (!$date) {
+                return time();
+            }
             $time = strtotime($date);
             return $time == -1 ? time() : $time;
-        }
-        elseif(is_null($date))
-        {
+        } elseif (is_null($date)) {
             return time();
-        }
-        elseif(is_numeric($date))
-        {
+        } elseif (is_numeric($date)) {
             return $date;
-        }
-        else
-        {
+        } else {
             return get_class($date) == 'date' ? $date->timestamp : time();
         }
     }
 
     public function valid($date)
     {
-        $this->set_date($date);
-        return checkdate($this->month , $this->day , $this->year);
+        $this->date_set($date);
+        return checkdate($this->month, $this->day, $this->year);
     }
 
-    public function set_date($date)
+    public function date_set($date)
     {
-        $time = $this->totime($date);
-        $array = getdate($time);
-        $this->timestamp    =   $array[0];
-        $this->second       =   $array["seconds"];
-        $this->minute       =   $array["minutes"];
-        $this->hour         =   $array["hours"];
-        $this->year         =   $array["year"];
-        $this->month        =   $array["mon"];
-        $this->day          =   $array["mday"];
-        $this->mday          =   $array["mday"];
-        $this->wday          =   $array["wday"];
-        $this->yday         =   $array["yday"];
-        $this->monthtext       =   $array["month"];
-        $this->weekday       =   $array["weekday"];
-        return ;
+        $time            = $this->totime($date);
+        $array           = getdate($time);
+        $this->timestamp = $array[0];
+        $this->second    = $array["seconds"];
+        $this->minute    = $array["minutes"];
+        $this->hour      = $array["hours"];
+        $this->year      = $array["year"];
+        $this->month     = $array["mon"];
+        $this->day       = $array["mday"];
+        $this->mday      = $array["mday"];
+        $this->wday      = $array["wday"];
+        $this->yday      = $array["yday"];
+        $this->monthtext = $array["month"];
+        $this->weekday   = $array["weekday"];
+        return;
     }
 
     public function format($format = "%Y-%m-%d %H:%M:%S")
@@ -128,26 +124,25 @@ class time
     public function diff($date, $elaps = 'd')
     {
         $difftime = $this->totime($date) - $this->timestamp;
-        $days = $difftime / 86400;
-        switch ($elaps)
-        {
+        $days     = $difftime / 86400;
+        switch ($elaps) {
             case 'y':
-                $return =  $days / 365;
+                $return = $days / 365;
                 break;
             case 'm':
-                $return =  $days / 30;
+                $return = $days / 30;
                 break;
             case 'd':
                 $return = $days;
                 break;
             case 'w':
-                $return =  $days / 7;
+                $return = $days / 7;
                 break;
             case 'h':
-                $return =  $days * 24;
+                $return = $days * 24;
                 break;
             case 'i':
-                $return =  $days * 1440;
+                $return = $days * 1440;
                 break;
             case 's':
                 $return = $difftime;
@@ -158,34 +153,34 @@ class time
 
     public function timediff($time, $precision = false)
     {
-        if(!is_numeric($precision) && !is_bool($precision)) {
-            static $_diff = ['y'=>'年', 'm'=>'个月', 'd'=>'天', 'w'=>'周', 'h'=>'小时', 'i'=>'分钟', 's'=>'秒'];
-            return ceil($this->diff($time, $precision)).$_diff[$precision].'前';
+        if (!is_numeric($precision) && !is_bool($precision)) {
+            static $_diff = ['y' => '年', 'm' => '个月', 'd' => '天', 'w' => '周', 'h' => '小时', 'i' => '分钟', 's' => '秒'];
+            return ceil($this->diff($time, $precision)) . $_diff[$precision] . '前';
         }
         $diff = abs($this->totime($time) - $this->timestamp);
         static $chunks = [
             [31536000, '年'],
-            [2592000 , '个月'], array(604800, '周'), array(86400, '天'), array(3600, '小时'), array(60, '分钟'), array(1, '秒')
+            [2592000, '个月'], array(604800, '周'), array(86400, '天'), array(3600, '小时'), array(60, '分钟'), array(1, '秒')
         ];
-        $count =0;
+        $count = 0;
         $since = '';
-        for($i = 0; $i < count($chunks); $i++) {
-            if($diff>=$chunks[$i][0]) {
-                $num   =  floor($diff/$chunks[$i][0]);
-                $since .= sprintf('%d'.$chunks[$i][1],$num);
-                $diff =  (int)($diff-$chunks[$i][0]*$num);
+        for ($i = 0; $i < count($chunks); $i++) {
+            if ($diff >= $chunks[$i][0]) {
+                $num   = floor($diff / $chunks[$i][0]);
+                $since .= sprintf('%d' . $chunks[$i][1], $num);
+                $diff  = (int)($diff - $chunks[$i][0] * $num);
                 $count++;
-                if(!$precision || $count>=$precision) {
+                if (!$precision || $count >= $precision) {
                     break;
                 }
             }
         }
-        return $since.'前';
+        return $since . '前';
     }
 
     public function firstday_of_week()
     {
-        $wday = $this->wday === 0 ? 6 : $this->wday-1;
+        $wday = $this->wday === 0 ? 6 : $this->wday - 1;
         if ($wday) $this->add(-$wday, 'd');
         return (new date(mktime(0, 0, 0, $this->month, $this->day, $this->year)));
     }
@@ -217,14 +212,13 @@ class time
 
     public function add($number = 0, $interval = 'd')
     {
-        $hours =  $this->hour;
-        $minutes =  $this->minute;
-        $seconds =  $this->second;
-        $month =  $this->month;
-        $day =  $this->day;
-        $year =  $this->year;
-        switch ($interval)
-        {
+        $hours   = $this->hour;
+        $minutes = $this->minute;
+        $seconds = $this->second;
+        $month   = $this->month;
+        $day     = $this->day;
+        $year    = $this->year;
+        switch ($interval) {
             case 'y':
                 $year += $number;
                 break;
@@ -244,7 +238,7 @@ class time
                 $seconds += $number;
                 break;
             case 'w':
-                $day += ($number*7);
+                $day += ($number * 7);
                 break;
         }
         return (new date(mktime($hours, $minutes, $seconds, $month, $day, $year)));

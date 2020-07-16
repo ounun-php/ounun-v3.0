@@ -25,8 +25,8 @@ class id_card
         if (!preg_match($regx, $id)) {
             return false;
         }
-        if (15 == strlen($id)) //检查15位
-        {
+        //检查15位
+        if (15 == strlen($id)) {
             $regx = '/^(\d{6})+(\d{2})+(\d{2})+(\d{2})+(\d{3})$/';
             preg_match($regx, $id, $arr_split);
             //检查生日日期是否正确
@@ -36,8 +36,8 @@ class id_card
             } else {
                 return true;
             }
-        } else //检查18位
-        {
+
+        } else {  //检查18位
             $regx = '/^(\d{6})+(\d{4})+(\d{2})+(\d{2})+(\d{3})([0-9]|X)$/';
             preg_match($regx, $id, $arr_split);
             $dtm_birth = $arr_split[2] . '/' . $arr_split[3] . '/' . $arr_split[4];

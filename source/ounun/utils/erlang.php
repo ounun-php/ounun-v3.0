@@ -11,10 +11,10 @@ use ounun\client\http;
 
 class erlang
 {
-    protected $_key;
-    protected $_hub_id = 0; // hub_id
-    protected $_host;
-    protected $_port;
+    protected string $_key;
+    protected int $_hub_id = 0; // hub_id
+    protected string $_host;
+    protected int $_port;
 
     /**
      * 例子:
@@ -36,6 +36,7 @@ class erlang
     /**
      * erlang constructor.
      * @param string $key
+     * @param int $sid_hub_id
      * @param string $host
      * @param int $port
      */
@@ -45,9 +46,10 @@ class erlang
     }
 
     /**
-     * @param string $key
+     * @param int $sid_hub_id
      * @param string $host
      * @param int $port
+     * @param string $key
      */
     public function config_set(int $sid_hub_id = 0, string $host = '', int $port = 0, string $key = '')
     {
@@ -68,7 +70,8 @@ class erlang
 
     /**
      * 统一调用调用
-     * @param int $sid
+     * @param string $node_type
+     * @param string $mod
      * @param string $fun
      * @param string $arg_data
      * @return mixed|boolean string

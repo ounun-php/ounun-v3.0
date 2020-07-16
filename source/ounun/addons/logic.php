@@ -19,6 +19,8 @@ abstract class logic
     protected model $_model;
 
     /**
+     * 业务逻辑
+     *
      * @param model|null $model
      * @return $this 返回数据库连接对像
      */
@@ -36,7 +38,7 @@ abstract class logic
      */
     public function __construct(?model $model = null)
     {
-        $this->logic_set($model);
+        $this->model_set($model);
         $this->_initialize(); // 控制器初始化
     }
 
@@ -47,9 +49,10 @@ abstract class logic
 
     /**
      * 数据模型set
+     *
      * @param $model
      */
-    public function logic_set($model)
+    public function model_set($model)
     {
         if ($model && is_subclass_of($model, model::class)) {
             $this->_model = $model;
@@ -58,7 +61,18 @@ abstract class logic
     }
 
     /**
+     * get数据模型
+     *
+     * @return model
+     */
+    public function model_get()
+    {
+        return $this->_model;
+    }
+
+    /**
      * 错误代码
+     *
      * @param int $error_code
      * @param mixed $data
      * @param array $extend

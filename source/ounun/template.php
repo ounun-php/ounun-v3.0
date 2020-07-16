@@ -39,10 +39,10 @@ class template
     /** @var string 插目目录名 */
     protected string $_addon_tag;
 
-    /** @var string 风格 */
-    protected string $_style;
-    /** @var string 风格(默认) */
-    protected string $_style_default;
+    /** @var string 主题风格 */
+    protected string $_theme;
+    /** @var string 主题风格(默认) */
+    protected string $_theme_default;
 
     /** @var string 模板类型 */
     protected string $_type;
@@ -55,19 +55,19 @@ class template
     /**
      * 创建对像 template constructor.
      *
-     * @param string $tpl_style 风格
-     * @param string $tpl_style_default 风格(默认)
+     * @param string $tpl_theme 风格
+     * @param string $tpl_theme_default 风格(默认)
      * @param string $tpl_type 类型
      * @param string $tpl_type_default 模板文件所以目录(默认)
      * @param bool $is_trim
      */
-    public function __construct(string $tpl_style = '', string $tpl_style_default = '', string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
+    public function __construct(string $tpl_theme = '', string $tpl_theme_default = '', string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
     {
-        if ($tpl_style) {
-            $this->_style = $tpl_style;
+        if ($tpl_theme) {
+            $this->_theme = $tpl_theme;
         }
-        if ($tpl_style_default) {
-            $this->_style_default = $tpl_style_default;
+        if ($tpl_theme_default) {
+            $this->_theme_default = $tpl_theme_default;
         }
 
         if ($tpl_type) {
@@ -115,10 +115,10 @@ class template
             // print_r($tpl_dir);
             if ('root' == $tpl_dir['type']) {
                 // $styles
-                if ($this->_style_default && $this->_style != $this->_style_default) {
-                    $styles = [$this->_style, $this->_style_default];
+                if ($this->_theme_default && $this->_theme != $this->_theme_default) {
+                    $styles = [$this->_theme, $this->_theme_default];
                 } else {
-                    $styles = [$this->_style];
+                    $styles = [$this->_theme];
                 }
                 foreach ($styles as $style) {
                     foreach ($types as $type) {
@@ -205,7 +205,7 @@ class template
         echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
                     <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} ".($addon_tag?"\$addon_tag:{$addon_tag}":'')."<br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_style} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_theme} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />

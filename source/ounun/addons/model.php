@@ -67,6 +67,41 @@ abstract class model
     /** 初始化 */
     abstract protected function _initialize();
 
+    /**
+     * 更新数据
+     *
+     * @param int $id
+     * @param array $data
+     * @param bool $is_update_force
+     * @param bool $is_update_default
+     */
+    public function update(int $id, array $data, bool $is_update_force = false, bool $is_update_default = false)
+    {
+
+    }
+
+    /**
+     * 插入数据
+     *
+     * @param array $data
+     */
+    public function insert(array $data)
+    {
+
+    }
+
+    /**
+     * 删除
+     *
+     * @param string $where_str
+     * @param array $where_bind
+     * @param int $limit
+     */
+    public function delete(string $where_str, array $where_bind, int $limit = 1)
+    {
+
+    }
+
     /** 逻辑类get */
     public function logic_get()
     {

@@ -13,7 +13,7 @@ class file
      * 删除目录
      * @param string $pathname
      */
-    static public function deldir(string $pathname)
+    static public function del_dir(string $pathname)
     {
         //如果是目录则继续
         if (is_dir($pathname)) {
@@ -25,7 +25,7 @@ class file
                     //如果是目录则递归子目录，继续操作
                     if (is_dir($pathname . $val)) {
                         //子目录中操作删除文件夹和文件
-                        static::deldir($pathname . $val . '/');
+                        static::del_dir($pathname . $val . '/');
                         //目录清空后删除空文件夹
                         if (file_exists($pathname . $val . '/')) {
                             rmdir($pathname . $val . '/');
@@ -80,7 +80,7 @@ class file
         }
     }
 
-    private static $_error_msg = [];
+    private static array $_error_msg = [];
 
     static function read($pattern, $return = null)
     {
@@ -144,10 +144,14 @@ class file
 
     static function clear($path)
     {
-        if (!is_dir($path)) return false;
+        if (!is_dir($path)) {
+            return false;
+        }
         $path  = self::path($path);
         $items = glob($path . '*');
-        if (!is_array($items)) return true;
+        if (!is_array($items)) {
+            return true;
+        }
         foreach ($items as $v) {
             if (is_dir($v)) {
                 self::delete($v);

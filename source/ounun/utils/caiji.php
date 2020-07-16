@@ -13,6 +13,7 @@ class caiji
 {
     /**
      * 获取目录内容(左边)
+     *
      * @param string $content 所在内容
      * @param string $left 目标内容左边标识点
      * @param string $right 目标内容右边标识点
@@ -25,6 +26,7 @@ class caiji
 
     /**
      * 获取目录内容(右边)
+     *
      * @param string $content 所在内容
      * @param string $right 目标内容右边标识点
      * @param string $left 目标内容左边标识点
@@ -37,6 +39,7 @@ class caiji
 
     /**
      * 获取目录内容(左右两边边)
+     *
      * @param string $content 所在内容
      * @param string $left 目标内容左边标识点
      * @param string $right 目标内容右边标识点
@@ -57,6 +60,7 @@ class caiji
 
     /**
      * 获取目录内容(左边)
+     *
      * @param string $content 所在内容
      * @param string $middle 目标内容分格点
      * @param string $left 目标内容左边标识点
@@ -78,6 +82,7 @@ class caiji
 
     /**
      * 获取目录内容(右边)
+     *
      * @param string $content 所在内容
      * @param string $middle 目标内容分格点
      * @param string $right 目标内容右边标识点
@@ -99,9 +104,11 @@ class caiji
 
     /**
      * 获取目录内容
+     *
      * @param string $content 所在内容
      * @param string $middle 目标内容分格点
      * @param array $rules 分析规则 ['key'=> 主键, 'type' => <'left'默认,'right'> , 'left' => $left, 'right'=>$right]
+     * @return mixed
      */
     static public function list(string $content, string $middle, array $rules)
     {
@@ -128,6 +135,7 @@ class caiji
 
     /**
      * 取出正则数据
+     *
      * @param  $pattern string
      *      网址: <a href="(http://:any)">(:any)</a>
      *      网址: <img src="(http://:any)" :any?/>
@@ -143,6 +151,7 @@ class caiji
 
     /**
      * 正则提取正文里指定的第几张图片地址
+     *
      * @param string $content
      * @return array
      */
@@ -156,6 +165,7 @@ class caiji
 
     /**
      * 随机生成国内ip
+     *
      * @return string
      */
     static public function rand_inland_ip()
@@ -184,6 +194,7 @@ class caiji
 
     /**
      * 随机 显示次数
+     *
      * @return string
      */
     static public function rand_views()
@@ -211,6 +222,7 @@ class caiji
 
     /**
      * 获取html代码
+     *
      * @param $url
      * @param null $headers 键值对形式
      * @param array $options
@@ -232,7 +244,7 @@ class caiji
         }
         $headers = $curl_headers;
         unset($curl_headers);
-        if (!preg_match('/^\w+\:\/\//', $url)) {
+        if (!preg_match('/^\w+:\/\//', $url)) {
             $url = 'http://' . $url;
         }
         $curl = null;

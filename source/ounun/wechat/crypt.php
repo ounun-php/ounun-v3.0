@@ -16,6 +16,7 @@ class crypt
 
     /**
      * 构造函数
+     *
      * @param string $session_key 用户在小程序登录后获取的会话密钥
      * @param string $app_id 小程序的appid
      */
@@ -27,6 +28,7 @@ class crypt
 
     /**
      * 检验数据的真实性，并且获取解密后的明文.
+     *
      * @param string $encrypted_data 加密的用户数据
      * @param string $iv 与用户数据一同返回的初始向量
      * @param string $data 解密后的原文

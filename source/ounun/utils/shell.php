@@ -10,7 +10,7 @@ namespace ounun\utils;
 class shell
 {
     /** @var bool */
-    protected $_debug = false;
+    protected bool $_debug = false;
 
     /**
      * shell constructor.

@@ -7,7 +7,6 @@
 namespace ounun;
 
 use ounun\cache\driver;
-use ounun\db\pdo;
 
 class cache
 {
@@ -179,7 +178,7 @@ class cache
             return $this->_value[$key];
         }
         /** @var int 最后更新时间，大于这个时间数据都过期 */
-        $last_time = (int)\ounun::$global['cache']['last_time'];
+        $last_time = (int)(global_all('cache')['last_time']);
         $c         = $this->_driver->get($key, [], true);
         if ($c && $c['v'] && $c['t'] > $last_time) {
             $this->_value[$key] = $c['v'];

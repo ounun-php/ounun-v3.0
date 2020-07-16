@@ -25,13 +25,14 @@ namespace ounun\utils;
 class crontab
 {
     /** @var array  解析数据 */
-    protected $_cron = [];
+    protected array $_cron = [];
 
     /** @var string 空:格式正确      非空:错误提示 */
-    protected $_error = '';
+    protected string $_error = '';
 
     /**
      * 格式化crontab时间设置字符串,用于比较
+     *
      * crontab constructor.
      * @param string $cron_str crontab的时间计划字符串，如"15 3 * * *"
      * @param array $cron_array
@@ -74,6 +75,7 @@ class crontab
 
     /**
      * 检查某时间($time)是否符合某个corntab时间计划($str_cron)
+     *
      * @param int $time 时间戳
      * @return array  出错返回string（错误信息）
      */
@@ -97,6 +99,7 @@ class crontab
 
     /**
      * 格式化时间戳，以便比较
+     *
      * @param int $time 时间戳
      *
      * @return array
@@ -108,6 +111,7 @@ class crontab
 
     /**
      * 获得this->cron数据
+     *
      * @return array
      */
     public function cron(): array
@@ -177,5 +181,4 @@ class crontab
         $list = $max - $min > $step ? range($min, $max, $step) : [(int)$min];
         return succeed($list);
     }
-
 }

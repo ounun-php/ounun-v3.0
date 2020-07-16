@@ -6,27 +6,19 @@ namespace ounun\utils;
 
 class ids
 {
-    /** @var integer 开始计算的时间，毫秒级时间截 */
-    protected $epoch_time = 1546593387000;
+    /** @var int 开始计算的时间，毫秒级时间截 */
+    protected int $epoch_time = 1546593387000;
 
-    /** @var integer 序列号支持1毫秒产生4095个自增序列ID */
-    protected $incre_id_max_12bit = 4095;
+    /** @var int 序列号支持1毫秒产生4095个自增序列ID */
+    protected int $incre_id_max_12bit = 4095;
 
-    /**
-     * 默认情况下41bit的时间戳可以支持该算法使用到2082年
-     *
-     * @var integer
-     */
-    protected $start_time_max_41bit = 1546593387000;
+    /** @var int 默认情况下41bit的时间戳可以支持该算法使用到2082年 */
+    protected int $start_time_max_41bit = 1546593387000;
 
-    /**
-     * 机器ID
-     *
-     * @var null
-     */
-    protected $machine_id = null;
+    /** @var int 机器ID */
+    protected int $machine_id = 0;
 
-    protected $seq_num = 0;
+    protected int $seq_num = 0;
 
     /**
      * 设置机器ID
@@ -40,6 +32,7 @@ class ids
 
     /**
      * 获取机器ID
+     *
      * @return number
      */
     public function machine_id_get()
@@ -49,6 +42,7 @@ class ids
 
     /**
      * 设置序列号一定顺序出现，不然一亳秒内经常碰撞
+     *
      * @return number
      */
     public function seq_num()
@@ -64,6 +58,7 @@ class ids
 
     /**
      * 生成自增iD
+     *
      * @return number
      */
     public function generateIncreId()
