@@ -45,6 +45,7 @@ if (Environment) {
 
 /**
  * 语言包
+ *
  * @param string $s
  * @return string
  */
@@ -67,6 +68,7 @@ function l(string $s)
 
 /**
  * 得到访客的IP
+ *
  * @return string IP
  */
 function ip(): string
@@ -95,6 +97,7 @@ function ip(): string
 
 /**
  * 输出带参数的URL
+ *
  * @param string $url URL
  * @param array $data_query 数据
  * @param array $replace_ext 要替换的数据
@@ -159,12 +162,13 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
 
 /**
  * 得到 原生 URL(去问号后的 QUERY_STRING)
+ *
  * @param string $uri
  * @return string URL
  */
 function url_original(string $uri = ''): string
 {
-    if ('' == $uri) {
+    if (empty($uri)) {
         $uri = $_SERVER['REQUEST_URI'];
     }
     $tmp = explode('?', $uri, 2);
@@ -173,6 +177,7 @@ function url_original(string $uri = ''): string
 
 /**
  * 通过uri得到mod
+ *
  * @param $uri string
  * @return array
  */
@@ -190,6 +195,7 @@ function url_to_mod(string $uri): array
 
 /**
  * URL去重
+ *
  * @param string $url_original 网址
  * @param bool $ext_req 网址可否带参加数
  * @param string $domain 是否捡查 域名
@@ -224,12 +230,14 @@ function url_check(string $url_original = '', bool $ext_req = true, string $doma
 }
 
 /**
+ * 提示用户选择
+ *
  * @param string $url1
  * @param string $url2
  * @param string $note
  * @param bool $top
  */
-function go_note(string $url1, string $url2, string $note, bool $top = false): void
+function go_confirm(string $url1, string $url2, string $note, bool $top = false): void
 {
     $top  = "\t" . ($top ? 'window.top.' : '');
     $note ??= '点击“确定”继续操作  点击“取消” 中止操作';
@@ -247,7 +255,9 @@ function go_note(string $url1, string $url2, string $note, bool $top = false): v
 }
 
 /**
- * @param $url
+ * 页跳转
+ *
+ * @param string $url
  * @param bool $top
  * @param int $head_code
  * @param int $delay 延时跳转(单位秒)
@@ -296,14 +306,15 @@ function go_msg(string $msg, string $url = ''): void
  * @param string $msg
  * @param bool $outer
  * @param bool $meta
+ * @param string $charset
  * @return string
  */
-function msg(string $msg, bool $outer = true, $meta = true): string
+function msg(string $msg, bool $outer = true, $meta = true, $charset = 'utf-8'): string
 {
     $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     if ($outer) {
         if ($meta) {
-            $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+            $mt = '<meta http-equiv="Content-Type" content="text/html; charset=' . $charset . '" />' . "\n";
         } else {
             $mt = '';
         }
@@ -317,10 +328,10 @@ function msg(string $msg, bool $outer = true, $meta = true): string
  * @param string $msg
  * @param bool $close
  */
-function msg_close(string $msg, bool $close = false): void
+function msg_close(string $msg, bool $close = false, $charset = 'utf-8'): void
 {
     $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
-    $mt = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />' . "\n";
+    $mt = '<meta http-equiv="Content-Type" content="text/html; charset=' . $charset . '" />' . "\n";
     $rs = $mt . '<script type="text/javascript">' . "\n" . $rs . "\n" . '</script>' . "\n";
     echo $rs;
     if ($close) {
@@ -2112,7 +2123,7 @@ function start(array $url_mods, string $host)
     }
 
     // template_set
-    ounun::tpl_theme_set( (string)$app['tpl_type'], (string)$app['tpl_type_default'],(string)$app['tpl_theme'], (string)$app['tpl_theme_default']);
+    ounun::tpl_theme_set((string)$app['tpl_type'], (string)$app['tpl_type_default'], (string)$app['tpl_theme'], (string)$app['tpl_theme_default']);
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org;');
