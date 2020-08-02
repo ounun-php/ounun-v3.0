@@ -146,6 +146,7 @@ class debug
      * @param string $k
      * @param mixed $log 日志内容
      * @param bool $is_replace 是否替换
+     * @return debug
      */
     public function logs(string $k, $log, $is_replace = true)
     {
@@ -167,13 +168,19 @@ class debug
             }
             $this->write();
         }
+        return $this;
     }
 
-    /** 停止调试 */
+    /**
+     * 停止调试
+     *
+     * @return debug
+     */
     public function stop()
     {
         $this->_logs     = [];
         $this->_filename = '';
+        return $this;
     }
 
     /** 内部内调 */
@@ -191,12 +198,14 @@ class debug
 
     /**
      * 析构调试相关
+     *
      * @param bool $is_end 是否当前请求 最后一次写入
+     * @return debug
      */
     public function write(bool $is_end = false)
     {
         if (!$this->_filename) {
-            return;
+            return $this;
         }
         $filename = $this->_filename;
         $str      = '';
@@ -254,18 +263,19 @@ class debug
             $this->_logs_buffer = '';
         }
         // 写文件
-        if ($this->_is_bof) {
+        if ($this->_is_bof && $str) {
             if (file_exists($filename)) {
-                $str = $str . '------------------' . PHP_EOL . file_get_contents($filename);
+                $str = $str . file_get_contents($filename);
             }
             file_put_contents($filename, $str);
-        } else {
+        } elseif($str) {
             file_put_contents($filename, $str . '------------------' . PHP_EOL, FILE_APPEND);
         }
+        return $this;
     }
 
     /** @var int header idx */
-    static private $_header_idx = 0;
+    private static int $_header_idx = 0;
 
     /**
      * 在header输出头数据
@@ -316,7 +326,8 @@ class debug
                              $is_bof = false, $is_run_time = true): self
     {
         if (empty(static::$_instances[$channel])) {
-            $dir                          = (\ounun::$global['debug'] && \ounun::$global['debug']['out']) ? \ounun::$global['debug']['out'] : Dir_Root . 'storage/logs/';
+            $debug                        = global_all('debug', []);
+            $dir                          = ($debug && $debug['out']) ? $debug['out'] : Dir_Root . 'storage/logs/';
             $filename                     = $dir . date('Y-m-d') . '_' . $channel . '_' . $filename;
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,
@@ -331,6 +342,7 @@ class debug
      */
     public static function is_header()
     {
-        return (\ounun::$global['debug'] && \ounun::$global['debug']['header']) ?? false;
+        $debug = global_all('debug');
+        return ($debug && $debug['header']) ?? false;
     }
 }

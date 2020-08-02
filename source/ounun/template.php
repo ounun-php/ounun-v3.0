@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 /**
@@ -30,11 +31,150 @@ class template
         self::Type_Control,
     ];
 
+    /** @var string 应用模板类型pc/wap/mip - 模板 */
+    public static string $type = 'pc';
+    /** @var string 应用模板类型pc/wap/mip[默认] - 模板 */
+    public static string $type_default = 'pc';
+
+    /** @var string 主题风格(主题目录) */
+    public static string $theme = 'default';
+    /** @var string 主题风格(主题目录)[默认] - 模板 */
+    public static string $theme_default = 'default';
+
+    /** @var array Template view目录 */
+    public static array $paths = [];
+    /** @var array 模板替换数据组 */
+    public static array $assign_array = [];
+
+    /** @var array 站点SEO */
+    public static array $site_seo = ['sitename' => '', 'keywords' => '', 'description' => '', 'slogan' => ''];
+
+    /**
+     * 设定 模板类型/主题风格
+     *
+     * @param string $tpl_type 类型
+     * @param string $tpl_type_default 类型(默认)
+     * @param string $tpl_theme 主题风格
+     * @param string $tpl_theme_default 主题风格(默认)
+     */
+    static public function theme_set(string $tpl_type = '', string $tpl_type_default = '',
+                                     string $tpl_theme = '', string $tpl_theme_default = '')
+    {
+        // 类型
+        $tpl_type && static::$type = $tpl_type;
+        // 类型(默认)
+        $tpl_type_default && static::$type_default = $tpl_type_default;
+
+        // 主题风格
+        $tpl_theme && static::$theme = $tpl_theme;
+        // 主题风格(默认)
+        $tpl_theme_default && static::$theme_default = $tpl_theme_default;
+    }
+
+
+    /**
+     * 设定 模板tpl根目录
+     *
+     * @param array $paths 模板tpl根目录
+     */
+    static public function paths_set(array $paths = [])
+    {
+        // 模板根目录
+        if ($paths && is_array($paths)) {
+            foreach ($paths as $tpl_dir) {
+                // print_r(['__LINE__'=>__LINE__,'$tpl_dir'=>$tpl_dir]);
+                if (!in_array($tpl_dir, static::$paths) && is_dir($tpl_dir['path'])) {
+                    static::$paths[] = $tpl_dir;
+                }
+            }
+        }
+    }
+
+    /**
+     * 设定模板替换
+     *
+     * @param string $key
+     * @param string $value
+     */
+    static public function assign_array_set(string $key, string $value)
+    {
+        static::$assign_array[$key] = $value;
+    }
+
+    /**
+     * 设定模板替换
+     *
+     * @param array $data
+     */
+    static public function assign_array_multi_set(?array $data)
+    {
+        if ($data && is_array($data)) {
+            foreach ($data as $key => $value) {
+                static::$assign_array[$key] = $value;
+            }
+        }
+    }
+
+    /**
+     * 赋值(默认) $seo + $url
+     *
+     * @return array
+     */
+    static public function assign_array_get()
+    {
+        return array_merge([
+            '{$page_url}'  => \ounun::$page_url,      // $lang/$app_path/$base_url,
+            '{$page_file}' => \ounun::$page_file_path,// 基础url,
+            // 根目录/面面路径
+            '{$page_www}'  => \ounun::$page_www,
+            '{$page_wap}'  => \ounun::$page_wap,
+            '{$page_mip}'  => \ounun::$page_mip,
+            // 根目录
+            '{$root_www}'  => \ounun::$root_www,
+            '{$root_wap}'  => \ounun::$root_wap,
+            '{$root_mip}'  => \ounun::$root_mip,
+            '{$root_api}'  => \ounun::$root_api,
+            // static
+            '{$root_res}'         => \ounun::$url_res,
+            '{$root_upload}'      => \ounun::$url_upload, '/public/uploads' => \ounun::$url_upload,
+            '{$root_static}'      => \ounun::$url_static, '/public/static' => \ounun::$url_static,
+            '{$root_static_g}'    => \ounun::$url_static_g, '/public/static_g' => \ounun::$url_static_g,
+            // seo_site
+            '{$site_name}'        => static::$site_seo['name'],
+            '{$site_keywords}'    => static::$site_seo['keywords'],
+            '{$site_description}' => static::$site_seo['description'],
+            '{$site_slogan}'      => static::$site_seo['slogan'],
+            // app_name
+            '{$app_name}'         => \ounun::$app_name,
+            '{$app_domain}'       => \ounun::$app_domain,
+        ], static::$assign_array);
+    }
+
+    /**
+     * 设定页面的SEO
+     *
+     * @param string $title
+     * @param string $keywords
+     * @param string $description
+     * @param string $h1
+     * @param string $etag
+     */
+    static public function page_seo_set(string $title = '', string $keywords = '', string $description = '', string $h1 = '', string $etag = '')
+    {
+        $page_seo = [];
+        $title && $page_seo['{$seo_title}'] = $title;
+        $keywords && $page_seo['{$seo_keywords}'] = $keywords;
+        $description && $page_seo['{$seo_description}'] = $description;
+        $h1 && $page_seo['{$seo_h1}'] = $h1;
+        $etag && $page_seo['{$seo_etag}'] = $etag;
+        $page_seo && static::$assign_array = array_merge(static::$assign_array, $page_seo);
+    }
+
     /** @var bool 是否开启ob_start */
     protected static bool $_ob_start = false;
 
     /** @var string 模板目录(当前) */
-    protected string $_dir_current;
+    protected string $_current_path;
 
     /** @var string 插目目录名 */
     protected string $_addon_tag;
@@ -50,37 +190,45 @@ class template
     protected string $_type_default;
 
     /** @var bool 是否去空格 换行 */
-    protected bool $_is_trim = false;
+    protected bool $_is_trim;
 
     /**
      * 创建对像 template constructor.
      *
-     * @param string $tpl_theme 风格
-     * @param string $tpl_theme_default 风格(默认)
-     * @param string $tpl_type 类型
-     * @param string $tpl_type_default 模板文件所以目录(默认)
-     * @param bool $is_trim
+     * @param bool $is_trim 是否去除多余的空格换行
+     * @param string $theme 风格
+     * @param string $theme_default 风格(默认)
+     * @param string $type 类型
+     * @param string $type_default 模板文件所以目录(默认)
      */
-    public function __construct(string $tpl_theme = '', string $tpl_theme_default = '', string $tpl_type = '', string $tpl_type_default = '', bool $is_trim = false)
+    public function __construct(bool $is_trim = false,
+                                ?string $theme = null, ?string $theme_default = null,
+                                ?string $type = null, ?string $type_default = null)
     {
-        if ($tpl_theme) {
-            $this->_theme = $tpl_theme;
-        }
-        if ($tpl_theme_default) {
-            $this->_theme_default = $tpl_theme_default;
+        $theme ??= static::$theme;
+        if ($theme) {
+            $this->_theme = $theme;
         }
 
-        if ($tpl_type) {
-            $this->_type = $tpl_type;
-        }
-        if ($tpl_type_default) {
-            $this->_type_default = $tpl_type_default;
+        $theme_default ??= static::$theme_default;
+        if ($theme_default) {
+            $this->_theme_default = $theme_default;
         }
 
-        $this->_dir_current = '';
-        $this->_is_trim     = $is_trim;
+        $type ??= static::$type;
+        if ($type) {
+            $this->_type = $type;
+        }
 
-        $this->replace();
+        $type_default ??= static::$type_default;
+        if ($type_default) {
+            $this->_type_default = $type_default;
+        }
+
+        $this->_current_path = '';
+        $this->_is_trim      = $is_trim;
+
+        $this->assign();
     }
 
     /**
@@ -92,12 +240,8 @@ class template
      * @param bool $remember_dir_current
      * @return string
      */
-    public function tpl_fixed(string $filename, string $addon_tag, bool $show_debug = true, bool $remember_dir_current = true): string
+    public function fixed(string $filename, string $addon_tag, bool $show_debug = true, bool $remember_dir_current = true): string
     {
-        // echo "-----<br />\n";
-        // print_r(['\ounun::$tpl_dirs'=>\ounun::$tpl_dirs,'\ounun::$maps_paths'=>\ounun::$maps_paths]);
-        // echo "<hr /><br />\n";
-
         // $types
         if ($this->_type_default && $this->_type != $this->_type_default) {
             $types = [$this->_type, $this->_type_default];
@@ -111,7 +255,7 @@ class template
         } else {
             $addon_tag2 = '';
         }
-        foreach (\ounun::$tpl_paths as $tpl_dir) {
+        foreach (static::$paths as $tpl_dir) {
             // print_r($tpl_dir);
             if ('root' == $tpl_dir['type']) {
                 // $styles
@@ -126,23 +270,12 @@ class template
                         // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                         if (is_file($filename2)) {
                             if ($remember_dir_current) {
-                                $this->_dir_current = dirname($filename2) . '/';
+                                $this->_current_path = dirname($filename2) . '/';
                             }
                             return $filename2;
                         }
                     } // end $types
                 } // end $styles
-//            } elseif ('app' == $tpl_dir['type']) {
-//                foreach ($types as $type) {
-//                    $filename2 = "{$tpl_dir['path']}" . \ounun::$app_name . "/template/{$type}/{$addon_tag2}{$filename}";
-//                    // echo "line:".__LINE__." filename:{$filename2} <br />\n";
-//                    if (is_file($filename2)) {
-//                        if ($remember_dir_current) {
-//                            $this->_dir_current = dirname($filename2) . '/';
-//                        }
-//                        return $filename2;
-//                    }
-//                }
 //          }elseif ('addons' == $tpl_dir['type']){
             } else {
                 foreach ($types as $type) {
@@ -150,14 +283,14 @@ class template
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
                         if ($remember_dir_current) {
-                            $this->_dir_current = dirname($filename2) . '/';
+                            $this->_current_path = dirname($filename2) . '/';
                         }
                         return $filename2;
                     }
                 }
             }
         }
-        if ($show_debug) {
+        if (global_all('debug',[])['template']) {
             $this->error($filename, $addon_tag);
         }
         return '';
@@ -170,11 +303,11 @@ class template
      * @param string $addon_tag
      * @return string
      */
-    public function tpl_curr(string $filename, string $addon_tag = ''): string
+    public function curr(string $filename, string $addon_tag = ''): string
     {
         // curr
-        if ($this->_dir_current) {
-            $filename2 = "{$this->_dir_current}{$filename}";
+        if ($this->_current_path) {
+            $filename2 = "{$this->_current_path}{$filename}";
             if (is_file($filename2)) {
                 // echo "filename:{$filename2}\n";
                 return $filename2;
@@ -184,13 +317,13 @@ class template
         // $this->_addon_tag == ''
         if (empty($addon_tag) && $this->_addon_tag) {
             $addon_tag = $this->_addon_tag;
-            $filename2 = $this->tpl_fixed($filename, '', false, false);
+            $filename2 = $this->fixed($filename, '', false, false);
             if ($filename2) {
                 return $filename2;
             }
         }
 
-        return $this->tpl_fixed($filename, $addon_tag, true, false);
+        return $this->fixed($filename, $addon_tag, true, false);
     }
 
 
@@ -204,21 +337,20 @@ class template
     {
         echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
                     <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} ".($addon_tag?"\$addon_tag:{$addon_tag}":'')."<br />
+                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} " . ($addon_tag ? "\$addon_tag:{$addon_tag}" : '') . "<br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_theme} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_dir_current} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_current_path} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(\ounun::$tpl_paths) . " <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(static::$paths) . " <br />
               </div>";
-        // error_get_last();
-        trigger_error("Can't find Template:{$filename}", E_USER_ERROR);
+        error_php("Can't find \$filename:{$filename} \$addon_tag:{$addon_tag}");
     }
 
     /**
      * 替换
      */
-    public function replace()
+    public function assign()
     {
         if (empty(\v::$cache_html) || \v::$cache_html->stop) {
             // ob_start();
@@ -270,7 +402,7 @@ class template
         }
 
         // 替换
-        return strtr($buffer, \ounun::tpl_replace_array_get());
+        return strtr($buffer, static::assign_array_get());
     }
 
     /**

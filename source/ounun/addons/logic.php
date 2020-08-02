@@ -16,7 +16,7 @@ abstract class logic
     protected static $_instance;
 
     /** @var model 数据模型 */
-    protected model $_model;
+    protected $_model;
 
     /**
      * 业务逻辑

@@ -217,7 +217,7 @@ class html
     {
         $this->stop = true;
         if ($output) {
-            \v::$tpl->replace();
+            \v::$tpl->assign();
             $this->run_output();
         }
     }

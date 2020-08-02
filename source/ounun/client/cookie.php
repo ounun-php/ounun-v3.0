@@ -9,18 +9,35 @@ namespace ounun\client;
 
 class cookie
 {
-    protected string $_prefix = '';
-    protected string $_path = '/';
-    protected string $_domain = '';
+    /** @var string cookie前缀 */
+    protected static string $_prefix = '';
+    /** @var string 目录 */
+    protected static string $_path = '/';
+    /** @var string 域名 */
+    protected static string $_domain = '';
 
-    public function __construct($prefix = 'cc_', $path = '/', $domain = '')
+    /**
+     * 配制
+     *
+     * @param string $prefix cookie前缀
+     * @param string $path 目录
+     * @param string $domain 域名
+     */
+    public static function config(string $prefix = '', string $path = '/', string $domain = '')
     {
-        $this->_prefix = $prefix;
-        $this->_path   = $path;
-        $this->_domain = $domain;
+        $prefix && static::$_prefix = $prefix;
+        $path && static::$_path = $path;
+        $domain && static::$_domain = $domain;
     }
 
-    public function set($var, $value = null, $time = 0)
+    /**
+     * cookie设定
+     *
+     * @param string $key
+     * @param mixed $value
+     * @param int $time
+     */
+    public static function set(string $key, $value = null, int $time = 0)
     {
         if (is_null($value)) {
             $time = time() - 3600;
@@ -28,20 +45,37 @@ class cookie
             $time += time();
         }
         $s             = $_SERVER['SERVER_PORT'] == '443' ? 1 : 0;
-        $var           = $this->_prefix . $var;
-        $_COOKIE[$var] = $value;
+        $key           = static::$_prefix . $key;
+        $_COOKIE[$key] = $value;
         if (is_array($value)) {
             foreach ($value as $k => $v) {
-                setcookie($var . '[' . $k . ']', $v, $time, $this->_path, $this->_domain, $s);
+                setcookie($key . '[' . $k . ']', $v, $time, static::$_path, static::$_domain, $s);
             }
         } else {
-            setcookie($var, $value, $time, $this->_path, $this->_domain, $s);
+            setcookie($key, $value, $time, static::$_path, static::$_domain, $s);
         }
     }
 
-    public function get($var)
+    /**
+     * 取得cookie
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return string
+     */
+    public static function get(string $key,$default = null)
     {
-        $var = $this->_prefix . $var;
-        return isset($_COOKIE[$var]) ? $_COOKIE[$var] : false;
+        $key = static::$_prefix . $key;
+        return isset($_COOKIE[$key]) ? $_COOKIE[$key] : $default;
+    }
+
+    /**
+     * 删除cookie
+     *
+     * @param string $key
+     */
+    public static function del(string $key)
+    {
+        static::set($key, null, 0);
     }
 }

@@ -21,25 +21,4 @@ abstract class addons
 
     /** @var string 系统 */
     const Is_System = false;
-
-    /** @var array 依赖插件 */
-    public static array $addons_require = [];
-
-    /** @var array 插件子模块(主要是子类继承用) */
-    protected static array $_addons_view_class = [];
-
-    /** @return array 插件子模块 */
-    static public function addons_view_class()
-    {
-        return static::$_addons_view_class;
-    }
-
-    /**
-     * 环境配制
-     * @return array
-     */
-    static public function verb_config()
-    {
-        return [];
-    }
 }

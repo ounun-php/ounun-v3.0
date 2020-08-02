@@ -5,6 +5,7 @@
  */
 
 use ounun\addons\addons;
+use ounun\addons\logic;
 use ounun\debug;
 use ounun\c;
 use ounun\cache\html;
@@ -31,17 +32,6 @@ defined('Dir_Data') || define('Dir_Data', Dir_Storage . 'data/');
 defined('Dir_Cache') || define('Dir_Cache', Dir_Storage . 'cache/');
 /** cache html目录 **/
 defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
-/** Environment目录 **/
-defined('Environment') || define('Environment', environment());
-
-// 测试环境
-if (Environment) {
-    /** 开始时间戳 **/
-    define('Ounun_Start_Time', microtime(true));
-    /** 开始内存量 **/
-    define('Ounun_Start_Memory', memory_get_usage());
-}
-
 
 /**
  * 语言包
@@ -280,14 +270,18 @@ function go_url(string $url, bool $top = false, int $head_code = 302, int $delay
 
 /**
  * 返回
+ *
+ * @param int $num
  */
-function go_back(): void
+function go_back($num = -1): void
 {
-    echo '<script type="text/javascript">', "\n", 'window.history.go(-1);', "\n", '</script>', "\n";
+    echo '<script type="text/javascript">', "\n", 'window.history.go(' . $num . ');', "\n", '</script>', "\n";
     exit();
 }
 
 /**
+ *  挑转网页 彈出alert對話框
+ *
  * @param string $msg
  * @param string $url
  */
@@ -303,6 +297,7 @@ function go_msg(string $msg, string $url = ''): void
 
 /**
  * 彈出alert對話框
+ *
  * @param string $msg
  * @param bool $outer
  * @param bool $meta
@@ -325,8 +320,10 @@ function msg(string $msg, bool $outer = true, $meta = true, $charset = 'utf-8'):
 
 /**
  * 出错提示错
+ *
  * @param string $msg
  * @param bool $close
+ * @param string $charset
  */
 function msg_close(string $msg, bool $close = false, $charset = 'utf-8'): void
 {
@@ -343,6 +340,7 @@ function msg_close(string $msg, bool $close = false, $charset = 'utf-8'): void
 
 /**
  * 判断服务器是否是HTTPS连接
+ *
  * @return bool
  */
 function https_is()
@@ -359,6 +357,7 @@ function https_is()
 
 /**
  * 返回一个错误
+ *
  * @param string $msg
  * @param int $status
  * @param mixed $data
@@ -379,6 +378,7 @@ function error(string $msg = '', int $status = 1, $data = null, $extend = [])
 
 /**
  * 确认是否错误 数据
+ *
  * @param mixed $data
  * @return bool
  */
@@ -393,6 +393,7 @@ function error_is($data)
 
 /**
  * 返回错误提示信息
+ *
  * @param mixed $data
  * @return string
  */
@@ -402,7 +403,8 @@ function error_message($data): string
 }
 
 /**
- * 返回错误代码
+ * 返回 错误代码
+ *
  * @param mixed $data
  * @return int
  */
@@ -412,6 +414,8 @@ function error_code($data): int
 }
 
 /**
+ * 返回 成功
+ *
  * @param mixed $data
  * @param string $message
  * @param array $extend 延伸数据
@@ -427,7 +431,8 @@ function succeed($data, string $message = '', $extend = [])
 }
 
 /**
- * 返回 数据
+ * 返回 成功数据
+ *
  * @param mixed $data
  * @return mixed
  */
@@ -438,6 +443,7 @@ function succeed_data($data)
 
 /**
  * Ajax方式返回数据到客户端
+ *
  * @param mixed $data 要返回的数据
  * @param string $type AJAX返回数据格式
  * @param string $jsonp_callback
@@ -479,6 +485,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
 
 /**
  * 获得 json字符串数据
+ *
  * @param mixed $data
  * @return string
  */
@@ -489,6 +496,7 @@ function json_encode_unescaped($data): string
 
 /**
  * 对 json格式的字符串进行解码
+ *
  * @param string $json_string
  * @return mixed
  */
@@ -499,6 +507,7 @@ function json_decode_array(?string $json_string)
 
 /**
  * 获得 extend数据php
+ *
  * @param string $extend_string
  * @return array|mixed
  */
@@ -513,6 +522,7 @@ function extend_decode_php(string $extend_string)
 
 /**
  * 获得 extend数据json
+ *
  * @param string $extend_string
  * @return array|mixed
  */
@@ -527,6 +537,7 @@ function extend_decode_json(string $extend_string)
 
 /**
  * 对字符串进行编码，这样可以安全地通过URL
+ *
  * @param string $string to encode
  * @return string
  */
@@ -537,6 +548,7 @@ function base64_url_encode(string $string = null): string
 
 /**
  * 解码一个 URL传递的字符串
+ *
  * @param string $string to decode
  * @return string
  */
@@ -547,6 +559,7 @@ function base64_url_decode(string $string = null): string
 
 /**
  * 编号 转 字符串
+ *
  * @param int $id to encode
  * @return string
  */
@@ -566,6 +579,7 @@ function short_url_encode(int $id = 0): string
 
 /**
  * 字符串 转 编号
+ *
  * @param string $string 字符串
  * @return int
  */
@@ -583,6 +597,7 @@ function short_url_decode(string $string = ''): int
 
 /**
  * HTTP缓存控制
+ *
  * @param int $expires 缓存时间 0:为不缓存 单位:s
  * @param string $etag ETag
  * @param int $last_modified 最后更新时间
@@ -662,16 +677,18 @@ function error404(string $msg = ''): void
 }
 
 /**
- * error 404
+ * error php
  *
  * @param string $error_msg
  * @param string $error_html
  */
 function error_php(string $error_msg, string $error_html = ''): void
 {
+    debug::i('error', 'error_php.txt');
     if ($error_html) {
         echo $error_html;
     }
+    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths]) . PHP_EOL;
     echo '<pre>' . PHP_EOL;
     debug_print_backtrace();
     echo PHP_EOL . '</pre>';
@@ -684,10 +701,9 @@ function error_php(string $error_msg, string $error_html = ''): void
  *
  * @param int $times
  * @param callable $callback
- * @param int $sleep
+ * @param int $sleep 微秒 1/1000 秒
  * @return mixed
- *
- * @throws \Exception
+ * @throws Exception
  */
 function retry(int $times, callable $callback, int $sleep = 0)
 {
@@ -781,15 +797,6 @@ function global_apps(string $key, $default = null, string $app_name = '')
 function global_addons(string $key, string $addon_tag, $default = null)
 {
     // 加载  -> runtime_apps 生成时加载
-//    if (!isset(\ounun::$global_addons[$addon_tag])) {
-//        $filename = Dir_Storage . 'runtime/.global_' . $addon_tag . '.php';
-//        if (is_file($filename)) {
-//            require $filename;
-//        } else {
-//            \ounun::$global_addons[$addon_tag] = [];
-//        }
-//    }
-
     // 转换翻译
     $tag = \ounun::$global_addons[$addon_tag];
     if ($tag && $value = $tag[$key]) {
@@ -799,7 +806,8 @@ function global_addons(string $key, string $addon_tag, $default = null)
 }
 
 /**
- * 路由
+ * ounun
+ *
  * @param $routes      array  目录路由表
  * @param $host        string 主机
  * @param $mod         array  目录数组
@@ -825,6 +833,7 @@ class ounun
     const App_Name_Process = 'process';
     /** @var string command 后台任务（定时任务） */
     const App_Name_Command = 'command';
+
     /** @var array 应用名称组 */
     const App_Names = [
         self::App_Name_Web,
@@ -858,7 +867,7 @@ class ounun
     /** 应用app数据 */
     public static array $app = [];
     /** 应用app数据(默认) */
-    public static array $app_default = ['app_name' => self::App_Name_Web, 'path' => '/'];
+    public static array $app_default = [];
 
     /** @var string 当前APP */
     public static string $app_name = '';
@@ -874,7 +883,6 @@ class ounun
     /** @var string 当前app之前通信内问key */
     public static string $app_key_communication_private = '';
 
-
     /** @var array 自动加载路径paths */
     public static array $maps_path = [];
     /** @var array 自动加载路径maps */
@@ -883,15 +891,15 @@ class ounun
     public static array $maps_installed_addon = [];
 
 
-    /** @var array 插件addons挂载数据 */
-    public static array $addon_mount = [];
+    /** @var array 插件addons数据 */
+    public static array $addon = [];
+    /** @var array 插件addons路由数据 */
+    public static array $addon_route = [];
     /** @var array 插件addons网址映射url前缀Path(URL)数据 */
     public static array $addon_path = [];
-    /** @var string 当前插件addon  网址Url前缀Path(URL) */
-    public static string $addon_path_curr = '';
 
     /** @var string 当前面页(文件名)  Page Base */
-    public static string $page_base_file = '';
+    public static string $page_file_path = '';
     /** @var string 当前面页(网址)    Page URL */
     public static string $page_url = '';
 
@@ -920,30 +928,12 @@ class ounun
     /** @var string Upload URL */
     public static string $url_upload = '';
 
-    /** @var string 应用模板类型pc/wap/mip - 模板 */
-    public static string $tpl_type = 'pc';
-    /** @var string 应用模板类型pc/wap/mip[默认] - 模板 */
-    public static string $tpl_type_default = 'pc';
-
-    /** @var string 主题风格(主题目录) */
-    public static string $tpl_theme = 'default';
-    /** @var string 主题风格(主题目录)[默认] - 模板 */
-    public static string $tpl_theme_default = 'default';
-
-    /** @var array Template view目录 */
-    public static array $tpl_paths = [];
-    /** @var array 模板替换数据组 */
-    public static array $tpl_replace_array = [];
-
     /** @var string 当前语言 */
     public static string $lang = 'zh_cn';
     /** @var string 默认语言 */
     public static string $lang_default = 'zh_cn';
     /** @var array 支持的语言 "zh"=>"繁體中文", "ja"=>"日本語", */
-    public static array $lang_supports = ["en_us" => "English", "zh_cn" => "简体中文",];
-
-    /** @var array 站点SEO */
-    public static array $seo_site = ['sitename' => '', 'keywords' => '', 'description' => '', 'slogan' => ''];
+    public static array $lang_support = ["en_us" => "English", "zh_cn" => "简体中文",];
 
     /**
      * 添加命令行
@@ -958,182 +948,6 @@ class ounun
             }
         }
     }
-
-    /**
-     * 本地环境变量设定 (应用)
-     * @param string $app_name
-     */
-//    static public function environment_app_set(string $app_name)
-//    {
-//        // 为空时直接返回
-//        if (empty($app_name)) {
-//            return;
-//        }
-//        $config_ini = static::$global_apps[$app_name];
-//
-//        // print_r(['$app_name'=>$app_name,'$config_ini'=>$config_ini]);
-//        if ($config_ini) {
-//            static::environment_set($config_ini);
-//        }
-//    }
-
-    /**
-     * 本地环境变量设定
-     * @param array $config_ini
-     */
-//    static public function environment_set(array $config_ini = [])
-//    {
-//        // 为空时直接返回
-//        if (empty($config_ini)) {
-//            return;
-//        }
-//
-//        // 添加App路径(根目录)
-//        $key = 'paths';
-//        if (isset($config_ini[$key])) {
-//            $vs = $config_ini[$key];
-//
-//            if ($vs && is_array($vs)) {
-//                foreach ($vs as $v) {
-//                    if (is_array($v) && $v['path']) {
-//                        static::path_set($v['path'], $v['is_auto_helper']);
-//                    }
-//                }
-//            } else {
-//                if (file_exists(Dir_Root)) {
-//                    static::path_set(Dir_Root, true);
-//                }
-//                if (file_exists(Dir_Vendor . 'cms.cc/')) {
-//                    static::path_set(Dir_Vendor . 'cms.cc/', true);
-//                }
-//            }
-//        }
-//
-//        // app数据
-//        $key = 'apps';
-//        if (isset($config_ini[$key])) {
-//            $config = $config_ini[$key];
-//            if ($config && is_array($config)) {
-//                $routes_default = $config['default'] ?? [];
-//                unset($config['default']);
-//                if ($config && $routes_default) {
-//                    static::apps_set($config, $routes_default, []);
-//                }
-//            }
-//        }
-//
-//        // 挂载模块路由
-//        $key = 'routes';
-//        if (isset($config_ini[$key])) {
-//            $addons = $config_ini[$key];
-//            if ($addons && is_array($addons)) {
-//                addons::mount_multi($addons);
-//            }
-//        }
-//
-//        // 域名&项目代号&当前app之前通信内问key
-//        $key = 'domain';
-//        if (isset($config_ini[$key])) {
-//            $vs = $config_ini[$key];
-//            if ($vs && is_array($vs)) {
-//                static::domain_set($vs['domain'], $vs['code'], $vs['version'], $vs['key']);
-//            }
-//        }
-//
-//        // 统计 / 备案号 / Baidu / xzh / 配制cache_file
-//        $key = 'global';
-//        if (isset($config_ini[$key])) {
-//            $config = $config_ini[$key];
-//            if ($config && is_array($config)) {
-//                static::global_set($config);
-//            }
-//        }
-//
-//        // 设定模板目录
-//        $key = 'template_paths';
-//        if (isset($config_ini[$key])) {
-//            $tpl_dirs = $config_ini[$key];
-//            if ($tpl_dirs && is_array($tpl_dirs)) {
-//                static::template_paths_set($tpl_dirs);
-//            }
-//        }
-//
-//        // html变量替换
-//        $key = 'template_array';
-//        if (isset($config_ini[$key])) {
-//            $config = $config_ini[$key];
-//            if ($config && is_array($config)) {
-//                static::template_array_set($config);
-//            }
-//        }
-//
-//        // 配制database
-//        $key = 'databases';
-//        if (isset($config_ini[$key])) {
-//            $config = $config_ini[$key];
-//            if ($config && is_array($config)) {
-//                static::database_set($config, $config_ini['database_default']);
-//            }
-//        }
-//
-//        // 设定语言 & 设定支持的语言
-//        $key = 'lang';
-//        if (isset($config_ini[$key])) {
-//            $config = $config_ini[$key];
-//            if ($config && is_array($config)) {
-//                static::lang_set('', $config['default'], $config['support']);
-//            }
-//        }
-//
-//        // 设定路由数据
-//        $key = 'urls';
-//        if (isset($config_ini[$key])) {
-//            $urls = $config_ini[$key];
-//            if ($urls && is_array($urls)) {
-//                static::urls_set($urls['root_www'], $urls['root_wap'], $urls['root_mip'], $urls['root_api'], $urls['url_res'], $urls['url_upload'], $urls['url_static'], $urls['url_static_g']);
-//            }
-//        }
-//
-//        // 设定站点页面SEO
-//        $key = 'seo_site';
-//        if (isset($config_ini[$key])) {
-//            $config = $config_ini[$key];
-//            static::seo_site_set($config['sitename'], $config['keywords'], $config['description'], $config['slogan']);
-//        }
-//
-////        // 设定站点页面SEO
-////        $key = 'seo_page';
-////        if (isset($config_ini[$key])) {
-////            $config = $config_ini[$key];
-////            static::seo_page_set((string)$config['title'], (string)$config['keywords'], (string)$config['description'], (string)$config['h1'], (string)$config['etag']);
-////        }
-//
-//        // 公共配制数据(应用)
-////        $key = '__app__';
-////        if (isset($config_ini[$key])) {
-////            $configs = $config_ini[$key];
-////            if ($configs && is_array($configs)) {
-////                foreach ($configs as $app_name => $config) {
-////                    if ($config && is_array($config)) {
-////                        static::global_addons_set($config, '', $app_name);
-////                    }
-////                }
-////            }
-////        } // end if
-//
-//        // 公共配制数据(插件)
-////        $key = '__addons__';
-////        if (isset($config_ini[$key])) {
-////            $configs = $config_ini[$key];
-////            if ($configs && is_array($configs)) {
-////                foreach ($configs as $addon_tag => $config) {
-////                    if ($config && is_array($config)) {
-////                        static::global_addons_set($config, $addon_tag, '');
-////                    }
-////                }
-////            }
-////        } // end if
-//    }
 
     /**
      * 设定语言 & 设定支持的语言
@@ -1152,7 +966,7 @@ class ounun
         }
         if ($lang_support_list && is_array($lang_support_list)) {
             foreach ($lang_support_list as $lang => $lang_name) {
-                static::$lang_supports[$lang] = $lang_name;
+                static::$lang_support[$lang] = $lang_name;
             }
         }
         // 加载 语言包
@@ -1163,41 +977,6 @@ class ounun
             }
         }
         // 加载 默认语言包 -> runtime_apps 自动加载
-    }
-
-    /**
-     * 设定站点的SEO
-     * @param string $sitename
-     * @param string $keywords
-     * @param string $description
-     * @param string $slogan
-     */
-//    static public function seo_site_set(string $sitename = '', string $keywords = '', string $description = '', string $slogan = '')
-//    {
-//        $sitename && static::$seo_site['sitename'] = $sitename;
-//        $keywords && static::$seo_site['keywords'] = $keywords;
-//        $description && static::$seo_site['description'] = $description;
-//        $slogan && static::$seo_site['slogan'] = $slogan;
-//    }
-
-    /**
-     * 设定页面的SEO
-     *
-     * @param string $title
-     * @param string $keywords
-     * @param string $description
-     * @param string $h1
-     * @param string $etag
-     */
-    static public function seo_page_set(string $title = '', string $keywords = '', string $description = '', string $h1 = '', string $etag = '')
-    {
-        $seo_page = [];
-        $title && $seo_page['{$seo_title}'] = $title;
-        $keywords && $seo_page['{$seo_keywords}'] = $keywords;
-        $description && $seo_page['{$seo_description}'] = $description;
-        $h1 && $seo_page['{$seo_h1}'] = $h1;
-        $etag && $seo_page['{$seo_etag}'] = $etag;
-        $seo_page && static::$tpl_replace_array = array_merge(static::$tpl_replace_array, []);
     }
 
     /**
@@ -1289,248 +1068,82 @@ class ounun
     }
 
     /**
-     * 添加$addon
+     * 网址路径前缀(Url)
      *
-     * @param string $addon_apps
+     * @param string $addon_tag
+     * @param string $addon_view
+     * @param string $path
+     * @param string $lang
+     * @param bool $is_current 是否当前页面
+     * @return string
      */
-    static public function addons_set(string $addon_apps)
+    static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false)
     {
-        if ($addon_apps && !in_array($addon_apps, static::$maps_installed_addon)) {
-            array_push(static::$maps_installed_addon, $addon_apps);
+        $key = ($addon_tag ? '/' . $addon_tag : '') . ($addon_view ? '/' . $addon_view : '');
+        if (isset(static::$addon_path[$key])) {
+            $page_file_path = static::$addon_path[$key] . $path;
+        } else {
+            $page_file_path = $key . $path;
         }
-    }
-
-    /**
-     * 添加App路径(根目录)
-     *
-     * @param string $path_root
-     */
-    static public function path_set(string $path_root)
-    {
-        /** src-0 \         自动加载 */
-        ounun::load_class_set($path_root . 'src/', '', false);
-        /** src-0 \addons   自动加载  */
-        ounun::load_class_set($path_root . 'addons/', 'addons', true);
-    }
-
-    /**
-     * 设定地址
-     * @param string $root_www
-     * @param string $root_wap
-     * @param string $root_mip
-     * @param string $root_api
-     * @param string $url_res
-     * @param string $url_static
-     * @param string $url_upload
-     * @param string $url_static_g
-     */
-    static public function urls_set(string $root_www, string $root_wap, string $root_mip, string $root_api,
-                                    string $url_res, string $url_upload, string $url_static, string $url_static_g)
-    {
-        /** Www URL */
-        static::$root_www = $root_www;
-        /** Wap URL Mobile */
-        static::$root_wap = $root_wap;
-        /** Mip URL */
-        static::$root_mip = $root_mip;
-        /** Api URL */
-        static::$root_api = $root_api;
-
-        /** Res URL */
-        static::$url_res = $url_res;
-        /** Upload URL */
-        static::$url_upload = $url_upload;
-        /** Static URL */
-        static::$url_static = $url_static;
-        /** StaticG URL */
-        static::$url_static_g = $url_static_g;
-    }
-
-    /**
-     * 域名&项目代号&当前app之前通信内问key
-     * @param string $app_domain
-     * @param string $app_code
-     * @param string $app_version
-     * @param string $app_key_communication_private
-     */
-    static public function domain_set(string $app_domain = '', string $app_code = '', string $app_version = '', string $app_key_communication_private = '')
-    {
-        /** 项目主域名 */
-        $app_domain && static::$app_domain = $app_domain;
-        /** 项目代号 */
-        $app_code && static::$app_code = $app_code;
-        /** 当前版本号(本地cache) 1.1.1 */
-        $app_version && static::$app_version = $app_version;
-        /** 当前app之前通信内问key */
-        $app_key_communication_private && static::$app_key_communication_private = $app_key_communication_private;
-    }
-
-    /**
-     * 设定 模板类型/主题风格
-     *
-     * @param string $tpl_type 类型
-     * @param string $tpl_type_default 类型(默认)
-     * @param string $tpl_theme 主题风格
-     * @param string $tpl_theme_default 主题风格(默认)
-     */
-    static public function tpl_theme_set(string $tpl_type = '', string $tpl_type_default = '',
-                                         string $tpl_theme = '', string $tpl_theme_default = '')
-    {
-        // 类型
-        $tpl_type && static::$tpl_type = $tpl_type;
-        // 类型(默认)
-        $tpl_type_default && static::$tpl_type_default = $tpl_type_default;
-
-        // 主题风格
-        $tpl_theme && static::$tpl_theme = $tpl_theme;
-        // 主题风格(默认)
-        $tpl_theme_default && static::$tpl_theme_default = $tpl_theme_default;
-    }
-
-
-    /**
-     * 设定 模板tpl根目录
-     *
-     * @param array $paths 模板tpl根目录
-     */
-    static public function tpl_paths_set(array $paths = [])
-    {
-        // 模板根目录
-        if ($paths && is_array($paths)) {
-            foreach ($paths as $tpl_dir) {
-                // print_r(['__LINE__'=>__LINE__,'$tpl_dir'=>$tpl_dir]);
-                if (!in_array($tpl_dir, static::$tpl_paths) && is_dir($tpl_dir['path'])) {
-                    static::$tpl_paths[] = $tpl_dir;
-                }
-            }
-        }
-    }
-
-    /**
-     * 设定模板替换
-     *
-     * @param string $key
-     * @param string $value
-     */
-    static public function tpl_replace_array_set(string $key, string $value)
-    {
-        static::$tpl_replace_array[$key] = $value;
-    }
-
-    /**
-     * 设定模板替换
-     *
-     * @param array $data
-     */
-    static public function tpl_replace_array_multi_set(?array $data)
-    {
-        if ($data && is_array($data)) {
-            foreach ($data as $key => $value) {
-                static::$tpl_replace_array[$key] = $value;
-            }
-        }
-    }
-
-    /**
-     * 赋值(默认) $seo + $url
-     *
-     * @return array
-     */
-    static public function tpl_replace_array_get()
-    {
-        return array_merge([
-            '{$page_url}'  => static::$page_url,      // $lang/$app_path/$base_url,
-            '{$page_file}' => static::$page_base_file,// 基础url,
-            // 根目录/面面路径
-            '{$page_www}'  => static::$page_www,
-            '{$page_wap}'  => static::$page_wap,
-            '{$page_mip}'  => static::$page_mip,
-            // 根目录
-            '{$root_www}'  => static::$root_www,
-            '{$root_wap}'  => static::$root_wap,
-            '{$root_mip}'  => static::$root_mip,
-            '{$root_api}'  => static::$root_api,
-
-            '{$root_res}'         => static::$url_res,
-            '{$root_upload}'      => static::$url_upload, '/public/uploads/' => static::$url_upload,
-            '{$root_static}'      => static::$url_static, '/public/static/' => static::$url_static,
-            '{$root_static_g}'    => static::$url_static_g, '/public/static_g/' => static::$url_static_g,
-            // seo_site
-            '{$site_name}'        => static::$seo_site['name'],
-            '{$site_keywords}'    => static::$seo_site['keywords'],
-            '{$site_description}' => static::$seo_site['description'],
-            '{$site_slogan}'      => static::$seo_site['slogan'],
-            // app_name
-            '{$app_name}'         => static::$app_name,
-            '{$app_domain}'       => static::$app_domain,
-        ], static::$tpl_replace_array);
+        return static::url_get($page_file_path, $lang, $is_current);
     }
 
     /**
      * 当前面页
      *
-     * @param string $url
+     * @param string $page_file_path
      * @param string $lang
+     * @param bool $is_current 是否当前页面
      * @return string
      */
-    static public function url_page_get(string $url = '', $lang = '')
+    static public function url_get(string $page_file_path = '', string $lang = null, bool $is_current = true)
     {
-        if (empty($lang)) {
-            $lang = static::$lang;
-        }
-        if ($url !== '' && $url[0] == '/') {
-            $page_base_file = $url;
-            if ($lang == static::$lang_default) {
-                $page_lang = '';
-                $page_url  = static::$app_path . substr($url, 1);
-            } else {
-                $page_lang = '/' . $lang;
-                $page_url  = $page_lang . static::$app_path . substr($url, 1);
-            }
+        $lang ??= static::$lang;
+        if ($lang == static::$lang_default) {
+            $lang_path = '';
+            $page_url  = static::$app_path . $page_file_path;
         } else {
-            $page_base_file = '/' . $url;
-            if ($lang == static::$lang_default) {
-                $page_lang = '';
-                $page_url  = static::$app_path . $url;
-            } else {
-                $page_lang = '/' . $lang;
-                $page_url  = $page_lang . static::$app_path . $url;
-            }
+            $lang_path = '/' . $lang;
+            $page_url  = $lang_path . static::$app_path . $page_file_path;
         }
-        if (empty(static::$page_url)) {
-            static::url_page_set($page_base_file, $page_url, $page_lang);
+
+        if ($is_current && empty(static::$page_url)) {
+            static::url_set($page_file_path, $page_url, $lang_path);
         }
+
+//        echo json_encode_unescaped(['$page_file_path'=>$page_file_path,'$page_url'=>$page_url,'$lang_path'=>$lang_path,'$lang'=>$lang,'static::$lang'=>static::$lang,
+//                                    'static::$app_path'=>static::$app_path,'static::$page_url'=>static::$page_url])."\n";
         return $page_url;
     }
 
     /**
      * 设定$page_www/$page_wap/$page_mip
      *
-     * @param string $page_base_file
+     * @param string $page_file_path
      * @param string $page_url
-     * @param string $page_lang
+     * @param string $lang_path
      */
-    static public function url_page_set(string $page_base_file, string $page_url, string $page_lang)
+    static public function url_set(string $page_file_path, string $page_url, string $lang_path)
     {
         /** @var string Base Page */
-        static::$page_base_file = $page_base_file;
+        static::$page_file_path = $page_file_path;
         /** @var string URL Page */
         static::$page_url = $page_url;
 
         /** @var string Www Page */
-        $a                = explode('/', static::$root_www, 5);
-        $p                = $a[3] ? "/{$a[3]}" : '';
-        static::$page_www = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
+        $pages            = explode('/', static::$root_www, 4);
+        $path             = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_www = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
 
         /** @var string Mobile Page */
-        $a                = explode('/', static::$root_wap, 5);
-        $p                = $a[3] ? "/{$a[3]}" : '';
-        static::$page_wap = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
+        $pages            = explode('/', static::$root_wap, 4);
+        $path             = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_wap = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
 
         /** @var string Mip Page */
-        $a                = explode('/', static::$root_mip, 5);
-        $p                = $a[3] ? "/{$a[3]}" : '';
-        static::$page_mip = "{$a[0]}//{$a[2]}{$page_lang}{$p}{$page_base_file}";
+        $pages            = explode('/', static::$root_mip, 4);
+        $path             = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
     }
 
     /**
@@ -1555,9 +1168,9 @@ class ounun
      */
     static public function root_curr_get()
     {
-        if (static::$tpl_type == template::Type_Mip) {
+        if (template::$type == template::Type_Mip) {
             return static::$root_mip;
-        } elseif (static::$tpl_type == template::Type_Wap) {
+        } elseif (template::$type == template::Type_Wap) {
             return static::$root_wap;
         }
         return static::$root_www;
@@ -1572,7 +1185,6 @@ class ounun
      */
     static public function class_set(string $class, string $filename, bool $is_require = false)
     {
-        // echo __FILE__.':'.__LINE__.' $class:'."{$class} \$filename:{$filename}\n";
         if ($is_require && is_file($filename)) {
             require $filename;
         } else {
@@ -1582,23 +1194,26 @@ class ounun
 
     /**
      * 加载helper
-     * @param string $path_root
+     *
+     * @param string $path
      */
-    static public function load_helper(string $path_root)
+    static public function load_helper(string $path)
     {
-        is_file($path_root . 'app/helper.php') && require $path_root . 'app/helper.php';
-        if (static::$app_name) {
-            is_file($path_root . 'app/helper.' . static::$app_name . '.php') && require $path_root . 'app/helper.' . static::$app_name . '.php';
+        if (is_file($path . 'app/helper.php')) {
+            require $path . 'app/helper.php';
+        }
+        if (static::$app_name && is_file($path . 'app/helper.' . static::$app_name . '.php')) {
+            require $path . 'app/helper.' . static::$app_name . '.php';
         }
     }
 
     /**
      * 自动加载的类
+     *
      * @param string $class
      */
     static public function load_class(string $class)
     {
-//      echo // __FILE__.':'.__LINE__. ' $class:'."{$class}<br />\n";
         $filename = static::load_class_file_exists($class);
         if ($filename) {
             require $filename;
@@ -1685,46 +1300,17 @@ class ounun
     }
 
     /**
-     * 加载controller
-     * @param string $class_filename
-     * @return string
-     */
-//    static public function load_controller(string $class_filename)
-//    {
-//        $paths = static::$maps_path['app'];
-//        if ($paths && is_array($paths)) {
-//            foreach ($paths as $v) {
-//                $filename = $v['path'] . static::$app_name . '/' . $class_filename;
-//                //  echo "\$filename:{$filename}\n";
-//                if (is_file($filename)) {
-//                    return $filename;
-//                }
-//            }
-//        }
-//        return '';
-//    }
-
-    /**
-     * 设定路由数据
+     * 添加App路径(根目录)
      *
-     * @param array $apps
-     * @param array $apps_default
-     * @param array $addons_mount
+     * @param string $path_root
      */
-//    static public function apps_set(array $apps, array $apps_default = [], array $addons_mount = [])
-//    {
-//        if ($apps) {
-//            foreach ($apps as $k => $v) {
-//                static::$app[$k] = $v;
-//            }
-//        }
-//        if ($apps_default) {
-//            static::$app_default = $apps_default;
-//        }
-//        if ($addons_mount) {
-//            static::$addon_mount = $addons_mount;
-//        }
-//    }
+    static public function path_root_set(string $path_root)
+    {
+        /** src-0 \         自动加载 */
+        ounun::load_class_set($path_root . 'src/', '', false);
+        /** src-0 \addons   自动加载  */
+        ounun::load_class_set($path_root . 'addons/', 'addons', true);
+    }
 
     /**
      * 模块 快速路由
@@ -1732,29 +1318,29 @@ class ounun
      * @param array $url_mods
      * @return array
      */
-    static public function apps_get(array $url_mods = [])
+    static public function addon_get(array $url_mods = [])
     {
+        debug::header([$url_mods, \ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
+
         // 修正App_Name
-        $app_name = (static::$app_name == static::App_Name_Web || in_array(static::$app_name, static::App_Names))
+        $app_name = (static::$app_name === static::App_Name_Web || in_array(static::$app_name, static::App_Names))
             ? static::$app_name
             : static::App_Name_Web;
-        // debug::header(\ounun::$apps_cache, '', __FILE__, __LINE__);
 
         // 插件路由
         $addon_tag = '';
-
         /** @var addons $apps */
-        if ($url_mods[1] && ($route = static::$addon_mount["{$url_mods[0]}/$url_mods[1]"]) && $apps = $route['apps']) {
+        if ($url_mods[1] && ($addon = static::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
             array_shift($url_mods);
             array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-        } elseif ($url_mods[0] && ($route = static::$addon_mount[$url_mods[0]]) && $apps = $route['apps']) {
+        } elseif ($url_mods[0] && ($addon = static::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
             array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-        } elseif (($route = static::$addon_mount['']) && $apps = $route['apps']) {
+        } elseif (($addon = static::$addon_route['']) && $apps = $addon['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
-            error_php('ounun::$apps_cache[\'\']: There is no default value -> $apps_cache:' . json_encode(ounun::$addon_mount) . '');
+            error_php('ounun::$addon_mount[\'\']: There is no default value -> $addon_mount:' . json_encode(ounun::$addon_route) . '');
         }
 
         // api
@@ -1764,15 +1350,15 @@ class ounun
             return [$filename, $class_name, $addon_tag, $url_mods];
         }
 
-        // view_class
-        if ($route['view_class']) {
-            $class_filename = "{$addon_tag}/{$app_name}/{$route['view_class']}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$route['view_class']}";
+        // view
+        if ($addon['view']) {
+            $class_filename = "{$addon_tag}/{$app_name}/{$addon['view']}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$addon['view']}";
         } else {
             $class_filename = "{$addon_tag}/{$app_name}.php";
             $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
         }
-        static::$addon_path_curr = $route['url'] ? '/' . $route['url'] : '';
+        debug::header([$addon_tag,$class_filename,$class_name,$addon],'$addon',__FILE__, __LINE__);
 
         // paths
         if ($class_filename) {
@@ -1780,9 +1366,8 @@ class ounun
             if ($paths && is_array($paths)) {
                 foreach ($paths as $v) {
                     $filename = $v['path'] . $class_filename;
-                    // echo "\$filename:{$filename0}\n";
+                    // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
                     if (is_file($filename)) {
-                        //  echo " --> \$filename000:{$filename}\n";
                         if (empty($url_mods)) {
                             $url_mods = [static::Def_Method];
                         }
@@ -1803,11 +1388,8 @@ class ounun
  */
 abstract class v
 {
-    /** @var int cache_html_time */
-    public static int $cache_html_time = 2678400; // 31天
-
-    /** @var bool html_trim */
-    public static bool $cache_html_trim = true;
+    /** @var logic logic */
+    public static $logic;
 
     /** @var html|null cache_html */
     public static ?html $cache_html;
@@ -1818,8 +1400,11 @@ abstract class v
     /** @var debug|null debug调试相关 */
     public static ?debug $debug;
 
-    /** @var string 插件标识 */
+    /** @var string 插件唯一标识 */
     public string $addon_tag = '';
+
+    /** @var string 插件展示子类 */
+    public string $addon_view = '';
 
     /**
      * 调试初始化
@@ -1862,13 +1447,15 @@ abstract class v
     /**
      * 网页Cache
      *
-     * @param $key
+     * @param string $key
+     * @param bool $cache_html_trim
+     * @param int $cache_html_time_expire
      */
-    public function cache_html($key)
+    public function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
     {
         if ('' == Environment && $cache_config = global_all('cache', [])['html']) {
-            $cache_config['prefix'] = 'html_' . \ounun::$app_name . '_' . \ounun::$tpl_theme . '_' . \ounun::$tpl_type;
-            static::$cache_html     = new html($cache_config, $key, static::$cache_html_time, static::$cache_html_trim);
+            $cache_config['prefix'] = 'c_html_' . \ounun::$app_name . '_' . \ounun\template::$theme . '_' . \ounun\template::$type;
+            static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
             static::$cache_html->run(true);
         }
     }
@@ -1882,7 +1469,7 @@ abstract class v
     {
         if (static::$cache_html) {
             static::$cache_html->stop($output);
-            static::$tpl->replace();
+            static::$tpl->assign();
         }
     }
 
@@ -1896,7 +1483,7 @@ abstract class v
      */
     static public function tpl_fixed(string $filename, string $addon_tag = '', bool $show_debug = true): string
     {
-        $tpl = static::$tpl->tpl_fixed($filename, $addon_tag, $show_debug);
+        $tpl = static::$tpl->fixed($filename, $addon_tag, $show_debug);
         if ($tpl) {
             return $tpl;
         }
@@ -1912,7 +1499,7 @@ abstract class v
      */
     static public function tpl_curr(string $filename, string $addon_tag = ''): string
     {
-        return static::$tpl->tpl_curr($filename, $addon_tag);
+        return static::$tpl->curr($filename, $addon_tag);
     }
 
 
@@ -1920,9 +1507,9 @@ abstract class v
      * ounun_view constructor.
      *
      * @param array $url_mods
-     * @param string $addon_tag
+     * @param string|null $addon_tag
      */
-    public function __construct(array $url_mods, string $addon_tag = '')
+    public function __construct(array $url_mods, ?string $addon_tag = null)
     {
         if (empty($url_mods)) {
             $url_mods = [\ounun::Def_Method];
@@ -1940,43 +1527,70 @@ abstract class v
      *
      * @param string $method
      */
-    protected function _initialize(string $method)
-    {
+    abstract protected function _initialize(string $method);
 
+    /**
+     * 网址路径前缀(Url)
+     *
+     * @param string $path
+     * @param string|null $lang
+     * @param bool $is_current 是否当前页面
+     * @param string|null $addon_view
+     * @param string|null $addon_tag
+     * @return string
+     */
+    public function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null)
+    {
+        $addon_tag  ??= $this->addon_tag;
+        $addon_view ??= $this->addon_view;
+        return \ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
+    }
+
+    /**
+     * 当前面页
+     *
+     * @param string $page_file_path
+     * @param string $lang
+     * @param bool $is_current 是否当前页面
+     * @return string
+     */
+    public function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
+    {
+        return \ounun::url_get($page_file_path, $lang, $is_current);
     }
 
     /**
      * 初始化Page
      *
-     * @param string $page_file
+     * @param string $page_file_path
      * @param bool $is_cache_html
      * @param bool $ext_req
      * @param string $domain
-     * @param int $cache_html_time
+     * @param int $cache_html_time_expire
      * @param bool $cache_html_trim
      */
-    public function init_page(string $page_file = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
-                              int $cache_html_time = 0, bool $cache_html_trim = true)
+    public function init_page(string $page_file_path = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
+                              int $cache_html_time_expire = 0, bool $cache_html_trim = true)
     {
+        // url
+        $this->url_addon_get($page_file_path,null,true);
+
         // url_check
-        \ounun::url_page_get(\ounun::$addon_path_curr . $page_file);
         url_check(\ounun::$page_url, $ext_req, $domain);
 
         // cache_html
         if ('' == Environment) {
-            $debug                   = \ounun::$global['debug'];
-            static::$cache_html_trim = $debug && isset($debug['html_trim']) ? $debug['html_trim'] : $cache_html_trim;
-        } else {
-            static::$cache_html_trim = false;
+            $debug           = global_all('debug');
+            $cache_html_trim = ($debug && isset($debug['html_trim'])) ? $debug['html_trim'] : $cache_html_trim;
         }
         if ($is_cache_html) {
-            static::$cache_html_time = $cache_html_time > 300 ? $cache_html_time : static::$cache_html_time;
-            $this->cache_html(\ounun::$page_url);
+            $cache_html_time_expire = $cache_html_time_expire > 300 ? $cache_html_time_expire : 300;
+            $this->cache_html(\ounun::$page_url, $cache_html_trim, $cache_html_time_expire);
         }
 
         // template
         if (empty(static::$tpl)) {
-            static::$tpl = new template(\ounun::$tpl_theme, \ounun::$tpl_theme_default, \ounun::$tpl_type, \ounun::$tpl_type_default, static::$cache_html_trim);
+            static::$tpl = new template($cache_html_trim);
         }
     }
 
@@ -2000,6 +1614,7 @@ abstract class v
     public function robots($mod)
     {
         url_check('/robots.txt');
+        // 执行
         $filename = Dir_Root . 'env/app.robots.' . \ounun::$app_name . '.txt';
         $type     = 'text/plain';
         $time     = 14400;
@@ -2022,6 +1637,7 @@ abstract class v
     public function ads($mod)
     {
         url_check('/ads.txt');
+        // 执行
         $filename = Dir_Root . 'env/app.ads.' . \ounun::$app_name . '.txt';
         $type     = 'text/plain';
         $time     = 14400;
@@ -2084,7 +1700,7 @@ abstract class v
 function start(array $url_mods, string $host)
 {
     // 语言lang
-    if ($url_mods && $url_mods[0] && ounun::$lang_supports[$url_mods[0]]) {
+    if ($url_mods && $url_mods[0] && ounun::$lang_support[$url_mods[0]]) {
         $lang = array_shift($url_mods);
     } else {
         $lang = ounun::$lang ?? ounun::$lang_default;
@@ -2115,7 +1731,7 @@ function start(array $url_mods, string $host)
     // paths
     foreach (ounun::$paths as $v) {
         // path_set
-        ounun::path_set($v['path']);
+        ounun::path_root_set($v['path']);
         if ($v['is_auto_helper']) {
             // load_helper
             ounun::load_helper($v['path']);
@@ -2123,7 +1739,7 @@ function start(array $url_mods, string $host)
     }
 
     // template_set
-    ounun::tpl_theme_set((string)$app['tpl_type'], (string)$app['tpl_type_default'], (string)$app['tpl_theme'], (string)$app['tpl_theme_default']);
+    template::theme_set((string)$app['tpl_type'], (string)$app['tpl_type_default'], (string)$app['tpl_theme'], (string)$app['tpl_theme_default']);
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org;');
@@ -2131,7 +1747,7 @@ function start(array $url_mods, string $host)
 
     // 设定 模块与方法(缓存)
     /** @var v $classname */
-    list($filename, $classname, $addon_tag, $url_mods) = ounun::apps_get($url_mods);
+    list($filename, $classname, $addon_tag, $url_mods) = ounun::addon_get($url_mods);
     debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
     // 包括模块文件
@@ -2140,12 +1756,9 @@ function start(array $url_mods, string $host)
         if (class_exists($classname, false)) {
             new $classname($url_mods, $addon_tag);
             exit();
-        } else {
-            $error = "LINE:" . __LINE__ . " Can't find controller:'{$classname}' filename:" . $filename;
         }
-    } else {
-        $error = "LINE:" . __LINE__ . " Can't find controller:{$classname}";
     }
+    $error = "LINE:" . __LINE__ . " error:" . json_encode_unescaped(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods]);
     header('HTTP/1.1 404 Not Found');
     error_php($error);
 }
@@ -2162,3 +1775,12 @@ function start_web()
 ounun::load_class_set(Dir_Ounun, 'ounun', false);
 /** 注册自动加载 */
 spl_autoload_register('\\ounun::load_class');
+/** Environment目录 */
+defined('Environment') || define('Environment', environment());
+/** 环境 */
+if (Environment) {
+    /** 开始时间戳 **/
+    define('Ounun_Start_Time', microtime(true));
+    /** 开始内存量 **/
+    define('Ounun_Start_Memory', memory_get_usage());
+}

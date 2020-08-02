@@ -29,24 +29,30 @@ class util
 
     /**
      * 设定当前页面
+     *
      * @param string $url
+     * @param string $addon_tag
+     * @param string $addon_view
      * @param string $url_key
      */
-    static public function page_set(string $url, string $url_key = 'p')
+    static public function page_set(string $url,string $addon_tag, string $addon_view = '', string $url_key = 'p')
     {
-        $default_url = \ounun::url_page_get(\ounun::$addon_path_curr.$url);
+        $url = \ounun::url_addon_get($addon_tag,$addon_view,$url);
         self::value_set($url_key, $url);
     }
 
     /**
      * 获取URL
+     *
      * @param string $default_url
+     * @param string $addon_tag
+     * @param string $addon_view
      * @param string $url_key
      * @return mixed
      */
-    static public function page_get(string $default_url, string $url_key = 'p')
+    static public function page_get(string $default_url,string $addon_tag, string $addon_view = '', string $url_key = 'p')
     {
-        $default_url = \ounun::url_page_get(\ounun::$addon_path_curr.$default_url);
+        $default_url = \ounun::url_addon_get($addon_tag,$addon_view,$default_url);
         return self::value_get($url_key, $default_url);
     }
 
