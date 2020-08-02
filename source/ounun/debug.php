@@ -321,14 +321,14 @@ class debug
      * @param bool $is_run_time 运行时间毫秒
      * @return $this 调试日志单例
      */
-    public static function i($channel = 'comm', $filename = 'debug.txt', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true,
+    public static function i(string $channel = 'comm', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true,
                              $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
-                             $is_bof = false, $is_run_time = true): self
+                             $is_bof = false, $is_run_time = true,string $filename = ''): self
     {
         if (empty(static::$_instances[$channel])) {
             $debug                        = global_all('debug', []);
             $dir                          = ($debug && $debug['out']) ? $debug['out'] : Dir_Root . 'storage/logs/';
-            $filename                     = $dir . date('Y-m-d') . '_' . $channel . '_' . $filename;
+            $filename                     = $dir . date('Y-m-d') . '_' . $channel . ($filename?'.log':'_' . $filename);
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,
                 $is_bof, $is_run_time);

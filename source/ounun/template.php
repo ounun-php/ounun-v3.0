@@ -104,7 +104,7 @@ class template
     /**
      * 设定模板替换
      *
-     * @param array $data
+     * @param array|null $data
      */
     static public function assign_array_multi_set(?array $data)
     {
@@ -123,17 +123,17 @@ class template
     static public function assign_array_get()
     {
         return array_merge([
-            '{$page_url}'  => \ounun::$page_url,      // $lang/$app_path/$base_url,
-            '{$page_file}' => \ounun::$page_file_path,// 基础url,
+            '{$page_url}'         => \ounun::$page_url,      // $lang/$app_path/$base_url,
+            '{$page_file}'        => \ounun::$page_file_path,// 基础url,
             // 根目录/面面路径
-            '{$page_www}'  => \ounun::$page_www,
-            '{$page_wap}'  => \ounun::$page_wap,
-            '{$page_mip}'  => \ounun::$page_mip,
+            '{$page_www}'         => \ounun::$page_www,
+            '{$page_wap}'         => \ounun::$page_wap,
+            '{$page_mip}'         => \ounun::$page_mip,
             // 根目录
-            '{$root_www}'  => \ounun::$root_www,
-            '{$root_wap}'  => \ounun::$root_wap,
-            '{$root_mip}'  => \ounun::$root_mip,
-            '{$root_api}'  => \ounun::$root_api,
+            '{$root_www}'         => \ounun::$root_www,
+            '{$root_wap}'         => \ounun::$root_wap,
+            '{$root_mip}'         => \ounun::$root_mip,
+            '{$root_api}'         => \ounun::$root_api,
             // static
             '{$root_res}'         => \ounun::$url_res,
             '{$root_upload}'      => \ounun::$url_upload, '/public/uploads' => \ounun::$url_upload,
@@ -162,8 +162,10 @@ class template
     static public function page_seo_set(string $title = '', string $keywords = '', string $description = '', string $h1 = '', string $etag = '')
     {
         $page_seo = [];
-        $title && $page_seo['{$seo_title}'] = $title;
-        $keywords && $page_seo['{$seo_keywords}'] = $keywords;
+        if ($title) {
+            $page_seo['{$seo_title}'] = $title;
+        }
+        empty($keywords) || $page_seo['{$seo_keywords}'] = $keywords;
         $description && $page_seo['{$seo_description}'] = $description;
         $h1 && $page_seo['{$seo_h1}'] = $h1;
         $etag && $page_seo['{$seo_etag}'] = $etag;
@@ -236,11 +238,10 @@ class template
      *
      * @param string $filename
      * @param string $addon_tag
-     * @param bool $show_debug
      * @param bool $remember_dir_current
      * @return string
      */
-    public function fixed(string $filename, string $addon_tag, bool $show_debug = true, bool $remember_dir_current = true): string
+    public function fixed(string $filename, string $addon_tag, bool $remember_dir_current = true): string
     {
         // $types
         if ($this->_type_default && $this->_type != $this->_type_default) {
@@ -290,7 +291,7 @@ class template
                 }
             }
         }
-        if (global_all('debug',[])['template']) {
+        if (global_all('debug', [])['template']) {
             $this->error($filename, $addon_tag);
         }
         return '';

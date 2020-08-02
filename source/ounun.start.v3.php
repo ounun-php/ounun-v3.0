@@ -6,6 +6,7 @@
 
 use ounun\addons\addons;
 use ounun\addons\logic;
+use ounun\db\utils;
 use ounun\debug;
 use ounun\c;
 use ounun\cache\html;
@@ -42,12 +43,12 @@ defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
 function l(string $s)
 {
     if ($l = $GLOBALS['_lang_']) {
-        if ($lang = $l[\ounun::$lang]) {
+        if ($lang = $l[ounun::$lang]) {
             if ($s2 = $lang[$s]) {
                 return $s2;
             }
         }
-        if ($lang_default = $l[\ounun::$lang_default]) {
+        if ($lang_default = $l[ounun::$lang_default]) {
             if ($s2 = $lang_default[$s]) {
                 return $s2;
             }
@@ -173,9 +174,9 @@ function url_original(string $uri = ''): string
  */
 function url_to_mod(string $uri): array
 {
-    $uri = \explode('/', $uri, 2);
-    $uri = \explode('.', urldecode($uri[1]), 2);
-    $uri = \explode('/', $uri[0]);
+    $uri = explode('/', $uri, 2);
+    $uri = explode('.', urldecode($uri[1]), 2);
+    $uri = explode('/', $uri[0]);
     $mod = [];
     foreach ($uri as $v) {
         $v !== '' && $mod[] = $v;
@@ -462,7 +463,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
         // 返回xml格式数据
         case c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
-            exit(\ounun\db\utils::xml_encode($data));
+            exit(utils::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
         case c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');
@@ -663,12 +664,12 @@ function error404(string $msg = ''): void
                     <h1>404 Not Found</h1>
                 </div>
                 <hr>
-                <div align="center"><a href="' . \ounun::$root_www . '">返回网站首页</a></div>
+                <div align="center"><a href="' . ounun::$root_www . '">返回网站首页</a></div>
                 ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
             </body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
-            <!-- ' . \ounun::$app_name . ' -->
+            <!-- ' . ounun::$app_name . ' -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
@@ -684,7 +685,7 @@ function error404(string $msg = ''): void
  */
 function error_php(string $error_msg, string $error_html = ''): void
 {
-    debug::i('error', 'error_php.txt');
+    debug::i('error_php');
     if ($error_html) {
         echo $error_html;
     }
@@ -760,7 +761,7 @@ function environment()
  */
 function global_all(string $key, $default = null)
 {
-    if ($value = \ounun::$global[$key]) {
+    if ($value = ounun::$global[$key]) {
         return $value;
     }
     return $default;
@@ -776,9 +777,9 @@ function global_all(string $key, $default = null)
  */
 function global_apps(string $key, $default = null, string $app_name = '')
 {
-    $app_name ??= \ounun::$app_name;
+    $app_name ??= ounun::$app_name;
     if ($app_name) {
-        $tag = \ounun::$global_apps[$app_name];
+        $tag = ounun::$global_apps[$app_name];
         if ($tag && $value = $tag[$key]) {
             return $value;
         }
@@ -798,7 +799,7 @@ function global_addons(string $key, string $addon_tag, $default = null)
 {
     // 加载  -> runtime_apps 生成时加载
     // 转换翻译
-    $tag = \ounun::$global_addons[$addon_tag];
+    $tag = ounun::$global_addons[$addon_tag];
     if ($tag && $value = $tag[$key]) {
         return $value;
     }
@@ -943,8 +944,8 @@ class ounun
     static public function commands_set(array $commands)
     {
         foreach ($commands as $command) {
-            if ($command && !in_array($command, \ounun::$commands)) {
-                \ounun::$commands[] = $command;
+            if ($command && !in_array($command, ounun::$commands)) {
+                ounun::$commands[] = $command;
             }
         }
     }
@@ -1320,7 +1321,7 @@ class ounun
      */
     static public function addon_get(array $url_mods = [])
     {
-        debug::header([$url_mods, \ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
+        debug::header([$url_mods, ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
 
         // 修正App_Name
         $app_name = (static::$app_name === static::App_Name_Web || in_array(static::$app_name, static::App_Names))
@@ -1413,13 +1414,13 @@ abstract class v
      * @param string $filename
      * @return debug|null
      */
-    public static function debug_init(string $channel = 'comm', string $filename = '404.txt')
-    {
-        if (empty(static::$debug)) {
-            static::$debug = debug::i($channel, $filename);
-        }
-        return static::$debug;
-    }
+//    public static function debug_init(string $channel = 'comm', string $filename = '404.txt')
+//    {
+//        if (empty(static::$debug)) {
+//            static::$debug = debug::i($channel, $filename);
+//        }
+//        return static::$debug;
+//    }
 
     /**
      * 调试日志
@@ -1427,22 +1428,22 @@ abstract class v
      * @param string $k
      * @param mixed $log
      */
-    public function debug_logs(string $k, $log)
-    {
-        if (static::$debug) {
-            static::$debug->logs($k, $log);
-        }
-    }
+//    public static function debug_logs(string $k, $log)
+//    {
+//        if (static::$debug) {
+//            static::$debug->logs($k, $log);
+//        }
+//    }
 
     /**
      * 停止 调试
      */
-    public function debug_stop()
-    {
-        if (static::$debug) {
-            static::$debug->stop();
-        }
-    }
+//    public static function debug_stop()
+//    {
+//        if (static::$debug) {
+//            static::$debug->stop();
+//        }
+//    }
 
     /**
      * 网页Cache
@@ -1454,7 +1455,7 @@ abstract class v
     public function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
     {
         if ('' == Environment && $cache_config = global_all('cache', [])['html']) {
-            $cache_config['prefix'] = 'c_html_' . \ounun::$app_name . '_' . \ounun\template::$theme . '_' . \ounun\template::$type;
+            $cache_config['prefix'] = 'c_html_' . ounun::$app_name . '_' . template::$theme . '_' . template::$type;
             static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
             static::$cache_html->run(true);
         }
@@ -1478,12 +1479,11 @@ abstract class v
      *
      * @param string $filename
      * @param string $addon_tag
-     * @param bool $show_debug
      * @return string
      */
-    static public function tpl_fixed(string $filename, string $addon_tag = '', bool $show_debug = true): string
+    static public function tpl_fixed(string $filename, string $addon_tag = ''): string
     {
-        $tpl = static::$tpl->fixed($filename, $addon_tag, $show_debug);
+        $tpl = static::$tpl->fixed($filename, $addon_tag);
         if ($tpl) {
             return $tpl;
         }
@@ -1512,10 +1512,10 @@ abstract class v
     public function __construct(array $url_mods, ?string $addon_tag = null)
     {
         if (empty($url_mods)) {
-            $url_mods = [\ounun::Def_Method];
+            $url_mods = [ounun::Def_Method];
         }
-        $method       = $url_mods[0];
-        \ounun::$view = $this;
+        $method      = $url_mods[0];
+        ounun::$view = $this;
 
         $addon_tag && $this->addon_tag = $addon_tag;
         $this->_initialize($method);
@@ -1543,7 +1543,7 @@ abstract class v
     {
         $addon_tag  ??= $this->addon_tag;
         $addon_view ??= $this->addon_view;
-        return \ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
+        return ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
     }
 
     /**
@@ -1556,7 +1556,7 @@ abstract class v
      */
     public function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
     {
-        return \ounun::url_get($page_file_path, $lang, $is_current);
+        return ounun::url_get($page_file_path, $lang, $is_current);
     }
 
     /**
@@ -1576,7 +1576,7 @@ abstract class v
         $this->url_addon_get($page_file_path,null,true);
 
         // url_check
-        url_check(\ounun::$page_url, $ext_req, $domain);
+        url_check(ounun::$page_url, $ext_req, $domain);
 
         // cache_html
         if ('' == Environment) {
@@ -1585,7 +1585,7 @@ abstract class v
         }
         if ($is_cache_html) {
             $cache_html_time_expire = $cache_html_time_expire > 300 ? $cache_html_time_expire : 300;
-            $this->cache_html(\ounun::$page_url, $cache_html_trim, $cache_html_time_expire);
+            $this->cache_html(ounun::$page_url, $cache_html_trim, $cache_html_time_expire);
         }
 
         // template
@@ -1597,25 +1597,25 @@ abstract class v
     /**
      * 默认 首页
      *
-     * @param array $mod
+     * @param array $url_mods
      */
-    public function index($mod)
+    public function index(array $url_mods)
     {
         error404("<strong>method</strong>  --> " . __METHOD__ . " <br />\n  
-                       <strong>mod</strong> ------> " . json_encode($mod, JSON_UNESCAPED_UNICODE) . " <br />\n  
+                       <strong>url_mods</strong> ------> " . json_encode($url_mods, JSON_UNESCAPED_UNICODE) . " <br />\n  
                        <strong>class</strong> ------> " . get_class($this));
     }
 
     /**
      * 默认 robots.txt文件
      *
-     * @param array $mod
+     * @param array $url_mods
      */
-    public function robots($mod)
+    public function robots(array $url_mods = [])
     {
         url_check('/robots.txt');
         // 执行
-        $filename = Dir_Root . 'env/app.robots.' . \ounun::$app_name . '.txt';
+        $filename = Dir_Root . 'env/app.robots.' . ounun::$app_name . '.txt';
         $type     = 'text/plain';
         $time     = 14400;
         if (file_exists($filename)) {
@@ -1632,13 +1632,13 @@ abstract class v
     /**
      * 默认 ads.txt文件    google.com
      *
-     * @param array $mod
+     * @param array $url_mods
      */
-    public function ads($mod)
+    public function ads(array $url_mods = [])
     {
         url_check('/ads.txt');
         // 执行
-        $filename = Dir_Root . 'env/app.ads.' . \ounun::$app_name . '.txt';
+        $filename = Dir_Root . 'env/app.ads.' . ounun::$app_name . '.txt';
         $type     = 'text/plain';
         $time     = 14400;
         if (file_exists($filename)) {
@@ -1654,8 +1654,10 @@ abstract class v
 
     /**
      * /favicon.ico
+     *
+     * @param array $url_mods
      */
-    public function favicon($mod)
+    public function favicon(array $url_mods = [])
     {
         $filenames = [Dir_Root . 'public/static/favicon.ico', Dir_Root . 'public/favicon.ico'];
         $type      = 'image/x-icon';
@@ -1668,10 +1670,10 @@ abstract class v
                 exit();
             }
         }
-        if ($_GET['t'] || empty(\ounun::$url_static)) {
+        if ($_GET['t'] || empty(ounun::$url_static)) {
             error404();
         }
-        go_url(\ounun::$url_static . 'favicon.ico?t=' . time(), false, 301);
+        go_url(ounun::$url_static . 'favicon.ico?t=' . time(), false, 301);
     }
 
     /**
@@ -1684,7 +1686,7 @@ abstract class v
     {
         header('HTTP/1.1 404 Not Found');
         if (Environment) {
-            $this->debug_init('404');
+            debug::i('404');
         }
         error404("<strong>method</strong> -->   {$method} <br />\n 
                         <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) . " <br />\n 
@@ -1694,6 +1696,7 @@ abstract class v
 
 /**
  * 开始
+ *
  * @param array $url_mods
  * @param string $host
  */
