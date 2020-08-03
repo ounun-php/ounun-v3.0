@@ -6,7 +6,9 @@
 namespace ounun\cache\driver;
 
 
-class memcached extends \ounun\cache\driver
+use ounun\cache\driver;
+
+class memcached extends driver
 {
     /** @var string memcached类型 */
     const Type          = 'memcached';

@@ -18,7 +18,7 @@ class crypt
      * 构造函数
      *
      * @param string $session_key 用户在小程序登录后获取的会话密钥
-     * @param string $app_id 小程序的appid
+     * @param string $app_id 小程序的app_id
      */
     public function __construct(string $app_id, string $session_key)
     {

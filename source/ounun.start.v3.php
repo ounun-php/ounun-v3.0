@@ -659,12 +659,12 @@ function error404(string $msg = ''): void
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
                 <title>404 Not Found</title>
             </head>
-            <body bgcolor="white">
-                <div align="center">
+            <body style="background-color: white;">
+                <div style="text-align: center;">
                     <h1>404 Not Found</h1>
                 </div>
                 <hr>
-                <div align="center"><a href="' . ounun::$root_www . '">返回网站首页</a></div>
+                <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>
                 ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
             </body>
             </html>

@@ -5,10 +5,12 @@
  */
 namespace ounun\cache\driver;
 
+use ounun\cache\driver;
+
 /**
  * 文件类型缓存类
  */
-class file extends \ounun\cache\driver
+class file extends driver
 {
     /** @var string file类型 */
     const Type          = 'file';

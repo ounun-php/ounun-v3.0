@@ -25,9 +25,9 @@ class cookie
      */
     public static function config(string $prefix = '', string $path = '/', string $domain = '')
     {
-        $prefix && static::$_prefix = $prefix;
-        $path && static::$_path = $path;
-        $domain && static::$_domain = $domain;
+        empty($prefix) || static::$_prefix = $prefix;
+        empty($path) || static::$_path = $path;
+        empty($domain) || static::$_domain = $domain;
     }
 
     /**

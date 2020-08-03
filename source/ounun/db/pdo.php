@@ -969,20 +969,18 @@ class pdo
         switch ($types) {
             case 'i':
                 return \PDO::PARAM_INT;
-                break;
-            case 's':
-            case 'd':
+            //break;
+            case 's': // -> default
+            case 'd': // -> default
                 return \PDO::PARAM_STR;
-                break;
+            //break;
             case 'b':
                 return \PDO::PARAM_LOB;
-                break;
+            //break;
             case 'null':
                 return \PDO::PARAM_NULL;
-                break;
             case 'bool':
                 return \PDO::PARAM_BOOL;
-                break;
             default:
                 return \PDO::PARAM_STR;
         }
@@ -997,19 +995,19 @@ class pdo
         switch ($param) {
             case \PDO::PARAM_INT:
                 return 'i';
-                break;
+                // break;
             case \PDO::PARAM_STR:
                 return 's';
-                break;
+                // break;
             case \PDO::PARAM_LOB:
                 return 'b';
-                break;
+                // break;
             case \PDO::PARAM_NULL:
                 return 'null';
-                break;
+                // break;
             case \PDO::PARAM_BOOL:
                 return 'bool';
-                break;
+                // break;
             default:
                 return '';
         }
@@ -1022,7 +1020,6 @@ class pdo
     protected function _keys_parse(string $sql)
     {
         $splits = preg_split('/(:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        // $splits = preg_split('/(\:[^ |^,|\|;)]+)/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY); // 支持中文字段
         $result = [];
         foreach ($splits as $v) {
             if ($v[0] == ':') {
@@ -1123,14 +1120,14 @@ class pdo
         try {
             $this->_stmt->execute();
         } catch (\Exception $e) {
-            print_r([
+            $msg = [
                 '$this->_last_sql'   => $this->_last_sql,
                 '$this->_bind_param' => $this->_bind_param,
                 '$fields'            => $fields,
-            ]);
+            ];
             $this->_stmt->debugDumpParams();
             // echo $this->_stmt->queryString."\n";
-            trigger_error("Sql Error:" . $e->getMessage() . "\nTrace:" . $e->getTraceAsString() . "\n", E_USER_ERROR);
+            error_php("Sql Error:" . $e->getMessage() . "\nTrace:" . $e->getTraceAsString() . "\n".json_encode_unescaped($msg), E_USER_ERROR);
         }
     }
 

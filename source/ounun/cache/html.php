@@ -23,7 +23,7 @@ class html
 
     /** @var int cdn类型 */
     protected int $_cdn_type = 2;
-    /** @var driver 缓存驱动 */
+    /** @var driver|null 缓存驱动 */
     protected ?driver $_cache_driver;
     /** @var string 页面key */
     protected string $_cache_key = '';

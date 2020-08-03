@@ -22,7 +22,7 @@ class session
     }
 
     /**
-     * @param string $session_key
+     * @param string|null $session_key
      */
     public function key_set(?string $session_key = null)
     {

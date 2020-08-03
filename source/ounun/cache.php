@@ -62,7 +62,7 @@ class cache
         $this->_driver_type = $config['driver_type'];
         if ($this->_driver_type) {
             $cls           = "driver\{$this->_driver_type}";
-            if (is_subclass_of($cls, \ounun\cache\driver::class)) {
+            if (is_subclass_of($cls, driver::class)) {
                 $this->_driver = new $cls($config);
             }else{
                 trigger_error("Can't support \$cls:{$cls}", E_USER_ERROR);

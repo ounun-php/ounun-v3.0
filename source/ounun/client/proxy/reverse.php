@@ -139,7 +139,6 @@ class reverse
     }
 
     /**
-     * @param $url
      * @return array
      */
     public function cache_get()
@@ -163,6 +162,7 @@ class reverse
         $server_url    = $this->server_url();
         $this->content = http::file_get_contents_loop($server_url, '', 1);
         if ($this->content) {
+            $this->_http_code = 200;
             $this->write($local_filename, $this->content);
             return succeed(200);
         }
@@ -195,7 +195,6 @@ class reverse
 
     /**
      * @param string $local_filename
-     * @param bool $http_if_modified_304
      * @param bool $is_sendfile
      * @param int $time_expired
      */
@@ -228,20 +227,7 @@ class reverse
      */
     static public function output_content(string $content, string $local_filename, int $time_cache, string $last_modified, string $server_version, bool $is_header, int $time_expired = 0)
     {
-        $time_current_string = gmdate("D, d M Y H:i:s", $time_expired);
-        $time_expired_string = gmdate("D, d M Y H:i:s", ($time_expired + $time_cache));
-        header("HTTP/1.1 200 OK");
-        header("Date: Wed, {$time_current_string} GMT");
-        if ($is_header) {
-            $content_type = mime_content_type($local_filename);
-            header("Content-Type: {$content_type}");
-        }
-        if ($last_modified) {
-            header("Last-Modified: {$last_modified}");
-        }
-        header("Cache-Control: max-age={$time_cache}");
-        header("Expires: {$time_expired_string} GMT");
-        header("Server: {$server_version}");
+        static::_header($local_filename,$time_cache,$last_modified,$server_version,$is_header,$time_expired);
         exit($content);
     }
 
@@ -255,14 +241,17 @@ class reverse
      */
     static public function output_sendfile(string $local_filename, int $time_cache, string $last_modified, string $server_version, bool $is_header, int $time_expired = 0)
     {
-        // exit(__METHOD__);
+        static::_header($local_filename,$time_cache,$last_modified,$server_version,$is_header,$time_expired);
+        readfile($local_filename);
+        exit;
+    }
 
+    static protected function _header(string $local_filename, int $time_cache, string $last_modified, string $server_version, bool $is_header, int $time_expired = 0)
+    {
         $time_current_string = gmdate("D, d M Y H:i:s", $time_expired);
         $time_expired_string = gmdate("D, d M Y H:i:s", ($time_expired + $time_cache));
-
         header("HTTP/1.1 200 OK");
         header("Date: Wed, {$time_current_string} GMT");
-
         if ($is_header) {
             $content_type = mime_content_type($local_filename);
             header("Content-Type: {$content_type}");
@@ -273,8 +262,6 @@ class reverse
         header("Cache-Control: max-age={$time_cache}");
         header("Expires: {$time_expired_string} GMT");
         header("Server: {$server_version}");
-        readfile($local_filename);
-        exit;
     }
 
     /**

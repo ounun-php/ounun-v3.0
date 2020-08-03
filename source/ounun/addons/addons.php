@@ -6,7 +6,6 @@
 
 namespace ounun\addons;
 
-use ounun\db\pdo;
 
 abstract class addons
 {

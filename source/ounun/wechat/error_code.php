@@ -24,7 +24,7 @@ class error_code
     const DecodeBase64Error = -41016;
 
     /** @var array 数据 */
-    const msgs = [
+    const Msg_List = [
         self::OK => '正常',
 
         self::IllegalEncodingAesKey => 'encodingAesKey非法',

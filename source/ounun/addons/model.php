@@ -11,7 +11,7 @@ abstract class model
     protected static $_instance;
 
     /**
-     * @param pdo $db
+     * @param pdo|null $db
      * @return $this 返回数据库连接对像
      */
     public static function i(?pdo $db = null): self
@@ -53,7 +53,7 @@ abstract class model
 
     /**
      * cms constructor.
-     * @param pdo $db
+     * @param pdo|null $db
      */
     public function __construct(?pdo $db = null)
     {

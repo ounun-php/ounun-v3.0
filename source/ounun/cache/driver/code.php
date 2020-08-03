@@ -91,7 +91,7 @@ class code extends \ounun\cache\driver
      */
     public function get2(string $key, $default = 0, bool $add_prefix = true)
     {
-        $filename = $this->key_get($name);
+        $filename = $this->key_get($key);
         if (!is_file($filename)) {
             return $default;
         }
@@ -203,7 +203,7 @@ class code extends \ounun\cache\driver
      * 清空文件夹函数和清空文件夹后删除空文件夹函数的处理
      * @param $path
      */
-    private function deldir2($path)
+    private function del_dir2($path)
     {
         //如果是目录则继续
         if (is_dir($path)) {

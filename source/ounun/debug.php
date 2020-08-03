@@ -132,6 +132,7 @@ class debug
 
     /**
      * 日志追加位置
+     *
      * @param bool $bof true:倒序(新内容在头部) false:正序(新内容在尾部)
      * @return debug
      */
@@ -143,6 +144,7 @@ class debug
 
     /**
      * 调试日志
+     *
      * @param string $k
      * @param mixed $log 日志内容
      * @param bool $is_replace 是否替换
@@ -183,7 +185,9 @@ class debug
         return $this;
     }
 
-    /** 内部内调 */
+    /**
+     * 内部内调
+     */
     public function callback()
     {
         $buffer = ob_get_contents();
@@ -291,9 +295,9 @@ class debug
             $key = [];
             static::$_header_idx++;
 
-            $k && $key[] = $k;
-            $filename && $key[] = basename($filename);
-            $line && $key[] = $line;
+            empty($k) || $key[] = $k;
+            empty($filename) || $key[] = basename($filename);
+            empty($line) || $key[] = $line;
 
             $key = implode('-', $key);
             if (is_array($v) || is_object($v)) {

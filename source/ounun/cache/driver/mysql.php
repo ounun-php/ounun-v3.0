@@ -7,10 +7,12 @@
 namespace ounun\cache\driver;
 
 
+use ounun\cache\driver;
+
 /**
  * 文件类型缓存类
  */
-class mysql extends \ounun\cache\driver
+class mysql extends driver
 {
     /** @var string file类型 */
     const Type          = 'mysql';

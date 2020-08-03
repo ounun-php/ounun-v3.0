@@ -14,7 +14,7 @@ namespace ounun\cache;
 abstract class driver
 {
     /** @var mixed 驱动句柄 */
-    protected $_handler;
+    protected \Redis $_handler;
 
     /** @var array 缓存 get read:读取次数 set write:写入次数 */
     protected array $_times = ['get' => 0, 'set' => 0,];

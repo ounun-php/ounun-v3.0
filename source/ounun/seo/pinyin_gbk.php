@@ -6,8 +6,6 @@
 
 namespace ounun\seo;
 
-use ounun\utils\str;
-
 /** 本插件所在目录 */
 define('Dir_Plugins_Pinyin', __DIR__ . '/');
 

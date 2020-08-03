@@ -6,6 +6,8 @@
 
 namespace ounun;
 
+use ounun\restful\error_code;
+
 class restful
 {
     /** @var string method */
@@ -62,10 +64,10 @@ class restful
     /**
      * 构建前执行
      *
-     * @param $mod
+     * @param $url_mods
      * @return bool|array
      */
-    public function _construct_before($mod)
+    public function _construct_before(array $url_mods = [])
     {
         return true;
     }
@@ -73,6 +75,7 @@ class restful
     /**
      * @param string $methods
      * @param string $domain
+     * @param string $headers
      */
     static public function headers_allow_origin_set(string $methods = 'GET,POST,PUT,DELETE', string $domain = '*', string $headers = '*')
     {
@@ -89,7 +92,7 @@ class restful
      */
     public static function headers_set(string $content_type, int $status_code = 200, string $http_version = 'HTTP/1.1')
     {
-        $status_message = \ounun\restful\error_code::Maps[$status_code] ?? \ounun\restful\error_code::Maps[200];
+        $status_message = error_code::Maps[$status_code] ?? error_code::Maps[200];
 
         header($http_version . ' ' . $status_code . ' ' . $status_message);
         header('Content-Type: ' . $content_type . '; charset=utf-8');

@@ -7,19 +7,21 @@
 namespace ounun\cache\driver;
 
 
+use ounun\cache\driver;
+
 /**
  * Redis缓存驱动，适合单机部署、有前端代理实现高可用的场景，性能最好
  * 有需要在业务层实现读写分离、或者使用RedisCluster的需求，请使用Redisd驱动
  *
- * 要求安装phpredis扩展：https://github.com/nicolasff/phpredis
+ * 要求安装php redis扩展：https://github.com/nicolasff/phpredis
  */
-class redis extends \ounun\cache\driver
+class redis extends driver
 {
     /** @var string redis类型 */
     const Type = 'redis';
 
     /** @var \Redis */
-    protected $_handler;
+    protected \Redis $_handler;
 
     /** @var array 配制 */
     protected array $_options = [
@@ -307,6 +309,7 @@ class redis extends \ounun\cache\driver
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
      * 返回:push 操作后的 list 长度。
      * @param string $key
+     * @param $value
      * @param bool $add_prefix
      * @return int push 操作后的 list 长度。
      */
@@ -332,6 +335,7 @@ class redis extends \ounun\cache\driver
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
      *    push操作后的列表长度。
      * @param string $key
+     * @param $value
      * @param bool $add_prefix
      * @return int push操作后的列表长度
      */

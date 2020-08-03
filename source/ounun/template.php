@@ -61,14 +61,14 @@ class template
                                      string $tpl_theme = '', string $tpl_theme_default = '')
     {
         // 类型
-        $tpl_type && static::$type = $tpl_type;
+        empty($tpl_type) || static::$type = $tpl_type;
         // 类型(默认)
-        $tpl_type_default && static::$type_default = $tpl_type_default;
+        empty($tpl_type_default) || static::$type_default = $tpl_type_default;
 
         // 主题风格
-        $tpl_theme && static::$theme = $tpl_theme;
+        empty($tpl_theme) || static::$theme = $tpl_theme;
         // 主题风格(默认)
-        $tpl_theme_default && static::$theme_default = $tpl_theme_default;
+        empty($tpl_theme_default) || static::$theme_default = $tpl_theme_default;
     }
 
 
@@ -162,14 +162,12 @@ class template
     static public function page_seo_set(string $title = '', string $keywords = '', string $description = '', string $h1 = '', string $etag = '')
     {
         $page_seo = [];
-        if ($title) {
-            $page_seo['{$seo_title}'] = $title;
-        }
+        empty($title) || $page_seo['{$seo_title}'] = $title;
         empty($keywords) || $page_seo['{$seo_keywords}'] = $keywords;
-        $description && $page_seo['{$seo_description}'] = $description;
-        $h1 && $page_seo['{$seo_h1}'] = $h1;
-        $etag && $page_seo['{$seo_etag}'] = $etag;
-        $page_seo && static::$assign_array = array_merge(static::$assign_array, $page_seo);
+        empty($description) || $page_seo['{$seo_description}'] = $description;
+        empty($h1) || $page_seo['{$seo_h1}'] = $h1;
+        empty($etag) || $page_seo['{$seo_etag}'] = $etag;
+        empty($page_seo) || static::$assign_array = array_merge(static::$assign_array, $page_seo);
     }
 
     /** @var bool 是否开启ob_start */
@@ -198,10 +196,10 @@ class template
      * 创建对像 template constructor.
      *
      * @param bool $is_trim 是否去除多余的空格换行
-     * @param string $theme 风格
-     * @param string $theme_default 风格(默认)
-     * @param string $type 类型
-     * @param string $type_default 模板文件所以目录(默认)
+     * @param string|null $theme 风格
+     * @param string|null $theme_default 风格(默认)
+     * @param string|null $type 类型
+     * @param string|null $type_default 模板文件所以目录(默认)
      */
     public function __construct(bool $is_trim = false,
                                 ?string $theme = null, ?string $theme_default = null,
@@ -318,13 +316,13 @@ class template
         // $this->_addon_tag == ''
         if (empty($addon_tag) && $this->_addon_tag) {
             $addon_tag = $this->_addon_tag;
-            $filename2 = $this->fixed($filename, '', false, false);
+            $filename2 = $this->fixed($filename, '',  false);
             if ($filename2) {
                 return $filename2;
             }
         }
 
-        return $this->fixed($filename, $addon_tag, true, false);
+        return $this->fixed($filename, $addon_tag, false);
     }
 
 
@@ -415,6 +413,5 @@ class template
             ob_start();
             static::$_ob_start = true;
         }
-        return;
     }
 }
