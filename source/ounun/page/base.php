@@ -12,6 +12,7 @@ use ounun\db\pdo;
 /**
  * 主要功能: 分頁,有問題問我吧,沒時間寫注
  * Class base_max
+ *
  * @package ounun\page
  */
 class base
@@ -61,6 +62,7 @@ class base
     /**
      * 创建一个分页类
      * page constructor.
+     *
      * @param pdo $db
      * @param string $table
      * @param string $url
@@ -87,6 +89,7 @@ class base
 
     /**
      * 设定总接口
+     *
      * @param array $config
      */
     public function config_set(array $config)
@@ -104,6 +107,7 @@ class base
 
     /**
      * 得到分页数据
+     *
      * @param int $page
      * @param string $title
      * @param bool $end_index
@@ -158,6 +162,7 @@ class base
 
     /**
      * 算出分页数据
+     *
      * @param int $page_curr
      * @param bool $end_index
      * @return array
@@ -218,6 +223,7 @@ class base
 
     /**
      * 得到数据总行数
+     *
      * @return int
      */
     public function total_size(): int
@@ -231,6 +237,7 @@ class base
 
     /**
      * 得到数据总页数
+     *
      * @return int
      */
     public function total_page(): int
@@ -240,6 +247,7 @@ class base
 
     /**
      * 当前所在页数
+     *
      * @return int
      */
     public function page_curr(): int
@@ -249,6 +257,7 @@ class base
 
     /**
      * 翻页排序  false:1...max  true:max...1
+     *
      * @return int
      */
     public function page_end_index(): int
@@ -279,6 +288,7 @@ class base
 
     /**
      * 设定字符串
+     *
      * @return string
      */
     private function _note_set(): string
@@ -289,6 +299,7 @@ class base
 
     /**
      * 设定URL串
+     *
      * @param int $page
      * @return string
      */
@@ -322,6 +333,7 @@ class base
 
     /**
      * 从数据库中得到数据总行数
+     *
      * @return int
      */
     protected function _total_get(): int

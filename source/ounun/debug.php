@@ -216,7 +216,7 @@ class debug
         // 环境参数
         if ($this->_is_out_url) {
             $this->_is_out_url = false;
-            $str               .= date('Y-m-d H:i:s') . ' URL :' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:') . '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . "\n";
+            $str               .= date('Y-m-d H:i:s') . ' URL :\'' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:') . '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . "'\n";
         }
         if ($this->_is_out_get && $_GET) {
             $this->_is_out_get = false;
@@ -262,9 +262,10 @@ class debug
                 $run_time = '';
             }
             if ($this->_is_out_buffer && $this->_logs_buffer) {
-                $str .= '--- DATE:' . date("Y-m-d H:i:s") . ' RunTime:' . $run_time . '---' . PHP_EOL . $this->_logs_buffer . PHP_EOL;
+                $str                .= '--- DATE:' . date("Y-m-d H:i:s") . ' RunTime:' . $run_time . '---' . PHP_EOL . $this->_logs_buffer;
+                $this->_logs_buffer = '';
             }
-            $this->_logs_buffer = '';
+            $str .= '------------------' . PHP_EOL;
         }
         // 写文件
         if ($this->_is_bof && $str) {
@@ -272,8 +273,8 @@ class debug
                 $str = $str . file_get_contents($filename);
             }
             file_put_contents($filename, $str);
-        } elseif($str) {
-            file_put_contents($filename, $str . '------------------' . PHP_EOL, FILE_APPEND);
+        } elseif ($str) {
+            file_put_contents($filename, $str, FILE_APPEND);
         }
         return $this;
     }
@@ -313,7 +314,6 @@ class debug
 
     /**
      * @param string $channel
-     * @param string $filename 输出文件名
      * @param bool $is_out_buffer 是否输出 buffer
      * @param bool $is_out_get 是否输出 get
      * @param bool $is_out_post 是否输出 post
@@ -323,16 +323,17 @@ class debug
      * @param bool $is_out_server 是否输出 server
      * @param bool $is_bof 倒序(后面的日志写到前面)
      * @param bool $is_run_time 运行时间毫秒
+     * @param string|null $filename 输出文件名
      * @return $this 调试日志单例
      */
     public static function i(string $channel = 'comm', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true,
                              $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
-                             $is_bof = false, $is_run_time = true,string $filename = ''): self
+                             $is_bof = false, $is_run_time = true, ?string $filename = null): self
     {
         if (empty(static::$_instances[$channel])) {
             $debug                        = global_all('debug', []);
             $dir                          = ($debug && $debug['out']) ? $debug['out'] : Dir_Root . 'storage/logs/';
-            $filename                     = $dir . date('Y-m-d') . '_' . $channel . ($filename?'.log':'_' . $filename);
+            $filename                     = $dir . date('Y-m-d') . '_' . $channel . ($filename ? '_' . $filename : '.log');
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,
                 $is_bof, $is_run_time);

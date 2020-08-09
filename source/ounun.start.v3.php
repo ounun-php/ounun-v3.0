@@ -154,16 +154,13 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
 /**
  * 得到 原生 URL(去问号后的 QUERY_STRING)
  *
- * @param string $uri
+ * @param string|null $uri
  * @return string URL
  */
-function url_original(string $uri = ''): string
+function url_original(?string $uri = null): string
 {
-    if (empty($uri)) {
-        $uri = $_SERVER['REQUEST_URI'];
-    }
-    $tmp = explode('?', $uri, 2);
-    return $tmp[0];
+    $uri ??= $_SERVER['REQUEST_URI'];
+    return explode('?', $uri, 2)[0];
 }
 
 /**
@@ -692,7 +689,7 @@ function error_php(string $error_msg, string $error_html = ''): void
     echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths]) . PHP_EOL;
     echo '<pre>' . PHP_EOL;
     debug_print_backtrace();
-    echo PHP_EOL . '</pre>';
+    echo '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
 }
 
@@ -1359,7 +1356,7 @@ class ounun
             $class_filename = "{$addon_tag}/{$app_name}.php";
             $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
         }
-        debug::header([$addon_tag,$class_filename,$class_name,$addon],'$addon',__FILE__, __LINE__);
+        debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
 
         // paths
         if ($class_filename) {
@@ -1402,77 +1399,10 @@ abstract class v
     public static ?debug $debug;
 
     /** @var string 插件唯一标识 */
-    public string $addon_tag = '';
+    public static string $addon_tag = '';
 
     /** @var string 插件展示子类 */
-    public string $addon_view = '';
-
-    /**
-     * 调试初始化
-     *
-     * @param string $channel
-     * @param string $filename
-     * @return debug|null
-     */
-//    public static function debug_init(string $channel = 'comm', string $filename = '404.txt')
-//    {
-//        if (empty(static::$debug)) {
-//            static::$debug = debug::i($channel, $filename);
-//        }
-//        return static::$debug;
-//    }
-
-    /**
-     * 调试日志
-     *
-     * @param string $k
-     * @param mixed $log
-     */
-//    public static function debug_logs(string $k, $log)
-//    {
-//        if (static::$debug) {
-//            static::$debug->logs($k, $log);
-//        }
-//    }
-
-    /**
-     * 停止 调试
-     */
-//    public static function debug_stop()
-//    {
-//        if (static::$debug) {
-//            static::$debug->stop();
-//        }
-//    }
-
-    /**
-     * 网页Cache
-     *
-     * @param string $key
-     * @param bool $cache_html_trim
-     * @param int $cache_html_time_expire
-     */
-    public function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
-    {
-        if ('' == Environment && $cache_config = global_all('cache', [])['html']) {
-            $cache_config['prefix'] = 'c_html_' . ounun::$app_name . '_' . template::$theme . '_' . template::$type;
-            static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
-            static::$cache_html->run(true);
-        }
-    }
-
-    /**
-     * 是否马上输出cache
-     *
-     * @param bool $output
-     */
-    public function cache_html_stop(bool $output)
-    {
-        if (static::$cache_html) {
-            static::$cache_html->stop($output);
-            static::$tpl->assign();
-        }
-    }
+    public static string $addon_view = '';
 
     /**
      * (兼容)返回一个 模板文件地址(绝对目录,相对root)
@@ -1502,6 +1432,35 @@ abstract class v
         return static::$tpl->curr($filename, $addon_tag);
     }
 
+    /**
+     * 网址路径前缀(Url)
+     *
+     * @param string $path
+     * @param string|null $lang
+     * @param bool $is_current 是否当前页面
+     * @param string|null $addon_view
+     * @param string|null $addon_tag
+     * @return string
+     */
+    public static function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null)
+    {
+        $addon_tag  ??= static::$addon_tag;
+        $addon_view ??= static::$addon_view;
+        return ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
+    }
+
+    /**
+     * 当前面页
+     *
+     * @param string $page_file_path
+     * @param string|null $lang
+     * @param bool $is_current 是否当前页面
+     * @return string
+     */
+    public static function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
+    {
+        return ounun::url_get($page_file_path, $lang, $is_current);
+    }
 
     /**
      * ounun_view constructor.
@@ -1517,7 +1476,7 @@ abstract class v
         $method      = $url_mods[0];
         ounun::$view = $this;
 
-        $addon_tag && $this->addon_tag = $addon_tag;
+        empty($addon_tag) || static::$addon_tag = $addon_tag;
         $this->_initialize($method);
         $this->$method($url_mods);
     }
@@ -1530,36 +1489,6 @@ abstract class v
     abstract protected function _initialize(string $method);
 
     /**
-     * 网址路径前缀(Url)
-     *
-     * @param string $path
-     * @param string|null $lang
-     * @param bool $is_current 是否当前页面
-     * @param string|null $addon_view
-     * @param string|null $addon_tag
-     * @return string
-     */
-    public function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null)
-    {
-        $addon_tag  ??= $this->addon_tag;
-        $addon_view ??= $this->addon_view;
-        return ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
-    }
-
-    /**
-     * 当前面页
-     *
-     * @param string $page_file_path
-     * @param string $lang
-     * @param bool $is_current 是否当前页面
-     * @return string
-     */
-    public function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
-    {
-        return ounun::url_get($page_file_path, $lang, $is_current);
-    }
-
-    /**
      * 初始化Page
      *
      * @param string $page_file_path
@@ -1569,11 +1498,11 @@ abstract class v
      * @param int $cache_html_time_expire
      * @param bool $cache_html_trim
      */
-    public function init_page(string $page_file_path = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
-                              int $cache_html_time_expire = 0, bool $cache_html_trim = true)
+    protected function _initialize_page(string $page_file_path = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
+                                        int $cache_html_time_expire = 0, bool $cache_html_trim = true)
     {
         // url
-        $this->url_addon_get($page_file_path,null,true);
+        $this->url_addon_get($page_file_path, null, true);
 
         // url_check
         url_check(ounun::$page_url, $ext_req, $domain);
@@ -1591,6 +1520,35 @@ abstract class v
         // template
         if (empty(static::$tpl)) {
             static::$tpl = new template($cache_html_trim);
+        }
+    }
+
+    /**
+     * 网页Cache
+     *
+     * @param string $key
+     * @param bool $cache_html_trim
+     * @param int $cache_html_time_expire
+     */
+    protected function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
+    {
+        if ('' == Environment && $cache_config = global_all('cache', [])['html']) {
+            $cache_config['prefix'] = 'c_html_' . ounun::$app_name . '_' . template::$theme . '_' . template::$type;
+            static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
+            static::$cache_html->run(true);
+        }
+    }
+
+    /**
+     * 是否马上输出cache
+     *
+     * @param bool $output
+     */
+    protected function cache_html_stop(bool $output)
+    {
+        if (static::$cache_html) {
+            static::$cache_html->stop($output);
+            static::$tpl->assign();
         }
     }
 
@@ -1761,8 +1719,8 @@ function start(array $url_mods, string $host)
             exit();
         }
     }
-    $error = "LINE:" . __LINE__ . " error:" . json_encode_unescaped(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods]);
     header('HTTP/1.1 404 Not Found');
+    $error = "LINE:" . __LINE__ . " error:" . json_encode_unescaped(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods]);
     error_php($error);
 }
 

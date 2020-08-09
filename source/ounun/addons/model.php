@@ -28,7 +28,7 @@ abstract class model
     /** @var array 数据 */
     protected array $_data = [];
 
-    /** @var mixed 逻辑类 */
+    /** @var logic 逻辑类 */
     protected $_logic;
 
     /** @var pdo */
@@ -76,10 +76,10 @@ abstract class model
      * @param string|null $table
      * @return int
      */
-    public function update(string $where_str, array $where_bind,array $data,?string $table = null)
+    public function update(string $where_str, array $where_bind, array $data, ?string $table = null)
     {
         $table ??= $this->table;
-        return  $this->db->table($table)->where($where_str, $where_bind)->update($data);
+        return $this->db->table($table)->where($where_str, $where_bind)->update($data);
     }
 
     /**
@@ -127,19 +127,63 @@ abstract class model
             ->column_one();
     }
 
-    /** 逻辑类get */
+    /**
+     * 分页
+     *
+     * @param string $where_str
+     * @param array $where_bind
+     * @param string $fields
+     * @param array $orders
+     * @param array $page_gets
+     * @param array $page_config
+     * @param string|null $table
+     * @return array
+     */
+    public function pagination(string $where_str, array $where_bind, string $fields = '', array $orders = [], array $page_gets = [], array $page_config = [], ?string $table = null)
+    {
+        $table ??= $this->table;
+        $page  = (isset($page_gets['page']) && (int)$page_gets['page'] > 1) ? (int)$page_gets['page'] : 1;
+        $url   = url_build_query(url_original(), $page_gets, ['page' => '{page}']);
+
+        $where = ['str' => $where_str, 'bind' => $where_bind,];
+        $pg    = new \ounun\page\base($this->db, $table, $url, $where, $page_config);
+        $ps    = $pg->initialize($page);
+
+        $this->db->table($table)
+            ->field($fields)
+            ->where($where_str, $where_bind)
+            ->limit($pg->limit_length(), $pg->limit_offset());
+        if ($orders && is_array($orders)) {
+            foreach ($orders as $field => $order) {
+                $this->db->order($field, $order);
+            }
+        }
+        return [$ps, $this->db->column_all()];
+    }
+
+    /**
+     * 逻辑类get
+     *
+     * @return logic
+     */
     public function logic_get()
     {
         return $this->_logic;
     }
 
-    /** 逻辑类set */
+    /**
+     * 逻辑类set
+     *
+     * @param logic $logic
+     */
     public function logic_set($logic)
     {
         $this->_logic = $logic;
     }
 
     /**
+     * set
+     *
      * @param $name
      * @param $value
      */
@@ -149,6 +193,8 @@ abstract class model
     }
 
     /**
+     * get
+     *
      * @param $name
      * @return mixed
      */
@@ -158,6 +204,8 @@ abstract class model
     }
 
     /**
+     * isset
+     *
      * @param $name
      * @return bool
      */
@@ -167,6 +215,8 @@ abstract class model
     }
 
     /**
+     * unset
+     *
      * @param $name
      */
     public function __unset($name)

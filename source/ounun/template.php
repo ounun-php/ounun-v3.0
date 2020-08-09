@@ -375,6 +375,8 @@ class template
     }
 
     /**
+     * trim
+     *
      * @param string $buffer
      * @param bool $is_trim
      * @return string
