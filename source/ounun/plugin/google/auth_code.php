@@ -84,7 +84,7 @@ class auth_code
     public function qrcode_google_url_get($name, $secret, $title = null,$url_root = 'https://qr.7pk.cn/')
     {
         $urlencoded = urlencode('otpauth://totp/' . urlencode($name) . '?secret=' . $secret . '');
-        if (isset($title)) {
+        if (isset($title) && $title) {
             $urlencoded .= urlencode('&issuer=' . urlencode($title));
         }
         return $url_root.'qrout.php?c=' . $urlencoded . '';

@@ -10,8 +10,8 @@ class debug
 {
     /** @var array  日志数组 */
     private array $_logs = [];
-    /** @var string 输出文件名 */
-    private string $_logs_buffer = '';
+    /** @var string|null 输出文件名 */
+    private ?string $_logs_buffer;
     /** @var int    输出文件名 */
     private int $_time = 0;
 
@@ -63,12 +63,12 @@ class debug
             }
         }
         //
-        if (class_exists('\ounun\template')) {
-            template::ob_start();
+        if (class_exists(template::class) && template::ob_status()) {
+            template::ob_func([$this, 'callback'], []);
         } else {
             ob_start();
+            register_shutdown_function([$this, 'callback']);
         }
-        register_shutdown_function(array($this, 'callback'));
 
         $this->_filename    = $filename;
         $this->_is_bof      = $is_bof;
@@ -162,7 +162,7 @@ class debug
                     if (is_array($this->_logs[$k])) {
                         $this->_logs[$k][] = $log;
                     } else {
-                        $this->_logs[$k] = array($this->_logs[$k], $log);
+                        $this->_logs[$k] = [$this->_logs[$k], $log];
                     }
                 } else {
                     $this->_logs[$k] = $log;
@@ -187,17 +187,25 @@ class debug
 
     /**
      * 内部内调
+     * @param string|null $buffer
      */
-    public function callback()
+    public function callback(?string $buffer = null)
     {
-        $buffer = ob_get_contents();
-        ob_clean();
-        ob_implicit_flush(1);
-        if ($this->_is_out_buffer) {
-            $this->_logs_buffer = $buffer;
+        if (empty($buffer)) {
+            $buffer = ob_get_contents();
+            ob_clean();
+            ob_implicit_flush(1);
+            if ($this->_is_out_buffer) {
+                $this->_logs_buffer = $buffer;
+            }
+            $this->write(true);
+            exit($buffer);
+        } else {
+            if ($this->_is_out_buffer) {
+                $this->_logs_buffer = $buffer;
+            }
+            $this->write(true);
         }
-        $this->write(true);
-        exit($buffer);
     }
 
     /**
@@ -323,17 +331,18 @@ class debug
      * @param bool $is_out_server 是否输出 server
      * @param bool $is_bof 倒序(后面的日志写到前面)
      * @param bool $is_run_time 运行时间毫秒
+     * @param string $date_dir 时间 以_或/ 目录或用_分开
      * @param string|null $filename 输出文件名
      * @return $this 调试日志单例
      */
     public static function i(string $channel = 'comm', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true,
                              $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
-                             $is_bof = false, $is_run_time = true, ?string $filename = null): self
+                             $is_bof = false, $is_run_time = true, string $date_dir = '_', ?string $filename = null): self
     {
         if (empty(static::$_instances[$channel])) {
             $debug                        = global_all('debug', []);
-            $dir                          = ($debug && $debug['out']) ? $debug['out'] : Dir_Root . 'storage/logs/';
-            $filename                     = $dir . date('Y-m-d') . '_' . $channel . ($filename ? '_' . $filename : '.log');
+            $dir                          = ($debug && $debug['out_dir']) ? $debug['out_dir'] : Dir_Root . 'storage/logs/';
+            $filename                     = $dir . date('Y-m-d') . $date_dir . $channel . ($filename ? '_' . $filename : '.log');
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,
                 $is_bof, $is_run_time);

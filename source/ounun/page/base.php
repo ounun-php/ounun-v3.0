@@ -228,7 +228,7 @@ class base
      */
     public function total_size(): int
     {
-        if ($this->_total) {
+        if (isset($this->_total)) {
             return $this->_total;
         }
         $this->_total = $this->_total_get();

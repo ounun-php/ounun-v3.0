@@ -7,7 +7,7 @@
 namespace ounun\addons;
 
 
-abstract class addons
+abstract class apps
 {
     /** @var string 插件名称 */
     const Addon_Name = '[基类]';

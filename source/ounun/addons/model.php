@@ -176,7 +176,7 @@ abstract class model
      *
      * @param logic $logic
      */
-    public function logic_set($logic)
+    public function logic_set(logic $logic)
     {
         $this->_logic = $logic;
     }
@@ -184,10 +184,10 @@ abstract class model
     /**
      * set
      *
-     * @param $name
-     * @param $value
+     * @param string $name
+     * @param mixed $value
      */
-    public function __set($name, $value)
+    public function data_set(string $name, $value)
     {
         $this->_data[$name] = $value;
     }
@@ -195,12 +195,35 @@ abstract class model
     /**
      * get
      *
-     * @param $name
+     * @param string $name
+     * @param mixed $default_value
      * @return mixed
      */
-    public function __get($name)
+    public function data_get(string $name, $default_value = null)
     {
-        return isset($this->_data[$name]) ? $this->_data[$name] : null;
+        return isset($this->_data[$name]) ? $this->_data[$name] : $default_value;
+    }
+
+    /**
+     * set
+     *
+     * @param string $name
+     * @param mixed $value
+     */
+    public function __set(string $name, $value)
+    {
+        $this->data_set($name,$value);
+    }
+
+    /**
+     * get
+     *
+     * @param string $name
+     * @return mixed
+     */
+    public function __get(string $name)
+    {
+        return $this->data_get($name,null);
     }
 
     /**

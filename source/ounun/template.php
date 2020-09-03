@@ -140,7 +140,7 @@ class template
             '{$root_static}'      => \ounun::$url_static, '/public/static' => \ounun::$url_static,
             '{$root_static_g}'    => \ounun::$url_static_g, '/public/static_g' => \ounun::$url_static_g,
             // seo_site
-            '{$site_name}'        => static::$site_seo['name'],
+            '{$site_name}'        => static::$site_seo['sitename'],
             '{$site_keywords}'    => static::$site_seo['keywords'],
             '{$site_description}' => static::$site_seo['description'],
             '{$site_slogan}'      => static::$site_seo['slogan'],
@@ -172,6 +172,10 @@ class template
 
     /** @var bool 是否开启ob_start */
     protected static bool $_ob_start = false;
+    /** @var string 缓存数据 */
+    protected static string $_ob_string;
+    /** @var array 回调数组 */
+    protected static array $_ob_callbacks = [];
 
     /** @var string 模板目录(当前) */
     protected string $_current_path;
@@ -316,7 +320,7 @@ class template
         // $this->_addon_tag == ''
         if (empty($addon_tag) && $this->_addon_tag) {
             $addon_tag = $this->_addon_tag;
-            $filename2 = $this->fixed($filename, '',  false);
+            $filename2 = $this->fixed($filename, '', false);
             if ($filename2) {
                 return $filename2;
             }
@@ -352,7 +356,6 @@ class template
     public function assign()
     {
         if (empty(\v::$cache_html) || \v::$cache_html->stop) {
-            // ob_start();
             static::ob_start();
             register_shutdown_function([$this, 'callback'], true);
         }
@@ -369,7 +372,14 @@ class template
             $buffer = ob_get_contents();
             ob_clean();
             ob_implicit_flush(1);
-
+            // 执行回调
+            if (static::$_ob_callbacks && is_array(static::$_ob_callbacks)) {
+                foreach (static::$_ob_callbacks as $v) {
+                    array_push($v[1],$buffer);
+                    call_user_func_array($v[0], $v[1]);
+                }
+            }
+            // exit
             exit(static::trim($buffer, $this->_is_trim));
         }
     }
@@ -385,9 +395,6 @@ class template
     {
         // 写文件
         if ($is_trim) {
-            /*            $pattern = ['/<!--.*?-->/', '/[^:\-\"]\/\/[^\S].*?\n/', '/\/\*.*?\*\//', '/[\n\r\t]*?/', '/\s{2,}/', '/>\s?</', '/<!--.*?-->/', '/\"\s?>/'];*/
-//            $replacement = ['', '', '', '', ' ', '><', '', '">'];
-//            $buffer = preg_replace($pattern, $replacement, $buffer);
             $buffer = preg_replace_callback('/<script(.*?)>([\s\S]*?)<\/script>/m', function ($matches) {
                 $matches_2 = preg_replace(['/<!--[\s\S]*?-->/m', '/\/\*[\s\S]*?\*\//m', '/[^\S]\/\/.*/', '/\s{2,}/m',], ['', '', '', ' ',], $matches[2]);
                 return "<script{$matches[1]}>{$matches_2}</script>";
@@ -415,5 +422,24 @@ class template
             ob_start();
             static::$_ob_start = true;
         }
+    }
+
+    /**
+     * 设定 回调函数
+     * @param callable $callback
+     * @param array $param_arr
+     */
+    static public function ob_func(callable $callback, array $param_arr)
+    {
+        static::$_ob_callbacks[] = [$callback, $param_arr];
+        // echo __METHOD__.':'.count(static::$_ob_callbacks)."\n";
+    }
+
+    /**
+     * ob_start 状态
+     */
+    static public function ob_status()
+    {
+        return static::$_ob_start;
     }
 }

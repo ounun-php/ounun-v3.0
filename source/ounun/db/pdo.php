@@ -44,9 +44,9 @@ class pdo
     /** @var string 更新操作Add */
     const Update_Add = 'add';
 
-    /** @var \PDO  pdo */
+    /** @var \PDO|null  pdo */
     protected ?\PDO $_pdo = null; // pdo
-    /** @var \PDOStatement  stmt */
+    /** @var \PDOStatement|null  stmt */
     protected ?\PDOStatement $_stmt = null; // stmt
 
 
@@ -105,8 +105,6 @@ class pdo
     /** @var string 关联表 */
     protected string $_join = '';
 
-    /** @var bool  debug */
-    protected bool $_is_debug = false; // debug
     /** @var bool 多条 */
     protected bool $_is_multiple = false;
     /** @var bool 是否替换插入 */
@@ -197,9 +195,6 @@ class pdo
             }
             $sql = str_replace('?', $this->quote($param), $sql);
             $this->_prepare($sql, false);
-            if ($this->_is_debug) {
-                $this->_stmt->debugDumpParams();
-            }
             $this->_stmt->execute();
         } else {
             $this->_prepare($sql, $check_active);
@@ -468,17 +463,6 @@ class pdo
         $this->_is_multiple = $is_multiple;
         return $this;
     }
-
-    /**
-     * 条件参数 默认true:执行execute  绑定false:bind_param
-     * @param bool $is_execute
-     * @return $this
-     */
-//    public function execute(bool $is_execute = false):self
-//    {
-//        $this->_is_execute = $is_execute;
-//        return $this;
-//    }
 
     /**
      * 参数 install update replace
@@ -879,16 +863,6 @@ class pdo
     }
 
     /**
-     * @param bool $debug
-     * @return $this
-     */
-    public function debug(bool $debug = true)
-    {
-        $this->_is_debug = $debug;
-        return $this;
-    }
-
-    /**
      * 是否连接成功
      * @return bool
      */
@@ -995,19 +969,19 @@ class pdo
         switch ($param) {
             case \PDO::PARAM_INT:
                 return 'i';
-                // break;
+            // break;
             case \PDO::PARAM_STR:
                 return 's';
-                // break;
+            // break;
             case \PDO::PARAM_LOB:
                 return 'b';
-                // break;
+            // break;
             case \PDO::PARAM_NULL:
                 return 'null';
-                // break;
+            // break;
             case \PDO::PARAM_BOOL:
                 return 'bool';
-                // break;
+            // break;
             default:
                 return '';
         }
@@ -1111,23 +1085,18 @@ class pdo
                 }
             } else {
                 $this->_stmt->debugDumpParams();
-                trigger_error("SQL:Can't find \$fields[{$key}] ", E_USER_ERROR);
+                error_php("SQL:Can't find \$fields[{$key}] ", '', 'mysql');
             }
         }
-        if ($this->_is_debug) {
-            $this->_stmt->debugDumpParams();
-        }
+
         try {
             $this->_stmt->execute();
         } catch (\Exception $e) {
-            $msg = [
-                '$this->_last_sql'   => $this->_last_sql,
-                '$this->_bind_param' => $this->_bind_param,
-                '$fields'            => $fields,
-            ];
             $this->_stmt->debugDumpParams();
-            // echo $this->_stmt->queryString."\n";
-            error_php("Sql Error:" . $e->getMessage() . "\nTrace:" . $e->getTraceAsString() . "\n".json_encode_unescaped($msg), E_USER_ERROR);
+            error_php("Sql Error:" . $e->getMessage() .
+                "\n\tlast_sql:" . $this->_last_sql . "\n" .
+                "\tbind_param:" . json_encode_unescaped($this->_bind_param) . "\n" .
+                "\tfields:" . json_encode_unescaped($fields) . "\n", '', 'mysql');
         }
     }
 
@@ -1155,7 +1124,6 @@ class pdo
 
         $this->_is_multiple = false;
         $this->_is_replace  = false;
-        $this->_is_debug    = false;
     }
 
     /**

@@ -4,7 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-use ounun\addons\addons;
+use ounun\addons\apps;
 use ounun\addons\logic;
 use ounun\db\utils;
 use ounun\debug;
@@ -252,6 +252,7 @@ function go_confirm(string $url1, string $url2, string $note, bool $top = false)
  */
 function go_url(string $url, bool $top = false, int $head_code = 302, int $delay = 0): void
 {
+    // error_php($url);
     if ($top) {
         echo '<script type="text/javascript">' . "\n";
         echo "window.top.location.href='{$url}';\n";
@@ -679,15 +680,27 @@ function error404(string $msg = ''): void
  *
  * @param string $error_msg
  * @param string $error_html
+ * @param string $channel
  */
-function error_php(string $error_msg, string $error_html = ''): void
+function error_php(string $error_msg, string $error_html = '', string $channel = 'php'): void
 {
-    debug::i('error_php');
+    $out = global_all('debug', [])['out_config'];
+    if ($out && isset($out['default']) && isset($out['default']['buffer'])) {
+        if (isset($out[$channel]) && is_array($out[$channel])) {
+            $c = array_merge($out['default'], $out[$channel]);
+        } else {
+            $c = $out['default'];
+        }
+        debug::i($channel, $c['buffer'], $c['get'], $c['post'], $c['url'], $c['cookie'], $c['session'], $c['server'], $c['bof'], $c['time'], $c['date_dir'], $c['filename']);
+    } else {
+        debug::i($channel);
+    }
+    // print_r(['$debug'=>$debug,'$out'=>$out,'$c'=>$c]);
     if ($error_html) {
         echo $error_html;
     }
-    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths]) . PHP_EOL;
     echo '<pre>' . PHP_EOL;
+    echo '$app:' . var_export(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => json_encode_unescaped(ounun::$paths)], true) . PHP_EOL;
     debug_print_backtrace();
     echo '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
@@ -1077,7 +1090,29 @@ class ounun
      */
     static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false)
     {
-        $key = ($addon_tag ? '/' . $addon_tag : '') . ($addon_view ? '/' . $addon_view : '');
+        // 空
+        if (empty($addon_tag)) {
+            return static::url_get($path, $lang, $is_current);
+        }
+
+        // tag view都存在
+        if ($addon_view) {
+            $key = '/' . $addon_tag . '/' . $addon_view;
+            if (isset(static::$addon_path[$key])) {
+                $page_file_path = static::$addon_path[$key] . $path;
+                return static::url_get($page_file_path, $lang, $is_current);
+            }
+            $key2 = '/' . $addon_tag;
+            if (isset(static::$addon_path[$key2])) {
+                $page_file_path = static::$addon_path[$key2] . '/' . $addon_view . $path;
+                return static::url_get($page_file_path, $lang, $is_current);
+            }
+            $page_file_path = $key . $path;
+            return static::url_get($page_file_path, $lang, $is_current);
+        }
+
+        // tag
+        $key = '/' . $addon_tag;
         if (isset(static::$addon_path[$key])) {
             $page_file_path = static::$addon_path[$key] . $path;
         } else {
@@ -1318,7 +1353,7 @@ class ounun
      */
     static public function addon_get(array $url_mods = [])
     {
-        debug::header([$url_mods, ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
+        // debug::header([$url_mods, ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
 
         // 修正App_Name
         $app_name = (static::$app_name === static::App_Name_Web || in_array(static::$app_name, static::App_Names))
@@ -1327,7 +1362,7 @@ class ounun
 
         // 插件路由
         $addon_tag = '';
-        /** @var addons $apps */
+        /** @var apps $apps */
         if ($url_mods[1] && ($addon = static::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
             array_shift($url_mods);
             array_shift($url_mods);
@@ -1367,7 +1402,11 @@ class ounun
                     // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
                     if (is_file($filename)) {
                         if (empty($url_mods)) {
-                            $url_mods = [static::Def_Method];
+                            if (isset($addon['method']) && $addon['method']) {
+                                $url_mods = [$addon['method']];
+                            } else {
+                                $url_mods = [static::Def_Method];
+                            }
                         }
                         return [$filename, $class_name, $addon_tag, $url_mods];
                     }
@@ -1460,6 +1499,24 @@ abstract class v
     public static function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
     {
         return ounun::url_get($page_file_path, $lang, $is_current);
+    }
+
+    /**
+     * 本页跳转 - 带参数$replace_ext
+     *
+     * @param array $replace_ext 要替换的数据
+     * @param string|null $url URL
+     * @param array $data_query 数据
+     * @param array $skip 忽略的数据 如:page
+     */
+    public static function url_go(array $replace_ext = [], ?string $url = null, array $data_query = [], array $skip = [])
+    {
+        $url ??= \ounun::$page_url;
+        if (empty($data_query)) {
+            $data_query = (array)$_GET;
+        }
+        $url = url_build_query($url, $data_query, $replace_ext, $skip);
+        go_url($url);
     }
 
     /**

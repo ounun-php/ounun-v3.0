@@ -243,7 +243,7 @@ class code extends \ounun\cache\driver
      * @param string $filename
      * @return mixed
      */
-    static public function read2(string $filename)
+    static public function read(string $filename)
     {
         if (file_exists($filename)) {
             return require $filename;
@@ -259,7 +259,7 @@ class code extends \ounun\cache\driver
      * @param bool   $recursive
      * @return mixed
      */
-    static public function write2(string $filename, $data, bool $recursive = false)
+    static public function write(string $filename, $data, bool $recursive = false)
     {
         if($recursive){
             $dir      = dirname($filename);

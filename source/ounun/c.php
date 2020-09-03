@@ -73,6 +73,7 @@ class c
     const Check_Yes = 1;
     /** @var int 没有验证 */
     const Check_No = 0;
+
     /** @var int 默认超时时长 */
     const Check_Timeout = 1800;
     /** @var int 登录校验 超时间 */
