@@ -344,9 +344,16 @@ class file
         return $array;
     }
 
+    /**
+     * @param $path
+     * @param string $pattern
+     * @return false|int
+     */
     static function size($path, $pattern = '*')
     {
-        if (!is_dir($path)) return false;
+        if (!is_dir($path)) {
+            return false;
+        }
         $size  = 0;
         $path  = self::path($path);
         $items = glob($path . $pattern);
@@ -361,7 +368,11 @@ class file
         return $size;
     }
 
-    static function sizeunit($filesize)
+    /**
+     * @param $filesize
+     * @return string
+     */
+    static function size_unit($filesize)
     {
         if ($filesize >= 1073741824) {
             $filesize = round($filesize / 1073741824 * 100) / 100 . ' GB';
@@ -375,8 +386,12 @@ class file
         return $filesize;
     }
 
-    static function path($path)
+    /**
+     * @param $path
+     * @return string
+     */
+    public static function path($path)
     {
-        return rtrim(preg_replace("|[\/]+|", '/', $path), '/') . '/';
+        return rtrim(preg_replace("|[/]+|", '/', $path), '/') . '/';
     }
 }

@@ -6,7 +6,7 @@
 namespace ounun\db;
 
 
-class utils
+class db
 {
     /** @var string 整数类型 */
     const Type_Int = 'int';

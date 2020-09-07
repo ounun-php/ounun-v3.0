@@ -4,9 +4,10 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-namespace ounun\plugin;
+namespace ounun\xmlrpc;
 
-class xmlrpc_client
+
+class client
 {
     protected string $url;
     protected string $method;
@@ -16,6 +17,11 @@ class xmlrpc_client
     protected int $error_code;
     protected string $error_msg;
 
+    /**
+     * xmlrpc_client constructor.
+     * @param $url
+     * @param string $method
+     */
     public function __construct($url, $method = 'POST')
     {
         $this->url    = $url;

@@ -7,6 +7,8 @@
 namespace ounun\cache\driver;
 
 
+use ounun\db\pdo;
+
 /**
  * 文件类型缓存类
  */
@@ -14,6 +16,9 @@ class sqlite extends \ounun\cache\driver
 {
     /** @var string file类型 */
     const Type          = 'sqlite';
+
+    /** @var pdo */
+    protected $_handler;
 
     /** @var array  */
     protected $options = [
@@ -25,7 +30,7 @@ class sqlite extends \ounun\cache\driver
         'large_scale'   => false, // bool false:少量      true:大量
 
         'prefix'      => '',    // 模块名称
-        'prefix_list' => 't',
+        'prefix_list' => 's',
 
         'path'        => '',
     ];

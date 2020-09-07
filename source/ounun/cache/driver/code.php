@@ -23,7 +23,7 @@ class code extends \ounun\cache\driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_list'   => 't',
+        'prefix_list'   => 'c',
 
         // 'cache_subdir'  => true,   用 large_scale
         'path'          => Dir_Cache,

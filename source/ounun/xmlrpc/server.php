@@ -4,9 +4,10 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-namespace ounun\plugin;
+namespace ounun\xmlrpc;
 
-class xmlrpc_server
+
+class server
 {
     protected $_xmlrpc_server;
 

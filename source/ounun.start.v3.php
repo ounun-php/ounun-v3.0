@@ -6,7 +6,7 @@
 
 use ounun\addons\apps;
 use ounun\addons\logic;
-use ounun\db\utils;
+use ounun\db\db;
 use ounun\debug;
 use ounun\c;
 use ounun\cache\html;
@@ -461,7 +461,7 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
         // 返回xml格式数据
         case c::Format_Xml :
             header('Content-Type:text/xml; charset=utf-8');
-            exit(utils::xml_encode($data));
+            exit(db::xml_encode($data));
         // 返回JSON数据格式到客户端 包含状态信息
         case c::Format_Jsonp:
             header('Content-Type:application/javascript; charset=utf-8');

@@ -13,7 +13,7 @@ class memcached extends driver
     /** @var string memcached类型 */
     const Type          = 'memcached';
 
-    /** @var \Memcached|null */
+    /** @var \Memcached */
     protected $_handler;
 
     /** @var array 配制 */
@@ -26,7 +26,7 @@ class memcached extends driver
         'format_string' => false, // bool false:混合数据 true:字符串
         'large_scale'   => false, // bool false:少量    true:大量
         'prefix'        => '',    // 模块名称
-        'prefix_list'   => 't',
+        'prefix_list'   => 'm',
 
 
         'servers'  => [

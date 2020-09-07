@@ -6,7 +6,10 @@
 
 namespace ounun\addons;
 
-
+/**
+ * Class logic
+ * @package ounun\addons
+ */
 abstract class logic
 {
     /** @var array 错误提示信息 */

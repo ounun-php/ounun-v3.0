@@ -21,7 +21,7 @@ class redis extends driver
     const Type = 'redis';
 
     /** @var \Redis */
-    protected \Redis $_handler;
+    protected $_handler;
 
     /** @var array 配制 */
     protected array $_options = [
@@ -33,7 +33,7 @@ class redis extends driver
         'large_scale'   => false, // bool false:少量      true:大量
 
         'prefix'      => '',    // 模块名称
-        'prefix_list' => 't',
+        'prefix_list' => 'r',
 
         'host'       => '127.0.0.1',
         'port'       => 6379,

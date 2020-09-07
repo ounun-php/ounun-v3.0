@@ -61,7 +61,6 @@ class erlang
         }
         if ($host) {
             $this->_host = $host;
-            // $this->_host = '127.0.0.1';
         }
         if ($port) {
             $this->_port = $port;

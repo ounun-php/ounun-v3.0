@@ -5,7 +5,7 @@
  */
 namespace ounun\page;
 
-class util
+class utils
 {
     /**
      * @param array $data_query 数据

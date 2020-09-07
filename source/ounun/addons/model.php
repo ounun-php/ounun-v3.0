@@ -11,8 +11,10 @@ abstract class model
     protected static $_instance;
 
     /**
+     * 返回数据库连接对像
+     *
      * @param pdo|null $db
-     * @return $this 返回数据库连接对像
+     * @return $this
      */
     public static function i(?pdo $db = null): self
     {
@@ -49,7 +51,6 @@ abstract class model
         'validators'      => [],
         'options'         => []
     ];
-
 
     /**
      * cms constructor.
@@ -97,6 +98,7 @@ abstract class model
 
     /**
      * 删除
+     *
      * @param string $where_str
      * @param array $where_bind
      * @param int $limit 删除limit默认为1
@@ -110,11 +112,13 @@ abstract class model
     }
 
     /**
+     * 得到一条数据数组
+     *
      * @param string $where_str
      * @param array $where_bind
      * @param string|null $table
      * @param string $field
-     * @return array 得到一条数据数组
+     * @return array
      */
     public function column_one(string $where_str, array $where_bind, ?string $table = null, string $field = '*')
     {

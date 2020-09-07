@@ -3,11 +3,11 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
 namespace ounun\cache\driver;
 
 
 use ounun\cache\driver;
+use ounun\db\pdo;
 
 /**
  * 文件类型缓存类
@@ -17,11 +17,30 @@ class mysql extends driver
     /** @var string file类型 */
     const Type          = 'mysql';
 
+    /** @var pdo */
+    protected $_handler;
+
     /** @var array  */
     protected $options = [
-        'prefix' => '',
-        'path'   => '',
-        'expire' => 0, // 等于 10*365*24*3600（10年）
+        // 'module'     => '', // 模块名称   转 prefix
+        // 'filename'   => '', // 文件名
+        'expire'    => 0,  // 有效时间 0为永久
+        'serialize' => ['json_encode_unescaped', 'json_decode_array'], // encode decode
+
+        'format_string' => false, // bool false:混合数据 true:字符串
+        'large_scale'   => false, // bool false:少量    true:大量
+        'prefix'        => '',    // 模块名称
+        'prefix_list'   => 'd',
+
+
+        'servers'  => [
+            ['127.0.0.1', 3306, 100],
+            // ['127.0.0.1',11211,100]
+        ],
+        'timeout'  => 0, // 超时时间（单位：毫秒）
+        'username' => '', //账号
+        'password' => '', //密码
+        'option'   => [],
     ];
 
     /**
@@ -38,7 +57,6 @@ class mysql extends driver
         if (substr($this->options['path'], -1) != '/') {
             $this->options['path'] .= '/';
         }
-
     }
 
 
