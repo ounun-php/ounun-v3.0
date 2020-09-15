@@ -57,6 +57,7 @@ class db
                 }
             }
         }
+
         // bind
         $bind = [];
         if ($is_update) {

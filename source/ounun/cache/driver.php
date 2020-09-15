@@ -40,6 +40,7 @@ abstract class driver
 
     /**
      * 读取缓存
+     *
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
@@ -50,6 +51,7 @@ abstract class driver
 
     /**
      * 写入缓存
+     *
      * @param string $key 缓存变量名
      * @param mixed $value 存储数据
      * @param int $expire 有效时间（秒）
@@ -61,6 +63,7 @@ abstract class driver
 
     /**
      * 增加之后的value值。（针对数值缓存）
+     *
      * @param string $key 缓存变量名
      * @param int $increment 步长
      * @param bool $add_prefix 是否活加前缀
@@ -70,6 +73,7 @@ abstract class driver
 
     /**
      * 返回一个数字：减少之后的value值。（针对数值缓存）
+     *
      * @param string $key 缓存变量名
      * @param int $increment 步长
      * @param bool $add_prefix 是否活加前缀
@@ -79,6 +83,7 @@ abstract class driver
 
     /**
      * 返回key是否存在
+     *
      * @param string $key 缓存变量名
      * @param bool $add_prefix 是否活加前缀
      * @return bool
@@ -87,6 +92,7 @@ abstract class driver
 
     /**
      * 设置key的过期时间，超过时间后，将会自动删除该key
+     *
      * @param string $key 缓存变量名
      * @param int $expire 有效时间（秒）
      * @param bool $add_prefix 是否活加前缀
@@ -96,6 +102,7 @@ abstract class driver
 
     /**
      * 删除缓存
+     *
      * @param string $key 缓存变量名
      * @param bool $add_prefix 是否活加前缀
      * @return bool
@@ -104,12 +111,14 @@ abstract class driver
 
     /**
      * 清除所有缓存
+     *
      * @return bool
      */
     abstract public function clear();
 
     /**
      * 返回 key 指定的哈希集中该字段所关联的值
+     *
      * @param string $key
      * @param string $field
      * @param int $default
@@ -122,6 +131,7 @@ abstract class driver
      * 设置 key 指定的哈希集中指定字段的值。
      * 如果 key 指定的哈希集不存在，会创建一个新的哈希集并与 key 关联。
      * 如果字段在哈希集中存在，它将被重写。
+     *
      * @param string $key
      * @param string $field
      * @param mixed $value
@@ -133,6 +143,7 @@ abstract class driver
     /**
      * 增加 key 指定的哈希集中指定字段的数值。如果 key 不存在，会创建一个新的哈希集并与 key 关联。如果字段不存在，则字段的值在该操作执行前被设置为 0
      *   HINCRBY 支持的值的范围限定在 64位 有符号整数
+     *
      * @param string $key
      * @param string $field
      * @param int $increment
@@ -143,6 +154,7 @@ abstract class driver
 
     /**
      * 返回hash里面field是否存在
+     *
      * @param string $key
      * @param string $field
      * @param bool $add_prefix
@@ -153,6 +165,7 @@ abstract class driver
     /**
      * 从 key 指定的哈希集中移除指定的域。在哈希集中不存在的域将被忽略。
      *  如果 key 指定的哈希集不存在，它将被认为是一个空的哈希集，该命令将返回0。
+     *
      * @param string $key
      * @param string $field
      * @param bool $add_prefix
@@ -162,6 +175,7 @@ abstract class driver
 
     /**
      * 返回 key 指定的哈希集中所有的字段和值
+     *
      * @param string $key
      * @param array $default
      * @param bool $add_prefix
@@ -171,6 +185,7 @@ abstract class driver
 
     /**
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
+     *
      * @param string $key
      * @param bool $add_prefix
      * @return int
@@ -179,6 +194,7 @@ abstract class driver
 
     /**
      * 移除并且返回 key 对应的 list 的第一个元素。
+     *
      * @param string $key
      * @param bool $add_prefix
      * @return mixed
@@ -187,6 +203,7 @@ abstract class driver
 
     /**
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
+     *
      * @param string $key
      * @param bool $add_prefix
      * @return int
@@ -195,6 +212,7 @@ abstract class driver
 
     /**
      * 移除并返回存于 key 的 list 的最后一个元素。
+     *
      * @param string $key
      * @param bool $add_prefix
      * @return mixed
@@ -216,6 +234,7 @@ abstract class driver
 
     /**
      * 返回存储在 key 里的list的长度。 如果 key 不存在，那么就被看作是空list，并且返回长度为 0。 当存储在 key 里的值不是一个list的话，会返回error。
+     *
      * @param string $key 标签名
      * @param bool $add_prefix 是否活加前缀
      * @return int
@@ -225,6 +244,7 @@ abstract class driver
 
     /**
      * 删除缓存标签
+     *
      * @param string $key 标签标识
      * @param bool $add_prefix 是否活加前缀
      * @return void
@@ -242,6 +262,7 @@ abstract class driver
 
     /**
      * 获取实际的缓存标识
+     *
      * @param string $key 缓存名
      * @param bool $add_prefix 是否活加前缀
      * @param bool $is_list 是否列表前缀
@@ -251,6 +272,7 @@ abstract class driver
 
     /**
      * 取得  prefix | module:名称
+     *
      * @param bool $is_list
      * @return string
      */
@@ -264,6 +286,7 @@ abstract class driver
 
     /**
      * 序列化数据
+     *
      * @param mixed $data 缓存数据
      * @return string
      */
@@ -278,6 +301,7 @@ abstract class driver
 
     /**
      * 反序列化数据
+     *
      * @param string $data 缓存数据
      * @return mixed
      */
@@ -293,6 +317,7 @@ abstract class driver
 
     /**
      * 返回缓存读取次数
+     *
      * @return int
      */
     public function times_get(): int
@@ -302,6 +327,7 @@ abstract class driver
 
     /**
      * 返回缓存写入次数
+     *
      * @return int
      */
     public function times_set(): int
@@ -311,6 +337,7 @@ abstract class driver
 
     /**
      * 读取缓存
+     *
      * @param array $keys 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
@@ -328,6 +355,7 @@ abstract class driver
 
     /**
      * 写入缓存
+     *
      * @param array $values 缓存数据
      * @param int $expire 有效时间 0为永久
      * @param bool $add_prefix 是否活加前缀
@@ -346,6 +374,7 @@ abstract class driver
 
     /**
      * 删除缓存
+     *
      * @param array $keys 缓存变量名
      * @param bool $add_prefix 是否活加前缀
      * @return bool
@@ -364,6 +393,7 @@ abstract class driver
 
     /**
      * 返回句柄对象，可执行其它高级方法
+     *
      * @return mixed
      */
     public function handler()
@@ -373,10 +403,10 @@ abstract class driver
 
     /**
      * @param string $method
-     * @param array $args
+     * @param mixed $args
      * @return mixed
      */
-    public function __call($method, $args)
+    public function __call(string $method, $args)
     {
         if ($this->_handler) {
             return call_user_func_array([$this->_handler, $method], $args);

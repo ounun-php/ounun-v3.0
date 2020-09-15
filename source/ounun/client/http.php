@@ -78,8 +78,8 @@ class http
     /** @var string|null */
     public ?string $uri;
 
-    /** @var string */
-    public string $host = '';
+    /** @var string|null */
+    public ?string $host = '';
     /** @var int */
     public int $port = 80;
     /** @var string|null */
@@ -135,9 +135,6 @@ class http
     public int $error_code;
     /** @var bool */
     public bool $is_ok = false;
-
-
-
 
 
     /** @var array Known robots. */
@@ -302,17 +299,17 @@ class http
 
         // Check if browser excepts content type xhtml+xml
         if (strpos($this->_accept, 'application/xhtml+xml')) {
-            $this->setFeature('xhtml+xml');
+            $this->feature_set('xhtml+xml');
         }
 
         // Check for a mathplayer plugin is installed, so we can use MathML on several browsers
         if (strpos($this->_lower_agent, 'mathplayer') !== false) {
-            $this->setFeature('mathml');
+            $this->feature_set('mathml');
         }
 
         // Check for UTF support.
         if (isset($_SERVER['HTTP_ACCEPT_CHARSET'])) {
-            $this->setFeature('utf', strpos(strtolower($_SERVER['HTTP_ACCEPT_CHARSET']), 'utf') !== false);
+            $this->feature_set('utf', strpos(strtolower($_SERVER['HTTP_ACCEPT_CHARSET']), 'utf') !== false);
         }
 
         if (!empty($this->_agent)) {
@@ -322,39 +319,39 @@ class http
                 strpos($this->_lower_agent, 'openwave') !== false ||
                 strpos($this->_lower_agent, 'opera mini') !== false ||
                 strpos($this->_lower_agent, 'operamini') !== false) {
-                $this->setFeature('frames', false);
-                $this->setFeature('javascript', false);
-                $this->setQuirk('avoid_popup_windows');
+                $this->feature_set('frames', false);
+                $this->feature_set('javascript', false);
+                $this->quirk_set('avoid_popup_windows');
                 $this->_mobile = true;
             } elseif (preg_match('|Opera[/ ]([0-9.]+)|', $this->_agent, $version)) {
                 $this->browser_set('opera');
                 list($this->major_version, $this->minor_version) = explode('.', $version[1]);
-                $this->setFeature('javascript', true);
-                $this->setQuirk('no_filename_spaces');
+                $this->feature_set('javascript', true);
+                $this->quirk_set('no_filename_spaces');
 
                 if ($this->major_version >= 7) {
-                    $this->setFeature('dom');
-                    $this->setFeature('iframes');
-                    $this->setFeature('accesskey');
-                    $this->setFeature('optgroup');
-                    $this->setQuirk('double_linebreak_textarea');
+                    $this->feature_set('dom');
+                    $this->feature_set('iframes');
+                    $this->feature_set('accesskey');
+                    $this->feature_set('optgroup');
+                    $this->quirk_set('double_linebreak_textarea');
                 }
             } elseif (strpos($this->_lower_agent, 'elaine/') !== false ||
                 strpos($this->_lower_agent, 'palmsource') !== false ||
                 strpos($this->_lower_agent, 'digital paths') !== false) {
                 $this->browser_set('palm');
-                $this->setFeature('images', false);
-                $this->setFeature('frames', false);
-                $this->setFeature('javascript', false);
-                $this->setQuirk('avoid_popup_windows');
+                $this->feature_set('images', false);
+                $this->feature_set('frames', false);
+                $this->feature_set('javascript', false);
+                $this->quirk_set('avoid_popup_windows');
                 $this->_mobile = true;
             } elseif ((preg_match('|MSIE ([0-9.]+)|', $this->_agent, $version)) ||
                 (preg_match('|Internet Explorer/([0-9.]+)|', $this->_agent, $version))) {
 
                 $this->browser_set('msie');
-                $this->setQuirk('cache_ssl_downloads');
-                $this->setQuirk('cache_same_url');
-                $this->setQuirk('break_disposition_filename');
+                $this->quirk_set('cache_ssl_downloads');
+                $this->quirk_set('cache_same_url');
+                $this->quirk_set('break_disposition_filename');
 
                 if (strpos($version[1], '.') !== false) {
                     list($this->major_version, $this->minor_version) = explode('.', $version[1]);
@@ -367,7 +364,7 @@ class http
                  * PNG images. */
                 if (($this->major_version < 7) &&
                     preg_match('/windows/i', $this->_agent)) {
-                    $this->setQuirk('png_transparency');
+                    $this->quirk_set('png_transparency');
                 }
 
                 /* Some Handhelds have their screen resolution in the
@@ -379,68 +376,68 @@ class http
 
                 switch ($this->major_version) {
                     case 7:
-                        $this->setFeature('javascript', 1.4);
-                        $this->setFeature('dom');
-                        $this->setFeature('iframes');
-                        $this->setFeature('utf');
-                        $this->setFeature('rte');
-                        $this->setFeature('homepage');
-                        $this->setFeature('accesskey');
-                        $this->setFeature('optgroup');
-                        $this->setFeature('xmlhttpreq');
-                        $this->setQuirk('scrollbar_in_way');
+                        $this->feature_set('javascript', 1.4);
+                        $this->feature_set('dom');
+                        $this->feature_set('iframes');
+                        $this->feature_set('utf');
+                        $this->feature_set('rte');
+                        $this->feature_set('homepage');
+                        $this->feature_set('accesskey');
+                        $this->feature_set('optgroup');
+                        $this->feature_set('xmlhttpreq');
+                        $this->quirk_set('scrollbar_in_way');
                         break;
 
                     case 6:
-                        $this->setFeature('javascript', 1.4);
-                        $this->setFeature('dom');
-                        $this->setFeature('iframes');
-                        $this->setFeature('utf');
-                        $this->setFeature('rte');
-                        $this->setFeature('homepage');
-                        $this->setFeature('accesskey');
-                        $this->setFeature('optgroup');
-                        $this->setFeature('xmlhttpreq');
-                        $this->setQuirk('scrollbar_in_way');
-                        $this->setQuirk('broken_multipart_form');
-                        $this->setQuirk('windowed_controls');
+                        $this->feature_set('javascript', 1.4);
+                        $this->feature_set('dom');
+                        $this->feature_set('iframes');
+                        $this->feature_set('utf');
+                        $this->feature_set('rte');
+                        $this->feature_set('homepage');
+                        $this->feature_set('accesskey');
+                        $this->feature_set('optgroup');
+                        $this->feature_set('xmlhttpreq');
+                        $this->quirk_set('scrollbar_in_way');
+                        $this->quirk_set('broken_multipart_form');
+                        $this->quirk_set('windowed_controls');
                         break;
 
                     case 5:
                         if ($this->platform_get() == 'mac') {
-                            $this->setFeature('javascript', 1.2);
-                            $this->setFeature('optgroup');
+                            $this->feature_set('javascript', 1.2);
+                            $this->feature_set('optgroup');
                         } else {
                             // MSIE 5 for Windows.
-                            $this->setFeature('javascript', 1.4);
-                            $this->setFeature('dom');
-                            $this->setFeature('xmlhttpreq');
+                            $this->feature_set('javascript', 1.4);
+                            $this->feature_set('dom');
+                            $this->feature_set('xmlhttpreq');
                             if ($this->minor_version >= 5) {
-                                $this->setFeature('rte');
-                                $this->setQuirk('windowed_controls');
+                                $this->feature_set('rte');
+                                $this->quirk_set('windowed_controls');
                             }
                         }
-                        $this->setFeature('iframes');
-                        $this->setFeature('utf');
-                        $this->setFeature('homepage');
-                        $this->setFeature('accesskey');
+                        $this->feature_set('iframes');
+                        $this->feature_set('utf');
+                        $this->feature_set('homepage');
+                        $this->feature_set('accesskey');
                         if ($this->minor_version == 5) {
-                            $this->setQuirk('break_disposition_header');
-                            $this->setQuirk('broken_multipart_form');
+                            $this->quirk_set('break_disposition_header');
+                            $this->quirk_set('broken_multipart_form');
                         }
                         break;
 
                     case 4:
-                        $this->setFeature('javascript', 1.2);
-                        $this->setFeature('accesskey');
+                        $this->feature_set('javascript', 1.2);
+                        $this->feature_set('accesskey');
                         if ($this->minor_version > 0) {
-                            $this->setFeature('utf');
+                            $this->feature_set('utf');
                         }
                         break;
 
                     case 3:
-                        $this->setFeature('javascript', 1.5);
-                        $this->setQuirk('avoid_popup_windows');
+                        $this->feature_set('javascript', 1.5);
+                        $this->quirk_set('avoid_popup_windows');
                         break;
                 }
             } elseif (preg_match('|amaya/([0-9.]+)|', $this->_agent, $version)) {
@@ -450,18 +447,18 @@ class http
                     $this->minor_version = $version[2];
                 }
                 if ($this->major_version > 1) {
-                    $this->setFeature('mathml');
-                    $this->setFeature('svg');
+                    $this->feature_set('mathml');
+                    $this->feature_set('svg');
                 }
-                $this->setFeature('xhtml+xml');
+                $this->feature_set('xhtml+xml');
             } elseif (preg_match('|W3C_Validator/([0-9.]+)|', $this->_agent, $version)) {
-                $this->setFeature('mathml');
-                $this->setFeature('svg');
-                $this->setFeature('xhtml+xml');
+                $this->feature_set('mathml');
+                $this->feature_set('svg');
+                $this->feature_set('xhtml+xml');
             } elseif (preg_match('|ANTFresco/([0-9]+)|', $this->_agent, $version)) {
                 $this->browser_set('fresco');
-                $this->setFeature('javascript', 1.5);
-                $this->setQuirk('avoid_popup_windows');
+                $this->feature_set('javascript', 1.5);
+                $this->quirk_set('avoid_popup_windows');
             } elseif (strpos($this->_lower_agent, 'avantgo') !== false) {
                 $this->browser_set('avantgo');
                 $this->_mobile = true;
@@ -470,8 +467,8 @@ class http
                 // Konqueror and Apple's Safari both use the KHTML
                 // rendering engine.
                 $this->browser_set('konqueror');
-                $this->setQuirk('empty_file_input_value');
-                $this->setQuirk('no_hidden_overflow_tables');
+                $this->quirk_set('empty_file_input_value');
+                $this->quirk_set('no_hidden_overflow_tables');
                 $this->major_version = $version[1];
                 if (isset($version[2])) {
                     $this->minor_version = $version[2];
@@ -480,152 +477,152 @@ class http
                 if (strpos($this->_agent, 'Safari') !== false &&
                     $this->major_version >= 60) {
                     // Safari.
-                    $this->setFeature('utf');
-                    $this->setFeature('javascript', 1.4);
-                    $this->setFeature('dom');
-                    $this->setFeature('iframes');
+                    $this->feature_set('utf');
+                    $this->feature_set('javascript', 1.4);
+                    $this->feature_set('dom');
+                    $this->feature_set('iframes');
                     if ($this->major_version > 125 ||
                         ($this->major_version == 125 &&
                             $this->minor_version >= 1)) {
-                        $this->setFeature('accesskey');
-                        $this->setFeature('xmlhttpreq');
+                        $this->feature_set('accesskey');
+                        $this->feature_set('xmlhttpreq');
                     }
                     if ($this->major_version > 522) {
-                        $this->setFeature('svg');
-                        $this->setFeature('xhtml+xml');
+                        $this->feature_set('svg');
+                        $this->feature_set('xhtml+xml');
                     }
                 } else {
                     // Konqueror.
-                    $this->setFeature('javascript', 1.5);
+                    $this->feature_set('javascript', 1.5);
                     switch ($this->major_version) {
                         case 3:
-                            $this->setFeature('dom');
-                            $this->setFeature('iframes');
-                            $this->setFeature('xhtml+xml');
+                            $this->feature_set('dom');
+                            $this->feature_set('iframes');
+                            $this->feature_set('xhtml+xml');
                             break;
                     }
                 }
             } elseif (preg_match('|Mozilla/([0-9.]+)|', $this->_agent, $version)) {
                 $this->browser_set('mozilla');
-                $this->setQuirk('must_cache_forms');
+                $this->quirk_set('must_cache_forms');
 
                 list($this->major_version, $this->minor_version) = explode('.', $version[1]);
                 switch ($this->major_version) {
                     case 5:
                         if ($this->platform_get() == 'win') {
-                            $this->setQuirk('break_disposition_filename');
+                            $this->quirk_set('break_disposition_filename');
                         }
-                        $this->setFeature('javascript', 1.4);
-                        $this->setFeature('dom');
-                        $this->setFeature('accesskey');
-                        $this->setFeature('optgroup');
-                        $this->setFeature('xmlhttpreq');
-                        $this->setFeature('cite');
+                        $this->feature_set('javascript', 1.4);
+                        $this->feature_set('dom');
+                        $this->feature_set('accesskey');
+                        $this->feature_set('optgroup');
+                        $this->feature_set('xmlhttpreq');
+                        $this->feature_set('cite');
                         if (preg_match('|rv:(.*)\)|', $this->_agent, $revision)) {
                             if ($revision[1] >= 1) {
-                                $this->setFeature('iframes');
+                                $this->feature_set('iframes');
                             }
                             if ($revision[1] >= 1.3) {
-                                $this->setFeature('rte');
+                                $this->feature_set('rte');
                             }
                             if ($revision[1] >= 1.5) {
-                                $this->setFeature('svg');
-                                $this->setFeature('mathml');
-                                $this->setFeature('xhtml+xml');
+                                $this->feature_set('svg');
+                                $this->feature_set('mathml');
+                                $this->feature_set('xhtml+xml');
                             }
                         }
                         break;
 
                     case 4:
-                        $this->setFeature('javascript', 1.3);
-                        $this->setQuirk('buggy_compression');
+                        $this->feature_set('javascript', 1.3);
+                        $this->quirk_set('buggy_compression');
                         break;
 
                     case 3:
                     default:
-                        $this->setFeature('javascript', 1);
-                        $this->setQuirk('buggy_compression');
+                        $this->feature_set('javascript', 1);
+                        $this->quirk_set('buggy_compression');
                         break;
                 }
             } elseif (preg_match('|Lynx/([0-9]+)|', $this->_agent, $version)) {
                 $this->browser_set('lynx');
-                $this->setFeature('images', false);
-                $this->setFeature('frames', false);
-                $this->setFeature('javascript', false);
-                $this->setQuirk('avoid_popup_windows');
+                $this->feature_set('images', false);
+                $this->feature_set('frames', false);
+                $this->feature_set('javascript', false);
+                $this->quirk_set('avoid_popup_windows');
             } elseif (preg_match('|Links \(([0-9]+)|', $this->_agent, $version)) {
                 $this->browser_set('links');
-                $this->setFeature('images', false);
-                $this->setFeature('frames', false);
-                $this->setFeature('javascript', false);
-                $this->setQuirk('avoid_popup_windows');
+                $this->feature_set('images', false);
+                $this->feature_set('frames', false);
+                $this->feature_set('javascript', false);
+                $this->quirk_set('avoid_popup_windows');
             } elseif (preg_match('|HotJava/([0-9]+)|', $this->_agent, $version)) {
                 $this->browser_set('hotjava');
-                $this->setFeature('javascript', false);
+                $this->feature_set('javascript', false);
             } elseif (strpos($this->_agent, 'UP/') !== false ||
                 strpos($this->_agent, 'UP.B') !== false ||
                 strpos($this->_agent, 'UP.L') !== false) {
                 $this->browser_set('up');
-                $this->setFeature('html', false);
-                $this->setFeature('javascript', false);
-                $this->setFeature('hdml');
-                $this->setFeature('wml');
+                $this->feature_set('html', false);
+                $this->feature_set('javascript', false);
+                $this->feature_set('hdml');
+                $this->feature_set('wml');
 
                 if (strpos($this->_agent, 'GUI') !== false &&
                     strpos($this->_agent, 'UP.Link') !== false) {
                     /* The device accepts Openwave GUI extensions for
                      * WML 1.3. Non-UP.Link gateways sometimes have
                      * problems, so exclude them. */
-                    $this->setQuirk('ow_gui_1.3');
+                    $this->quirk_set('ow_gui_1.3');
                 }
                 $this->_mobile = true;
             } elseif (strpos($this->_agent, 'Xiino/') !== false) {
                 $this->browser_set('xiino');
-                $this->setFeature('hdml');
-                $this->setFeature('wml');
+                $this->feature_set('hdml');
+                $this->feature_set('wml');
                 $this->_mobile = true;
             } elseif (strpos($this->_agent, 'Palmscape/') !== false) {
                 $this->browser_set('palmscape');
-                $this->setFeature('javascript', false);
-                $this->setFeature('hdml');
-                $this->setFeature('wml');
+                $this->feature_set('javascript', false);
+                $this->feature_set('hdml');
+                $this->feature_set('wml');
                 $this->_mobile = true;
             } elseif (strpos($this->_agent, 'Nokia') !== false) {
                 $this->browser_set('nokia');
-                $this->setFeature('html', false);
-                $this->setFeature('wml');
-                $this->setFeature('xhtml');
+                $this->feature_set('html', false);
+                $this->feature_set('wml');
+                $this->feature_set('xhtml');
                 $this->_mobile = true;
             } elseif (strpos($this->_agent, 'Ericsson') !== false) {
                 $this->browser_set('ericsson');
-                $this->setFeature('html', false);
-                $this->setFeature('wml');
+                $this->feature_set('html', false);
+                $this->feature_set('wml');
                 $this->_mobile = true;
             } elseif (strpos($this->_lower_agent, 'wap') !== false) {
                 $this->browser_set('wap');
-                $this->setFeature('html', false);
-                $this->setFeature('javascript', false);
-                $this->setFeature('hdml');
-                $this->setFeature('wml');
+                $this->feature_set('html', false);
+                $this->feature_set('javascript', false);
+                $this->feature_set('hdml');
+                $this->feature_set('wml');
                 $this->_mobile = true;
             } elseif (strpos($this->_lower_agent, 'docomo') !== false ||
                 strpos($this->_lower_agent, 'portalmmm') !== false) {
                 $this->browser_set('imode');
-                $this->setFeature('images', false);
+                $this->feature_set('images', false);
                 $this->_mobile = true;
             } elseif (strpos($this->_agent, 'BlackBerry') !== false) {
                 $this->browser_set('blackberry');
-                $this->setFeature('html', false);
-                $this->setFeature('javascript', false);
-                $this->setFeature('hdml');
-                $this->setFeature('wml');
+                $this->feature_set('html', false);
+                $this->feature_set('javascript', false);
+                $this->feature_set('hdml');
+                $this->feature_set('wml');
                 $this->_mobile = true;
             } elseif (strpos($this->_agent, 'MOT-') !== false) {
                 $this->browser_set('motorola');
-                $this->setFeature('html', false);
-                $this->setFeature('javascript', false);
-                $this->setFeature('hdml');
-                $this->setFeature('wml');
+                $this->feature_set('html', false);
+                $this->feature_set('javascript', false);
+                $this->feature_set('hdml');
+                $this->feature_set('wml');
                 $this->_mobile = true;
             } elseif (strpos($this->_lower_agent, 'j-') !== false) {
                 $this->browser_set('mml');
@@ -655,7 +652,7 @@ class http
         return $this->request($url, $referer, $limit, $timeout, $block);
     }
 
-    public function upload(string $url,string $content_type, $data = [], $files = [], $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
+    public function upload(string $url, string $content_type, $data = [], $files = [], $referer = '', $limit = 0, $timeout = 30, $block = TRUE)
     {
         $this->method       = 'POST';
         $boundary           = "AaB03x";
@@ -715,7 +712,7 @@ class http
             stream_set_timeout($fp, $timeout);
             fwrite($fp, $out);
             $this->request_data = '';
-            $status     = stream_get_meta_data($fp);
+            $status             = stream_get_meta_data($fp);
             if (!$status['timed_out']) {
                 $maxsize = min($limit, 1024000);
                 if ($maxsize == 0) $maxsize = 1024000;
@@ -835,33 +832,18 @@ class http
      *
      * @return string  The browser agent string.
      */
-    function getAgentString()
+    function agent_get()
     {
         return $this->_agent;
-    }
-
-    /**
-     * Returns the server protocol in use on the current server.
-     *
-     * @return string  The HTTP server protocol version.
-     */
-    function getHTTPProtocol()
-    {
-        if (isset($_SERVER['SERVER_PROTOCOL'])) {
-            if (($pos = strrpos($_SERVER['SERVER_PROTOCOL'], '/'))) {
-                return substr($_SERVER['SERVER_PROTOCOL'], $pos + 1);
-            }
-        }
-        return null;
     }
 
     /**
      * Set unique behavior for the current browser.
      *
      * @param string $quirk The behavior to set.
-     * @param string $value Special behavior parameter.
+     * @param bool $value Special behavior parameter.
      */
-    function setQuirk($quirk, $value = true)
+    function quirk_set(string $quirk, $value = true)
     {
         $this->_quirks[$quirk] = $value;
     }
@@ -872,7 +854,7 @@ class http
      * @param string $quirk The behavior to check.
      * @return boolean  Does the browser have the behavior set?
      */
-    function hasQuirk($quirk)
+    function quirk_has(string $quirk)
     {
         return !empty($this->_quirks[$quirk]);
     }
@@ -883,7 +865,7 @@ class http
      * @param string $quirk The behavior to retrieve.
      * @return string  The value for the requested behavior.
      */
-    function getQuirk($quirk)
+    function quirk_get(string $quirk)
     {
         return isset($this->_quirks[$quirk])
             ? $this->_quirks[$quirk]
@@ -894,9 +876,9 @@ class http
      * Set capabilities for the current browser.
      *
      * @param string $feature The capability to set.
-     * @param string $value Special capability parameter.
+     * @param bool $value Special capability parameter.
      */
-    function setFeature($feature, $value = true)
+    function feature_set(string $feature, $value = true)
     {
         $this->_features[$feature] = $value;
     }
@@ -931,7 +913,7 @@ class http
      * @param string $mimetype The MIME type to check.
      * @return boolean  True if the browser can display the MIME type.
      */
-    function isViewable($mimetype)
+    function is_viewable($mimetype)
     {
         $mimetype = strtolower($mimetype);
         list($type, $subtype) = explode('/', $mimetype);
@@ -955,7 +937,7 @@ class http
             * latter.  For our purposes, we will treat them the
             * same.
             */
-            if ($this->isBrowser('mozilla') &&
+            if ($this->is_browser('mozilla') &&
                 ($mimetype == 'image/pjpeg') &&
                 (strpos($this->_accept, 'image/jpeg') !== false)) {
                 return true;
@@ -979,7 +961,7 @@ class http
      * @param string $browser The browser to check.
      * @return boolean  Is the given browser the same as the current?
      */
-    function isBrowser($browser)
+    public function is_browser($browser)
     {
         return ($this->browser === $browser);
     }
@@ -989,7 +971,7 @@ class http
      *
      * @return boolean  True if browser is a known robot.
      */
-    function isRobot()
+    public function is_robot()
     {
         foreach ($this->_robots as $robot) {
             if (strpos($this->_agent, $robot) !== false) {
@@ -999,17 +981,7 @@ class http
         return false;
     }
 
-    /**
-     * Determine if we are using a secure (SSL) connection.
-     *
-     * @return boolean  True if using SSL, false if not.
-     */
-    public function isSSLConnection()
-    {
-        return ((isset($_SERVER['HTTPS']) &&
-                ($_SERVER['HTTPS'] == 'on')) ||
-            getenv('SSL_PROTOCOL_VERSION'));
-    }
+
 
 
     public static function method_get()
@@ -1023,7 +995,7 @@ class http
             return self::$_request_base;
         }
         $base                = self::is_ssl() ? 'https://' : 'http://';
-        $base                .= self::get_host();
+        $base                .= self::host_get();
         self::$_request_base = $base;
         return $base;
     }
@@ -1032,7 +1004,7 @@ class http
     {
         if (!is_null(self::$_request_url)) return self::$_request_url;
         $url                = self::is_ssl() ? 'https://' : 'http://';
-        $url                .= self::get_host();
+        $url                .= self::host_get();
         $url                .= self::uri_get();
         self::$_request_url = $url;
         return $url;
@@ -1058,11 +1030,6 @@ class http
         }
         self::$_request_uri = $uri;
         return $uri;
-    }
-
-    public static function clean()
-    {
-
     }
 
     public static function query_string_get()
@@ -1097,18 +1064,18 @@ class http
         return self::env_get('HTTP_REFERER');
     }
 
-    public static function get_host()
+    public static function host_get()
     {
         $host = self::env_get('HTTP_X_FORWARDED_HOST');
         return $host ? $host : self::env_get('HTTP_HOST');
     }
 
-    public static function get_language()
+    public static function language_get()
     {
         return self::env_get('HTTP_ACCEPT_LANGUAGE');
     }
 
-    public static function get_charset()
+    public static function charset_get()
     {
         return $_SERVER['HTTP_ACCEPT_CHARSET'];
     }
@@ -1133,10 +1100,12 @@ class http
     }
 
 
-
     public static function is_ssl()
     {
-        return (strtolower(self::env_get('HTTPS')) === 'on' || strtolower(self::env_get('HTTP_SSL_HTTPS')) === 'on' || self::env_get('HTTP_X_FORWARDED_PROTO') == 'https');
+        return (strtolower(self::env_get('HTTPS')) === 'on'
+            || strtolower(self::env_get('HTTP_SSL_HTTPS')) === 'on'
+            || self::env_get('HTTP_X_FORWARDED_PROTO') == 'https'
+            || getenv('SSL_PROTOCOL_VERSION'));
     }
 
     public static function is_xml_http_request()
@@ -1238,13 +1207,13 @@ class http
         if (isset($parts['query']) && strpos($parts['query'], '&amp;')) {
             $parts['query'] = str_replace('&amp;', '&', $parts['query']);
         }
-        $this->scheme = isset ($parts['scheme']) ? $parts['scheme'] : 'http';
-        $this->user   = isset ($parts['user']) ? $parts['user'] : null;
-        $this->pass  = isset ($parts['pass']) ? $parts['pass'] : null;
+        $this->scheme   = isset ($parts['scheme']) ? $parts['scheme'] : 'http';
+        $this->user     = isset ($parts['user']) ? $parts['user'] : null;
+        $this->pass     = isset ($parts['pass']) ? $parts['pass'] : null;
         $this->host     = isset ($parts['host']) ? $parts['host'] : null;
         $this->port     = isset ($parts['port']) ? $parts['port'] : null;
-        $this->_path     = isset ($parts['path']) ? $parts['path'] : null;
-        $this->_query    = isset ($parts['query']) ? $parts['query'] : null;
+        $this->_path    = isset ($parts['path']) ? $parts['path'] : null;
+        $this->_query   = isset ($parts['query']) ? $parts['query'] : null;
         $this->fragment = isset ($parts['fragment']) ? $parts['fragment'] : null;
         if (isset($parts['query'])) {
             parse_str($parts['query'], $this->query_vars);
@@ -1267,18 +1236,18 @@ class http
         return $uri;
     }
 
-    public function var_set($name, $value)
+    public function query_vars_set($name, $value)
     {
         $this->query_vars[$name] = $value;
         $this->_query            = null;
     }
 
-    public function var_get($name, $default = null)
+    public function query_vars_get($name, $default = null)
     {
         return isset($this->query_vars[$name]) ? $this->query_vars[$name] : $default;
     }
 
-    public function var_del($name)
+    public function query_vars_del($name)
     {
         if (isset($this->query_vars[$name])) {
             unset($this->query_vars[$name]);
@@ -1307,71 +1276,34 @@ class http
         return $this->_query;
     }
 
-
-
-    public function get_user()
-    {
-        return $this->user;
-    }
-
-    public function set_user($user)
-    {
-        $this->user = $user;
-    }
-
-    public function get_pass()
-    {
-        return $this->pass;
-    }
-
-    public function set_pass($pass)
-    {
-        $this->pass = $pass;
-    }
-
-    public function get_host2()
-    {
-        return $this->host;
-    }
-
-    public function set_host2($host)
-    {
-        $this->host = $host;
-    }
-
-    public function get_port()
-    {
-        return isset($this->port) ? $this->port : null;
-    }
-
-    public function set_port($port)
-    {
-        $this->port = $port;
-    }
-
-    public function get_path()
+    public function path_get()
     {
         return $this->_path;
     }
 
-    public function set_path($path)
+    public function path_set($path)
     {
         $this->_path = $this->_clean_path($path);
     }
 
-    public function get_fragment()
-    {
-        return $this->fragment;
-    }
-
-    public function set_fragment($anchor)
-    {
-        $this->fragment = $anchor;
-    }
-
     public function https_is()
     {
-        return $this->scheme == 'https' ? true : false;
+        return $this->scheme === 'https';
+    }
+
+    /**
+     * Returns the server protocol in use on the current server.
+     *
+     * @return string  The HTTP server protocol version.
+     */
+    public function http_protocol_get()
+    {
+        if (isset($_SERVER['SERVER_PROTOCOL'])) {
+            if (($pos = strrpos($_SERVER['SERVER_PROTOCOL'], '/'))) {
+                return substr($_SERVER['SERVER_PROTOCOL'], $pos + 1);
+            }
+        }
+        return null;
     }
 
     public function _clean_path($path)

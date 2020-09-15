@@ -17,12 +17,12 @@ class cookie
      * @param string $cookie
      * @param int $img_width
      * @param int $img_height
-     * @param int $img_lenght
+     * @param int $img_length
      */
-    public static function output($cookie = 'captcha', $img_width = 75, $img_height = 24, $img_lenght = 4)
+    public static function output(string $cookie = 'captcha',int $img_width = 75,int $img_height = 24,int $img_length = 4)
     {
         $base = new base();
-        $base->make($img_width, $img_height, $img_lenght);
+        $base->make($img_width, $img_height, $img_length);
         setcookie($cookie, md5($base->code), time() + 3600, '/');
         // setcookie($cookie,md5($base->code),time()+3600);
         $base->output();
@@ -35,9 +35,9 @@ class cookie
      * @param string $cookie
      * @return boolean
      */
-    public static function check($code, $cookie = 'captcha')
+    public static function check(string $code, string $cookie = 'captcha')
     {
-        $rs = ($code && $_COOKIE[$cookie] && md5($code) == $_COOKIE[$cookie]) ? true : false;
+        $rs = $code && $_COOKIE[$cookie] && md5($code) == $_COOKIE[$cookie];
         setcookie($cookie, '', -3600);
         return $rs;
     }
