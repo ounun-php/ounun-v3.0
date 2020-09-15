@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun\plugin\captcha;
 
 /**
@@ -12,7 +13,7 @@ namespace ounun\plugin\captcha;
 class base
 {
     /** @var string 随机码 */
-    public $code = '';
+    public string $code = '';
 
     /** @var resource 图片句柄 */
     protected $_img;
@@ -26,14 +27,7 @@ class base
     public function make($img_width = 75, $img_height = 24, $img_lenght = 4)
     {
         if (!function_exists("imagecreatetruecolor")) {
-            $input = [
-                '1335',
-                '3114',
-                '4922',
-                '2320',
-                '1268',
-                '9011'
-            ];
+            $input      = ['1335', '3114', '4922', '2320', '1268', '9011'];
             $this->code = $input[array_rand($input)];
 
             // setcookie($cookie,md5($input),time()+3600);
@@ -41,11 +35,7 @@ class base
             readfile(__DIR__ . "/res/no_gd/{$this->code}.png");
             exit();
         }
-        $font = [
-            __DIR__ . '/res/font/a.ttf',
-            __DIR__ . '/res/font/b.ttf',
-            __DIR__ . '/res/font/c.ttf',
-        ];
+        $font       = [__DIR__ . '/res/font/a.ttf', __DIR__ . '/res/font/b.ttf', __DIR__ . '/res/font/c.ttf',];
         $this->code = '';
         for ($ti = 0; $ti < $img_lenght; $ti++) {
             $this->code .= dechex(mt_rand(0, 9));

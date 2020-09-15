@@ -9,7 +9,7 @@ use ounun\cache\driver\redis;
 
 class lock
 {
-    /** @var array<self> */
+    /** @var array */
     protected static array $_instances = [];
 
     /**
@@ -32,6 +32,7 @@ class lock
 
     /**
      * RedisLock constructor.
+     *
      * @param cache $cache
      */
     public function __construct(cache $cache)
@@ -65,6 +66,7 @@ class lock
 
     /**
      * 释放锁
+     *
      * @param  String $key 锁标识
      * @return Boolean
      */

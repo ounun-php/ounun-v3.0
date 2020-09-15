@@ -129,15 +129,15 @@ class html
     {
         $this->cache_time();
         debug::header($this->_cache_time, 'time', __FILE__, __LINE__);
-        debug::header( $this->_time_expire, 'expire',__FILE__, __LINE__);
+        debug::header($this->_time_expire, 'expire', __FILE__, __LINE__);
         if ($this->_cache_time + $this->_time_expire > $this->_time_curr) {
-            debug::header( $this->filename(),'xypc', __FILE__, __LINE__);
+            debug::header($this->filename(), 'xypc', __FILE__, __LINE__);
             return true;
         }
         $cache_time_t = $this->cache_time_tmp();
-        debug::header( $cache_time_t, 'time_t',__FILE__, __LINE__);
+        debug::header($cache_time_t, 'time_t', __FILE__, __LINE__);
         if ($cache_time_t + self::Cache_Time_Interval > $this->_time_curr) {
-            debug::header( $this->filename() . '.t time:' . $cache_time_t, 'xypc_t',__FILE__, __LINE__);
+            debug::header($this->filename() . '.t time:' . $cache_time_t, 'xypc_t', __FILE__, __LINE__);
             return true;
         }
         $this->_cache_time = 0;
@@ -150,7 +150,7 @@ class html
      */
     public function run_execute(bool $output)
     {
-        debug::header($this->filename(),'xypm',  __FILE__, __LINE__);
+        debug::header($this->filename(), 'xypm', __FILE__, __LINE__);
         $this->stop = false;
         $this->cache_time_tmp_set();
         // 生成
@@ -201,9 +201,9 @@ class html
         ob_clean();
         ob_implicit_flush(1);
         // 写文件
-        debug::header( $filesize,'xypm_size', __FILE__, __LINE__);
+        debug::header($filesize, 'xypm_size', __FILE__, __LINE__);
         if ($filesize > self::Cache_Mini_Size) {
-            debug::header($this->filename(),'xypm_ok',  __FILE__, __LINE__);
+            debug::header($this->filename(), 'xypm_ok', __FILE__, __LINE__);
 
             $buffer = \ounun\template::trim($buffer, $this->_is_trim);
             $buffer = gzencode($buffer, 9);
@@ -230,7 +230,9 @@ class html
     {
         $this->stop = true;
         if ($output) {
-            \v::$tpl->assign();
+            if (\v::$tpl) {
+                \v::$tpl->assign();
+            }
             $this->run_output();
         }
     }
@@ -255,21 +257,24 @@ class html
         return $this->_cache_driver->delete($this->_cache_key);
     }
 
-    /** 有效Cache数据类型
+    /**
+     * 有效Cache数据类型
+     *
      * @param $cdn_type
      * @return array
      */
     public function valid($cdn_type)
     {
-        if($cdn_type == self::Cdn_Type_Min){
+        if ($cdn_type == self::Cdn_Type_Min) {
             return [driver\redis::Type, driver\memcached::Type, driver\sqlite::Type];
         }
         // if(self::Cdn_Type_Full)
-        return  [driver\redis::Type, driver\memcached::Type, driver\html::Type];
+        return [driver\redis::Type, driver\memcached::Type, driver\html::Type];
     }
 
     /**
      * 取得 File:文件名  Memcache|Redis:缓存KEY
+     *
      * @return string
      */
     public function filename()
@@ -283,6 +288,7 @@ class html
 
     /**
      * 看是否存在cache
+     *
      * @return int 小于0:无Cache 大于0:创建Cache时间
      */
     public function cache_time(): int
@@ -294,10 +300,10 @@ class html
         $this->_cache_time = 0;
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename();
-            debug::header( $filename, 'filename',__FILE__, __LINE__);
+            debug::header($filename, 'filename', __FILE__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_time = filemtime($filename);
-                debug::header( $this->_cache_time,'cache_time', __FILE__, __LINE__);
+                debug::header($this->_cache_time, 'cache_time', __FILE__, __LINE__);
             }
         } else {
             $this->_cache_time = (int)$this->_cache_value['filemtime'];
@@ -307,6 +313,7 @@ class html
 
     /**
      * 文件生成时间(临时)
+     *
      * @return int 文件生成时间(临时)
      */
     public function cache_time_tmp()
@@ -318,11 +325,11 @@ class html
         $this->_cache_time_t = 0;
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename() . '.t';
-            debug::header( $filename, 'file',__FILE__, __LINE__);
+            debug::header($filename, 'file', __FILE__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_time_t = filemtime($filename);
                 $this->_cache_size_t = filesize($filename);
-                debug::header($this->_cache_time_t,'time',  __FILE__, __LINE__);
+                debug::header($this->_cache_time_t, 'time', __FILE__, __LINE__);
             }
         } else {
             $this->_cache_time_t = (int)$this->_cache_value['filemtime_t'];
@@ -332,6 +339,7 @@ class html
 
     /**
      * 文件大小(临时)
+     *
      * @return int
      */
     public function cache_size_tmp()
@@ -347,7 +355,7 @@ class html
         $this->_cache_time_t = time();
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename() . '.t';
-            debug::header($filename,'file',  __FILE__, __LINE__);
+            debug::header($filename, 'file', __FILE__, __LINE__);
             if (file_exists($filename)) {
                 touch($filename);
             } else {
@@ -365,6 +373,7 @@ class html
 
     /**
      * 文件大小
+     *
      * @return int 文件大小
      */
     public function cache_size()
@@ -374,10 +383,10 @@ class html
         }
         if (driver\file::Type == $this->_cache_type) {
             $filename = $this->filename();
-            debug::header( $filename, 'file',__FILE__, __LINE__);
+            debug::header($filename, 'file', __FILE__, __LINE__);
             if (file_exists($filename)) {
                 $this->_cache_size = filesize($filename);
-                debug::header($this->_cache_size,'size',  __FILE__, __LINE__);
+                debug::header($this->_cache_size, 'size', __FILE__, __LINE__);
             }
             $this->_cache_size = 0;
         } else {
@@ -388,6 +397,8 @@ class html
 
     /**
      * 保存数据
+     *
+     * @param $html
      */
     public function cache_html($html)
     {
@@ -395,7 +406,7 @@ class html
         if (driver\file::Type == $this->_cache_type) {
             $this->_cache_driver->set($this->_cache_key, $html, $this->_time_expire);
             $filename = $this->filename() . '.t';
-            debug::header( $filename,'delfile', __FILE__, __LINE__);
+            debug::header($filename, 'delfile', __FILE__, __LINE__);
             if (file_exists($filename)) {
                 unlink($filename);
             }
@@ -407,8 +418,10 @@ class html
 
     /**
      * 保存数据
+     *
+     * @param bool $gzip
      */
-    public function cache_out($gzip)
+    public function cache_out(bool $gzip)
     {
         // 输出
         if ($gzip) {// 输出 ( 支持 gzip )
@@ -435,5 +448,4 @@ class html
             exit($content);
         }
     }
-
 }
