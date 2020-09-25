@@ -1,4 +1,9 @@
 <?php
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
+
 /*
  * DNSPod API PHP Web 示例
  * http://www.likexian.com/
@@ -12,48 +17,60 @@ namespace ounun\plugin;
 
 class dnspod
 {
-    private string $_token = '';
-    private int $_id = 0;
-    private string $_lang = 'cn';
-    private string $_error_on_empty = 'no';
-    private string $_format = 'json';
-
-    public array $grade_list = [
-        'D_Free'    => '免费套餐',
-        'D_Plus'    => '豪华 VIP套餐',
-        'D_Extra'   => '企业I VIP套餐',
-        'D_Expert'  => '企业II VIP套餐',
-        'D_Ultra'   => '企业III VIP套餐',
-        'DP_Free'   => '新免费套餐',
-        'DP_Plus'   => '个人专业版',
-        'DP_Extra'  => '企业创业版',
+    const Grade_List = [
+        'D_Free' => '免费套餐',
+        'D_Plus' => '豪华 VIP套餐',
+        'D_Extra' => '企业I VIP套餐',
+        'D_Expert' => '企业II VIP套餐',
+        'D_Ultra' => '企业III VIP套餐',
+        'DP_Free' => '新免费套餐',
+        'DP_Plus' => '个人专业版',
+        'DP_Extra' => '企业创业版',
         'DP_Expert' => '企业标准版',
-        'DP_Ultra'  => '企业旗舰版',
+        'DP_Ultra' => '企业旗舰版',
     ];
 
-    public array $status_list = [
+    const Status_List = [
         'enable' => '启用',
         'pause'  => '暂停',
         'spam'   => '封禁',
         'lock'   => '锁定',
     ];
 
+    /** @var string API根据路径 */
+    protected string $_api_base = 'https://dnsapi.cn/';
+
+    /** @var string 登录TOKEN */
+    protected string $_login_token = '';
+    /** @var int  登录TOKEN ID */
+    protected int $_login_token_id = 0;
+
+    /** @var string */
+    protected string $_lang = 'cn';
+    /** @var string */
+    protected string $_error_on_empty = 'no';
+    /** @var string */
+    protected string $_format = 'json';
+
     /**
-     * dnspod constructor.
-     * @param $token
-     * @param $token_id
+     * 构造方法，传入默认Token
+     *
+     * @param string $token
+     * @param int $token_id
      * @param string $format
      * @param string $lang
      * @param string $error_on_empty
      */
-    public function __construct($token, $token_id, $format = 'json', $lang = 'cn', $error_on_empty = 'no')
+    public function __construct(string $token, int $token_id, $format = 'json', $lang = 'cn', $error_on_empty = 'no')
     {
-        $this->_token          = $token;
-        $this->_id             = $token_id;
+        $this->_login_token    = $token;
+        $this->_login_token_id = $token_id;
+
         $this->_lang           = $lang;
         $this->_error_on_empty = $error_on_empty;
         $this->_format         = $format;
     }
+
 
     /**
      * @param $domain_id
@@ -61,7 +78,7 @@ class dnspod
      */
     public function record($domain_id)
     {
-        $response = $this->_api('Record.List', array('domain_id' => $domain_id));
+        $response = $this->_api('Record.List', ['domain_id' => $domain_id]);
         $records  = [];
         foreach ($response['records'] as $id => $rv) {
             if ($rv['value'] != 'f1g1ns1.dnspod.net.' && $rv['value'] != 'f1g1ns2.dnspod.net.') {
@@ -133,12 +150,12 @@ class dnspod
         }
 
         $data_ext = [
-            'login_token'    => "{$this->_id},{$this->_token}",
+            'login_token'    => "{$this->_login_token_id},{$this->_login_token}",
             'format'         => $this->_format,
             'lang'           => $this->_lang,
             'error_on_empty' => $this->_error_on_empty,
         ];
-        $api      = 'https://dnsapi.cn/' . $api;
+        $api      = $this->_api_base . $api;
         $data     = array_merge($data, $data_ext);
 
         $result = $this->_post($api, $data);
@@ -180,12 +197,11 @@ class dnspod
 
     /**
      *
-     * @param $url
-     * @param $data
-     * @param string $cookie
+     * @param string $url
+     * @param array $data
      * @return array|mixed
      */
-    private function _post($url, $data)
+    private function _post(string $url,array $data)
     {
         if ($url == '' || !is_array($data)) {
             return $this->_message('danger', '内部错误：参数错误', '');

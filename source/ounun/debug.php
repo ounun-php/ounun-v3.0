@@ -221,41 +221,51 @@ class debug
         }
         $filename = $this->_filename;
         $str      = '';
-        // 环境参数
-        if ($this->_is_out_url) {
-            $this->_is_out_url = false;
-            $str               .= date('Y-m-d H:i:s') . ' URL :\'' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:') . '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . "'\n";
-        }
-        if ($this->_is_out_get && $_GET) {
-            $this->_is_out_get = false;
-            $t                 = [];
-            foreach ($_GET as $k => $v) {
-                $t[] = "{$k} => {$v}";
+        // web 环境参数
+        if (!Is_Cli) {
+            // url
+            if ($this->_is_out_url) {
+                $this->_is_out_url = false;
+                $str               .= date('Y-m-d H:i:s') . ' URL :\'' . ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ? 'https:' : 'http:') . '//' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . "'\n";
             }
-            $str .= 'GET :' . implode("\n    ", $t) . PHP_EOL;
-        }
-        if ($this->_is_out_post && $_POST) {
-            $str .= 'POST:' . var_export($_POST, true) . PHP_EOL;
-        }
-        if ($this->_is_out_post) {
-            $this->_is_out_post = false;
-            $input              = file_get_contents('php://input');
-            if ($input) {
-                $str .= 'INPUT:' . $input . PHP_EOL;
+            // get
+            if ($this->_is_out_get && $_GET) {
+                $this->_is_out_get = false;
+                $t                 = [];
+                foreach ($_GET as $k => $v) {
+                    $t[] = "{$k} => {$v}";
+                }
+                $str .= 'GET :' . implode("\n    ", $t) . PHP_EOL;
+            }
+            // post
+            if ($this->_is_out_post && $_POST) {
+                $str .= 'POST:' . var_export($_POST, true) . PHP_EOL;
+            }
+            // input
+            if ($this->_is_out_post) {
+                $this->_is_out_post = false;
+                $input              = file_get_contents('php://input');
+                if ($input) {
+                    $str .= 'INPUT:' . $input . PHP_EOL;
+                }
+            }
+            // cookie
+            if ($this->_is_out_cookie && $_COOKIE) {
+                $this->_is_out_cookie = false;
+                $str                  .= 'COOKIE:' . var_export($_COOKIE, true) . PHP_EOL;
+            }
+            // session
+            if ($this->_is_out_session && $_SESSION) {
+                $this->_is_out_session = false;
+                $str                   .= 'SESSION:' . var_export($_SESSION, true) . PHP_EOL;
+            }
+            // server
+            if ($this->_is_out_server && $_SERVER) {
+                $this->_is_out_server = false;
+                $str                  .= 'SERVER:' . var_export($_SERVER, true) . PHP_EOL;
             }
         }
-        if ($this->_is_out_cookie && $_COOKIE) {
-            $this->_is_out_cookie = false;
-            $str                  .= 'COOKIE:' . var_export($_COOKIE, true) . PHP_EOL;
-        }
-        if ($this->_is_out_session && $_SESSION) {
-            $this->_is_out_session = false;
-            $str                   .= 'SESSION:' . var_export($_SESSION, true) . PHP_EOL;
-        }
-        if ($this->_is_out_server && $_SERVER) {
-            $this->_is_out_server = false;
-            $str                  .= 'SERVER:' . var_export($_SERVER, true) . PHP_EOL;
-        }
+
         // 日志
         if ($this->_logs) {
             $str         .= 'LOGS:' . var_export($this->_logs, true) . PHP_EOL;

@@ -4,6 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
+use apps\command\command;
 use ounun\addons\apps;
 use ounun\addons\logic;
 use ounun\db\db;
@@ -496,7 +497,7 @@ function json_encode_unescaped($data): string
 /**
  * 对 json格式的字符串进行解码
  *
- * @param string $json_string
+ * @param string|mixed $json_string
  * @return mixed
  */
 function json_decode_array(?string $json_string)
@@ -540,7 +541,7 @@ function extend_decode_json(string $extend_string)
  * @param string $string to encode
  * @return string
  */
-function base64_url_encode(string $string = null): string
+function base64_url_encode(string $string = ''): string
 {
     return strtr(base64_encode($string), '+/=', '-_~');
 }
@@ -551,7 +552,7 @@ function base64_url_encode(string $string = null): string
  * @param string $string to decode
  * @return string
  */
-function base64_url_decode(string $string = null): string
+function base64_url_decode(string $string = ''): string
 {
     return base64_decode(strtr($string, '-_~', '+/='));
 }
@@ -684,7 +685,14 @@ function error404(string $msg = ''): void
  */
 function error_php(string $error_msg, string $error_html = '', string $channel = 'php'): void
 {
-    $out = global_all('debug', [])['out_config'];
+    // global_all
+    $outs = global_all('debug', []);
+    if ($outs && isset($outs['out_config'])) {
+        $out = $outs['out_config'];
+    } else {
+        $out = null;
+    }
+    // if
     if ($out && isset($out['default']) && isset($out['default']['buffer'])) {
         if (isset($out[$channel]) && is_array($out[$channel])) {
             $c = array_merge($out['default'], $out[$channel]);
@@ -753,7 +761,7 @@ function environment()
         if (is_file($file)) {
             require $file;
         } else {
-            error_php('file not found:' . $file);
+            error_php('Unable to find: ${Dir_Root}/env/environment.example.php');
         }
     }
     if (!isset($GLOBALS['_environment_'])) {
@@ -771,7 +779,7 @@ function environment()
  */
 function global_all(string $key, $default = null)
 {
-    if ($value = ounun::$global[$key]) {
+    if ($key && isset(ounun::$global[$key]) && $value = ounun::$global[$key]) {
         return $value;
     }
     return $default;
@@ -1269,8 +1277,8 @@ class ounun
                 $first = '';
                 $len   = 0;
             }
-            if (!static::$maps_path
-                || !static::$maps_path[$first]
+            if (empty(static::$maps_path)
+                || empty(static::$maps_path[$first])
                 || !(is_array(static::$maps_path[$first]) && in_array($path_root, array_column(static::$maps_path[$first], 'path')))) {
                 static::$maps_path[$first][] = [
                     'path'      => $path_root,
@@ -1709,14 +1717,14 @@ abstract class v
     }
 }
 
-/**
- * 开始
- *
- * @param array $url_mods
- * @param string $host
- */
-function start(array $url_mods, string $host)
+/** Web 开始 */
+function start_web()
 {
+    // 开始
+    $host     = $_SERVER['HTTP_HOST'];
+    $uri      = url_original($_SERVER['REQUEST_URI']);
+    $url_mods = url_to_mod($uri);
+
     // 语言lang
     if ($url_mods && $url_mods[0] && ounun::$lang_support[$url_mods[0]]) {
         $lang = array_shift($url_mods);
@@ -1781,13 +1789,35 @@ function start(array $url_mods, string $host)
     error_php($error);
 }
 
-/** Web */
-function start_web()
+/**
+ * Cli 开始
+ * @param array $argv
+ * @return int
+ */
+function start_cli(array $argv)
 {
-    $uri      = url_original($_SERVER['REQUEST_URI']);
-    $url_mods = url_to_mod($uri);
-    start($url_mods, $_SERVER['HTTP_HOST']);
+    \ounun::$app_name = \ounun::App_Name_Command;
+    \ounun::$app_path = '/';
+
+    // runtime_apps
+    $filename = Dir_Storage . 'runtime/.runtime_' . \ounun::$app_name . '.php';
+    if (is_file($filename)) {
+        require $filename;
+    }
+
+    // paths
+    foreach (\ounun::$paths as $v) {
+        // path_set
+        \ounun::path_root_set($v['path']);
+        if ($v['is_auto_helper']) {
+            // load_helper
+            \ounun::load_helper($v['path']);
+        }
+    }
+
+    return (new \ounun\addons\console([]))->execute($argv);
 }
+
 
 /** 自动加载 src-4 \ounun  */
 ounun::load_class_set(Dir_Ounun, 'ounun', false);

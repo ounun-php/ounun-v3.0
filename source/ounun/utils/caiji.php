@@ -7,8 +7,6 @@
 namespace ounun\utils;
 
 
-use ounun\client\proxy;
-
 class caiji
 {
     /**
