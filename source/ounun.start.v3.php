@@ -1792,9 +1792,12 @@ function start_web()
 /**
  * Cli 开始
  * @param array $argv
+ * @param array $commands
+ * @param string $name
+ * @param string $version
  * @return int
  */
-function start_cli(array $argv)
+function start_cli(array $argv,array $commands = [],string $name = 'Ounun Command', string $version = '0.1')
 {
     \ounun::$app_name = \ounun::App_Name_Command;
     \ounun::$app_path = '/';
@@ -1815,7 +1818,7 @@ function start_cli(array $argv)
         }
     }
 
-    return (new \ounun\addons\console([]))->execute($argv);
+    return (new \ounun\addons\console($commands,$name,$version))->execute($argv);
 }
 
 

@@ -11,11 +11,12 @@ class file
 {
     /**
      * 删除目录
+     *
      * @param string $pathname
      */
-    static public function del_dir(string $pathname)
+    static public function deldir(string $pathname)
     {
-        //如果是目录则继续
+        // 如果是目录则继续
         if (is_dir($pathname)) {
             //扫描一个文件夹内的所有文件夹和文件并返回数组
             $p = scandir($pathname);
@@ -25,7 +26,7 @@ class file
                     //如果是目录则递归子目录，继续操作
                     if (is_dir($pathname . $val)) {
                         //子目录中操作删除文件夹和文件
-                        static::del_dir($pathname . $val . '/');
+                        static::deldir($pathname . $val . '/');
                         //目录清空后删除空文件夹
                         if (file_exists($pathname . $val . '/')) {
                             rmdir($pathname . $val . '/');
@@ -42,38 +43,42 @@ class file
 
     /**
      * 创建目录
-     * @param string $pathname
+     *
+     * @param string $path_name
      * @param int $mode
      * @param bool $recursive
      */
-    static public function mkdir(string $pathname, int $mode = 0777, bool $recursive = false)
+    static public function mkdir(string $path_name, int $mode = 0777, bool $recursive = false)
     {
-        if (!file_exists($pathname)) {
-            mkdir($pathname, $mode, $recursive);
+        if (!file_exists($path_name)) {
+            mkdir($path_name, $mode, $recursive);
         }
     }
 
 
     /**
      * 读取目录下所有文件名
-     * @param string $pathname
+     *
+     * @param string $path_root
+     * @param array $files
+     * @param string $path_name
      */
-    static public function readfile(string $pathroot, array &$files = [], string $pathname = '')
+    static public function read_file(string $path_root, array &$files = [], string $path_name = '')
     {
         // 如果是目录则继续
-        if (is_dir($pathroot . $pathname)) {
+        if (is_dir($path_root . $path_name)) {
             //扫描一个文件夹内的所有文件夹和文件并返回数组
-            $p = scandir($pathroot . $pathname);
+            $p = scandir($path_root . $path_name);
             foreach ($p as $val) {
                 //排除目录中的.和..
                 if ($val != "." && $val != "..") {
                     //如果是目录则递归子目录，继续操作
-                    if (is_dir($pathroot . $pathname . $val)) {
+                    if (is_dir($path_root . $path_name . $val)) {
                         // 子目录
-                        static::readfile($pathroot, $files, $pathname . $val . '/');
+                        static::read_file($path_root, $files, $path_name . $val . '/');
                     } else {
                         // 是文件
-                        $files[] = $pathname . $val;
+                        $files[] = $path_name . $val;
                     }
                 }
             }

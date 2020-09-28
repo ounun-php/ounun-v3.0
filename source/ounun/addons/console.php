@@ -34,12 +34,8 @@ class console
 
         // add
         if (is_array($commands)) {
-            foreach ($commands as $command) {
-                if (class_exists($command)) {
-                    if (is_subclass_of($command, command::class)) {
-                        $this->add(new $command($this));  // 注册指令
-                    }
-                }
+            foreach ($commands as $key => $command) {
+
             }
         }
     }
@@ -50,7 +46,7 @@ class console
      * @param command $command 命令实例
      * @return int
      */
-    public function add(command $command)
+    public function add(string $key, command $command)
     {
         static::$commands[$command->name] = $command;
         return count(static::$commands);
@@ -89,6 +85,15 @@ class console
                 $command = static::$commands[command_c::Default_Cmd];
                 $command->execute($argv);
             }
+        }
+        if (class_exists($command)) {
+            if (is_subclass_of($command, command::class)) {
+                (new $command($this))->execute($argv);  // 执行指令
+            }else{
+                static::echo("命令:{$command} 父类不是:".command::class, command_c::Color_Light_Red);
+            }
+        }else{
+            static::echo("命令:{$argv[1]} 文件不存在!", command_c::Color_Light_Red);
         }
         return 0;
     }
