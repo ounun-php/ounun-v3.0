@@ -11,6 +11,7 @@ class httpc
 {
     /**
      * 请求
+     *
      * @param string $url
      * @param array $headers header格式必须为 “键: 值”
      * @param array $options

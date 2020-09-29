@@ -18,12 +18,13 @@ class command
     /** @var string  脚本版本 */
     public string $script_version = '';
 
-    /** @var bool 是否有效 */
-    protected bool $_is_enabled = true;
     /** @var bool 是否正在运行 */
-    protected bool $_is_run = false;
+    protected bool $_run_state = false;
     /** @var float 执行时间 */
-    protected float $_time_run = 0;
+    protected float $_run_time = 0;
+
+    /** @var float 开始时间 */
+//    private float $_time_start = 0;
 
     /**
      * task constructor.
@@ -34,21 +35,36 @@ class command
     }
 
     /**
-     * 有效状态 true:有效   false:关闭
-     * @return bool
-     */
-    public function is_enabled()
-    {
-        return $this->_is_enabled;
-    }
-
-    /**
      * 运行状态 true:运行中  false:关闭
      * @return bool
      */
-    public function is_run()
+    public function run_state()
     {
-        return $this->_is_run;
+        return $this->_run_state;
+    }
+
+    /**
+     * 执行时间
+     * @return float|int
+     */
+    public function run_time()
+    {
+        return $this->_run_time;
+    }
+
+    /** 开始 */
+    public function start()
+    {
+        // $this->_time_start = 0 - microtime(true);
+        $this->_run_time  = 0 - microtime(true);
+        $this->_run_state = true;
+    }
+
+    /** 停止 */
+    public function stop()
+    {
+        $this->_run_state = false;
+        $this->_run_time  += microtime(true);
     }
 
     /**
@@ -93,13 +109,9 @@ class command
      */
     public function execute(array $argc_input)
     {
-        $start         = microtime(true);
-        $this->_is_run = true;
         $this->_execute_inside($argc_input);
-        $this->_is_run   = false;
-        $this->_time_run = microtime(true) - $start;
-
-        echo "time run: " . $this->_time_run . " \n";
+        $this->stop();
+        echo "time run: " . $this->run_time() . " \n";
         return 0;
     }
 

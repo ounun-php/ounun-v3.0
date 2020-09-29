@@ -14,6 +14,7 @@ class console
 
     /** @var string 命令的名字（"ounun" 后面的部分） */
     public string $name;
+
     /** @var string 运行命令时使用 "--help" 选项时的完整命令描述 */
     public string $version;
 
@@ -35,7 +36,9 @@ class console
         // add
         if (is_array($commands)) {
             foreach ($commands as $key => $command) {
-
+                if ($key && $command) {
+                    $this->add($key, $command);
+                }
             }
         }
     }
@@ -43,12 +46,13 @@ class console
     /**
      * 添加一个指令
      *
-     * @param command $command 命令实例
+     * @param string $key 索引关键key
+     * @param string $command 命令实例
      * @return int
      */
-    public function add(string $key, command $command)
+    public function add(string $key, string $command)
     {
-        static::$commands[$command->name] = $command;
+        static::$commands[$key] = $command;
         return count(static::$commands);
     }
 
@@ -60,39 +64,49 @@ class console
      */
     public function execute(array $argv)
     {
-        // print_r(['$argv'=>$argv]);
         if (empty($argv) || empty($argv[1]) || '--help' == $argv[1] || '--list' == $argv[1]) {
-            /** @var command $command */
+            /** @var string $command */
             $command = static::$commands[command_c::Default_Cmd];
-            $command->execute($argv);
-        } else {
-            /** @var command $command */
-            $command = static::$commands[$argv[1]];
-            if ($command) {
-                if ('--help' == $argv[2]) {
-                    $command->help($argv);
-                } else {
-                    $run_time = 0 - microtime(true);
-                    $run_cmd  = str_pad($argv[1], 16);
-                    static::echo("-- runing... {$run_cmd} " . date("Y-m-d H:i:s") . "             --------------------", command_c::Color_Cyan);
-                    $command->execute($argv);
-                    $run_time += microtime(true);
-                    static::echo("-- done      {$run_cmd} " . date("Y-m-d H:i:s") . " run:" . str_pad(round($run_time, 4) . 's', 8) . "--------------------", command_c::Color_Cyan);
+        } else if ($argv[1]) {
+            // addons
+            $command = "\\addons\\{$argv[1]}\\command";
+            // command
+            if (!class_exists($command)) {
+                if (isset(static::$commands[$argv[1]])) {
+                    /** @var string $command */
+                    $command = static::$commands[$argv[1]];
                 }
-            } else {
-                static::echo("命令:{$argv[1]} 不存在!", command_c::Color_Light_Red);
-                static::echo("你可以尝试下面", command_c::Color_Green);
-                $command = static::$commands[command_c::Default_Cmd];
-                $command->execute($argv);
             }
         }
-        if (class_exists($command)) {
+
+        // command 为空
+        if (empty($command)) {
+            static::echo("命令:{$argv[1]} 不存在!", command_c::Color_Light_Red);
+            static::echo("你可以尝试下面", command_c::Color_Green);
+            $command = static::$commands[command_c::Default_Cmd];
+        }
+
+        // command 执行
+        if ($command && class_exists($command)) {
             if (is_subclass_of($command, command::class)) {
-                (new $command($this))->execute($argv);  // 执行指令
-            }else{
-                static::echo("命令:{$command} 父类不是:".command::class, command_c::Color_Light_Red);
+                if ('--help' == $argv[2]) {
+                    (new $command($this))->help($argv);  // 执行指令help
+                } else {
+                    $run_cmd = str_pad($command, 16);
+                    /** @var command $command_o */
+                    $command_o = new $command();
+                    $command_o->start();
+                    static::echo(date("Y-m-d H:i:s") . "    runing... {$run_cmd}                      --------------------", command_c::Color_Cyan);
+                    $command_o->execute($argv);  // 执行指令
+                    if ($command_o->run_state()) {
+                        $command_o->stop();
+                    }
+                    static::echo(date("Y-m-d H:i:s") . "    done      {$run_cmd}    运行时间:" . str_pad(round($command_o->run_time(), 4) . '秒', 8) . " --------------------", command_c::Color_Cyan);
+                }
+            } else {
+                static::echo("命令:{$command} 父类不是:" . command::class, command_c::Color_Light_Red);
             }
-        }else{
+        } else {
             static::echo("命令:{$argv[1]} 文件不存在!", command_c::Color_Light_Red);
         }
         return 0;

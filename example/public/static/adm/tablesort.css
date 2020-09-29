@@ -1,7 +1,7 @@
 
 table.p_table_order {
     font-family: arial, serif;
-    /*background-color: #F6FBFF;*/
+    /* background-color: #F6FBFF; */
     margin: 5px 0 15px;
     text-align: center;
     font-size: 12px;
@@ -12,7 +12,7 @@ table.p_table_order {
 }
 
 table.p_table_order thead tr td, table.p_table_order tfoot tr td {
-    /*background-color: #e6EEEE;*/
+    /* background-color: #e6EEEE; */
     border: 1px solid #DDDDDD;
     font-size: 12px;
     padding: 4px;

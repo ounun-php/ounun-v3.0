@@ -9,32 +9,33 @@ namespace ounun\client;
 
 class session
 {
-    /** @var string  session key * */
-    protected string $_key = '';
+    /** @var string  session prefix * */
+    protected string $_prefix = '';
 
     /**
      * session constructor.
+     *
      * @param string|null $session_key
      */
     public function __construct(?string $session_key = null)
     {
-        $this->key_set($session_key);
+        $this->prefix_set($session_key);
     }
 
     /**
      * @param string|null $session_key
      */
-    public function key_set(?string $session_key = null)
+    public function prefix_set(?string $session_key = null)
     {
-        $this->_key = $session_key ?? 'adm';
+        $this->_prefix = $session_key ?? 'adm';
     }
 
     /**
      * @return string
      */
-    public function key_get()
+    public function prefix_get()
     {
-        return $this->_key;
+        return $this->_prefix;
     }
 
     /**
@@ -46,7 +47,7 @@ class session
      */
     public function get(string $key, $default = null)
     {
-        $key = $this->_key . $key;
+        $key = $this->_prefix . $key;
         return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
     }
 
@@ -59,7 +60,7 @@ class session
      */
     public function set(string $key, $val)
     {
-        $_SESSION[$this->_key . $key] = $val;
+        $_SESSION[$this->_prefix . $key] = $val;
         return true;
     }
 
@@ -71,7 +72,7 @@ class session
      */
     public function del(string $key)
     {
-        unset($_SESSION[$this->_key . $key]);
+        unset($_SESSION[$this->_prefix . $key]);
         return true;
     }
 
@@ -82,10 +83,10 @@ class session
      */
     public function clean()
     {
-        if ($this->_key && $_SESSION) {
-            $key_len = strlen($this->_key);
+        if ($this->_prefix && $_SESSION) {
+            $key_len = strlen($this->_prefix);
             foreach ($_SESSION as $k => $v) {
-                if ($this->_key == substr($k, 0, $key_len)) {
+                if ($this->_prefix == substr($k, 0, $key_len)) {
                     unset($_SESSION[$k]);
                 }
             }

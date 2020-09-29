@@ -46,30 +46,6 @@ class http
         return static::$_instances[$signature];
     }
 
-    /**
-     * @param string $uri
-     * @return $this
-     */
-//    static public function i2(string $uri = '')
-//    {
-//        if (empty(static::$_instances[$uri])) {
-//            if (empty($uri)) {
-//                $https = (isset($_SERVER['HTTPS']) && !empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) != 'off')) ? 's://' : '://';
-//                if (!empty($_SERVER['PHP_SELF']) && !empty ($_SERVER['REQUEST_URI'])) {
-//                    $uri = 'http' . $https . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-//                } else {
-//                    $uri = 'http' . $https . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_NAME'];
-//                    if (isset($_SERVER['QUERY_STRING']) && !empty($_SERVER['QUERY_STRING'])) $uri .= '?' . $_SERVER['QUERY_STRING'];
-//                }
-//                $uri = urldecode($uri);
-//                $uri = str_replace(['"', '<', '>'], ['&quot;', '&lt;', '&gt;'], $uri);
-//                $uri = preg_replace(['/eval\((.*)\)/', '/[\"\'][\\s]*javascript:(.*)[\"\']/'], ['', '""'], $uri);
-//            }
-//            static::$_instances[$uri] = new static();
-//        }
-//        return static::$_instances[$uri];
-//    }
-
 
     /** @var string */
     public string $scheme = 'http';
