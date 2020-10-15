@@ -818,7 +818,7 @@ function global_addons(string $key, string $addon_tag, $default = null)
     // 加载  -> runtime_apps 生成时加载
     // 转换翻译
     $tag = ounun::$global_addons[$addon_tag];
-    if ($tag && $value = $tag[$key]) {
+    if ($tag && isset($tag[$key]) && $value = $tag[$key]) {
         return $value;
     }
     return $default;
@@ -1133,7 +1133,7 @@ class ounun
      * 当前面页
      *
      * @param string $page_file_path
-     * @param string $lang
+     * @param string|null $lang
      * @param bool $is_current 是否当前页面
      * @return string
      */
@@ -1797,7 +1797,7 @@ function start_web()
  * @param string $version
  * @return int
  */
-function start_cli(array $argv,array $commands = [],string $name = 'Ounun Command', string $version = '0.1')
+function start_cli(array $argv, array $commands = [], string $name = 'Ounun Command', string $version = '0.1')
 {
     \ounun::$app_name = \ounun::App_Name_Command;
     \ounun::$app_path = '/';
@@ -1818,7 +1818,7 @@ function start_cli(array $argv,array $commands = [],string $name = 'Ounun Comman
         }
     }
 
-    return (new \ounun\addons\console($commands,$name,$version))->execute($argv);
+    return (new \ounun\addons\console($commands, $name, $version))->execute($argv);
 }
 
 

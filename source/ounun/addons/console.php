@@ -89,8 +89,18 @@ class console
         // command 执行
         if ($command && class_exists($command)) {
             if (is_subclass_of($command, command::class)) {
-                if ('--help' == $argv[2]) {
-                    (new $command($this))->help($argv);  // 执行指令help
+                $argv_len = 0;
+                if ($argv && is_array($argv)) {
+                    $argv_len = count($argv);
+                    if ($argv_len >= 1) {
+                        array_shift($argv);
+                    }
+                }
+                if ($argv_len >= 2) {
+                    array_shift($argv);
+                }
+                if ($argv && '--help' == $argv[0]) {
+                    (new $command())->help($argv);  // 执行指令help
                 } else {
                     $run_cmd = str_pad($command, 16);
                     /** @var command $command_o */
@@ -131,13 +141,24 @@ class console
         if ($time) {
             $file = command_c::Color_Cyan . '[' . date("Y-m-d H:i:s") . ']' . command_c::Color_None . $file;
         }
-        if (empty($color)) {
-            echo $file . $msg . $end;
-        } else {
-            echo $file . $color . $msg . command_c::Color_None . $end;
-        }
+        echo $file . static::color($msg, $color) . $end;
     }
 
+    /**
+     * echo加上颜色
+     *
+     * @param string $msg
+     * @param string $color
+     * @return string
+     */
+    static public function color(string $msg, string $color = '')
+    {
+        if (empty($color)) {
+            return $msg;
+        } else {
+            return $color . $msg . command_c::Color_None;
+        }
+    }
 
     /**
      * 打印数组

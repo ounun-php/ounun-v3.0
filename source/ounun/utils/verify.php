@@ -11,6 +11,7 @@ class verify
 {
     /**
      * 验证输入的邮件地址是否合法
+     *
      * @param string $email 邮箱字符串
      * @return bool
      */
@@ -30,6 +31,7 @@ class verify
 
     /**
      * 验证输入的手机号码是否合法
+     *
      * @param string $mobile_phone
      * @return bool
      */

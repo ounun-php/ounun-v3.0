@@ -78,14 +78,7 @@ class dnspod
      */
     public function record($domain_id)
     {
-        $response = $this->_api('Record.List', ['domain_id' => $domain_id]);
-        $records  = [];
-        foreach ($response['records'] as $id => $rv) {
-            if ($rv['value'] != 'f1g1ns1.dnspod.net.' && $rv['value'] != 'f1g1ns2.dnspod.net.') {
-                $records[$id] = $rv;
-            }
-        }
-        return $records;
+        return $this->_api('Record.List', ['domain_id' => $domain_id]);
     }
 
     /**
@@ -136,6 +129,20 @@ class dnspod
             'domain_id' => $domain_id
         ];
         return $this->_api('Domain.Remove', $data);
+    }
+
+    /**
+     * @param $offset
+     * @param $length
+     * @return array|mixed
+     */
+    public function domain_list($offset,$length)
+    {
+        $data = [
+            'offset' => $offset,
+            'length' => $length,
+        ];
+        return $this->_api('Domain.List', $data);
     }
 
     /**

@@ -10,21 +10,20 @@ namespace ounun\addons;
 class command
 {
     /** @var string 命令的名字（"ounun" 后面的部分） */
-    public string $name = '';
+    public string $name;
     /** @var string 运行命令时使用 "--help" 选项时的完整命令描述 */
-    public string $help = '';
-    /** @var string 运行 "php ./ounun list" 时的简短描述 */
-    public string $description = '';
+    public string $help;
+    /** @var string 运行命令时使用 "php ./ounun" 参数... */
+    public string $help_paras;
+    /** @var string 运行 "php ./ounun --help" 时的简短描述 */
+    public string $description;
     /** @var string  脚本版本 */
-    public string $script_version = '';
+    public string $script_version;
 
     /** @var bool 是否正在运行 */
     protected bool $_run_state = false;
     /** @var float 执行时间 */
     protected float $_run_time = 0;
-
-    /** @var float 开始时间 */
-//    private float $_time_start = 0;
 
     /**
      * task constructor.
@@ -68,14 +67,14 @@ class command
     }
 
     /**
-     * 帮
+     * 帮助
      * @param array $argv
      */
     public function help(array $argv)
     {
         console::echo("命令:", command_c::Color_Purple, '', 0, 0, '');
         console::echo("({$this->description})");
-        console::echo('./ounun ' . $this->name . ' [参数...]', command_c::Color_Blue);
+        console::echo('./ounun ' . $this->name . $this->help_paras, command_c::Color_Blue);
         console::echo($this->help, command_c::Color_Purple);
     }
 
@@ -97,13 +96,20 @@ class command
             $this->description = '命令进程';
         }
 
+        // [参数...]
+        if (empty($this->help_paras)) {
+            $this->help_paras = ' [参数...]';
+        }
         // 运行命令时使用 "--help" 选项时的完整命令描述
-        $this->help = "命令\n" .
-            "./ounun {$this->name} [间隔(秒,默认5秒)] [寿命(秒,默认300秒)] [任务ID] [网站tag]\n";
+        if (empty($this->help)) {
+            $this->help = "命令\n" .
+                "./ounun {$this->name} ".$this->help_paras."\n";
+        }
     }
 
     /**
      * 执行入口
+     *
      * @param array $argc_input
      * @return int
      */
@@ -111,10 +117,9 @@ class command
     {
         $this->_execute_inside($argc_input);
         $this->stop();
-        echo "time run: " . $this->run_time() . " \n";
+        console::echo("运行时间: " . $this->run_time(), command_c::Color_Green);
         return 0;
     }
-
 
     /**
      * @param array $argc_input
@@ -123,7 +128,7 @@ class command
     protected function _execute_inside(array $argc_input)
     {
         usleep(100);
-        echo __METHOD__ . " \$input:" . json_encode_unescaped($argc_input) . "\n";
+        console::echo(__METHOD__ . " \$input:" . json_encode_unescaped($argc_input), command_c::Color_Cyan);
         return 0;
     }
 }

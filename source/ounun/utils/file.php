@@ -7,178 +7,180 @@
 namespace ounun\utils;
 
 
+use ounun\utils\parse\ini;
+
 class file
 {
+    private static array $_error_msg = [];
+
     /**
      * 删除目录
      *
-     * @param string $pathname
+     * @param string $dir 目录的路径。
+     * @param bool $recursive 允许递归删除 $path_name 所指定的多级嵌套目录。
      */
-    static public function deldir(string $pathname)
+    static public function rmdir(string $dir, bool $recursive = true)
     {
-        // 如果是目录则继续
-        if (is_dir($pathname)) {
-            //扫描一个文件夹内的所有文件夹和文件并返回数组
-            $p = scandir($pathname);
-            foreach ($p as $val) {
-                //排除目录中的.和..
-                if ($val != "." && $val != "..") {
-                    //如果是目录则递归子目录，继续操作
-                    if (is_dir($pathname . $val)) {
-                        //子目录中操作删除文件夹和文件
-                        static::deldir($pathname . $val . '/');
-                        //目录清空后删除空文件夹
-                        if (file_exists($pathname . $val . '/')) {
-                            rmdir($pathname . $val . '/');
-                        }
-                    } else {
-                        //如果是文件直接删除
-                        unlink($pathname . $val);
-                    }
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            if ($recursive) {
+                foreach ($files as $file) {
+                    (is_dir("{$dir}/{$file}")) ? static::rmdir("{$dir}/{$file}") : unlink("{$dir}/{$file}");
                 }
+                rmdir($dir);
+            } else if (empty($files)) {
+                rmdir($dir);
             }
-            rmdir($pathname);
+        }
+        if (file_exists($dir)) {
+            unlink($dir);
         }
     }
 
     /**
      * 创建目录
      *
-     * @param string $path_name
-     * @param int $mode
-     * @param bool $recursive
+     * @param string $dir 目录的路径。
+     * @param int $mode 默认的 mode 是 0777，意味着最大可能的访问权。
+     * @param bool $recursive 允许递归创建由 $path_name 所指定的多级嵌套目录。
      */
-    static public function mkdir(string $path_name, int $mode = 0777, bool $recursive = false)
+    static public function mkdir(string $dir, int $mode = 0777, bool $recursive = true)
     {
-        if (!file_exists($path_name)) {
-            mkdir($path_name, $mode, $recursive);
+        if (!file_exists($dir)) {
+            mkdir($dir, $mode, $recursive);
         }
     }
 
-
     /**
-     * 读取目录下所有文件名
+     * 列出指定路径中的文件和目录
      *
-     * @param string $path_root
-     * @param array $files
-     * @param string $path_name
+     * @param string $dir 目录的路径。
+     * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
+     * @param array $return_files 如果提供 $return_files 参数， 则外部命令执行后的返回状态将会被设置到此变量中。
+     * @return array
      */
-    static public function read_file(string $path_root, array &$files = [], string $path_name = '')
+    static public function scandir(string $dir, array &$return_files = [], bool $recursive = true)
     {
-        // 如果是目录则继续
-        if (is_dir($path_root . $path_name)) {
-            //扫描一个文件夹内的所有文件夹和文件并返回数组
-            $p = scandir($path_root . $path_name);
-            foreach ($p as $val) {
-                //排除目录中的.和..
-                if ($val != "." && $val != "..") {
-                    //如果是目录则递归子目录，继续操作
-                    if (is_dir($path_root . $path_name . $val)) {
-                        // 子目录
-                        static::read_file($path_root, $files, $path_name . $val . '/');
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            if ($recursive) {
+                foreach ($files as $file) {
+                    if (is_dir("{$dir}/{$file}")) {
+                        static::scandir("{$dir}/{$file}", $return_files, $recursive);
                     } else {
-                        // 是文件
-                        $files[] = $path_name . $val;
+                        $return_files[] = "{$dir}/{$file}";
                     }
                 }
             }
         }
+        return $return_files;
     }
 
-    private static array $_error_msg = [];
-
-    static function read($pattern, $return = null)
+    /**
+     * 取得文件大小
+     *
+     * @param string $dir 目录的路径。
+     * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
+     * @return int
+     */
+    static function size(string $dir, bool $recursive = true)
     {
-        if ($return === 'dir') {
-            return glob($pattern, GLOB_ONLYDIR);
-        } elseif ($return === 'file') {
-            $array = glob($pattern);
-            return $array ? array_filter($array, 'is_file') : false;
-        } else {
-            return glob($pattern);
-        }
-    }
-
-
-    static function create($structure, $mode = 0755, $force = false)
-    {
-        if (is_dir($structure) || $structure == '') {
-            return true;
-        }
-        if (is_file($structure)) {
-            if (!$force || !@unlink($structure)) {
-                self::$_error_msg[] = sprintf('%s is a file', $dir);
-                return false;
-            }
-        }
-        if (self::create(dirname($structure), $mode, $force)) {
-            return @mkdir($structure, $mode);
-        } else {
-            self::$_error_msg[] = sprintf('can not mkdir %s', $structure);
-            return false;
-        }
-    }
-
-    static function delete($path)
-    {
-        if (!is_dir($path)) {
-            return false;
-        }
-        $path  = self::path($path);
-        $items = glob($path . '*');
-        if (!is_array($items)) {
-            return true;
-        }
-
-        foreach ($items as $v) {
-            if (is_dir($v)) {
-                self::delete($v);
-            } else {
-                if (!@unlink($v)) {
-                    self::$_error_msg[] = sprintf('can not delete file %s', $v);
-                    return false;
+        $size = 0;
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            if ($recursive) {
+                foreach ($files as $file) {
+                    if (is_dir("{$dir}/{$file}")) {
+                        $size += static::size("{$dir}/{$file}", $recursive);
+                    } else {
+                        $size += filesize("{$dir}/{$file}");
+                    }
                 }
             }
+        } elseif (is_file($dir)) {
+            $size += filesize($dir);
         }
-        if (!@rmdir($path)) {
-            self::$_error_msg[] = sprintf('can not rmdir %s', $path);
-            return false;
+        return $size;
+    }
+
+
+    /**
+     * 改变文件模式
+     *
+     * @param string $dir 文件的路径。
+     * @param int $mode 注意 mode 不会被自动当成八进制数值，而且也不能用字符串（例如 "g+w"）。要确保正确操作，需要给 mode 前面加上 0
+     * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
+     * @return bool
+     */
+    static function chmod(string $dir, int $mode = 0755, bool $recursive = true)
+    {
+        $mode = intval($mode, 8);
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            if ($recursive) {
+                foreach ($files as $file) {
+                    if (is_dir("{$dir}/{$file}")) {
+                        static::chmod("{$dir}/{$file}", $mode, $recursive);
+                    } else {
+                        chmod("{$dir}/{$file}", $mode);
+                    }
+                }
+            }
+            chmod($dir, $mode);
         }
         return true;
     }
 
-    static function clear($path)
+    /**
+     * 设定文件的访问和修改时间
+     *
+     * @param string $dir 要设定的文件名。
+     * @param int $mtime 要设定的时间。如果没有提供参数 time 则会使用当前系统的时间。
+     * @param int $atime 如果给出了这个参数，则给定文件的访问时间会被设为 atime，否则会设置 为time。如果没有给出这两个参数，则使用当前系统时间。
+     * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
+     * @return bool
+     */
+    static function touch(string $dir, int $mtime = 0, int $atime = 0, bool $recursive = true)
     {
-        if (!is_dir($path)) {
-            return false;
-        }
-        $path  = self::path($path);
-        $items = glob($path . '*');
-        if (!is_array($items)) {
-            return true;
-        }
-        foreach ($items as $v) {
-            if (is_dir($v)) {
-                self::delete($v);
-            } else {
-                if (!@unlink($v)) {
-                    self::$_error_msg[] = sprintf('can not delete file %s', $v);
-                    return false;
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            if ($recursive) {
+                foreach ($files as $file) {
+                    if (is_dir("{$dir}/{$file}")) {
+                        static::touch("{$dir}/{$file}", $mtime, $atime, $recursive);
+                    } else {
+                        touch("{$dir}/{$file}", $mtime, $atime);
+                    }
                 }
             }
+        } elseif (is_file($dir)) {
+            touch($dir, $mtime, $atime);
         }
         return true;
     }
 
-    static function rename($oldpath, $newpath)
+    /**
+     * 重命名一个文件或目录
+     *
+     * @param string $old_path 旧名字
+     * @param string $new_path 新的名字。
+     * @return bool
+     */
+    static function rename(string $old_path, string $new_path)
     {
-        return rename($oldpath, $newpath);
+        return rename($old_path, $new_path);
     }
 
-    static function move($source, $target)
+
+
+    static function move(string $source, string $target, bool $recursive = true)
     {
-        if (!is_dir($source)) return false;
-        if (!is_dir($target)) self::create($target);
+        if (!is_dir($source)) {
+            return false;
+        }
+        if (!is_dir($target)) {
+            static::mkdir($target);
+        }
         $source = self::path($source);
         $target = self::path($target);
         $items  = glob($source . '*');
@@ -264,139 +266,38 @@ class file
         return $array;
     }
 
-    static function chmod($path, $mode = 0755)
-    {
-        if (!is_dir($path)) return false;
-        $mode = intval($mode, 8);
-        if (!@chmod($path, $mode)) {
-            self::$_error_msg[] = sprintf('%s not changed to %s', $path, $mode);
-        }
-        $path  = self::path($path);
-        $items = glob($path . '*');
-        if (!is_array($items)) return true;
-        foreach ($items as $item) {
-            if (is_dir($item)) {
-                self::chmod($item, $mode);
-            } else {
-                if (!@chmod($item, $mode)) {
-                    self::$_error_msg[] = sprintf('%s not changed to %s', $item, $mode);
-                }
-            }
-        }
-        return true;
-    }
 
-    static function touch($path, $mtime = 0, $atime = 0)
+    static function tree($path, $type = null, &$array = [])
     {
-        if (!is_dir($path)) return false;
-        if (!@touch($path, $mtime, $atime)) {
-            self::$_error_msg[] = sprintf('%s not touch to %s', $path, $mtime);
-        }
-        $path  = self::path($path);
-        $items = glob($path . '*');
-        if (!is_array($items)) return true;
-        foreach ($items as $item) {
-            if (is_dir($item)) {
-                self::touch($path, $mtime, $atime);
-            } else {
-                if (!@touch($item, $mtime, $atime)) {
-                    self::$_error_msg[] = sprintf('%s not touch to %s', $item, $mtime);
-                }
-            }
-        }
-        return true;
-    }
-
-    static function file_ext_name($filename, $flag = '.')
-    {
-        $filearea  = explode($flag, $filename);
-        $partnum   = count($filearea);
-        $fileclass = $filearea[$partnum - 1];
-        return $fileclass;
-    }
-
-    static function tree($path, $mode = null, &$array = [])
-    {
-        if (!is_dir($path)) return false;
+        if (!is_dir($path)) return [];
         $path  = self::path($path);
         $items = glob($path . '*');
         if (!is_array($items)) return $array;
-        if ($mode === null) {
+        if ($type === null) {
             foreach ($items as $item) {
                 if (is_dir($item)) {
                     $array['dir'][] = $item;
-                    self::tree($item, $mode, $array);
+                    self::tree($item, $type, $array);
                 } else {
                     $array['file'][] = $item;
                 }
             }
-        } elseif ($mode == 'file') {
+        } elseif ($type == 'file') {
             foreach ($items as $item) {
                 if (is_dir($item)) {
-                    self::tree($item, $mode, $array);
+                    self::tree($item, $type, $array);
                 } else {
                     $array[] = $item;
                 }
             }
-        } elseif ($mode == 'dir') {
+        } elseif ($type == 'dir') {
             foreach ($items as $item) {
                 if (is_dir($item)) {
                     $array[] = $item;
-                    self::tree($item, $mode, $array);
+                    self::tree($item, $type, $array);
                 }
             }
         }
         return $array;
-    }
-
-    /**
-     * @param $path
-     * @param string $pattern
-     * @return false|int
-     */
-    static function size($path, $pattern = '*')
-    {
-        if (!is_dir($path)) {
-            return false;
-        }
-        $size  = 0;
-        $path  = self::path($path);
-        $items = glob($path . $pattern);
-        if (!is_array($items)) return $size;
-        foreach ($items as $item) {
-            if (is_dir($item)) {
-                $size += self::size($item);
-            } else {
-                $size += filesize($item);
-            }
-        }
-        return $size;
-    }
-
-    /**
-     * @param $filesize
-     * @return string
-     */
-    static function size_unit($filesize)
-    {
-        if ($filesize >= 1073741824) {
-            $filesize = round($filesize / 1073741824 * 100) / 100 . ' GB';
-        } elseif ($filesize >= 1048576) {
-            $filesize = round($filesize / 1048576 * 100) / 100 . ' MB';
-        } elseif ($filesize >= 1024) {
-            $filesize = round($filesize / 1024 * 100) / 100 . ' KB';
-        } else {
-            $filesize = $filesize . ' Bytes';
-        }
-        return $filesize;
-    }
-
-    /**
-     * @param $path
-     * @return string
-     */
-    public static function path($path)
-    {
-        return rtrim(preg_replace("|[/]+|", '/', $path), '/') . '/';
     }
 }

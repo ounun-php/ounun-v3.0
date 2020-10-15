@@ -375,7 +375,7 @@ class template
             // 执行回调
             if (static::$_ob_callbacks && is_array(static::$_ob_callbacks)) {
                 foreach (static::$_ob_callbacks as $v) {
-                    array_push($v[1],$buffer);
+                    array_push($v[1], $buffer);
                     call_user_func_array($v[0], $v[1]);
                 }
             }
@@ -411,6 +411,22 @@ class template
 
         // 替换
         return strtr($buffer, static::assign_array_get());
+    }
+
+    /**
+     * 变量替换
+     *
+     * @param string $subject 要替换的字符串
+     * @param array $data
+     * @param string|null $regex
+     * @return string
+     */
+    static public function replace(string $subject, array $data, ?string $regex = null)
+    {
+        $regex ??= '/\{\$(\w+)\}/';
+        return preg_replace_callback($regex, function ($var) use ($data) {
+            return $data[$var[1]] ?? $var[0];
+        }, $subject);
     }
 
     /**
