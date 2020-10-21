@@ -11,12 +11,10 @@ use ounun\utils\parse\ini;
 
 class file
 {
-    private static array $_error_msg = [];
-
     /**
      * 删除目录
      *
-     * @param string $dir 目录的路径。
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param bool $recursive 允许递归删除 $path_name 所指定的多级嵌套目录。
      */
     static public function rmdir(string $dir, bool $recursive = true)
@@ -25,7 +23,11 @@ class file
             $files = array_diff(scandir($dir), ['.', '..']);
             if ($recursive) {
                 foreach ($files as $file) {
-                    (is_dir("{$dir}/{$file}")) ? static::rmdir("{$dir}/{$file}") : unlink("{$dir}/{$file}");
+                    if (is_dir($dir . $file . '/')) {
+                        static::rmdir($dir . $file . '/');
+                    } else {
+                        unlink($dir . $file);
+                    }
                 }
                 rmdir($dir);
             } else if (empty($files)) {
@@ -40,7 +42,7 @@ class file
     /**
      * 创建目录
      *
-     * @param string $dir 目录的路径。
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param int $mode 默认的 mode 是 0777，意味着最大可能的访问权。
      * @param bool $recursive 允许递归创建由 $path_name 所指定的多级嵌套目录。
      */
@@ -54,21 +56,31 @@ class file
     /**
      * 列出指定路径中的文件和目录
      *
-     * @param string $dir 目录的路径。
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
      * @param array $return_files 如果提供 $return_files 参数， 则外部命令执行后的返回状态将会被设置到此变量中。
+     * @param array $options 参数选项 [path=>'相对目录','ignore_filename'=>'忽略,只匹配文件名','ignore_fullname'=>'忽略,完全匹配路径及文件名']
      * @return array
      */
-    static public function scandir(string $dir, array &$return_files = [], bool $recursive = true)
+    static public function scandir(string $dir, array &$return_files = [], bool $recursive = true, array $options = [])
     {
         if (is_dir($dir)) {
-            $files = array_diff(scandir($dir), ['.', '..']);
-            if ($recursive) {
-                foreach ($files as $file) {
-                    if (is_dir("{$dir}/{$file}")) {
-                        static::scandir("{$dir}/{$file}", $return_files, $recursive);
+            if (isset($options['ignore_filename']) && is_array($options['ignore_filename']) && $options['ignore_filename']) {
+                $ignore_filename = array_merge(['.', '..'], $options['ignore_filename']);
+            } else {
+                $ignore_filename = ['.', '..'];
+            }
+            $options['ignore_fullname'] ??= [];
+            $options['path']            ??= '';
+            $files                      = array_diff(scandir($dir . $options['path']), $ignore_filename);
+            foreach ($files as $file) {
+                if (!in_array($options['path'] . $file, $options['ignore_fullname'])) {
+                    if (is_dir($dir . $options['path'] . $file . '/')) {
+                        if ($recursive) {
+                            static::scandir($dir, $return_files, $recursive, array_merge($options, ['path' => $options['path'] . $file . '/']));
+                        }
                     } else {
-                        $return_files[] = "{$dir}/{$file}";
+                        $return_files[] = $options['path'] . $file;
                     }
                 }
             }
@@ -79,7 +91,7 @@ class file
     /**
      * 取得文件大小
      *
-     * @param string $dir 目录的路径。
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
      * @return int
      */
@@ -90,10 +102,10 @@ class file
             $files = array_diff(scandir($dir), ['.', '..']);
             if ($recursive) {
                 foreach ($files as $file) {
-                    if (is_dir("{$dir}/{$file}")) {
-                        $size += static::size("{$dir}/{$file}", $recursive);
+                    if (is_dir($dir . $file . '/')) {
+                        $size += static::size($dir . $file . '/', $recursive);
                     } else {
-                        $size += filesize("{$dir}/{$file}");
+                        $size += filesize($dir . $file);
                     }
                 }
             }
@@ -107,7 +119,7 @@ class file
     /**
      * 改变文件模式
      *
-     * @param string $dir 文件的路径。
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param int $mode 注意 mode 不会被自动当成八进制数值，而且也不能用字符串（例如 "g+w"）。要确保正确操作，需要给 mode 前面加上 0
      * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
      * @return bool
@@ -119,10 +131,10 @@ class file
             $files = array_diff(scandir($dir), ['.', '..']);
             if ($recursive) {
                 foreach ($files as $file) {
-                    if (is_dir("{$dir}/{$file}")) {
-                        static::chmod("{$dir}/{$file}", $mode, $recursive);
+                    if (is_dir($dir . $file . '/')) {
+                        static::chmod($dir . $file . '/', $mode, $recursive);
                     } else {
-                        chmod("{$dir}/{$file}", $mode);
+                        chmod($dir . $file, $mode);
                     }
                 }
             }
@@ -134,7 +146,7 @@ class file
     /**
      * 设定文件的访问和修改时间
      *
-     * @param string $dir 要设定的文件名。
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param int $mtime 要设定的时间。如果没有提供参数 time 则会使用当前系统的时间。
      * @param int $atime 如果给出了这个参数，则给定文件的访问时间会被设为 atime，否则会设置 为time。如果没有给出这两个参数，则使用当前系统时间。
      * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
@@ -146,10 +158,10 @@ class file
             $files = array_diff(scandir($dir), ['.', '..']);
             if ($recursive) {
                 foreach ($files as $file) {
-                    if (is_dir("{$dir}/{$file}")) {
-                        static::touch("{$dir}/{$file}", $mtime, $atime, $recursive);
+                    if (is_dir($dir . $file . '/')) {
+                        static::touch($dir . $file . '/', $mtime, $atime, $recursive);
                     } else {
-                        touch("{$dir}/{$file}", $mtime, $atime);
+                        touch($dir . $file, $mtime, $atime);
                     }
                 }
             }
@@ -162,8 +174,8 @@ class file
     /**
      * 重命名一个文件或目录
      *
-     * @param string $old_path 旧名字
-     * @param string $new_path 新的名字。
+     * @param string $old_path 旧名字，文件或目录的路径（目录尾部带/）。
+     * @param string $new_path 新的名字，文件或目录的路径（目录尾部带/）。
      * @return bool
      */
     static function rename(string $old_path, string $new_path)
@@ -171,133 +183,178 @@ class file
         return rename($old_path, $new_path);
     }
 
-
-
-    static function move(string $source, string $target, bool $recursive = true)
+    /**
+     * 文件及文件夹移动
+     *
+     * @param string $source 源，文件或目录的路径（目录尾部带/）。
+     * @param string $target 目标，文件或目录的路径（目录尾部带/）。
+     * @return bool
+     */
+    static function move(string $source, string $target)
     {
-        if (!is_dir($source)) {
-            return false;
-        }
-        if (!is_dir($target)) {
-            static::mkdir($target);
-        }
-        $source = self::path($source);
-        $target = self::path($target);
-        $items  = glob($source . '*');
-        if (!is_array($items)) return true;
-        foreach ($items as $v) {
-            $basename = basename($v);
-            $to       = $target . '/' . $basename;
-            if (is_dir($v)) {
-                self::move($v, $to);
-            } else {
-                if (!@rename($v, $to)) {
-                    self::$_error_msg[] = sprintf('can not move file %s to %s', $v, $to);
-                    return false;
+        if (is_dir($source)) {
+            if (!is_dir($target)) {
+                static::mkdir($target);
+            }
+            $files = array_diff(scandir($source), ['.', '..']);
+            foreach ($files as $file) {
+                if (is_dir($source . $file . '/')) {
+                    static::move($source . $file . '/', $target . $file . '/');
+                } else {
+                    rename($source . $file, $target . $file);
                 }
             }
+            rmdir($source);
+        } elseif (is_file($source)) {
+            static::mkdir(dirname($target));
+            rename($source, $target);
         }
-        if (!@rmdir($source)) throw new ct_exception("can not rmdir $source");
         return true;
     }
 
-    static function copy($source, $target, $mode = null, $pattern = null)
+    /**
+     * 查找条件， 文件及文件夹复制
+     *
+     * @param string $source 源，文件或目录的路径（目录尾部带/）。
+     * @param string $dest 目标，文件或目录的路径（目录尾部带/）。
+     * @param string|null $type
+     * @param string|null $pattern
+     * @return bool
+     */
+    static function copy(string $source, string $dest, ?string $type = null, ?string $pattern = null)
     {
-        if (PHP_OS == 'WINNT') $mode = null;
-        if (!is_dir($source)) return false;
-        if (is_null($mode)) {
-            if (!is_dir($target)) self::create($target);
-            $source = self::path($source);
-            $target = self::path($target);
-            $items  = glob($source . '*');
-            if (!is_array($items)) return true;
-            foreach ($items as $v) {
-                $basename = basename($v);
-                $to       = $target . '/' . $basename;
-                if (is_dir($v)) {
-                    self::copy($v, $to);
-                } else {
-                    if (!@copy($v, $to)) {
-                        self::$_error_msg[] = sprintf('can not copy file %s to %s', $v, $to);
-                        return false;
+        if (is_null($type)) {
+            if (is_dir($source)) {
+                static::mkdir($dest);
+                $files = array_diff(scandir($source), ['.', '..']);
+                foreach ($files as $file) {
+                    if (is_dir($source . $file . '/')) {
+                        static::copy($source . $file . '/', $dest . $file . '/', $type, $pattern);
+                    } else {
+                        copy($source . $file, $dest . $file);
                     }
                 }
+            } elseif (is_file($source)) {
+                static::mkdir(dirname($dest));
+                copy($source, $dest);
             }
         } else {
-            $files = self::find($source, $pattern, $mode, true);
+            $files = self::find($source, $pattern, $type, true);
             foreach ($files as $file) {
                 if (is_file($file)) {
-                    $newfile = str_replace($source, $target, str_replace("\\", "/", $file));
-                    self::create(dirname($newfile));
-                    if (!copy($file, $newfile)) {
-                        self::$_error_msg[] = sprintf('can not copy file %s to %s', $file, $newfile);
-                        return false;
-                    }
+                    $newfile = str_replace($source, $dest, str_replace("\\", "/", $file));
+                    self::mkdir(dirname($newfile));
+                    copy($file, $newfile);
                 }
             }
         }
         return true;
     }
 
-    static function find($path, $pattern, $mode = 'name', $deep = false, &$array = [])
+    /**
+     * 查找
+     *
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
+     * @param string $pattern 查找规则
+     * @param string $type 查找类型
+     * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
+     * @param array $return_files
+     * @return array
+     */
+    static function find(string $dir, string $pattern, $type = self::Find_Type_Name, $recursive = false, &$return_files = [])
     {
-        if (!is_dir($path)) return false;
-        $path  = self::path($path);
-        $items = glob($path . '*');
-        if (!is_array($items)) return [];
-
-        if ($mode == 'name') {
-            $array = array_merge($array, preg_grep($pattern, $items));
-        } elseif ($mode == 'data') {
-            foreach ($items as $item) {
-                if (is_file($item) && preg_grep($pattern, file_get_contents($item))) $array[] = $item;
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+        } elseif (is_file($dir)) {
+            $files = [$dir];
+        } else {
+            $files = [];
+        }
+        if ($type == static::Find_Type_Name) {
+            $return_files = array_merge($return_files, preg_grep($pattern, $files));
+        } elseif ($type == static::Find_Type_Content) {
+            /** @var string $file */
+            foreach ($files as $file) {
+                if (is_file($file) && preg_grep($pattern, [file_get_contents($file)])) {
+                    $return_files[] = $file;
+                }
             }
-        } elseif ($mode == 'filemtime') {
+        } elseif ($type == static::Find_Type_Filemtime) {
             $filemtime = strtotime($pattern);
-            foreach ($items as $item) {
-                if (is_file($item) && @filemtime($item) >= $filemtime) $array[] = $item;
+            foreach ($files as $file) {
+                if (is_file($file) && filemtime($file) >= $filemtime) {
+                    $return_files[] = $file;
+                }
             }
         }
-        if ($deep) {
-            foreach ($items as $item) {
-                if (is_dir($item)) self::find($item, $pattern, $mode, $deep, $array);
+        if ($recursive) {
+            foreach ($files as $file) {
+                if (is_dir($file)) {
+                    static::find($dir . $file . '/', $pattern, $type, $recursive, $return_files);
+                }
             }
         }
-        return $array;
+        return $return_files;
     }
 
+    /** @var string 文件名 */
+    const Find_Type_Name = 'name';
+    /** @var string 文件内容 */
+    const Find_Type_Content = 'content';
+    /** @var string 文件名创建时间 */
+    const Find_Type_Filemtime = 'filemtime';
 
-    static function tree($path, $type = null, &$array = [])
+    /**
+     * 树
+     *
+     * @param string $dir 文件或目录的路径（目录尾部带/）。
+     * @param string|null $type 返回类型
+     * @param array $return_files
+     * @return array|mixed
+     */
+    static function tree(string $dir, ?string $type = null, array &$return_files = [])
     {
-        if (!is_dir($path)) return [];
-        $path  = self::path($path);
-        $items = glob($path . '*');
-        if (!is_array($items)) return $array;
-        if ($type === null) {
-            foreach ($items as $item) {
-                if (is_dir($item)) {
-                    $array['dir'][] = $item;
-                    self::tree($item, $type, $array);
-                } else {
-                    $array['file'][] = $item;
+        if (is_dir($dir)) {
+            $files = array_diff(scandir($dir), ['.', '..']);
+            if ($type === null) {
+                foreach ($files as $file) {
+                    if (is_dir($file)) {
+                        $return_files['dir'][] = $file;
+                        static::tree($file, $type, $return_files);
+                    } else {
+                        $return_files['file'][] = $file;
+                    }
+                }
+            } elseif ($type == static::Tree_Type_File) {
+                foreach ($files as $file) {
+                    if (is_dir($file)) {
+                        static::tree($file, $type, $return_files);
+                    } else {
+                        $return_files['file'][] = $file;
+                    }
+                }
+            } elseif ($type == static::Tree_Type_Dir) {
+                foreach ($files as $file) {
+                    if (is_dir($file)) {
+                        $return_files['dir'][] = $file;
+                        static::tree($file, $type, $return_files);
+                    }
                 }
             }
-        } elseif ($type == 'file') {
-            foreach ($items as $item) {
-                if (is_dir($item)) {
-                    self::tree($item, $type, $array);
-                } else {
-                    $array[] = $item;
-                }
-            }
-        } elseif ($type == 'dir') {
-            foreach ($items as $item) {
-                if (is_dir($item)) {
-                    $array[] = $item;
-                    self::tree($item, $type, $array);
-                }
+        } elseif (is_file($dir)) {
+            if ($type === null) {
+                $return_files['file'][] = $dir;
+            } elseif ($type == static::Tree_Type_File) {
+                $return_files['file'][] = $dir;
             }
         }
-        return $array;
+        return $return_files;
     }
+
+    /** @var string 文件 */
+    const Tree_Type_File = 'file';
+    /** @var string 目录 */
+    const Tree_Type_Dir = 'dir';
+    /** @var string 文件与目录（默认） */
+    // const Tree_Type_Default = null;
 }
