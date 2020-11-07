@@ -271,7 +271,7 @@ class debug
             $str         .= 'LOGS:' . var_export($this->_logs, true) . PHP_EOL;
             $this->_logs = [];
         }
-        
+
         // 日志尾部
         if ($is_end) {
             if ($this->_is_run_time) {
