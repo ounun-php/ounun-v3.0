@@ -214,7 +214,7 @@ class http
      *
      * @var array
      */
-    protected $_images = ['jpeg', 'gif', 'png', 'pjpeg', 'x-png', 'bmp'];
+    protected array $_images = ['jpeg', 'gif', 'png', 'pjpeg', 'x-png', 'bmp'];
 
 
     /**

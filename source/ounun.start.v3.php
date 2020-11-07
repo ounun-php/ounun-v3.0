@@ -652,7 +652,7 @@ function error404(string $msg = ''): void
 {
     header('Cache-Control: no-cache, must-revalidate, max-age=0');
     header('HTTP/1.1 404 Not Found');
-    exit('<html lang="zh">
+    echo '<html lang="zh">
             <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
                 <title>404 Not Found</title>
@@ -660,11 +660,20 @@ function error404(string $msg = ''): void
             <body style="background-color: white;">
                 <div style="text-align: center;">
                     <h1>404 Not Found</h1>
+                    <p style="color: gray;">' . $_SERVER['HTTP_HOST'] . '</p>
                 </div>
                 <hr>
-                <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>
-                ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
-            </body>
+                <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>';
+    if (ounun::$global
+        && isset(ounun::$global['debug'])
+        && isset(ounun::$global['debug']['backtrace'])
+        && ounun::$global['debug']['backtrace']) {
+        echo($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '');
+        echo '<pre>' . PHP_EOL;
+        debug_print_backtrace();
+        echo '</pre>';
+    }
+    exit('</body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- ' . ounun::$app_name . ' -->
@@ -673,6 +682,7 @@ function error404(string $msg = ''): void
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->' . "\n");
+
 }
 
 /**
@@ -1351,79 +1361,7 @@ class ounun
         /** src-0 \addons   自动加载  */
         ounun::load_class_set($path_root . 'addons/', 'addons', true);
     }
-
-    /**
-     * 模块 快速路由
-     *
-     * @param array $url_mods
-     * @return array
-     */
-    static public function addon_get(array $url_mods = [])
-    {
-        // debug::header([$url_mods, ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
-
-        // 修正App_Name
-        $app_name = (static::$app_name === static::App_Name_Web || in_array(static::$app_name, static::App_Names))
-            ? static::$app_name
-            : static::App_Name_Web;
-
-        // 插件路由
-        $addon_tag = '';
-        /** @var apps $apps */
-        if ($url_mods[1] && ($addon = static::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
-            array_shift($url_mods);
-            array_shift($url_mods);
-            $addon_tag = $apps::Addon_Tag;
-        } elseif ($url_mods[0] && ($addon = static::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
-            array_shift($url_mods);
-            $addon_tag = $apps::Addon_Tag;
-        } elseif (($addon = static::$addon_route['']) && $apps = $addon['apps']) {
-            $addon_tag = $apps::Addon_Tag;
-        } else {
-            error_php('ounun::$addon_mount[\'\']: There is no default value -> $addon_mount:' . json_encode(ounun::$addon_route) . '');
-        }
-
-        // api
-        if ($app_name == static::App_Name_Api) {
-            $filename   = Dir_Ounun . 'ounun/restful.php';
-            $class_name = "\\ounun\\restful";
-            return [$filename, $class_name, $addon_tag, $url_mods];
-        }
-
-        // view
-        if ($addon['view']) {
-            $class_filename = "{$addon_tag}/{$app_name}/{$addon['view']}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$addon['view']}";
-        } else {
-            $class_filename = "{$addon_tag}/{$app_name}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
-        }
-        debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
-
-        // paths
-        if ($class_filename) {
-            $paths = static::$maps_path['addons'];
-            if ($paths && is_array($paths)) {
-                foreach ($paths as $v) {
-                    $filename = $v['path'] . $class_filename;
-                    // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
-                    if (is_file($filename)) {
-                        if (empty($url_mods)) {
-                            if (isset($addon['method']) && $addon['method']) {
-                                $url_mods = [$addon['method']];
-                            } else {
-                                $url_mods = [static::Def_Method];
-                            }
-                        }
-                        return [$filename, $class_name, $addon_tag, $url_mods];
-                    }
-                }
-            } // if ($paths
-        }
-        return ['', '', '', $url_mods];
-    }
 }
-
 
 /**
  * 构造模块基类 Class ViewBase
@@ -1623,9 +1561,8 @@ abstract class v
      */
     public function index(array $url_mods)
     {
-        error404("<strong>method</strong>  --> " . __METHOD__ . " <br />\n  
-                       <strong>url_mods</strong> ------> " . json_encode($url_mods, JSON_UNESCAPED_UNICODE) . " <br />\n  
-                       <strong>class</strong> ------> " . get_class($this));
+        $this->__call(__METHOD__, [$url_mods]);
+        // error404();
     }
 
     /**
@@ -1702,17 +1639,16 @@ abstract class v
      * 没定的方法
      *
      * @param string $method
-     * @param String $arguments
+     * @param array $arguments
      */
     public function __call($method, $arguments)
     {
-        header('HTTP/1.1 404 Not Found');
         if (Environment) {
             debug::i('404');
         }
-        error404("<strong>method</strong> -->   {$method} <br />\n 
-                        <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) . " <br />\n 
-                        <strong>class</strong> -----> " . get_class($this));
+        error404("<strong>method</strong> ----> {$method} " .
+            " <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) .
+            " <strong>class</strong> -----> " . get_class($this));
     }
 }
 
@@ -1723,7 +1659,7 @@ function start_web()
     $host     = $_SERVER['HTTP_HOST'];
     $uri      = url_original($_SERVER['REQUEST_URI']);
     $url_mods = url_to_mod($uri);
-
+    debug::header(['REQUEST_URI' => $_SERVER['REQUEST_URI'], '$url_mods' => $url_mods], '', __FILE__, __LINE__);
     // 语言lang
     if ($url_mods && $url_mods[0] && ounun::$lang_support[$url_mods[0]]) {
         $lang = array_shift($url_mods);
@@ -1770,9 +1706,89 @@ function start_web()
     header('X-Powered-By: cms.cc; ounun.org;');
     debug::header(['$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
+    // URL path_find
+    $find = function (string $class_filename, array $url_mods, array $addon) {
+        $paths = ounun::$maps_path['addons'];
+        if ($paths && is_array($paths)) {
+            foreach ($paths as $v) {
+                $filename = $v['path'] . $class_filename;
+                if (is_file($filename)) {
+                    // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
+                    if (empty($url_mods)) {
+                        if (isset($addon['method']) && $addon['method']) {
+                            $url_mods = [$addon['method']];
+                        } else {
+                            $url_mods = [ounun::Def_Method];
+                        }
+                    }
+                    return [$filename, $url_mods];
+                }
+            }
+        }
+        return ['', $url_mods];
+    };
+
+    // 模块 快速路由
+    $addon_get = function ($url_mods) use ($find) {
+        // 修正App_Name
+        $app_name = (ounun::$app_name === ounun::App_Name_Web || in_array(ounun::$app_name, ounun::App_Names))
+            ? ounun::$app_name
+            : ounun::App_Name_Web;
+
+        // 插件路由
+        $addon_tag = '';
+        /** @var apps $apps */
+        if ($url_mods[1] && ($addon = ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
+            array_shift($url_mods);
+            array_shift($url_mods);
+            $addon_tag = $apps::Addon_Tag;
+        } elseif ($url_mods[0] && ($addon = ounun::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
+            array_shift($url_mods);
+            $addon_tag = $apps::Addon_Tag;
+        } elseif (($addon = ounun::$addon_route['']) && $apps = $addon['apps']) {
+            $addon_tag = $apps::Addon_Tag;
+        } else {
+            error_php('ounun::$addon_mount[\'\']: There is no default value -> $addon_mount:' . json_encode(ounun::$addon_route) . '');
+        }
+
+        // api
+        if ($app_name == ounun::App_Name_Api) {
+            // 插件路由api
+            $class_filename = "{$addon_tag}/restful.php";
+            $class_name     = "\\addons\\{$addon_tag}\\restful";
+            list($filename, $url_mods) = $find($class_filename, $url_mods, $addon);
+            if ($filename) {
+                return [$filename, $class_name, $addon_tag, $url_mods];
+            }
+            // 默认
+            $filename   = Dir_Ounun . 'ounun/restful.php';
+            $class_name = "\\ounun\\restful";
+            return [$filename, $class_name, $addon_tag, $url_mods];
+        }
+
+        // view
+        if ($addon['view']) {
+            $class_filename = "{$addon_tag}/{$app_name}/{$addon['view']}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$addon['view']}";
+        } else {
+            $class_filename = "{$addon_tag}/{$app_name}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
+        }
+        debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
+
+        // paths
+        if ($class_filename) {
+            list($filename, $url_mods) = $find($class_filename, $url_mods, $addon);
+            if ($filename) {
+                return [$filename, $class_name, $addon_tag, $url_mods];
+            }
+        }
+        return ['', '', '', $url_mods];
+    };
+
     // 设定 模块与方法(缓存)
     /** @var v $classname */
-    list($filename, $classname, $addon_tag, $url_mods) = ounun::addon_get($url_mods);
+    list($filename, $classname, $addon_tag, $url_mods) = $addon_get($url_mods);
     debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
     // 包括模块文件
@@ -1819,7 +1835,6 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
 
     return (new \ounun\addons\console($commands, $name, $version))->execute($argv);
 }
-
 
 /** 自动加载 src-4 \ounun  */
 ounun::load_class_set(Dir_Ounun, 'ounun', false);

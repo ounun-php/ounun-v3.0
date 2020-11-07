@@ -14,13 +14,16 @@ class restful
     protected string $_method;
 
     /** @var array gets */
-    protected array $_request_gets = [];
+    // protected array $_request_gets = [];
 
     /** @var array post */
-    protected array $_request_post = [];
+    // protected array $_request_post = [];
 
-    /** @var array inputs */
-    protected array $_request_inputs = [];
+    /** @var array cookie */
+    // protected array $_request_cookie = [];
+
+    /** @var array|null inputs */
+    protected ?array $_request_inputs = [];
 
     /** @var string accept */
     protected string $_http_accept;
@@ -35,25 +38,35 @@ class restful
      */
     public function __construct(array $url_mods, string $addon_tag = '')
     {
+        // http
+        $this->_method      = strtoupper($_SERVER['REQUEST_METHOD']);
+        $this->_http_accept = strtolower($_SERVER['HTTP_ACCEPT']);
+        $this->_addon_tag   = $addon_tag;
+//      $this->_request_gets = $_GET;
+//      $this->_request_post = $_POST;
+//      $this->_request_cookie = $_COOKIE;
+
+        // input
+        if (empty($_POST)) {
+            $data = file_get_contents('php://input');
+            if ($data) {
+                $this->_request_inputs = json_decode_array($data);
+            }
+        }
+
+        // before
         $rs = $this->_construct_before($url_mods);
         if (error_is($rs)) {
             out($rs);
         }
-        //
-        $this->_method       = strtoupper($_SERVER['REQUEST_METHOD']);
-        $this->_http_accept  = strtolower($_SERVER['HTTP_ACCEPT']);
-        $this->_addon_tag    = $addon_tag;
-        $this->_request_gets = $_GET;
-        $this->_request_post = $_POST;
-        $data                = file_get_contents('php://input');
-        if ($data) {
-            $this->_request_inputs = json_decode_array($data);
-        }
+
+        // url_mods
         if (empty($url_mods)) {
             $url_mods = [\ounun::Def_Method];
         }
         $class = "\\addons\\{$addon_tag}\\api\\{$url_mods[0]}";
-        debug::header(['$class'=>$class,$url_mods],'',__FILE__,__LINE__);
+
+        // debug::header(['$class' => $class, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
         if ($addon_tag && class_exists($class)) {
             new $class($url_mods, $this);
         } else {
@@ -102,36 +115,74 @@ class restful
      * @param string $key
      * @return array|mixed
      */
-    public function gets_get($key = '')
+    public function gets_get(string $key = '')
     {
         if ($key) {
-            return $this->_request_gets[$key];
+            // return $this->_request_gets[$key];
+            return $_GET[$key];
         }
-        return $this->_request_gets;
+        // return $this->_request_gets;
+        return $_GET;
     }
 
     /**
      * @param string $key
      * @return array|mixed
      */
-    public function post_get($key = '')
+    public function post_get(string $key = '')
     {
         if ($key) {
-            return $this->_request_post[$key];
+            // return $this->_request_post[$key];
+            return $_POST[$key];
         }
-        return $this->_request_post;
+        // return $this->_request_post;
+        return $_POST;
     }
 
     /**
      * @param string $key
      * @return array|mixed
      */
-    public function input_get($key = '')
+    public function cookie_get(string $key = '')
+    {
+        if ($key) {
+            // return $this->_request_cookie[$key];
+            return $_COOKIE[$key];
+        }
+        // return $this->_request_cookie;
+        return $_COOKIE;
+    }
+
+    /**
+     * @param string $key
+     * @return array|mixed
+     */
+    public function input_get(string $key = '')
     {
         if ($key) {
             return $this->_request_inputs[$key];
         }
         return $this->_request_inputs;
+    }
+
+    /**
+     * @param string $key
+     * @return array|mixed
+     */
+    public function request_get(string $key)
+    {
+        if ($key) {
+            if ($_GET && isset($_GET[$key])) {
+                return $_GET[$key];
+            } elseif ($_POST && isset($_POST[$key])) {
+                return $_POST[$key];
+            } elseif ($this->_request_inputs && isset($this->_request_inputs[$key])) {
+                return $this->_request_inputs[$key];
+            } elseif ($_COOKIE && isset($_COOKIE[$key])) {
+                return $_COOKIE[$key];
+            }
+        }
+        return null;
     }
 
     /**

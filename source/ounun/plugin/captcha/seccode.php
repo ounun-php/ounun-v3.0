@@ -8,35 +8,35 @@ namespace ounun\plugin\captcha;
 
 class seccode
 {
-    public $consts = 'bcdfhjkmnpqrstwxyz';
-    public $vowels = 'aei23456789';
-    public $height = 24;
-    public $length = 4;
-    public $angle = 10;        //倾斜度
-    public $contort = 2;    //扭曲度
+    public string $consts = 'bcdfhjkmnpqrstwxyz';
+    public string $vowels = 'aei23456789';
+    public int $height = 24;
+    public int $length = 4;
+    public int $angle = 10;        //倾斜度
+    public int $contort = 2;    //扭曲度
     public $fonts;
 
-    function __construct()
+    public function __construct()
     {
         $session = &factory::session();
         $session->start();
         $this->fonts = CMSTOP_PATH . 'resources/fonts/couri.ttf';
     }
 
-    function image()
+    public function image()
     {
         $string = $this->_string();
         $this->_image($string);
     }
 
-    function valid($destroy = false)
+    public function valid($destroy = false)
     {
         $result = (isset($_SESSION['seccode']) && $_REQUEST['seccode'] === $_SESSION['seccode']) ? true : false;
         if ($destroy) unset($_SESSION['seccode']);
         return $result;
     }
 
-    function _string()
+    public  function _string()
     {
         $constslen = strlen($this->consts) - 1;
         $vowelslen = strlen($this->vowels) - 1;
@@ -48,7 +48,7 @@ class seccode
         return $_SESSION['seccode'];
     }
 
-    function _image($string)
+    public function _image($string)
     {
         ob_clean();
         $imageX = strlen($string) * 13;    //the image width

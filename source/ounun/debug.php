@@ -271,11 +271,12 @@ class debug
             $str         .= 'LOGS:' . var_export($this->_logs, true) . PHP_EOL;
             $this->_logs = [];
         }
+        
         // 日志尾部
         if ($is_end) {
             if ($this->_is_run_time) {
                 $this->_time += microtime(true);
-                $run_time    = 'RunTime:' . sprintf('%f', $this->_time);
+                $run_time    = sprintf('%f', $this->_time);
             } else {
                 $run_time = '';
             }
@@ -285,6 +286,7 @@ class debug
             }
             $str .= '------------------' . PHP_EOL;
         }
+
         // 写文件
         if ($this->_is_bof && $str) {
             if (file_exists($filename)) {
@@ -351,7 +353,7 @@ class debug
     {
         if (empty(static::$_instances[$channel])) {
             $debug                        = global_all('debug', []);
-            $dir                          = ($debug && $debug['out_dir']) ? $debug['out_dir'] : Dir_Root . 'storage/logs/';
+            $dir                          = ($debug && $debug['out_dir']) ? $debug['out_dir'] : Dir_Storage . 'logs/';
             $filename                     = $dir . date('Y-m-d') . $date_dir . $channel . ($filename ? '_' . $filename : '.log');
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,

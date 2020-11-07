@@ -9,13 +9,13 @@ namespace ounun\plugin\captcha;
 class session
 {
     /** @var int */
-    public $max_angle  = 15;
+    public int $max_angle  = 15;
 
     /** @var int */
-    public $max_offset = 5;
+    public int $max_offset = 5;
 
     /** @var string */
-    public $phrase = '';
+    public string $phrase = '';
 
     /** @var resource */
     protected $_image;
@@ -40,16 +40,16 @@ class session
         $square = $width * $height * 3;
         $effects = $this->rand($square / 2000, $square / 1000);
         for ($e = 0; $e < $effects; $e++) {
-            $this->drawLine($image, $width, $height);
+            $this->draw_line($image, $width, $height);
         }
         $this->phrase = 0; //  $this->phrase();
-        $color = $this->writePhrase($image, $this->phrase, $this->font(), $width, $height);
+        $color = $this->write_phrase($image, $this->phrase, $this->font(), $width, $height);
 
         $square = $width * $height;
         $effects = $this->rand($square / 3000, $square / 2000);
         if ($this->_max_front_lines !== 0) {
             for ($e = 0; $e < $effects; $e++) {
-                $this->drawLine($image, $width, $height, $color);
+                $this->draw_line($image, $width, $height, $color);
             }
         }
 
@@ -85,7 +85,7 @@ class session
      * @param $height
      * @param null $tcol
      */
-    protected function drawLine($image, $width, $height, $tcol = null)
+    protected function draw_line($image, $width, $height, $tcol = null)
     {
         if ($tcol === null) {
             $tcol = imagecolorallocate($image, $this->rand(100, 255), $this->rand(100, 255), $this->rand(100, 255));
@@ -106,7 +106,7 @@ class session
         imageline($image, $Xa, $Ya, $Xb, $Yb, $tcol);
     }
 
-    protected function writePhrase($image, $phrase, $font, $width, $height)
+    protected function write_phrase($image, $phrase, $font, $width, $height)
     {
         $size = $width / strlen($phrase) - $this->rand(0, 3) - 1;
         $box = imagettfbbox($size, 0, $font, $phrase);
