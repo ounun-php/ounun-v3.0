@@ -182,27 +182,27 @@ class time
     {
         $wday = $this->wday === 0 ? 6 : $this->wday - 1;
         if ($wday) $this->add(-$wday, 'd');
-        return (new date(mktime(0, 0, 0, $this->month, $this->day, $this->year)));
+        return date(mktime(0, 0, 0, $this->month, $this->day, $this->year));
     }
 
     public function firstday_of_month()
     {
-        return (new date(mktime(0, 0, 0, $this->month, 1, $this->year)));
+        return date(mktime(0, 0, 0, $this->month, 1, $this->year));
     }
 
     public function firstday_of_year()
     {
-        return (new date(mktime(0, 0, 0, 1, 1, $this->year)));
+        return date(mktime(0, 0, 0, 1, 1, $this->year));
     }
 
     public function lastday_of_month()
     {
-        return (new date(mktime(0, 0, 0, $this->month + 1, 0, $this->year)));
+        return date(mktime(0, 0, 0, $this->month + 1, 0, $this->year));
     }
 
     public function lastday_of_year()
     {
-        return (new date(mktime(0, 0, 0, 1, 0, $this->year + 1)));
+        return date(mktime(0, 0, 0, 1, 0, $this->year + 1));
     }
 
     public function maxday_of_month()
@@ -241,6 +241,6 @@ class time
                 $day += ($number * 7);
                 break;
         }
-        return (new date(mktime($hours, $minutes, $seconds, $month, $day, $year)));
+        return date(mktime($hours, $minutes, $seconds, $month, $day, $year));
     }
 }

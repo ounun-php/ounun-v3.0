@@ -12,3 +12,5 @@ example/*
 .settings
 .idea
 source/ounun/cache2
+.project
+.buildpath

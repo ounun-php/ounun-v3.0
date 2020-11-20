@@ -114,7 +114,6 @@ class command_c
     /** @var int 深度的颜色数量 */
     const Depth_Colors_Count = 7;
 
-
     /** @var int 等待空置状态 */
     const Status_Await = 11;
     /** @var int 工作中... */

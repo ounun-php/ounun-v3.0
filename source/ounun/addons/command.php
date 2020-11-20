@@ -11,19 +11,25 @@ class command
 {
     /** @var string 命令的名字（"ounun" 后面的部分） */
     public string $name;
+
     /** @var string 运行命令时使用 "--help" 选项时的完整命令描述 */
     public string $help;
+
     /** @var string 运行命令时使用 "php ./ounun" 参数... */
     public string $help_paras;
+
     /** @var string 运行 "php ./ounun --help" 时的简短描述 */
     public string $description;
+
     /** @var string  脚本版本 */
     public string $script_version;
 
+
     /** @var bool 是否正在运行 */
-    protected bool $_run_state = false;
+    protected bool $_state = false;
+
     /** @var float 执行时间 */
-    protected float $_run_time = 0;
+    protected float $_time = 0;
 
     /**
      * task constructor.
@@ -35,40 +41,47 @@ class command
 
     /**
      * 运行状态 true:运行中  false:关闭
+     *
      * @return bool
      */
-    public function run_state()
+    public function state()
     {
-        return $this->_run_state;
+        return $this->_state;
     }
 
     /**
      * 执行时间
+     *
      * @return float|int
      */
-    public function run_time()
+    public function time()
     {
-        return $this->_run_time;
+        return $this->_time;
     }
 
-    /** 开始 */
+    /**
+     * 开始
+     */
     public function start()
     {
         // $this->_time_start = 0 - microtime(true);
-        $this->_run_time  = 0 - microtime(true);
-        $this->_run_state = true;
+        $this->_time  = 0 - microtime(true);
+        $this->_state = true;
     }
 
-    /** 停止 */
+    /**
+     * 停止
+     */
     public function stop()
     {
-        $this->_run_state = false;
-        $this->_run_time  += microtime(true);
+        $this->_state = false;
+        $this->_time  += microtime(true);
     }
 
     /**
      * 帮助
-     * @param array $argv
+     *
+     * @param array $argv  参数
      */
     public function help(array $argv)
     {
@@ -117,11 +130,13 @@ class command
     {
         $this->_execute_inside($argc_input);
         $this->stop();
-        console::echo("运行时间: " . $this->run_time(), command_c::Color_Green);
+        console::echo("运行时间: " . $this->time(), command_c::Color_Green);
         return 0;
     }
 
     /**
+     * 内部执行入口
+     *
      * @param array $argc_input
      * @return int
      */

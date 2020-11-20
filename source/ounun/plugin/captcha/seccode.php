@@ -18,7 +18,7 @@ class seccode
 
     public function __construct()
     {
-        $session = &factory::session();
+        $session = new session();
         $session->start();
         $this->fonts = CMSTOP_PATH . 'resources/fonts/couri.ttf';
     }

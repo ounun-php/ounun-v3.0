@@ -64,24 +64,21 @@ function l(string $s)
  */
 function ip(): string
 {
-    static $hdr_ip;
-    if (empty($hdr_ip)) {
-        if (isset($_SERVER['HTTP_CDN_SRC_IP'])) {
-            $hdr_ip = stripslashes($_SERVER['HTTP_CDN_SRC_IP']);
+    if (isset($_SERVER['HTTP_CDN_SRC_IP'])) {
+        $hdr_ip = stripslashes($_SERVER['HTTP_CDN_SRC_IP']);
+    }else {
+        if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $hdr_ip = stripslashes($_SERVER['HTTP_CLIENT_IP']);
         } else {
-            if (isset($_SERVER['HTTP_CLIENT_IP'])) {
-                $hdr_ip = stripslashes($_SERVER['HTTP_CLIENT_IP']);
+            if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $hdr_ip = stripslashes($_SERVER['HTTP_X_FORWARDED_FOR']);
             } else {
-                if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                    $hdr_ip = stripslashes($_SERVER['HTTP_X_FORWARDED_FOR']);
-                } else {
-                    $hdr_ip = stripslashes($_SERVER['REMOTE_ADDR']);
-                    if (empty($hdr_ip)) {
-                        $hdr_ip = '127.0.0.1';
-                    }
-                }
+                $hdr_ip = stripslashes($_SERVER['REMOTE_ADDR']);
             }
         }
+    }
+    if (empty($hdr_ip)) {
+        $hdr_ip = '127.0.0.1';
     }
     return $hdr_ip;
 }
@@ -1648,6 +1645,7 @@ abstract class v
         }
         error404("<strong>method</strong> ----> {$method} " .
             " <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) .
+            " <strong>template</strong> ------> " . json_encode(['type'=>template::$type,'type_default'=>template::$type_default,'theme'=>template::$theme,'theme_default'=>template::$theme_default], JSON_UNESCAPED_UNICODE) .
             " <strong>class</strong> -----> " . get_class($this));
     }
 }

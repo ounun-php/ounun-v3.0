@@ -108,10 +108,10 @@ class console
                     $command_o->start();
                     static::echo(date("Y-m-d H:i:s") . "    runing... {$run_cmd}                      --------------------", command_c::Color_Cyan);
                     $command_o->execute($argv);  // 执行指令
-                    if ($command_o->run_state()) {
+                    if ($command_o->state()) {
                         $command_o->stop();
                     }
-                    static::echo(date("Y-m-d H:i:s") . "    done      {$run_cmd}    运行时间:" . str_pad(round($command_o->run_time(), 4) . '秒', 8) . " --------------------", command_c::Color_Cyan);
+                    static::echo(date("Y-m-d H:i:s") . "    done      {$run_cmd}    运行时间:" . str_pad(round($command_o->time(), 4) . '秒', 8) . " --------------------", command_c::Color_Cyan);
                 }
             } else {
                 static::echo("命令:{$command} 父类不是:" . command::class, command_c::Color_Light_Red);
