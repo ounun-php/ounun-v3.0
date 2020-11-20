@@ -759,15 +759,15 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     // 读取环境配制
-    $file = Dir_Storage . 'runtime/.environment.php';
-    if (is_file($file)) {
-        require $file;
+    $filename = Dir_Storage . 'runtime/.environment.php';
+    if (is_file($filename)) {
+        require $filename;
     } else {
-        $file = Dir_Root . 'env/environment.example.php';
-        if (is_file($file)) {
-            require $file;
+        $filename = Dir_Root . 'env/example.environment.php';
+        if (is_file($filename)) {
+            require $filename;
         } else {
-            error_php('Unable to find: ${Dir_Root}/env/environment.example.php');
+            error_php('Unable to find: ${Dir_Root}/env/example.environment.php');
         }
     }
     if (!isset($GLOBALS['_environment_'])) {
@@ -996,9 +996,9 @@ class ounun
         }
         // 加载 语言包
         if (static::$lang && static::$lang != static::$lang_default) {
-            $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang . '.php';
-            if (is_file($file)) {
-                require $file;
+            $filename = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang . '.php';
+            if (is_file($filename)) {
+                require_once $filename;
             }
         }
         // 加载 默认语言包 -> runtime_apps 自动加载
@@ -1268,7 +1268,7 @@ class ounun
     }
 
     /**
-     * 添加自动加载路径
+     * 添加自动加载路径(尽量少调用，生成配制)
      * @param string $path_root 目录路径
      * @param string $namespace_prefix 命名空间
      * @param bool $cut_path 是否剪切 目录路径中的 命名空间
@@ -1453,7 +1453,7 @@ abstract class v
      */
     public static function url_go(array $replace_ext = [], ?string $url = null, array $data_query = [], array $skip = [])
     {
-        $url ??= \ounun::$page_url;
+        $url ??= ounun::$page_url;
         if (empty($data_query)) {
             $data_query = (array)$_GET;
         }
@@ -1682,6 +1682,11 @@ function start_web()
     $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
     if (is_file($filename)) {
         require $filename;
+    }else{
+        $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
+        if (is_file($filename)) {
+            require $filename;
+        }
     }
 
     // lang
@@ -1812,22 +1817,27 @@ function start_web()
  */
 function start_cli(array $argv, array $commands = [], string $name = 'Ounun Command', string $version = '0.1')
 {
-    \ounun::$app_name = \ounun::App_Name_Command;
-    \ounun::$app_path = '/';
+    ounun::$app_name = ounun::App_Name_Command;
+    ounun::$app_path = '/';
 
     // runtime_apps
-    $filename = Dir_Storage . 'runtime/.runtime_' . \ounun::$app_name . '.php';
+    $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
     if (is_file($filename)) {
         require $filename;
+    }else{
+        $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
+        if (is_file($filename)) {
+            require $filename;
+        }
     }
 
     // paths
-    foreach (\ounun::$paths as $v) {
+    foreach (ounun::$paths as $v) {
         // path_set
-        \ounun::path_root_set($v['path']);
+        ounun::path_root_set($v['path']);
         if ($v['is_auto_helper']) {
             // load_helper
-            \ounun::load_helper($v['path']);
+            ounun::load_helper($v['path']);
         }
     }
 
