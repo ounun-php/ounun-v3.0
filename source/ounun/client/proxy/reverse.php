@@ -7,7 +7,7 @@
 namespace ounun\client\proxy;
 
 
-use ounun\client\http;
+use ounun\client\httpc;
 
 class reverse
 {
@@ -122,7 +122,7 @@ class reverse
      * 查看文件是否存在
      * @return array
      */
-    public function cache_check()
+    public function cache_check(): array
     {
         if (empty($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
             if ('GET' == $_SERVER['REQUEST_METHOD']) {
@@ -141,7 +141,7 @@ class reverse
     /**
      * @return array
      */
-    public function cache_get()
+    public function cache_get(): array
     {
         $local_filename = $this->local_filename();
         if (file_exists($local_filename)) {
@@ -160,7 +160,7 @@ class reverse
             return error('404-empty-server_url_root:' . $this->server_url(), 404, 404);
         }
         $server_url    = $this->server_url();
-        $this->content = http::file_get_contents_loop($server_url, '', 1);
+        $this->content = httpc::file_get_contents_loop($server_url, '', 1);
         if ($this->content) {
             $this->_http_code = 200;
             $this->write($local_filename, $this->content);
@@ -268,7 +268,7 @@ class reverse
      * 远程地址
      * @return string
      */
-    public function server_url()
+    public function server_url(): string
     {
         return $this->_server_url_root . '/' . ($this->_server_path ? $this->_server_path . '/' : '') . $this->_server_file;
     }
@@ -277,7 +277,7 @@ class reverse
      * 本地文件名
      * @return string
      */
-    public function local_filename()
+    public function local_filename(): string
     {
         return $this->_cache_path_root . $this->_cache_filename;
     }
@@ -286,7 +286,7 @@ class reverse
     /**
      * @return array
      */
-    public static function headers()
+    public static function headers(): array
     {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
@@ -313,7 +313,7 @@ class reverse
     /**
      * @return string
      */
-    public static function cookie()
+    public static function cookie(): string
     {
         $cookie = '';
         foreach ($_COOKIE as $i => $value) {
@@ -328,7 +328,7 @@ class reverse
      * @param bool $is_ssl
      * @return string
      */
-    public static function host(string $host, int $port = 80, bool $is_ssl = false)
+    public static function host(string $host, int $port = 80, bool $is_ssl = false): string
     {
         if ($is_ssl) {
             if (empty($port) || $port == 443) {

@@ -42,7 +42,7 @@ class pinyin_gbk
      * @param string $space 拼音之间的间隔
      * @return string
      */
-    public function convert($string, $from_encoding = 'gbk', $initial = true, $space = '')
+    public function convert(string $string, $from_encoding = 'gbk', $initial = true, $space = ''): string
     {
         $py = $this->pinyin($string, $from_encoding);
         if ($initial) {
@@ -61,7 +61,7 @@ class pinyin_gbk
      * @param string $from_encoding 汉字编码
      * @return string
      */
-    public function head($string, $from_encoding = 'gbk')
+    public function head(string $string, $from_encoding = 'gbk'): string
     {
         $rs = [];
         $py = $this->pinyin($string, $from_encoding);
@@ -77,7 +77,7 @@ class pinyin_gbk
      * @param string $from_encoding
      * @return  array <string, $string>
      */
-    public function pinyin($string, $from_encoding = 'gbk')
+    public function pinyin(string $string, $from_encoding = 'gbk'): array
     {
         if ($from_encoding != 'gbk') {
             $string = mb_convert_encoding($string, 'gbk', $from_encoding);

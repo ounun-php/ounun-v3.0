@@ -14,7 +14,7 @@ class str
      * @param string $delimiter 数字和单位分隔符
      * @return string  格式化后的带单位的大小
      */
-    static public function format_bytes($size, $delimiter = '')
+    static public function format_bytes($size, $delimiter = ''): string
     {
         $units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         for ($i = 0; $size >= 1024 && $i < 5; $i++) {
@@ -234,7 +234,7 @@ class str
      * @param int $length 允许字符串显示的最大长度
      * @return string 程序功能：截取全角和半角（汉字和英文）混合的字符串以避免乱码
      */
-    static public function substr_cn($str_cn, $length)
+    static public function substr_cn(string $str_cn, int $length): string
     {
         if (strlen($str_cn) > $length) {
             for ($i = 0; $i < $length; $i++) {
@@ -253,7 +253,7 @@ class str
      * @param bool $numeric
      * @return string
      */
-    static public function random($length, $numeric = false)
+    static public function random($length, $numeric = false): string
     {
         $seed = base_convert(md5(microtime() . $_SERVER['DOCUMENT_ROOT']), 16, $numeric ? 10 : 35);
         $seed = $numeric ? (str_replace('0', '', $seed) . '012340567890') : ($seed . 'zZ' . strtoupper($seed));
@@ -265,7 +265,7 @@ class str
         }
         $max = strlen($seed) - 1;
         for ($i = 0; $i < $length; $i++) {
-            $hash .= $seed{mt_rand(0, $max)};
+            $hash .= $seed[mt_rand(0, $max)];
         }
         return $hash;
     }
@@ -313,7 +313,7 @@ class str
      * 生成长为度7的16进制字符串
      * @return string
      */
-    static public function rand_hex_7()
+    static public function rand_hex_7(): string
     {
         $hex7_dec = mt_rand(0, 268435456);
         return dechex($hex7_dec);
@@ -337,7 +337,7 @@ class str
      * 生成长为度4的36进制字符串
      * @return string
      */
-    static public function rand_base36_4()
+    static public function rand_base36_4(): string
     {
         $i = mt_rand(0, 1679615);
         $s = base_convert($i, 10, 36);
@@ -386,7 +386,7 @@ class str
      * @param string $account
      * @return string
      */
-    static public function hide_accounts(string $account)
+    static public function hide_accounts(string $account): string
     {
         if (verify::email($account)) {
             return static::hide_email($account);
@@ -400,7 +400,7 @@ class str
      * @param string $card
      * @return string
      */
-    static public function hide_card(string $card)
+    static public function hide_card(string $card): string
     {
         return substr($card, 0, 2) . '****' . substr($card, -4);
     }
@@ -409,7 +409,7 @@ class str
      * @param string $mobile
      * @return string
      */
-    static public function hide_mobile(string $mobile)
+    static public function hide_mobile(string $mobile): string
     {
         return '1***' . substr($mobile, -4);
     }
@@ -418,7 +418,7 @@ class str
      * @param string $email
      * @return string
      */
-    static public function hide_email(string $email)
+    static public function hide_email(string $email): string
     {
         $arr = explode('@', $email);
         return substr($arr[0], 0, 2) . '***' . substr($arr[0], -2) . '@' . $arr[1];
@@ -428,7 +428,7 @@ class str
      * @param string $name
      * @return string
      */
-    static public function hide_name(string $name)
+    static public function hide_name(string $name): string
     {
         return '**' . mb_substr($name, -1, null, 'utf-8');
     }
@@ -438,7 +438,7 @@ class str
      * @param $ip
      * @return string
      */
-    static public function hide_ipv4($ip)
+    static public function hide_ipv4($ip): string
     {
         $ip    = explode('.', $ip);
         $ip[2] = '*';

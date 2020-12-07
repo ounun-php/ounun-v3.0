@@ -6,6 +6,7 @@
 
 namespace ounun;
 
+use ounun;
 use ounun\cache\driver;
 
 class cache
@@ -39,11 +40,11 @@ class cache
      * @param array $config
      * @return $this
      */
-    static public function i(string $storage_key = 'data', array $config = [])
+    static public function i(string $storage_key = 'data', array $config = []): cache
     {
         if (empty(static::$_instances[$storage_key])) {
             if (empty($config)) {
-                $config = \ounun::$global['cache'][$storage_key];
+                $config = ounun::$global['cache'][$storage_key];
             }
             $cache                            = new static($config);
             $cache->storage_key               = $storage_key;
@@ -94,7 +95,7 @@ class cache
      * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
+    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
     {
         return $this->_driver->set($key, $value, $expire, $add_prefix, $options);
     }
@@ -140,7 +141,7 @@ class cache
      * @param bool $add_prefix
      * @return string
      */
-    public function key_get(string $key, bool $add_prefix = false)
+    public function key_get(string $key, bool $add_prefix = false): string
     {
         return $this->_driver->key_get($key, $add_prefix);
     }
@@ -151,7 +152,7 @@ class cache
      * @param bool $add_prefix 是否活加前缀
      * @return bool
      */
-    public function exists(string $key, bool $add_prefix = false)
+    public function exists(string $key, bool $add_prefix = false): bool
     {
         return $this->_driver->exists($key, $add_prefix);
     }
@@ -172,7 +173,7 @@ class cache
      * @param callable $callback
      * @return mixed
      */
-    public function data($key, callable $callback)
+    public function data(string $key, callable $callback)
     {
         if (isset($this->_value[$key])) {
             return $this->_value[$key];
@@ -202,7 +203,7 @@ class cache
     /**
      * @return driver 返回缓存驱动
      */
-    public function driver()
+    public function driver(): driver
     {
         return $this->_driver;
     }

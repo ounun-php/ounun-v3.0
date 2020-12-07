@@ -19,7 +19,7 @@ class lbs
      * @param float $distince 距离 (千米)
      * @return array 符合距离范围的所有的点
      */
-    static public function nearby_store_get(float $longitude, float $latitude, float $distince)
+    static public function nearby_store_get(float $longitude, float $latitude, float $distince): array
     {
         list($minlng, $maxlng, $minlat, $maxlat) = static::get_nearby_by_longitude_and_latitude_and_distince($longitude, $latitude, $distince);
 
@@ -39,7 +39,7 @@ class lbs
      * @param double $distince 距离（千米）
      * @return array 格式：[经度最小值,经度最大值,纬度最小值,纬度最大值]
      **/
-    static public function get_nearby_by_longitude_and_latitude_and_distince(float $longitude, float $latitude, float $distince)
+    static public function get_nearby_by_longitude_and_latitude_and_distince(float $longitude, float $latitude, float $distince): array
     {
         $r = static::Earth_Radius;    // 地球半径千米
 
@@ -63,7 +63,7 @@ class lbs
      * @param array $nearbyStoreList 附近门店
      * @return array 按照距离由近到远排序之后List
      */
-    static public function get_nearby_store_by_distince_asc(float $longitude, float $latitude, array $nearbyStoreList)
+    static public function get_nearby_store_by_distince_asc(float $longitude, float $latitude, array $nearbyStoreList): array
     {
         $list = [];
         foreach ($nearbyStoreList as $v) {
@@ -83,7 +83,7 @@ class lbs
      * @param float $latitude2 地点2纬度
      * @return  float  距离：单位 米
      */
-    static public function distince(float $longitude1, float $latitude1, float $longitude2, float $latitude2)
+    static public function distince(float $longitude1, float $latitude1, float $longitude2, float $latitude2): float
     {
         $r = static::Earth_Radius;         // 地球半径千米
 
@@ -107,7 +107,7 @@ class lbs
      * @param float $d
      * @return float
      */
-    static protected function rad(float $d)
+    static protected function rad(float $d): float
     {
         return $d * M_PI / 180.0;
     }

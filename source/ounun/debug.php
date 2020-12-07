@@ -100,7 +100,7 @@ class debug
      * @param bool $v
      * @return debug
      */
-    public function out(string $k, bool $v)
+    public function out(string $k, bool $v): debug
     {
         $_k        = '_is_out_' . $k;
         $this->$_k = $v;
@@ -113,7 +113,7 @@ class debug
      * @param string $filename 文件路径
      * @return debug
      */
-    public function filename(string $filename)
+    public function filename(string $filename): debug
     {
         $this->_filename = $filename;
         return $this;
@@ -124,7 +124,7 @@ class debug
      * @param bool $show true:显示 false:不显示
      * @return debug
      */
-    public function run_time(bool $show)
+    public function run_time(bool $show): debug
     {
         $this->_is_run_time = $show;
         return $this;
@@ -136,7 +136,7 @@ class debug
      * @param bool $bof true:倒序(新内容在头部) false:正序(新内容在尾部)
      * @return debug
      */
-    public function bof(bool $bof)
+    public function bof(bool $bof): debug
     {
         $this->_is_bof = $bof;
         return $this;
@@ -150,7 +150,7 @@ class debug
      * @param bool $is_replace 是否替换
      * @return debug
      */
-    public function logs(string $k, $log, $is_replace = true)
+    public function logs(string $k, $log, $is_replace = true): debug
     {
         if ($k && $log) {
             // 直接替换
@@ -178,7 +178,7 @@ class debug
      *
      * @return debug
      */
-    public function stop()
+    public function stop(): debug
     {
         $this->_logs     = [];
         $this->_filename = '';
@@ -214,7 +214,7 @@ class debug
      * @param bool $is_end 是否当前请求 最后一次写入
      * @return debug
      */
-    public function write(bool $is_end = false)
+    public function write(bool $is_end = false): debug
     {
         if (!$this->_filename) {
             return $this;
@@ -366,7 +366,7 @@ class debug
      * 是否开启 http头debug
      * @return bool
      */
-    public static function is_header()
+    public static function is_header(): bool
     {
         $debug = global_all('debug');
         return ($debug && $debug['header']) ?? false;

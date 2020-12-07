@@ -11,7 +11,7 @@ namespace ounun\seo;
  */
 class wei
 {
-    public static function wei($str)
+    public static function wei($str): string
     {
         return strtr($str, data::wei);
     }

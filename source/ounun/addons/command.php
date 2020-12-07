@@ -44,7 +44,7 @@ class command
      *
      * @return bool
      */
-    public function state()
+    public function state(): bool
     {
         return $this->_state;
     }
@@ -64,7 +64,6 @@ class command
      */
     public function start()
     {
-        // $this->_time_start = 0 - microtime(true);
         $this->_time  = 0 - microtime(true);
         $this->_state = true;
     }
@@ -126,7 +125,7 @@ class command
      * @param array $argc_input
      * @return int
      */
-    public function execute(array $argc_input)
+    public function execute(array $argc_input): int
     {
         $this->_execute_inside($argc_input);
         $this->stop();
@@ -140,7 +139,7 @@ class command
      * @param array $argc_input
      * @return int
      */
-    protected function _execute_inside(array $argc_input)
+    protected function _execute_inside(array $argc_input): int
     {
         usleep(100);
         console::echo(__METHOD__ . " \$input:" . json_encode_unescaped($argc_input), command_c::Color_Cyan);

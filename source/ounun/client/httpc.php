@@ -454,7 +454,7 @@ class httpc
      * @param array $data
      * @return array
      */
-    protected static function _curl_https_post_build(array $data = [])
+    protected static function _curl_https_post_build(array $data = []): array
     {
         if (is_array($data)) {
             foreach ($data as &$value) {

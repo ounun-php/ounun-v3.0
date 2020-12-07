@@ -6,6 +6,7 @@
 
 namespace ounun;
 
+use ounun;
 use ounun\addons\logic;
 use ounun\restful\error_code;
 
@@ -66,7 +67,7 @@ abstract class restful
 
         // url_mods
         if (empty($url_mods)) {
-            $url_mods = [\ounun::Def_Method];
+            $url_mods = [ounun::Def_Method];
         }
         $class = "\\addons\\{$addon_tag}\\api\\{$url_mods[0]}";
 
@@ -119,7 +120,7 @@ abstract class restful
      * @param string $key
      * @return array|mixed
      */
-    public function gets_get(string $key = '')
+    public function gets_get(string $key = ''): array
     {
         if ($key) {
             // return $this->_request_gets[$key];
@@ -133,7 +134,7 @@ abstract class restful
      * @param string $key
      * @return array|mixed
      */
-    public function post_get(string $key = '')
+    public function post_get(string $key = ''): array
     {
         if ($key) {
             // return $this->_request_post[$key];
@@ -147,7 +148,7 @@ abstract class restful
      * @param string $key
      * @return array|mixed
      */
-    public function cookie_get(string $key = '')
+    public function cookie_get(string $key = ''): array
     {
         if ($key) {
             // return $this->_request_cookie[$key];
@@ -161,7 +162,7 @@ abstract class restful
      * @param string $key
      * @return array|mixed
      */
-    public function input_get(string $key = '')
+    public function input_get(string $key = ''): ?array
     {
         if ($key) {
             return $this->_request_inputs[$key];
@@ -173,7 +174,7 @@ abstract class restful
      * @param string $key
      * @return array|mixed
      */
-    public function request_get(string $key)
+    public function request_get(string $key): ?array
     {
         if ($key) {
             if ($_GET && isset($_GET[$key])) {
@@ -192,7 +193,7 @@ abstract class restful
     /**
      * @return string
      */
-    public function method_get()
+    public function method_get(): string
     {
         return $this->_method;
     }

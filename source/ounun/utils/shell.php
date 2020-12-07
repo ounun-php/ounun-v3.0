@@ -7,6 +7,8 @@
 namespace ounun\utils;
 
 
+use function system;
+
 class shell
 {
     /** @var bool */
@@ -59,7 +61,7 @@ class shell
      * @param string $cmd
      * @return bool
      */
-    protected function _sh(string $msg, string $cmd)
+    protected function _sh(string $msg, string $cmd): bool
     {
         if ($this->_debug) {
             echo "\n\ndebug no run ......\n\n\n";
@@ -68,7 +70,7 @@ class shell
             $retval = '';
             echo '<pre>', "\n{$msg}:\n";
             // echo  $cmd;
-            $last_line = \system($cmd, $retval);
+            $last_line = system($cmd, $retval);
             echo '</pre>';
         }
         return true;

@@ -7,8 +7,6 @@
 namespace ounun\utils;
 
 
-use ounun\utils\parse\ini;
-
 class file
 {
     /**
@@ -57,12 +55,13 @@ class file
      * 列出指定路径中的文件和目录
      *
      * @param string $dir 文件或目录的路径（目录尾部带/）。
-     * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
      * @param array $return_files 如果提供 $return_files 参数， 则外部命令执行后的返回状态将会被设置到此变量中。
+     * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
      * @param array $options 参数选项 [path=>'相对目录','ignore_filename'=>'忽略,只匹配文件名','ignore_fullname'=>'忽略,完全匹配路径及文件名']
+     * @param array $return_dirs
      * @return array
      */
-    static public function scandir(string $dir, array &$return_files = [], bool $recursive = true, array $options = [])
+    static public function scandir(string $dir, array &$return_files = [], bool $recursive = true, array $options = [], array &$return_dirs = []): array
     {
         if (is_dir($dir)) {
             if (isset($options['ignore_filename']) && is_array($options['ignore_filename']) && $options['ignore_filename']) {
@@ -76,8 +75,9 @@ class file
             foreach ($files as $file) {
                 if (!in_array($options['path'] . $file, $options['ignore_fullname'])) {
                     if (is_dir($dir . $options['path'] . $file . '/')) {
+                        $return_dirs[] = $options['path'] . $file;
                         if ($recursive) {
-                            static::scandir($dir, $return_files, $recursive, array_merge($options, ['path' => $options['path'] . $file . '/']));
+                            static::scandir($dir, $return_files, $recursive, array_merge($options, ['path' => $options['path'] . $file . '/']),$return_dirs);
                         }
                     } else {
                         $return_files[] = $options['path'] . $file;
@@ -95,7 +95,7 @@ class file
      * @param bool $recursive 允许递归列出 $dir 所指定的多级嵌套目录。
      * @return int
      */
-    static function size(string $dir, bool $recursive = true)
+    static function size(string $dir, bool $recursive = true): int
     {
         $size = 0;
         if (is_dir($dir)) {
@@ -124,7 +124,7 @@ class file
      * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
      * @return bool
      */
-    static function chmod(string $dir, int $mode = 0755, bool $recursive = true)
+    static function chmod(string $dir, int $mode = 0755, bool $recursive = true): bool
     {
         $mode = intval($mode, 8);
         if (is_dir($dir)) {
@@ -152,7 +152,7 @@ class file
      * @param bool $recursive 允许递归 $dir 所指定的多级嵌套目录。
      * @return bool
      */
-    static function touch(string $dir, int $mtime = 0, int $atime = 0, bool $recursive = true)
+    static function touch(string $dir, int $mtime = 0, int $atime = 0, bool $recursive = true): bool
     {
         if (is_dir($dir)) {
             $files = array_diff(scandir($dir), ['.', '..']);
@@ -178,7 +178,7 @@ class file
      * @param string $new_path 新的名字，文件或目录的路径（目录尾部带/）。
      * @return bool
      */
-    static function rename(string $old_path, string $new_path)
+    static function rename(string $old_path, string $new_path): bool
     {
         return rename($old_path, $new_path);
     }
@@ -190,7 +190,7 @@ class file
      * @param string $target 目标，文件或目录的路径（目录尾部带/）。
      * @return bool
      */
-    static function move(string $source, string $target)
+    static function move(string $source, string $target): bool
     {
         if (is_dir($source)) {
             if (!is_dir($target)) {
@@ -221,7 +221,7 @@ class file
      * @param string|null $pattern
      * @return bool
      */
-    static function copy(string $source, string $dest, ?string $type = null, ?string $pattern = null)
+    static function copy(string $source, string $dest, ?string $type = null, ?string $pattern = null): bool
     {
         if (is_null($type)) {
             if (is_dir($source)) {
@@ -261,7 +261,7 @@ class file
      * @param array $return_files
      * @return array
      */
-    static function find(string $dir, string $pattern, $type = self::Find_Type_Name, $recursive = false, &$return_files = [])
+    static function find(string $dir, string $pattern, $type = self::Find_Type_Name, $recursive = false, &$return_files = []): array
     {
         if (is_dir($dir)) {
             $files = array_diff(scandir($dir), ['.', '..']);
@@ -312,7 +312,7 @@ class file
      * @param array $return_files
      * @return array|mixed
      */
-    static function tree(string $dir, ?string $type = null, array &$return_files = [])
+    static function tree(string $dir, ?string $type = null, array &$return_files = []): array
     {
         if (is_dir($dir)) {
             $files = array_diff(scandir($dir), ['.', '..']);

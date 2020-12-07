@@ -5,6 +5,7 @@
  */
 
 use ounun\addons\apps;
+use ounun\addons\console;
 use ounun\addons\logic;
 use ounun\db\db;
 use ounun\debug;
@@ -66,7 +67,7 @@ function ip(): string
 {
     if (isset($_SERVER['HTTP_CDN_SRC_IP'])) {
         $hdr_ip = stripslashes($_SERVER['HTTP_CDN_SRC_IP']);
-    }else {
+    } else {
         if (isset($_SERVER['HTTP_CLIENT_IP'])) {
             $hdr_ip = stripslashes($_SERVER['HTTP_CLIENT_IP']);
         } else {
@@ -103,14 +104,10 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         }
         if ($skip && is_array($skip)) {
             foreach ($skip as $key => $value) {
-                if ($value) {
-                    if (is_array($value) && in_array($data_query[$key], $value, true)) {
-                        unset($data_query[$key]);
-                    } elseif ($value == $data_query[$key]) {
-                        unset($data_query[$key]);
-                    }
-                } else {
+                if (is_array($value) && in_array($data_query[$key], $value)) {
                     unset($data_query[$key]);
+                } else {
+                    unset($data_query[$value]);
                 }
             }
         }
@@ -123,7 +120,7 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
                 foreach ($value as $k2 => $v2) {
                     $rs[] = $key . '[' . $k2 . ']=' . urlencode($v2);
                 }
-            } elseif ($value || 0 === $value || '0' === $value) {
+            } elseif ($value || 0 === $value) {
                 $rs[] = $key . '=' . urlencode($value);
             }
         }
@@ -339,7 +336,7 @@ function msg_close(string $msg, bool $close = false, $charset = 'utf-8'): void
  *
  * @return bool
  */
-function https_is()
+function https_is(): bool
 {
     if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
         return true;
@@ -360,7 +357,7 @@ function https_is()
  * @param array $extend 延伸数据
  * @return array
  */
-function error(string $msg = '', int $status = 1, $data = null, $extend = [])
+function error(string $msg = '', int $status = 1, $data = null, $extend = []): array
 {
     $rs = ['msg' => $msg, 'status' => $status,];
     if ($data) {
@@ -378,7 +375,7 @@ function error(string $msg = '', int $status = 1, $data = null, $extend = [])
  * @param mixed $data
  * @return bool
  */
-function error_is($data)
+function error_is($data): bool
 {
     if (empty($data) || !is_array($data) || !array_key_exists('status', $data) || (array_key_exists('status', $data) && $data['status'] == 0)) {
         return false;
@@ -417,7 +414,7 @@ function error_code($data): int
  * @param array $extend 延伸数据
  * @return array
  */
-function succeed($data, string $message = '', $extend = [])
+function succeed($data, string $message = '', $extend = []): array
 {
     $rs = ['msg' => $message, 'status' => 0, 'data' => $data];
     if ($extend) {
@@ -435,6 +432,27 @@ function succeed($data, string $message = '', $extend = [])
 function succeed_data($data)
 {
     return $data['data'];
+}
+
+/**
+ * 返回 成功数据
+ *
+ * @param array $data
+ * @param mixed $data_data
+ * @return mixed
+ */
+function succeed_data_set(array $data,$data_data): array
+{
+    if(isset($data['data'])){
+        if(is_array($data['data'])){
+            $data['data'] = array_merge($data['data'],$data_data);
+        }else{
+            $data['data'] = array_merge($data_data,['__data__'=>$data['data']]);
+        }
+    }else{
+        $data['data'] = $data_data;
+    }
+    return $data;
 }
 
 /**
@@ -483,22 +501,30 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
  * 获得 json字符串数据
  *
  * @param mixed $data
- * @return string
+ * @return string|null
  */
-function json_encode_unescaped($data): string
+function json_encode_unescaped($data): ?string
 {
+    if (is_null($data)) {
+        return null;
+    }
     return json_encode($data, JSON_UNESCAPED_UNICODE);
 }
 
 /**
  * 对 json格式的字符串进行解码
  *
- * @param string|mixed $json_string
+ * @param string|null $json_string
  * @return mixed
  */
 function json_decode_array(?string $json_string)
 {
-    return json_decode($json_string, true);
+    if (is_null($json_string)) {
+        return null;
+    } elseif (is_string($json_string)) {
+        return json_decode($json_string, true);
+    }
+    return $json_string;
 }
 
 /**
@@ -509,18 +535,18 @@ function json_decode_array(?string $json_string)
  */
 function extend_decode_php(string $extend_string)
 {
-    $ext = [];
+    $extend = [];
     if ($extend_string) {
-        $ext = unserialize($extend_string);
+        $extend = unserialize($extend_string);
     }
-    return $ext;
+    return $extend;
 }
 
 /**
  * 获得 extend数据json
  *
  * @param string $extend_string
- * @return array|mixed
+ * @return mixed
  */
 function extend_decode_json(string $extend_string)
 {
@@ -884,7 +910,7 @@ class ounun
     public static string $database_default = '';
 
     /** @var array 命令s */
-    public static array $commands = [];
+    // public static array $commands = []; // 转到 \ounun\addons\console::$commands
 
     /** @var array 添加App路径(根目录) */
     public static array $paths = [];
@@ -912,8 +938,6 @@ class ounun
     public static array $maps_path = [];
     /** @var array 自动加载路径maps */
     public static array $maps_class = [];
-    /** @var array 当前已安装的功能模块(插件) */
-    public static array $maps_installed_addon = [];
 
 
     /** @var array 插件addons数据 */
@@ -963,15 +987,11 @@ class ounun
     /**
      * 添加命令行
      *
-     * @param array $commands
+     * @param array $commands $key => $command   索引关键key:命令实例
      */
     static public function commands_set(array $commands)
     {
-        foreach ($commands as $command) {
-            if ($command && !in_array($command, ounun::$commands)) {
-                ounun::$commands[] = $command;
-            }
-        }
+        console::add($commands);
     }
 
     /**
@@ -1084,7 +1104,7 @@ class ounun
      *
      * @return string
      */
-    static public function database_default_get()
+    static public function database_default_get(): string
     {
         if (empty(static::$database_default)) {
             static::$database_default = static::$app_name;
@@ -1098,11 +1118,11 @@ class ounun
      * @param string $addon_tag
      * @param string $addon_view
      * @param string $path
-     * @param string $lang
+     * @param string|null $lang
      * @param bool $is_current 是否当前页面
      * @return string
      */
-    static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false)
+    static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false): string
     {
         // 空
         if (empty($addon_tag)) {
@@ -1143,7 +1163,7 @@ class ounun
      * @param bool $is_current 是否当前页面
      * @return string
      */
-    static public function url_get(string $page_file_path = '', string $lang = null, bool $is_current = true)
+    static public function url_get(string $page_file_path = '', string $lang = null, bool $is_current = true): string
     {
         $lang ??= static::$lang;
         if ($lang == static::$lang_default) {
@@ -1158,8 +1178,6 @@ class ounun
             static::url_set($page_file_path, $page_url, $lang_path);
         }
 
-//        echo json_encode_unescaped(['$page_file_path'=>$page_file_path,'$page_url'=>$page_url,'$lang_path'=>$lang_path,'$lang'=>$lang,'static::$lang'=>static::$lang,
-//                                    'static::$app_path'=>static::$app_path,'static::$page_url'=>static::$page_url])."\n";
         return $page_url;
     }
 
@@ -1213,7 +1231,7 @@ class ounun
      *
      * @return string
      */
-    static public function root_curr_get()
+    static public function root_curr_get(): string
     {
         if (template::$type == template::Type_Mip) {
             return static::$root_mip;
@@ -1302,7 +1320,7 @@ class ounun
      * @param $class
      * @return string
      */
-    static protected function load_class_file_exists($class)
+    static protected function load_class_file_exists($class): string
     {
         // 类库映射
         if (!empty(static::$maps_class[$class])) {
@@ -1423,7 +1441,7 @@ abstract class v
      * @param string|null $addon_tag
      * @return string
      */
-    public static function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null)
+    public static function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null): string
     {
         $addon_tag  ??= static::$addon_tag;
         $addon_view ??= static::$addon_view;
@@ -1438,7 +1456,7 @@ abstract class v
      * @param bool $is_current 是否当前页面
      * @return string
      */
-    public static function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
+    public static function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true): string
     {
         return ounun::url_get($page_file_path, $lang, $is_current);
     }
@@ -1636,16 +1654,16 @@ abstract class v
      * 没定的方法
      *
      * @param string $method
-     * @param array $arguments
+     * @param array|null $arguments
      */
-    public function __call($method, $arguments)
+    public function __call(string $method, ?array $arguments)
     {
         if (Environment) {
             debug::i('404');
         }
         error404("<strong>method</strong> ----> {$method} " .
             " <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) .
-            " <strong>template</strong> ------> " . json_encode(['type'=>template::$type,'type_default'=>template::$type_default,'theme'=>template::$theme,'theme_default'=>template::$theme_default], JSON_UNESCAPED_UNICODE) .
+            " <strong>template</strong> ------> " . json_encode(['type' => template::$type, 'type_default' => template::$type_default, 'theme' => template::$theme, 'theme_default' => template::$theme_default], JSON_UNESCAPED_UNICODE) .
             " <strong>class</strong> -----> " . get_class($this));
     }
 }
@@ -1682,7 +1700,7 @@ function start_web()
     $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
     if (is_file($filename)) {
         require $filename;
-    }else{
+    } else {
         $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
         if (is_file($filename)) {
             require $filename;
@@ -1815,7 +1833,7 @@ function start_web()
  * @param string $version
  * @return int
  */
-function start_cli(array $argv, array $commands = [], string $name = 'Ounun Command', string $version = '0.1')
+function start_cli(array $argv, array $commands = [], string $name = 'Ounun Command', string $version = '0.1'): int
 {
     ounun::$app_name = ounun::App_Name_Command;
     ounun::$app_path = '/';
@@ -1824,7 +1842,7 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
     $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
     if (is_file($filename)) {
         require $filename;
-    }else{
+    } else {
         $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
         if (is_file($filename)) {
             require $filename;
@@ -1841,7 +1859,7 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
         }
     }
 
-    return (new \ounun\addons\console($commands, $name, $version))->execute($argv);
+    return (new console($commands, $name, $version))->execute($argv);
 }
 
 /** 自动加载 src-4 \ounun  */

@@ -33,7 +33,7 @@ class session
     /**
      * @return string
      */
-    public function prefix_get()
+    public function prefix_get(): string
     {
         return $this->_prefix;
     }
@@ -58,7 +58,7 @@ class session
      * @param mixed $val
      * @return bool
      */
-    public function set(string $key, $val)
+    public function set(string $key, $val): bool
     {
         $_SESSION[$this->_prefix . $key] = $val;
         return true;

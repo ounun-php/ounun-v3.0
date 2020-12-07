@@ -6,10 +6,12 @@
 
 namespace ounun\cache\driver;
 
+use ounun\cache\driver;
+
 /**
  * 文件类型缓存类(Code)
  */
-class code extends \ounun\cache\driver
+class code extends driver
 {
     /** @var string file类型 */
     const Type          = 'code';

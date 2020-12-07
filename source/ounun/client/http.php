@@ -20,7 +20,6 @@ class http
     public static string $_request_base;
 
     public static array $_pathinfo;
-
     /**
      * Returns a reference to the global Browser object, only creating it
      * if it doesn't already exist.

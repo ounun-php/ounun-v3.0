@@ -15,7 +15,7 @@ class verify
      * @param string $email 邮箱字符串
      * @return bool
      */
-    static public function email(string $email)
+    static public function email(string $email): bool
     {
         $chars = "/^([a-z0-9+_]|\\-|\\.)+@(([a-z0-9_]|\\-)+\\.)+[a-z]{2,6}\$/i";
         if (strpos($email, '@') !== false && strpos($email, '.') !== false) {
@@ -35,7 +35,7 @@ class verify
      * @param string $mobile_phone
      * @return bool
      */
-    static public function mobile(string $mobile_phone)
+    static public function mobile(string $mobile_phone): bool
     {
         $chars = "/^13[0-9]{1}[0-9]{8}$|15[0-9]{1}[0-9]{8}$|18[0-9]{1}[0-9]{8}$|17[0-9]{1}[0-9]{8}$/";
         if (preg_match($chars, $mobile_phone)) {

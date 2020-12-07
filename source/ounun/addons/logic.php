@@ -6,6 +6,7 @@
 
 namespace ounun\addons;
 
+
 /**
  * Class logic
  * @package ounun\addons
@@ -18,30 +19,32 @@ abstract class logic
     /** @var self 实例 */
     protected static $_instance;
 
-    /** @var model 数据模型 */
-    protected $_model;
+    /** @var database_model 数据模型 */
+    protected $_db;
 
     /**
      * 业务逻辑
      *
-     * @param model|null $model
-     * @return $this 返回数据库连接对像
+     * @param database_model|null $db
+     * @return self 返回数据库连接对像
      */
-    public static function i(?model $model = null): self
+    public static function i(?database_model $db = null): self
     {
         if (empty(static::$_instance)) {
-            static::$_instance = new static($model);
+            static::$_instance = new static($db);
         }
         return static::$_instance;
     }
 
     /**
      * cms constructor.
-     * @param model|null $model
+     * @param database_model|null $db
      */
-    public function __construct(?model $model = null)
+    public function __construct(?database_model $db = null)
     {
-        $this->model_set($model);
+        if ($db) {
+            $this->db_set($db);
+        }
         $this->_initialize(); // 控制器初始化
     }
 
@@ -53,24 +56,25 @@ abstract class logic
     /**
      * 数据模型set
      *
-     * @param $model
+     * @param $db
      */
-    public function model_set($model)
+    public function db_set(database_model $db)
     {
-        if ($model && is_subclass_of($model, model::class)) {
-            $this->_model = $model;
-            $this->_model->logic_set($this);
+        if ($db && is_subclass_of($db, database_model::class)) {
+            $this->_db = $db;
+        } else {
+            error_php("\$db:type error value->" . var_export($db, true));
         }
     }
 
     /**
      * get数据模型
      *
-     * @return model
+     * @return database_model
      */
-    public function model_get()
+    public function db_get(): database_model
     {
-        return $this->_model;
+        return $this->_db;
     }
 
     /**
@@ -81,7 +85,7 @@ abstract class logic
      * @param array $extend
      * @return array
      */
-    protected function error($error_code = 1, $data = null, $extend = [])
+    protected function error($error_code = 1, $data = null, $extend = []): array
     {
         if (static::Error_Msg && isset(static::Error_Msg[$error_code])) {
             $msg = static::Error_Msg[$error_code] . "(code:{$error_code})";

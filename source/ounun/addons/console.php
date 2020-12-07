@@ -7,6 +7,8 @@
 namespace ounun\addons;
 
 
+use ounun;
+
 class console
 {
     /** @var array 命令 */
@@ -34,25 +36,24 @@ class console
         empty($version) || $this->version = $version;
 
         // add
-        if (is_array($commands)) {
-            foreach ($commands as $key => $command) {
-                if ($key && $command) {
-                    $this->add($key, $command);
-                }
-            }
-        }
+        static::add($commands);
     }
 
     /**
-     * 添加一个指令
+     * 添加一个快捷命令行
      *
-     * @param string $key 索引关键key
-     * @param string $command 命令实例
+     * @param array $commands  $key => $command   索引关键key:命令实例
      * @return int
      */
-    public function add(string $key, string $command)
+    public static function add(array $commands): int
     {
-        static::$commands[$key] = $command;
+        if (is_array($commands)) {
+            foreach ($commands as $key => $command) {
+                if ($key && $command) {
+                    static::$commands[$key] = $command;
+                }
+            }
+        }
         return count(static::$commands);
     }
 
@@ -62,19 +63,22 @@ class console
      * @param array $argv
      * @return int
      */
-    public function execute(array $argv)
+    public function execute(array $argv): int
     {
         if (empty($argv) || empty($argv[1]) || '--help' == $argv[1] || '--list' == $argv[1]) {
             /** @var string $command */
             $command = static::$commands[command_c::Default_Cmd];
         } else if ($argv[1]) {
-            // addons
-            $command = "\\addons\\{$argv[1]}\\command";
-            // command
-            if (!class_exists($command)) {
-                if (isset(static::$commands[$argv[1]])) {
-                    /** @var string $command */
-                    $command = static::$commands[$argv[1]];
+            // 插件路由
+            if ($argv[1] && ($addon = ounun::$addon_route[$argv[1]]) && $apps = $addon['apps']) {
+                // $addon_tag = $apps::Addon_Tag;
+                $command = '\\addons\\'.$apps::Addon_Tag.'\\command';
+                // command
+                if (!class_exists($command)) {
+                    if (isset(static::$commands[$argv[1]])) {
+                        /** @var string $command */
+                        $command = static::$commands[$argv[1]];
+                    }
                 }
             }
         }
@@ -151,7 +155,7 @@ class console
      * @param string $color
      * @return string
      */
-    static public function color(string $msg, string $color = '')
+    static public function color(string $msg, string $color = ''): string
     {
         if (empty($color)) {
             return $msg;

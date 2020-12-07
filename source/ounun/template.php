@@ -6,6 +6,9 @@
 
 namespace ounun;
 
+use ounun;
+use v;
+
 /**
  * Class template
  * @package ounun
@@ -120,33 +123,33 @@ class template
      *
      * @return array
      */
-    static public function assign_array_get()
+    static public function assign_array_get(): array
     {
         return array_merge([
-            '{$page_url}'         => \ounun::$page_url,      // $lang/$app_path/$base_url,
-            '{$page_file}'        => \ounun::$page_file_path,// 基础url,
+            '{$page_url}'         => ounun::$page_url,      // $lang/$app_path/$base_url,
+            '{$page_file}'        => ounun::$page_file_path,// 基础url,
             // 根目录/面面路径
-            '{$page_www}'         => \ounun::$page_www,
-            '{$page_wap}'         => \ounun::$page_wap,
-            '{$page_mip}'         => \ounun::$page_mip,
+            '{$page_www}'         => ounun::$page_www,
+            '{$page_wap}'         => ounun::$page_wap,
+            '{$page_mip}'         => ounun::$page_mip,
             // 根目录
-            '{$root_www}'         => \ounun::$root_www,
-            '{$root_wap}'         => \ounun::$root_wap,
-            '{$root_mip}'         => \ounun::$root_mip,
-            '{$root_api}'         => \ounun::$root_api,
+            '{$root_www}'         => ounun::$root_www,
+            '{$root_wap}'         => ounun::$root_wap,
+            '{$root_mip}'         => ounun::$root_mip,
+            '{$root_api}'         => ounun::$root_api,
             // static
-            '{$root_res}'         => \ounun::$url_res,
-            '{$root_upload}'      => \ounun::$url_upload, '/public/uploads' => \ounun::$url_upload,
-            '{$root_static}'      => \ounun::$url_static, '/public/static' => \ounun::$url_static,
-            '{$root_static_g}'    => \ounun::$url_static_g, '/public/static_g' => \ounun::$url_static_g,
+            '{$root_res}'         => ounun::$url_res,
+            '{$root_upload}'      => ounun::$url_upload, '/public/uploads' => ounun::$url_upload,
+            '{$root_static}'      => ounun::$url_static, '/public/static' => ounun::$url_static,
+            '{$root_static_g}'    => ounun::$url_static_g, '/public/static_g' => ounun::$url_static_g,
             // seo_site
             '{$site_name}'        => static::$site_seo['sitename'],
             '{$site_keywords}'    => static::$site_seo['keywords'],
             '{$site_description}' => static::$site_seo['description'],
             '{$site_slogan}'      => static::$site_seo['slogan'],
             // app_name
-            '{$app_name}'         => \ounun::$app_name,
-            '{$app_domain}'       => \ounun::$app_domain,
+            '{$app_name}'         => ounun::$app_name,
+            '{$app_domain}'       => ounun::$app_domain,
         ], static::$assign_array);
     }
 
@@ -355,7 +358,7 @@ class template
      */
     public function assign()
     {
-        if (empty(\v::$cache_html) || \v::$cache_html->stop) {
+        if (empty(v::$cache_html) || v::$cache_html->stop) {
             static::ob_start();
             register_shutdown_function([$this, 'callback'], true);
         }
@@ -391,7 +394,7 @@ class template
      * @param bool $is_trim
      * @return string
      */
-    static public function trim(string $buffer, bool $is_trim)
+    static public function trim(string $buffer, bool $is_trim): string
     {
         // 写文件
         if ($is_trim) {
@@ -405,7 +408,7 @@ class template
             }, $buffer);
 
             $pattern     = ['/\s{2,}/', '/>\s?</', '/\"\s?' . '>/'];
-            $replacement = [' ', '><', '">'];
+            $replacement = [' ', '><','">'];
             $buffer      = preg_replace($pattern, $replacement, $buffer);
         }
 
@@ -421,7 +424,7 @@ class template
      * @param string|null $regex
      * @return string
      */
-    static public function replace(string $subject, array $data, ?string $regex = null)
+    static public function replace(string $subject, array $data, ?string $regex = null): string
     {
         $regex ??= '/\{\$(\w+)\}/';
         return preg_replace_callback($regex, function ($var) use ($data) {
@@ -454,7 +457,7 @@ class template
     /**
      * ob_start 状态
      */
-    static public function ob_status()
+    static public function ob_status(): bool
     {
         return static::$_ob_start;
     }

@@ -20,7 +20,7 @@ class lock
      * @param array $config
      * @return self
      */
-    static public function i(string $storage_key = 'data', array $config = [])
+    static public function i(string $storage_key = 'data', array $config = []): lock
     {
         if (empty(static::$_instances[$storage_key])) {
             $cache = cache::i($storage_key,$config);
@@ -57,7 +57,7 @@ class lock
      * @param int $expire
      * @return bool
      */
-    public function lock(string $key, $expire = 5)
+    public function lock(string $key,int $expire = 5)
     {
         $isLock = $this->redis->setnx($key, time() + $expire);
         if ($isLock) {
@@ -70,10 +70,10 @@ class lock
     /**
      * 释放锁
      *
-     * @param  String $key 锁标识
-     * @return Boolean
+     * @param string $key 锁标识
+     * @return bool
      */
-    public function unlock($key)
+    public function unlock(string $key): bool
     {
         return $this->redis->del($key);
     }
