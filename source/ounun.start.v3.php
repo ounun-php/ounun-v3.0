@@ -463,7 +463,7 @@ function succeed_data_set(array $data,$data_data): array
  * @param string $jsonp_callback
  * @param int $json_options 传递给json_encode的option参数
  */
-function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
+function out($data, string $type = c::Format_Json, string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
         $type = c::Format_Json;

@@ -10,7 +10,7 @@ use ounun;
 use ounun\addons\logic;
 use ounun\restful\error_code;
 
-abstract class restful
+class restful
 {
     /** @var string method */
     protected string $_method;
