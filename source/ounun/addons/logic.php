@@ -9,6 +9,7 @@ namespace ounun\addons;
 
 /**
  * Class logic
+ *
  * @package ounun\addons
  */
 abstract class logic
@@ -56,7 +57,7 @@ abstract class logic
     /**
      * 数据模型set
      *
-     * @param $db
+     * @param database_model $db
      */
     public function db_set(database_model $db)
     {

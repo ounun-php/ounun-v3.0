@@ -9,13 +9,18 @@ namespace ounun\addons;
 use \ounun\db\pdo;
 use ounun\page\base;
 
+
+
 /**
  * 数据库模型
  * Class database_model
+ * @property database_model $_instance static protected
+ *
+ * @method static database_model i(string $tag = '', array $config = []);
  *
  * @package ounun\addons
  */
-abstract class database_model extends pdo
+class database_model extends pdo
 {
     /** @var self 数据库实例 */
     protected static $_instance;
@@ -41,7 +46,8 @@ abstract class database_model extends pdo
     }
 
     /** 初始化 */
-    abstract protected function _initialize();
+    protected function _initialize(){}
+    //abstract protected function _initialize();
 
     /**
      * @param string $table 表名

@@ -441,15 +441,15 @@ function succeed_data($data)
  * @param mixed $data_data
  * @return mixed
  */
-function succeed_data_set(array $data,$data_data): array
+function succeed_data_set(array $data, $data_data): array
 {
-    if(isset($data['data'])){
-        if(is_array($data['data'])){
-            $data['data'] = array_merge($data['data'],$data_data);
-        }else{
-            $data['data'] = array_merge($data_data,['__data__'=>$data['data']]);
+    if (isset($data['data'])) {
+        if (is_array($data['data'])) {
+            $data['data'] = array_merge($data['data'], $data_data);
+        } else {
+            $data['data'] = array_merge($data_data, ['__data__' => $data['data']]);
         }
-    }else{
+    } else {
         $data['data'] = $data_data;
     }
     return $data;
@@ -517,7 +517,7 @@ function json_encode_unescaped($data): ?string
  * @param string|null $json_string
  * @return mixed
  */
-function json_decode_array(?string $json_string)
+function json_decode_array(?string $json_string): ?string
 {
     if (is_null($json_string)) {
         return null;
@@ -533,7 +533,7 @@ function json_decode_array(?string $json_string)
  * @param string $extend_string
  * @return array|mixed
  */
-function extend_decode_php(string $extend_string)
+function extend_decode_php(string $extend_string): array
 {
     $extend = [];
     if ($extend_string) {
@@ -548,7 +548,7 @@ function extend_decode_php(string $extend_string)
  * @param string $extend_string
  * @return mixed
  */
-function extend_decode_json(string $extend_string)
+function extend_decode_json(string $extend_string): array
 {
     $extend = [];
     if ($extend_string) {
@@ -779,7 +779,7 @@ function retry(int $times, callable $callback, int $sleep = 0)
  *
  * @return string '','2','-dev'
  */
-function environment()
+function environment(): string
 {
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
@@ -1304,12 +1304,10 @@ class ounun
             if (empty(static::$maps_path)
                 || empty(static::$maps_path[$first])
                 || !(is_array(static::$maps_path[$first]) && in_array($path_root, array_column(static::$maps_path[$first], 'path')))) {
-                static::$maps_path[$first][] = [
-                    'path'      => $path_root,
-                    'len'       => $len,
-                    'cut'       => $cut_path,
-                    'namespace' => $namespace_prefix
-                ];
+                static::$maps_path[$first][] = ['path'      => $path_root,
+                                                'len'       => $len,
+                                                'cut'       => $cut_path,
+                                                'namespace' => $namespace_prefix];
             }
         }
     }
@@ -1395,7 +1393,7 @@ abstract class v
     public static ?template $tpl;
 
     /** @var debug|null debug调试相关 */
-    public static ?debug $debug;
+    // public static ?debug $debug;
 
     /** @var string 插件唯一标识 */
     public static string $addon_tag = '';
