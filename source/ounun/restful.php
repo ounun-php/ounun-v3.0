@@ -10,8 +10,16 @@ use ounun;
 use ounun\addons\logic;
 use ounun\restful\error_code;
 
+/**
+ * Class restful
+ *
+ * @package ounun
+ */
 class restful
 {
+    /** @var logic logic */
+    public static $logic;
+
     /** @var string method */
     protected string $_method;
 
@@ -32,9 +40,6 @@ class restful
 
     /** @var string 插件标识 */
     protected string $_addon_tag = '';
-
-    /** @var logic logic */
-    public static $logic;
 
     /**
      * ounun_view constructor.

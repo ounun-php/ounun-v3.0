@@ -9,8 +9,6 @@ namespace ounun\addons;
 use \ounun\db\pdo;
 use ounun\page\base;
 
-
-
 /**
  * 数据库模型
  * Class database_model
@@ -94,8 +92,7 @@ class database_model extends pdo
         $pg    = new base($this, $table, $url, $where, $page_config);
         $ps    = $pg->initialize($page);
 
-        $this->table($table)
-            ->field($fields)
+        $this->table($table)->field($fields)
             ->where($where_str, $where_bind)
             ->limit($pg->limit_length(), $pg->limit_offset());
         if ($orders && is_array($orders)) {

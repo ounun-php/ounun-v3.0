@@ -30,10 +30,14 @@ class console
     public function __construct(array $commands = [], string $name = 'Ounun Command', string $version = '0.1')
     {
         // name
-        empty($name) || $this->name = $name;
+        if ($name) {
+            $this->name = $name;
+        }
 
         // version
-        empty($version) || $this->version = $version;
+        if ($version) {
+            $this->version = $version;
+        }
 
         // add
         static::add($commands);
@@ -42,7 +46,7 @@ class console
     /**
      * 添加一个快捷命令行
      *
-     * @param array $commands  $key => $command   索引关键key:命令实例
+     * @param array $commands $key => $command   索引关键key:命令实例
      * @return int
      */
     public static function add(array $commands): int
@@ -72,7 +76,7 @@ class console
             // 插件路由
             if ($argv[1] && ($addon = ounun::$addon_route[$argv[1]]) && $apps = $addon['apps']) {
                 // $addon_tag = $apps::Addon_Tag;
-                $command = '\\addons\\'.$apps::Addon_Tag.'\\command';
+                $command = '\\addons\\' . $apps::Addon_Tag . '\\command';
                 // command
                 if (!class_exists($command)) {
                     if (isset(static::$commands[$argv[1]])) {

@@ -50,7 +50,7 @@ class template
     public static array $assign_array = [];
 
     /** @var array 站点SEO */
-    public static array $site_seo = ['sitename' => '', 'keywords' => '', 'description' => '', 'slogan' => ''];
+    public static array $site_tkd_seo = ['sitename' => '', 'keywords' => '', 'description' => '', 'slogan' => ''];
 
     /**
      * 设定 模板类型/主题风格
@@ -143,10 +143,10 @@ class template
             '{$root_static}'      => ounun::$url_static, '/public/static' => ounun::$url_static,
             '{$root_static_g}'    => ounun::$url_static_g, '/public/static_g' => ounun::$url_static_g,
             // seo_site
-            '{$site_name}'        => static::$site_seo['sitename'],
-            '{$site_keywords}'    => static::$site_seo['keywords'],
-            '{$site_description}' => static::$site_seo['description'],
-            '{$site_slogan}'      => static::$site_seo['slogan'],
+            '{$site_name}'        => static::$site_tkd_seo['sitename'],
+            '{$site_keywords}'    => static::$site_tkd_seo['keywords'],
+            '{$site_description}' => static::$site_tkd_seo['description'],
+            '{$site_slogan}'      => static::$site_tkd_seo['slogan'],
             // app_name
             '{$app_name}'         => ounun::$app_name,
             '{$app_domain}'       => ounun::$app_domain,

@@ -447,7 +447,7 @@ function succeed_data_set(array $data, $data_data): array
         if (is_array($data['data'])) {
             $data['data'] = array_merge($data['data'], $data_data);
         } else {
-            $data['data'] = array_merge($data_data, ['__data__' => $data['data']]);
+            $data['data'] = array_merge($data_data, ['_data_' => $data['data']]);
         }
     } else {
         $data['data'] = $data_data;
@@ -503,7 +503,7 @@ function out($data, string $type = c::Format_Json, string $jsonp_callback = '', 
  * @param mixed $data
  * @return string|null
  */
-function json_encode_unescaped($data): ?string
+function json_encode_unescaped($data)
 {
     if (is_null($data)) {
         return null;
@@ -517,7 +517,7 @@ function json_encode_unescaped($data): ?string
  * @param string|null $json_string
  * @return mixed
  */
-function json_decode_array(?string $json_string): ?string
+function json_decode_array($json_string)
 {
     if (is_null($json_string)) {
         return null;
@@ -533,7 +533,7 @@ function json_decode_array(?string $json_string): ?string
  * @param string $extend_string
  * @return array|mixed
  */
-function extend_decode_php(string $extend_string): array
+function extend_decode_php(string $extend_string)
 {
     $extend = [];
     if ($extend_string) {
@@ -545,10 +545,10 @@ function extend_decode_php(string $extend_string): array
 /**
  * 获得 extend数据json
  *
- * @param string $extend_string
- * @return mixed
+ * @param string|null $extend_string
+ * @return mixed|array|null
  */
-function extend_decode_json(string $extend_string): array
+function extend_decode_json(?string $extend_string)
 {
     $extend = [];
     if ($extend_string) {
@@ -818,39 +818,20 @@ function global_all(string $key, $default = null)
 }
 
 /**
- * 公共配制数据(应用)
- *
- * @param string $key
- * @param mixed $default
- * @param string $app_name
- * @return mixed
- */
-function global_apps(string $key, $default = null, string $app_name = '')
-{
-    $app_name ??= ounun::$app_name;
-    if ($app_name) {
-        $tag = ounun::$global_apps[$app_name];
-        if ($tag && $value = $tag[$key]) {
-            return $value;
-        }
-    }
-    return $default;
-}
-
-/**
  * 公共配制数据(插件)
  *
- * @param string $key
- * @param mixed $default
  * @param string $addon_tag
+ * @param string|null $key
+ * @param mixed $default
  * @return mixed
  */
-function global_addons(string $key, string $addon_tag, $default = null)
+function global_addons(string $addon_tag, ?string $key = null, $default = null)
 {
-    // 加载  -> runtime_apps 生成时加载
-    // 转换翻译
-    $tag = ounun::$global_addons[$addon_tag];
-    if ($tag && isset($tag[$key]) && $value = $tag[$key]) {
+    $values = ounun::$global_addons[$addon_tag];
+    if (is_null($key)) {
+        return $values;
+    }
+    if ($values && isset($values[$key]) && $value = $values[$key]) {
         return $value;
     }
     return $default;
@@ -901,16 +882,11 @@ class ounun
     public static array $global = [];
     /** @var array 公共配制数据(插件) */
     public static array $global_addons = [];
-    /** @var array 公共配制数据(应用) */
-    public static array $global_apps = [];
 
     /** @var array DB配制数据 */
     public static array $database = [];
     /** @var string 默认 数据库 */
     public static string $database_default = '';
-
-    /** @var array 命令s */
-    // public static array $commands = []; // 转到 \ounun\addons\console::$commands
 
     /** @var array 添加App路径(根目录) */
     public static array $paths = [];
@@ -1032,31 +1008,13 @@ class ounun
     static public function global_set(array $config = [])
     {
         if ($config) {
+            if (empty(static::$global) || !is_array(static::$global)) {
+                static::$global = [];
+            }
             foreach ($config as $key => $value) {
                 static::$global[$key] = $value;
             }
         }
-    }
-
-    /**
-     * 设定公共配制数据(应用)
-     *
-     * @param array $config
-     * @param string $app_name
-     */
-    static public function global_apps_set(array $config = [], string $app_name = '')
-    {
-        if ($config) {
-            $app_name ??= static::$app_name;
-            if (!isset(static::$global_apps[$app_name])) {
-                static::$global_apps[$app_name] = [];
-            } elseif (is_array(static::$global_apps[$app_name])) {
-                static::$global_apps[$app_name] = [];
-            }
-            foreach ($config as $key => $value) {
-                static::$global_apps[$app_name][$key] = $value;
-            }
-        } // end $config
     }
 
     /**
@@ -1069,9 +1027,7 @@ class ounun
     {
         if ($config) {
             if ($addon_tag) {
-                if (!isset(static::$global_addons[$addon_tag])) {
-                    static::$global_addons[$addon_tag] = [];
-                } elseif (is_array(static::$global_addons[$addon_tag])) {
+                if (!isset(static::$global_addons[$addon_tag]) || !is_array(static::$global_addons[$addon_tag])) {
                     static::$global_addons[$addon_tag] = [];
                 }
                 foreach ($config as $key => $value) {
@@ -1392,9 +1348,6 @@ abstract class v
     /** @var  template|null  Template句柄容器 */
     public static ?template $tpl;
 
-    /** @var debug|null debug调试相关 */
-    // public static ?debug $debug;
-
     /** @var string 插件唯一标识 */
     public static string $addon_tag = '';
 
@@ -1463,18 +1416,23 @@ abstract class v
      * 本页跳转 - 带参数$replace_ext
      *
      * @param array $replace_ext 要替换的数据
+     * @param string|null $msg
      * @param string|null $url URL
      * @param array $data_query 数据
      * @param array $skip 忽略的数据 如:page
      */
-    public static function url_go(array $replace_ext = [], ?string $url = null, array $data_query = [], array $skip = [])
+    public static function url_go(array $replace_ext = [], ?string $msg = null, ?string $url = null, array $data_query = [], array $skip = [])
     {
         $url ??= ounun::$page_url;
         if (empty($data_query)) {
-            $data_query = (array)$_GET;
+            $data_query = $_GET;
         }
         $url = url_build_query($url, $data_query, $replace_ext, $skip);
-        go_url($url);
+        if (empty($msg)) {
+            go_url($url);
+        } else {
+            go_msg($msg, $url);
+        }
     }
 
     /**

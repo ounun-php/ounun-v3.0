@@ -722,7 +722,7 @@ class pdo
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
-     * @return mixed|null
+     * @return int
      */
     public function count_value(string $field = '*', string $alias = '`count`', $default_value = 0)
     {

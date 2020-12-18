@@ -7,8 +7,11 @@
 namespace ounun\addons;
 
 
-class command
+abstract class command
 {
+    /** @var logic logic */
+    public static $logic;
+
     /** @var string 命令的名字（"ounun" 后面的部分） */
     public string $name;
 
@@ -36,8 +39,14 @@ class command
      */
     public function __construct()
     {
+        $this->_initialize();
         $this->configure();
     }
+
+    /**
+     * 控制器初始化
+     */
+    abstract protected function _initialize();
 
     /**
      * 运行状态 true:运行中  false:关闭

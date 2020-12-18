@@ -13,7 +13,7 @@ namespace ounun\addons;
  *
  * @package ounun\addons
  */
-abstract class database_model_strict extends database_model
+class database_model_strict extends database_model
 {
     /** @var self 数据库实例 */
     protected static $_instance;
