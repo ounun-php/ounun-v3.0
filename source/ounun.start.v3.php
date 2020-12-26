@@ -718,12 +718,7 @@ function error404(string $msg = ''): void
 function error_php(string $error_msg, string $error_html = '', string $channel = 'php'): void
 {
     // global_all
-    $outs = global_all('debug', []);
-    if ($outs && isset($outs['out_config'])) {
-        $out = $outs['out_config'];
-    } else {
-        $out = null;
-    }
+    $out = global_all('debug_out');
     // if
     if ($out && isset($out['default']) && isset($out['default']['buffer'])) {
         if (isset($out[$channel]) && is_array($out[$channel])) {
@@ -807,12 +802,19 @@ function environment(): string
  *
  * @param string $key
  * @param mixed $default
+ * @param string|null $sub_key
  * @return mixed
  */
-function global_all(string $key, $default = null)
+function global_all(string $key, $default = null, ?string $sub_key = null)
 {
-    if ($key && isset(ounun::$global[$key]) && $value = ounun::$global[$key]) {
-        return $value;
+    if ($key && isset(ounun::$global[$key])) {
+        if (is_null($sub_key)) {
+            return ounun::$global[$key];
+        }
+        $value = ounun::$global[$key];
+        if (is_array($value) && isset($value[$sub_key])) {
+            return $value[$sub_key];
+        }
     }
     return $default;
 }
@@ -823,16 +825,23 @@ function global_all(string $key, $default = null)
  * @param string $addon_tag
  * @param string|null $key
  * @param mixed $default
+ * @param string|null $sub_key
  * @return mixed
  */
-function global_addons(string $addon_tag, ?string $key = null, $default = null)
+function global_addons(string $addon_tag, ?string $key = null, $default = null, ?string $sub_key = null)
 {
     $values = ounun::$global_addons[$addon_tag];
     if (is_null($key)) {
         return $values;
     }
-    if ($values && isset($values[$key]) && $value = $values[$key]) {
-        return $value;
+    if ($values && isset($values[$key])) {
+        if (is_null($sub_key)) {
+            return $values[$key];
+        }
+        $value = $values[$key];
+        if (is_array($value) && isset($value[$sub_key])) {
+            return $value[$sub_key];
+        }
     }
     return $default;
 }
@@ -975,20 +984,14 @@ class ounun
      *
      * @param string $lang
      * @param string $lang_default
-     * @param array $lang_support_list 设定支持的语言
      */
-    static public function lang_set(string $lang = '', string $lang_default = '', array $lang_support_list = [])
+    static public function lang_set(string $lang = '', string $lang_default = '')
     {
         if ($lang) {
             static::$lang = $lang;
         }
         if ($lang_default) {
             static::$lang_default = $lang_default;
-        }
-        if ($lang_support_list && is_array($lang_support_list)) {
-            foreach ($lang_support_list as $lang => $lang_name) {
-                static::$lang_support[$lang] = $lang_name;
-            }
         }
         // 加载 语言包
         if (static::$lang && static::$lang != static::$lang_default) {
@@ -1482,8 +1485,7 @@ abstract class v
 
         // cache_html
         if ('' == Environment) {
-            $debug           = global_all('debug');
-            $cache_html_trim = ($debug && isset($debug['html_trim'])) ? $debug['html_trim'] : $cache_html_trim;
+            $cache_html_trim = global_all('debug', $cache_html_trim, 'html_trim');
         }
         if ($is_cache_html) {
             $cache_html_time_expire = $cache_html_time_expire > 300 ? $cache_html_time_expire : 300;
@@ -1505,7 +1507,7 @@ abstract class v
      */
     protected function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
     {
-        if ('' == Environment && $cache_config = global_all('cache', [])['html']) {
+        if ('' == Environment && $cache_config = global_all('cache', false, 'html')) {
             $cache_config['prefix'] = 'c_html_' . ounun::$app_name . '_' . template::$theme . '_' . template::$type;
             static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
             static::$cache_html->run(true);
@@ -1725,7 +1727,7 @@ function start_web()
         } elseif (($addon = ounun::$addon_route['']) && $apps = $addon['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
-            error_php('ounun::$addon_mount[\'\']: There is no default value -> $addon_mount:' . json_encode(ounun::$addon_route) . '');
+            error_php('ounun::$addon_route[\'\']: There is no default value -> $addon_route:' . json_encode(ounun::$addon_route) . '');
         }
 
         // api

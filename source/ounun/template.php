@@ -296,7 +296,7 @@ class template
                 }
             }
         }
-        if (global_all('debug', [])['template']) {
+        if (global_all('debug', false,'template')) {
             $this->error($filename, $addon_tag);
         }
         return '';

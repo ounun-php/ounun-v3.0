@@ -62,13 +62,16 @@ class debug
                 mkdir($dirname, 0777, true);
             }
         }
-        //
+
+        // callback
         if (class_exists(template::class) && template::ob_status()) {
             template::ob_func([$this, 'callback'], []);
         } else {
             ob_start();
             register_shutdown_function([$this, 'callback']);
         }
+        set_error_handler([$this, 'callback_error'], E_ERROR);
+        set_exception_handler([$this, 'callback_exception']);
 
         $this->_filename    = $filename;
         $this->_is_bof      = $is_bof;
@@ -87,7 +90,7 @@ class debug
             $this->_time = -microtime(true);
         }
 
-        // init写
+        // init write
         $this->write();
 
         // header
@@ -206,6 +209,62 @@ class debug
             }
             $this->write(true);
         }
+    }
+
+    /**
+     * @param $exception
+     */
+    public function callback_exception($exception)
+    {
+        $this->logs('__exception__',$exception,false);
+    }
+
+    /**
+     * @param $error_code
+     * @param $error_str
+     * @param $error_file
+     * @param $error_line
+     */
+    public function callback_error($error_code, $error_str, $error_file, $error_line)
+    {
+        switch ($error_code) {
+            case E_WARNING:
+                // x / 0 错误 PHP7 依然不能很友好的自动捕获 只会产生 E_WARNING 级的错误
+                // 捕获判断后 throw new DivisionByZeroError($errstr)
+                // 或者使用 intdiv(x, 0) 方法 会自动抛出 DivisionByZeroError 的错误
+                if (strcmp('Division by zero', $error_str) == 0) {
+                    throw new \DivisionByZeroError($error_str);
+                }
+
+                $level_tips = 'PHP Warning: ';
+                break;
+            case E_NOTICE:
+                $level_tips = 'PHP Notice: ';
+                break;
+            case E_DEPRECATED:
+                $level_tips = 'PHP Deprecated: ';
+                break;
+            case E_USER_ERROR:
+                $level_tips = 'User Error: ';
+                break;
+            case E_USER_WARNING:
+                $level_tips = 'User Warning: ';
+                break;
+            case E_USER_NOTICE:
+                $level_tips = 'User Notice: ';
+                break;
+            case E_USER_DEPRECATED:
+                $level_tips = 'User Deprecated: ';
+                break;
+            case E_STRICT:
+                $level_tips = 'PHP Strict: ';
+                break;
+            default:
+                $level_tips = 'Unknown Type Error: ';
+                break;
+        }
+        $error = $error_str . ' in ' . $error_file . ' on ' . $error_line;
+        $this->logs($level_tips,$error,false);
     }
 
     /**
@@ -352,8 +411,7 @@ class debug
                              $is_bof = false, $is_run_time = true, string $date_dir = '_', ?string $filename = null): self
     {
         if (empty(static::$_instances[$channel])) {
-            $debug                        = global_all('debug', []);
-            $dir                          = ($debug && $debug['out_dir']) ? $debug['out_dir'] : Dir_Storage . 'logs/';
+            $dir                          = global_all('debug', Dir_Storage . 'logs/', 'out_dir');
             $filename                     = $dir . date('Y-m-d') . $date_dir . $channel . ($filename ? '_' . $filename : '.log');
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,
@@ -368,7 +426,6 @@ class debug
      */
     public static function is_header(): bool
     {
-        $debug = global_all('debug');
-        return ($debug && $debug['header']) ?? false;
+        return  global_all('debug',false,'header');
     }
 }
