@@ -56,6 +56,8 @@ class debug
                                 $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
                                 $is_bof = false, $is_run_time = true)
     {
+//        print_r(['$filename'       => $filename, '$is_out_buffer' => $is_out_buffer, '$is_out_get' => $is_out_get, '$is_out_url' => $is_out_url, '$is_out_cookie' => $is_out_cookie,
+//                 '$is_out_session' => $is_out_session, '$is_out_server' => $is_out_server, '$is_bof' => $is_bof, '$is_run_time' => $is_run_time]);
         if ($filename) {
             $dirname = dirname($filename);
             if (!file_exists($dirname)) {
@@ -216,7 +218,7 @@ class debug
      */
     public function callback_exception($exception)
     {
-        $this->logs('__exception__',$exception,false);
+        $this->logs('__exception__', $exception, false);
     }
 
     /**
@@ -264,7 +266,7 @@ class debug
                 break;
         }
         $error = $error_str . ' in ' . $error_file . ' on ' . $error_line;
-        $this->logs($level_tips,$error,false);
+        $this->logs($level_tips, $error, false);
     }
 
     /**
@@ -351,9 +353,14 @@ class debug
             if (file_exists($filename)) {
                 $str = $str . file_get_contents($filename);
             }
-            file_put_contents($filename, $str);
+            $ret = file_put_contents($filename, $str);
         } elseif ($str) {
-            file_put_contents($filename, $str, FILE_APPEND);
+            $ret = file_put_contents($filename, $str, FILE_APPEND);
+        } else {
+            $ret = 1;
+        }
+        if (empty($ret)) {
+            // error_php('debug write error');
         }
         return $this;
     }
@@ -426,6 +433,6 @@ class debug
      */
     public static function is_header(): bool
     {
-        return  global_all('debug',false,'header');
+        return global_all('debug', false, 'header');
     }
 }

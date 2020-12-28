@@ -7,7 +7,7 @@
 namespace ounun\addons;
 
 use \ounun\db\pdo;
-use ounun\page\base;
+use ounun\page\simple;
 
 /**
  * 数据库模型
@@ -44,7 +44,9 @@ class database_model extends pdo
     }
 
     /** 初始化 */
-    protected function _initialize(){}
+    protected function _initialize()
+    {
+    }
     //abstract protected function _initialize();
 
     /**
@@ -74,26 +76,29 @@ class database_model extends pdo
      * 分页
      *
      * @param string $where_str
-     * @param array $where_bind
+     * @param array $where_paras
      * @param string $fields
      * @param array $orders
      * @param array $page_gets
      * @param array $page_config
      * @param string|null $table
+     * @param callable|null $fn
      * @return array
      */
-    public function pagination(string $where_str, array $where_bind, string $fields = '', array $orders = [], array $page_gets = [], array $page_config = [], ?string $table = null): array
+    public function pagination(string $where_str, array $where_paras, string $fields = '', array $orders = [], array $page_gets = [], array $page_config = [], ?string $table = null, ?callable $fn = null): array
     {
         $table ??= $this->table;
+        $fn    ??= function () use ($table, $where_str, $where_paras) {
+            return $this->table($table)->where($where_str, $where_paras)->count_value();
+        };
         $page  = (isset($page_gets['page']) && (int)$page_gets['page'] > 1) ? (int)$page_gets['page'] : 1;
         $url   = url_build_query(url_original(), $page_gets, ['page' => '{page}']);
+        $pg    = new simple($url, $page_config);
+        $ps    = $pg->fn_total_set($fn)->initialize($page);
 
-        $where = ['str' => $where_str, 'bind' => $where_bind,];
-        $pg    = new base($this, $table, $url, $where, $page_config);
-        $ps    = $pg->initialize($page);
-
+        // table
         $this->table($table)->field($fields)
-            ->where($where_str, $where_bind)
+            ->where($where_str, $where_paras)
             ->limit($pg->limit_length(), $pg->limit_offset());
         if ($orders && is_array($orders)) {
             foreach ($orders as $field => $order) {

@@ -687,10 +687,8 @@ function error404(string $msg = ''): void
                 </div>
                 <hr>
                 <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>';
-    if (ounun::$global
-        && isset(ounun::$global['debug'])
-        && isset(ounun::$global['debug']['backtrace'])
-        && ounun::$global['debug']['backtrace']) {
+    $is_backtrace = global_all('debug',false,'backtrace');
+    if ($is_backtrace) {
         echo($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '');
         echo '<pre>' . PHP_EOL;
         debug_print_backtrace();
@@ -730,7 +728,7 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
     } else {
         debug::i($channel);
     }
-    // print_r(['$debug'=>$debug,'$out'=>$out,'$c'=>$c]);
+    // print_r(['$out' => $out, '$error_msg' => $error_msg, '$error_html' => $error_html, '$channel' => $channel]);
     if ($error_html) {
         echo $error_html;
     }
@@ -807,16 +805,22 @@ function environment(): string
  */
 function global_all(string $key, $default = null, ?string $sub_key = null)
 {
+    $ret = $default;
     if ($key && isset(ounun::$global[$key])) {
         if (is_null($sub_key)) {
-            return ounun::$global[$key];
+            $ret = ounun::$global[$key];
         }
         $value = ounun::$global[$key];
         if (is_array($value) && isset($value[$sub_key])) {
-            return $value[$sub_key];
+            $ret = $value[$sub_key];
         }
     }
-    return $default;
+    if (is_null($default)) {
+        return $ret;
+    } elseif (empty($ret)) {
+        return $default;
+    }
+    return $ret;
 }
 
 /**
@@ -830,20 +834,26 @@ function global_all(string $key, $default = null, ?string $sub_key = null)
  */
 function global_addons(string $addon_tag, ?string $key = null, $default = null, ?string $sub_key = null)
 {
+    $ret    = $default;
     $values = ounun::$global_addons[$addon_tag];
     if (is_null($key)) {
-        return $values;
+        $ret = $values;
     }
     if ($values && isset($values[$key])) {
         if (is_null($sub_key)) {
-            return $values[$key];
+            $ret = $values[$key];
         }
         $value = $values[$key];
         if (is_array($value) && isset($value[$sub_key])) {
-            return $value[$sub_key];
+            $ret = $value[$sub_key];
         }
     }
-    return $default;
+    if (is_null($default)) {
+        return $ret;
+    } elseif (empty($ret)) {
+        return $default;
+    }
+    return $ret;
 }
 
 /**
@@ -1727,7 +1737,7 @@ function start_web()
         } elseif (($addon = ounun::$addon_route['']) && $apps = $addon['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
-            error_php('ounun::$addon_route[\'\']: There is no default value -> $addon_route:' . json_encode(ounun::$addon_route) . '');
+            error404('ounun::$addon_route[\'\']: There is no default value -> $addon_route:' . json_encode(ounun::$addon_route) . '');
         }
 
         // api
