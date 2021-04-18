@@ -10,7 +10,6 @@ use ounun\addons\logic;
 use ounun\db\db;
 use ounun\debug;
 use ounun\c;
-use ounun\cache\html;
 use ounun\template;
 
 /** 是否Cli - 环境常量 */
@@ -43,7 +42,7 @@ defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
  */
 function l(string $s)
 {
-    if ($l = $GLOBALS['_lang_']) {
+    if ($l = $GLOBALS['$L']) {
         if ($lang = $l[ounun::$lang]) {
             if ($s2 = $lang[$s]) {
                 return $s2;
@@ -687,7 +686,7 @@ function error404(string $msg = ''): void
                 </div>
                 <hr>
                 <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>';
-    $is_backtrace = global_all('debug',false,'backtrace');
+    $is_backtrace = global_all('debug', false, 'backtrace');
     if ($is_backtrace) {
         echo($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '');
         echo '<pre>' . PHP_EOL;
@@ -1121,6 +1120,7 @@ class ounun
         } else {
             $page_file_path = $key . $path;
         }
+
         return static::url_get($page_file_path, $lang, $is_current);
     }
 
@@ -1146,7 +1146,6 @@ class ounun
         if ($is_current && empty(static::$page_url)) {
             static::url_set($page_file_path, $page_url, $lang_path);
         }
-
         return $page_url;
     }
 
@@ -1166,18 +1165,18 @@ class ounun
 
         /** @var string Www Page */
         $pages            = explode('/', static::$root_www, 4);
-        $path             = $pages[3] ? "/{$pages[3]}" : '';
-        static::$page_www = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
+        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_www = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
 
         /** @var string Mobile Page */
         $pages            = explode('/', static::$root_wap, 4);
-        $path             = $pages[3] ? "/{$pages[3]}" : '';
-        static::$page_wap = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
+        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_wap = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
 
         /** @var string Mip Page */
         $pages            = explode('/', static::$root_mip, 4);
-        $path             = $pages[3] ? "/{$pages[3]}" : '';
-        static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
+        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
     }
 
     /**
@@ -1355,9 +1354,6 @@ abstract class v
     /** @var logic logic */
     public static $logic;
 
-    /** @var html|null cache_html */
-    public static ?html $cache_html;
-
     /** @var  template|null  Template句柄容器 */
     public static ?template $tpl;
 
@@ -1396,59 +1392,6 @@ abstract class v
     }
 
     /**
-     * 网址路径前缀(Url)
-     *
-     * @param string $path
-     * @param string|null $lang
-     * @param bool $is_current 是否当前页面
-     * @param string|null $addon_view
-     * @param string|null $addon_tag
-     * @return string
-     */
-    public static function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null): string
-    {
-        $addon_tag  ??= static::$addon_tag;
-        $addon_view ??= static::$addon_view;
-        return ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
-    }
-
-    /**
-     * 当前面页
-     *
-     * @param string $page_file_path
-     * @param string|null $lang
-     * @param bool $is_current 是否当前页面
-     * @return string
-     */
-    public static function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true): string
-    {
-        return ounun::url_get($page_file_path, $lang, $is_current);
-    }
-
-    /**
-     * 本页跳转 - 带参数$replace_ext
-     *
-     * @param array $replace_ext 要替换的数据
-     * @param string|null $msg
-     * @param string|null $url URL
-     * @param array $data_query 数据
-     * @param array $skip 忽略的数据 如:page
-     */
-    public static function url_go(array $replace_ext = [], ?string $msg = null, ?string $url = null, array $data_query = [], array $skip = [])
-    {
-        $url ??= ounun::$page_url;
-        if (empty($data_query)) {
-            $data_query = $_GET;
-        }
-        $url = url_build_query($url, $data_query, $replace_ext, $skip);
-        if (empty($msg)) {
-            go_url($url);
-        } else {
-            go_msg($msg, $url);
-        }
-    }
-
-    /**
      * ounun_view constructor.
      *
      * @param array $url_mods
@@ -1475,165 +1418,11 @@ abstract class v
     abstract protected function _initialize(string $method);
 
     /**
-     * 初始化Page
-     *
-     * @param string $page_file_path
-     * @param bool $is_cache_html
-     * @param bool $ext_req
-     * @param string $domain
-     * @param int $cache_html_time_expire
-     * @param bool $cache_html_trim
-     */
-    protected function _initialize_page(string $page_file_path = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
-                                        int $cache_html_time_expire = 0, bool $cache_html_trim = true)
-    {
-        // url
-        $this->url_addon_get($page_file_path, null, true);
-
-        // url_check
-        url_check(ounun::$page_url, $ext_req, $domain);
-
-        // cache_html
-        if ('' == Environment) {
-            $cache_html_trim = global_all('debug', $cache_html_trim, 'html_trim');
-        }
-        if ($is_cache_html) {
-            $cache_html_time_expire = $cache_html_time_expire > 300 ? $cache_html_time_expire : 300;
-            $this->cache_html(ounun::$page_url, $cache_html_trim, $cache_html_time_expire);
-        }
-
-        // template
-        if (empty(static::$tpl)) {
-            static::$tpl = new template($cache_html_trim);
-        }
-    }
-
-    /**
-     * 网页Cache
-     *
-     * @param string $key
-     * @param bool $cache_html_trim
-     * @param int $cache_html_time_expire
-     */
-    protected function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
-    {
-        if ('' == Environment && $cache_config = global_all('cache', false, 'html')) {
-            $cache_config['prefix'] = 'c_html_' . ounun::$app_name . '_' . template::$theme . '_' . template::$type;
-            static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
-            static::$cache_html->run(true);
-        }
-    }
-
-    /**
-     * 是否马上输出cache
-     *
-     * @param bool $output
-     */
-    protected function cache_html_stop(bool $output)
-    {
-        if (static::$cache_html) {
-            static::$cache_html->stop($output);
-            static::$tpl->assign();
-        }
-    }
-
-    /**
      * 默认 首页
      *
      * @param array $url_mods
      */
-    public function index(array $url_mods)
-    {
-        $this->__call(__METHOD__, [$url_mods]);
-        // error404();
-    }
-
-    /**
-     * 默认 robots.txt文件
-     *
-     * @param array $url_mods
-     */
-    public function robots(array $url_mods = [])
-    {
-        url_check('/robots.txt');
-        // 执行
-        $filename = Dir_Root . 'env/app.robots.' . ounun::$app_name . '.txt';
-        $type     = 'text/plain';
-        $time     = 14400;
-        if (file_exists($filename)) {
-            $mtime = filemtime($filename);
-            expires($time, $mtime, $mtime, $type);
-            readfile($filename);
-        } else {
-            $mtime = time();
-            expires($time, $mtime, $mtime, $type);
-            exit("User-agent: *\nDisallow:");
-        }
-    }
-
-    /**
-     * 默认 ads.txt文件    google.com
-     *
-     * @param array $url_mods
-     */
-    public function ads(array $url_mods = [])
-    {
-        url_check('/ads.txt');
-        // 执行
-        $filename = Dir_Root . 'env/app.ads.' . ounun::$app_name . '.txt';
-        $type     = 'text/plain';
-        $time     = 14400;
-        if (file_exists($filename)) {
-            $mtime = filemtime($filename);
-            expires($time, $mtime, $mtime, $type);
-            readfile($filename);
-        } else {
-            $mtime = time();
-            expires($time, $mtime, $mtime, $type);
-            exit("google.com, pub-7081168645550959, DIRECT, f08c47fec0942fa0");
-        }
-    }
-
-    /**
-     * /favicon.ico
-     *
-     * @param array $url_mods
-     */
-    public function favicon(array $url_mods = [])
-    {
-        $filenames = [Dir_Root . 'public/static/favicon.ico', Dir_Root . 'public/favicon.ico'];
-        $type      = 'image/x-icon';
-        $time      = 14400;
-        foreach ($filenames as $filename) {
-            if (file_exists($filename)) {
-                $mtime = filemtime($filename);
-                expires($time, $mtime, $mtime, $type);
-                readfile($filename);
-                exit();
-            }
-        }
-        if ($_GET['t'] || empty(ounun::$url_static)) {
-            error404();
-        }
-        go_url(ounun::$url_static . 'favicon.ico?t=' . time(), false, 301);
-    }
-
-    /**
-     * 没定的方法
-     *
-     * @param string $method
-     * @param array|null $arguments
-     */
-    public function __call(string $method, ?array $arguments)
-    {
-        if (Environment) {
-            debug::i('404');
-        }
-        error404("<strong>method</strong> ----> {$method} " .
-            " <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) .
-            " <strong>template</strong> ------> " . json_encode(['type' => template::$type, 'type_default' => template::$type_default, 'theme' => template::$theme, 'theme_default' => template::$theme_default], JSON_UNESCAPED_UNICODE) .
-            " <strong>class</strong> -----> " . get_class($this));
-    }
+    abstract public function index(array $url_mods);
 }
 
 /** Web 开始 */

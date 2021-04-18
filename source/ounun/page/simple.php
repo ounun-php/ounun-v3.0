@@ -74,12 +74,12 @@ class simple
     /**
      * 得到分页数据
      *
-     * @param int $page
+     * @param int $page_curr
      * @param string $title
      * @param bool $end_index
      * @return array
      */
-    public function initialize(int $page = 0, string $title = "", bool $end_index = false): array
+    public function initialize(int $page_curr = 0, string $title = '', bool $end_index = false): array
     {
         $tag_default = $this->_config_page_tag_default;
         $tag_curr    = $this->_config_page_tag_curr;
@@ -88,7 +88,7 @@ class simple
         $title = $title ? "{$title}-" : '';
         $pages = [];
 
-        $data = $this->_data($page, $end_index);
+        $data = $this->_data($page_curr, $end_index);
         $note = $this->_note_set();
 
         $url_prev = '';

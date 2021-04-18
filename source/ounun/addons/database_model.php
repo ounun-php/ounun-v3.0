@@ -18,7 +18,7 @@ use ounun\page\simple;
  *
  * @package ounun\addons
  */
-class database_model extends pdo
+abstract class database_model extends pdo
 {
     /** @var self 数据库实例 */
     protected static $_instance;
@@ -44,10 +44,7 @@ class database_model extends pdo
     }
 
     /** 初始化 */
-    protected function _initialize()
-    {
-    }
-    //abstract protected function _initialize();
+    abstract protected function _initialize();
 
     /**
      * @param string $table 表名
@@ -75,37 +72,51 @@ class database_model extends pdo
     /**
      * 分页
      *
-     * @param string $where_str
-     * @param array $where_paras
-     * @param string $fields
-     * @param array $orders
+     * @param callable|null $fn_ret
+     * @param callable|null $fn_total
      * @param array $page_gets
      * @param array $page_config
-     * @param string|null $table
-     * @param callable|null $fn
+     * @param bool $end_index
+     * @param string $page_title
      * @return array
      */
-    public function pagination(string $where_str, array $where_paras, string $fields = '', array $orders = [], array $page_gets = [], array $page_config = [], ?string $table = null, ?callable $fn = null): array
+    public function paging(callable $fn_ret, callable $fn_total, array $page_gets = [], array $page_config = [], bool $end_index = true, string $page_title = ''): array
     {
-        $table ??= $this->table;
-        $fn    ??= function () use ($table, $where_str, $where_paras) {
+        $url = url_build_query(url_original(), $page_gets, ['page' => '{page}']);
+        $pg  = new simple($url, $page_config);
+        $ps  = $pg->fn_total_set($fn_total)->initialize((int)$page_gets['page'], $page_title, $end_index);
+        return [$ps, $fn_ret($pg)];
+    }
+
+
+    /**
+     * 简单 分页
+     *
+     * @param string $where_str
+     * @param array $where_paras
+     * @param array $orders
+     * @param string|null $table
+     * @param array $page_gets
+     * @param array $page_config
+     * @param bool $end_index
+     * @param string $page_title
+     * @return array
+     */
+    public function paging_simple(string $where_str = '', array $where_paras = [], array $orders = [], ?string $table = null, array $page_gets = [], array $page_config = [], bool $end_index = true, string $page_title = ''): array
+    {
+        $table    ??= $this->table;
+        $fn_total = function () use ($table, $where_str, $where_paras) {
             return $this->table($table)->where($where_str, $where_paras)->count_value();
         };
-        $page  = (isset($page_gets['page']) && (int)$page_gets['page'] > 1) ? (int)$page_gets['page'] : 1;
-        $url   = url_build_query(url_original(), $page_gets, ['page' => '{page}']);
-        $pg    = new simple($url, $page_config);
-        $ps    = $pg->fn_total_set($fn)->initialize($page);
-
-        // table
-        $this->table($table)->field($fields)
-            ->where($where_str, $where_paras)
-            ->limit($pg->limit_length(), $pg->limit_offset());
-        if ($orders && is_array($orders)) {
+        $fn_ret   = function (simple $pg) use ($orders, $table, $where_str, $where_paras) {
+            $this->table($table)->where($where_str, $where_paras)
+                ->limit($pg->limit_length(), $pg->limit_offset());
             foreach ($orders as $field => $order) {
                 $this->order($field, $order);
             }
-        }
-        return [$ps, $this->column_all()];
+            return $this->column_all();
+        };
+        return $this->paging($fn_ret, $fn_total, $page_gets, $page_config, $end_index, $page_title);
     }
 
     /**

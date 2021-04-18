@@ -12,6 +12,12 @@ abstract class command
     /** @var logic logic */
     public static $logic;
 
+    /** @var string 插件唯一标识 */
+    public static string $addon_tag = '';
+
+    /** @var string 插件展示子类 */
+    public static string $addon_view = '';
+
     /** @var string 命令的名字（"ounun" 后面的部分） */
     public string $name;
 

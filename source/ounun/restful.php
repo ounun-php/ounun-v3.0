@@ -90,7 +90,7 @@ class restful
      * @param $url_mods
      * @return bool|array
      */
-    public function _construct_before(array $url_mods = [])
+    protected function _construct_before(array $url_mods = [])
     {
         return true;
     }
@@ -125,7 +125,7 @@ class restful
      * @param string $key
      * @return array|mixed
      */
-    public function gets_get(string $key = ''): array
+    public function gets(string $key = ''): array
     {
         if ($key) {
             // return $this->_request_gets[$key];
@@ -139,7 +139,7 @@ class restful
      * @param string $key
      * @return array|mixed
      */
-    public function post_get(string $key = ''): array
+    public function post(string $key = ''): array
     {
         if ($key) {
             // return $this->_request_post[$key];
@@ -153,7 +153,7 @@ class restful
      * @param string $key
      * @return array|mixed
      */
-    public function cookie_get(string $key = ''): array
+    public function cookie(string $key = ''): array
     {
         if ($key) {
             // return $this->_request_cookie[$key];
@@ -167,7 +167,7 @@ class restful
      * @param string $key
      * @return array|mixed
      */
-    public function input_get(string $key = ''): ?array
+    public function input(string $key = ''): ?array
     {
         if ($key) {
             return $this->_request_inputs[$key];
@@ -179,7 +179,7 @@ class restful
      * @param string $key
      * @return array|mixed
      */
-    public function request_get(string $key): ?array
+    public function request(string $key): ?array
     {
         if ($key) {
             if ($_GET && isset($_GET[$key])) {
@@ -198,7 +198,7 @@ class restful
     /**
      * @return string
      */
-    public function method_get(): string
+    public function method(): string
     {
         return $this->_method;
     }

@@ -77,42 +77,4 @@ class lock
     {
         return $this->redis->del($key);
     }
-
-    /**
-     * 检测
-     *
-     * @param string $key
-     * @param string $pre
-     * @return bool
-     */
-//    public function check(string $key,string $pre = '')
-//    {
-//        return $this->redis->exists($this->make_key($key,$pre));
-//    }
-
-    /**
-     * down
-     *
-     * @param string $key
-     * @param int $expire
-     * @param string $pre
-     * @return bool|void
-     */
-//    public function down(string $key,int $expire,string $pre = '')
-//    {
-//        $key1 = $this->make_key($key,$pre);
-//        return $this->redis->set($key1,1,$expire);
-//    }
-
-    /**
-     * make key
-     *
-     * @param string $key
-     * @param string $pre
-     * @return string
-     */
-//    private function make_key(string $key,string $pre = '')
-//    {
-//        return $key = $pre . md5($key . '-' . date('Y-m-d'));
-//    }
 }

@@ -54,6 +54,7 @@ abstract class logic
      */
     abstract protected function _initialize();
 
+
     /**
      * 数据模型set
      *
@@ -77,6 +78,54 @@ abstract class logic
     {
         return $this->_db;
     }
+
+    /**
+     * 删除 - 操作动作
+     *
+     * @param array $data 数据
+     * @param string|null $type 类型
+     * @return array
+     */
+    public function data_del(array $data = [], ?string $type = null): array
+    {
+        return error('TODO: Implement data_del() method.');
+    }
+
+    /**
+     * 添加数据 - 操作动作
+     *
+     * @param array $data
+     * @param string|null $type 类型
+     * @return array
+     */
+    public function data_set(array $data = [], ?string $type = null): array
+    {
+        return error('TODO: Implement data_set() method.');
+    }
+
+    /**
+     * 获取数据 - 操作动作
+     *
+     * @param array $data
+     * @param string|null $type 类型
+     * @return array
+     */
+    public function data_get(array $data = [], ?string $type = null): array
+    {
+        return error('TODO: Implement data_get() method.');
+    }
+
+    /**
+     * 编辑 - 操作动作
+     *
+     * @param array $data
+     * @param string|null $type 类型
+     * @return array
+     */
+//    public function data_editor(array $data = [], ?string $type = null): array
+//    {
+//        return error('TODO: Implement data_editor() method.');
+//    }
 
     /**
      * 错误代码
