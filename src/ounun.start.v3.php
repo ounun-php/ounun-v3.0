@@ -753,15 +753,15 @@ function environment()
         return $GLOBALS['_environment_'];
     }
     // 读取环境配制
-    $file = Dir_Storage . 'runtime/.environment.php';
-    if (is_file($file)) {
-        require $file;
+    $file1 = Dir_Storage . 'runtime/.environment.php';
+    if (is_file($file1)) {
+        require $file1;
     } else {
-        $file = Dir_Root . 'env/environment.example.php';
-        if (is_file($file)) {
-            require $file;
+        $file2 = Dir_Root . 'env/example.environment.php';
+        if (is_file($file2)) {
+            require $file2;
         } else {
-            error_php('Unable to find: ${Dir_Root}/env/environment.example.php');
+            error_php("Unable to find: [{$file1},{$file2}]");
         }
     }
     if (!isset($GLOBALS['_environment_'])) {

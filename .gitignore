@@ -1,14 +1,7 @@
-app.*/data/cache/*
-app.*/data/html/*
-app.*/data/logs/*
-app.*/data/session/*
-app.*/environment.txt
-app.*/app/config2.php
-
-source/vendor/*
+app.*/data/*
+src/vendor/*
 example/*
 
 !.gitkeep
 .settings
 .idea
-source/ounun/cache2
