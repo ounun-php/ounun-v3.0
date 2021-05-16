@@ -17,7 +17,7 @@ define('Is_Cli', PHP_SAPI == 'cli');
 /** 是否Win - 环境常量 */
 define('Is_Win', strpos(PHP_OS, 'WIN') !== false);
 /** Ounun版本号 */
-define('Ounun_Version', '3.4.0');
+define('Ounun_Version', '3.5.0');
 
 /** root根目录 **/
 defined('Dir_Root') || define('Dir_Root', realpath(__DIR__ . '/../') . '/');
