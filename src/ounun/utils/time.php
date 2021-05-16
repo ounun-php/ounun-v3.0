@@ -23,7 +23,7 @@ class time
      * @param $time
      * @return string
      */
-    static public function reckon($time)
+    static public function reckon($time): string
     {
         $time_curr = time();
         // if($time > $time_curr){ return false; }
@@ -44,7 +44,7 @@ class time
             } else {
                 $str = floor($time_poor / (3600 * 24)) . '天前';
             }
-        } else if ($time_poor > 3600 * 24 * 7) {
+        } else{ // if ($time_poor > 3600 * 24 * 7) {
             $str = date("Y-m-d", $time);
         }
         return $str;
@@ -108,7 +108,6 @@ class time
         $this->yday      = $array["yday"];
         $this->monthtext = $array["month"];
         $this->weekday   = $array["weekday"];
-        return;
     }
 
     public function format($format = "%Y-%m-%d %H:%M:%S")
@@ -151,7 +150,7 @@ class time
         return $return;
     }
 
-    public function timediff($time, $precision = false)
+    public function timediff($time, $precision = false): string
     {
         if (!is_numeric($precision) && !is_bool($precision)) {
             static $_diff = ['y' => '年', 'm' => '个月', 'd' => '天', 'w' => '周', 'h' => '小时', 'i' => '分钟', 's' => '秒'];
@@ -181,28 +180,30 @@ class time
     public function firstday_of_week()
     {
         $wday = $this->wday === 0 ? 6 : $this->wday - 1;
-        if ($wday) $this->add(-$wday, 'd');
-        return (new date(mktime(0, 0, 0, $this->month, $this->day, $this->year)));
+        if ($wday) {
+            $this->add(-$wday, 'd');
+        }
+        return date(mktime(0, 0, 0, $this->month, $this->day, $this->year));
     }
 
     public function firstday_of_month()
     {
-        return (new date(mktime(0, 0, 0, $this->month, 1, $this->year)));
+        return date(mktime(0, 0, 0, $this->month, 1, $this->year));
     }
 
     public function firstday_of_year()
     {
-        return (new date(mktime(0, 0, 0, 1, 1, $this->year)));
+        return date(mktime(0, 0, 0, 1, 1, $this->year));
     }
 
     public function lastday_of_month()
     {
-        return (new date(mktime(0, 0, 0, $this->month + 1, 0, $this->year)));
+        return date(mktime(0, 0, 0, $this->month + 1, 0, $this->year));
     }
 
     public function lastday_of_year()
     {
-        return (new date(mktime(0, 0, 0, 1, 0, $this->year + 1)));
+        return date(mktime(0, 0, 0, 1, 0, $this->year + 1));
     }
 
     public function maxday_of_month()
@@ -241,6 +242,6 @@ class time
                 $day += ($number * 7);
                 break;
         }
-        return (new date(mktime($hours, $minutes, $seconds, $month, $day, $year)));
+        return date(mktime($hours, $minutes, $seconds, $month, $day, $year));
     }
 }

@@ -6,10 +6,12 @@
 
 namespace ounun\cache\driver;
 
+use ounun\cache\driver;
+
 /**
  * 文件类型缓存类(Code)
  */
-class code extends \ounun\cache\driver
+class code extends driver
 {
     /** @var string file类型 */
     const Type          = 'code';
@@ -105,7 +107,7 @@ class code extends \ounun\cache\driver
             }
             $this->expire = $expire;
             $content      = substr($content, 32);
-            if ($this->options['data_compress'] && function_exists('gzcompress')) {
+            if ($this->_options['data_compress'] && function_exists('gzcompress')) {
                 //启用数据压缩
                 $content = gzuncompress($content);
             }
@@ -127,7 +129,7 @@ class code extends \ounun\cache\driver
     public function set2($name, $value, $expire = null)
     {
         if (is_null($expire)) {
-            $expire = $this->options['expire'];
+            $expire = $this->_options['expire'];
         }
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();

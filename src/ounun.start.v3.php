@@ -4,13 +4,12 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-use apps\command\command;
 use ounun\addons\apps;
+use ounun\addons\console;
 use ounun\addons\logic;
 use ounun\db\db;
 use ounun\debug;
 use ounun\c;
-use ounun\cache\html;
 use ounun\template;
 
 /** 是否Cli - 环境常量 */
@@ -43,7 +42,7 @@ defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
  */
 function l(string $s)
 {
-    if ($l = $GLOBALS['_lang_']) {
+    if ($l = $GLOBALS['$L']) {
         if ($lang = $l[ounun::$lang]) {
             if ($s2 = $lang[$s]) {
                 return $s2;
@@ -65,24 +64,21 @@ function l(string $s)
  */
 function ip(): string
 {
-    static $hdr_ip;
-    if (empty($hdr_ip)) {
-        if (isset($_SERVER['HTTP_CDN_SRC_IP'])) {
-            $hdr_ip = stripslashes($_SERVER['HTTP_CDN_SRC_IP']);
+    if (isset($_SERVER['HTTP_CDN_SRC_IP'])) {
+        $hdr_ip = stripslashes($_SERVER['HTTP_CDN_SRC_IP']);
+    } else {
+        if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $hdr_ip = stripslashes($_SERVER['HTTP_CLIENT_IP']);
         } else {
-            if (isset($_SERVER['HTTP_CLIENT_IP'])) {
-                $hdr_ip = stripslashes($_SERVER['HTTP_CLIENT_IP']);
+            if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+                $hdr_ip = stripslashes($_SERVER['HTTP_X_FORWARDED_FOR']);
             } else {
-                if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-                    $hdr_ip = stripslashes($_SERVER['HTTP_X_FORWARDED_FOR']);
-                } else {
-                    $hdr_ip = stripslashes($_SERVER['REMOTE_ADDR']);
-                    if (empty($hdr_ip)) {
-                        $hdr_ip = '127.0.0.1';
-                    }
-                }
+                $hdr_ip = stripslashes($_SERVER['REMOTE_ADDR']);
             }
         }
+    }
+    if (empty($hdr_ip)) {
+        $hdr_ip = '127.0.0.1';
     }
     return $hdr_ip;
 }
@@ -107,14 +103,10 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         }
         if ($skip && is_array($skip)) {
             foreach ($skip as $key => $value) {
-                if ($value) {
-                    if (is_array($value) && in_array($data_query[$key], $value, true)) {
-                        unset($data_query[$key]);
-                    } elseif ($value == $data_query[$key]) {
-                        unset($data_query[$key]);
-                    }
-                } else {
+                if (is_array($value) && in_array($data_query[$key], $value)) {
                     unset($data_query[$key]);
+                } else {
+                    unset($data_query[$value]);
                 }
             }
         }
@@ -127,7 +119,7 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
                 foreach ($value as $k2 => $v2) {
                     $rs[] = $key . '[' . $k2 . ']=' . urlencode($v2);
                 }
-            } elseif ($value || 0 === $value || '0' === $value) {
+            } elseif ($value || 0 === $value) {
                 $rs[] = $key . '=' . urlencode($value);
             }
         }
@@ -343,7 +335,7 @@ function msg_close(string $msg, bool $close = false, $charset = 'utf-8'): void
  *
  * @return bool
  */
-function https_is()
+function https_is(): bool
 {
     if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
         return true;
@@ -364,7 +356,7 @@ function https_is()
  * @param array $extend 延伸数据
  * @return array
  */
-function error(string $msg = '', int $status = 1, $data = null, $extend = [])
+function error(string $msg = '', int $status = 1, $data = null, $extend = []): array
 {
     $rs = ['msg' => $msg, 'status' => $status,];
     if ($data) {
@@ -382,7 +374,7 @@ function error(string $msg = '', int $status = 1, $data = null, $extend = [])
  * @param mixed $data
  * @return bool
  */
-function error_is($data)
+function error_is($data): bool
 {
     if (empty($data) || !is_array($data) || !array_key_exists('status', $data) || (array_key_exists('status', $data) && $data['status'] == 0)) {
         return false;
@@ -421,7 +413,7 @@ function error_code($data): int
  * @param array $extend 延伸数据
  * @return array
  */
-function succeed($data, string $message = '', $extend = [])
+function succeed($data, string $message = '', $extend = []): array
 {
     $rs = ['msg' => $message, 'status' => 0, 'data' => $data];
     if ($extend) {
@@ -442,6 +434,27 @@ function succeed_data($data)
 }
 
 /**
+ * 返回 成功数据
+ *
+ * @param array $data
+ * @param mixed $data_data
+ * @return mixed
+ */
+function succeed_data_set(array $data, $data_data): array
+{
+    if (isset($data['data'])) {
+        if (is_array($data['data'])) {
+            $data['data'] = array_merge($data['data'], $data_data);
+        } else {
+            $data['data'] = array_merge($data_data, ['_data_' => $data['data']]);
+        }
+    } else {
+        $data['data'] = $data_data;
+    }
+    return $data;
+}
+
+/**
  * Ajax方式返回数据到客户端
  *
  * @param mixed $data 要返回的数据
@@ -449,7 +462,7 @@ function succeed_data($data)
  * @param string $jsonp_callback
  * @param int $json_options 传递给json_encode的option参数
  */
-function out($data, string $type = '', string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
+function out($data, string $type = c::Format_Json, string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
         $type = c::Format_Json;
@@ -487,22 +500,30 @@ function out($data, string $type = '', string $jsonp_callback = '', int $json_op
  * 获得 json字符串数据
  *
  * @param mixed $data
- * @return string
+ * @return string|null
  */
-function json_encode_unescaped($data): string
+function json_encode_unescaped($data)
 {
+    if (is_null($data)) {
+        return null;
+    }
     return json_encode($data, JSON_UNESCAPED_UNICODE);
 }
 
 /**
  * 对 json格式的字符串进行解码
  *
- * @param string|mixed $json_string
+ * @param string|null $json_string
  * @return mixed
  */
-function json_decode_array(?string $json_string)
+function json_decode_array($json_string)
 {
-    return json_decode($json_string, true);
+    if (is_null($json_string)) {
+        return null;
+    } elseif (is_string($json_string)) {
+        return json_decode($json_string, true);
+    }
+    return $json_string;
 }
 
 /**
@@ -513,20 +534,20 @@ function json_decode_array(?string $json_string)
  */
 function extend_decode_php(string $extend_string)
 {
-    $ext = [];
+    $extend = [];
     if ($extend_string) {
-        $ext = unserialize($extend_string);
+        $extend = unserialize($extend_string);
     }
-    return $ext;
+    return $extend;
 }
 
 /**
  * 获得 extend数据json
  *
- * @param string $extend_string
- * @return array|mixed
+ * @param string|null $extend_string
+ * @return mixed|array|null
  */
-function extend_decode_json(string $extend_string)
+function extend_decode_json(?string $extend_string)
 {
     $extend = [];
     if ($extend_string) {
@@ -653,7 +674,7 @@ function error404(string $msg = ''): void
 {
     header('Cache-Control: no-cache, must-revalidate, max-age=0');
     header('HTTP/1.1 404 Not Found');
-    exit('<html lang="zh">
+    echo '<html lang="zh">
             <head>
                 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
                 <title>404 Not Found</title>
@@ -661,11 +682,18 @@ function error404(string $msg = ''): void
             <body style="background-color: white;">
                 <div style="text-align: center;">
                     <h1>404 Not Found</h1>
+                    <p style="color: gray;">' . $_SERVER['HTTP_HOST'] . '</p>
                 </div>
                 <hr>
-                <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>
-                ' . ($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '') . '
-            </body>
+                <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>';
+    $is_backtrace = global_all('debug', false, 'backtrace');
+    if ($is_backtrace) {
+        echo($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '');
+        echo '<pre>' . PHP_EOL;
+        debug_print_backtrace();
+        echo '</pre>';
+    }
+    exit('</body>
             </html>
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- ' . ounun::$app_name . ' -->
@@ -674,6 +702,7 @@ function error404(string $msg = ''): void
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->
             <!-- a padding to disable MSIE and Chrome friendly error page -->' . "\n");
+
 }
 
 /**
@@ -686,12 +715,7 @@ function error404(string $msg = ''): void
 function error_php(string $error_msg, string $error_html = '', string $channel = 'php'): void
 {
     // global_all
-    $outs = global_all('debug', []);
-    if ($outs && isset($outs['out_config'])) {
-        $out = $outs['out_config'];
-    } else {
-        $out = null;
-    }
+    $out = global_all('debug_out');
     // if
     if ($out && isset($out['default']) && isset($out['default']['buffer'])) {
         if (isset($out[$channel]) && is_array($out[$channel])) {
@@ -703,7 +727,7 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
     } else {
         debug::i($channel);
     }
-    // print_r(['$debug'=>$debug,'$out'=>$out,'$c'=>$c]);
+    // print_r(['$out' => $out, '$error_msg' => $error_msg, '$error_html' => $error_html, '$channel' => $channel]);
     if ($error_html) {
         echo $error_html;
     }
@@ -747,21 +771,21 @@ function retry(int $times, callable $callback, int $sleep = 0)
  *
  * @return string '','2','-dev'
  */
-function environment()
+function environment(): string
 {
     if (isset($GLOBALS['_environment_'])) {
         return $GLOBALS['_environment_'];
     }
     // 读取环境配制
-    $file1 = Dir_Storage . 'runtime/.environment.php';
-    if (is_file($file1)) {
-        require $file1;
+    $filename = Dir_Storage . 'runtime/.environment.php';
+    if (is_file($filename)) {
+        require $filename;
     } else {
-        $file2 = Dir_Root . 'env/example.environment.php';
-        if (is_file($file2)) {
-            require $file2;
+        $filename = Dir_Root . 'env/example.environment.php';
+        if (is_file($filename)) {
+            require $filename;
         } else {
-            error_php("Unable to find: [{$file1},{$file2}]");
+            error_php('Unable to find: ${Dir_Root}/env/example.environment.php');
         }
     }
     if (!isset($GLOBALS['_environment_'])) {
@@ -775,53 +799,60 @@ function environment()
  *
  * @param string $key
  * @param mixed $default
+ * @param string|null $sub_key
  * @return mixed
  */
-function global_all(string $key, $default = null)
+function global_all(string $key, $default = null, ?string $sub_key = null)
 {
-    if ($key && isset(ounun::$global[$key]) && $value = ounun::$global[$key]) {
-        return $value;
-    }
-    return $default;
-}
-
-/**
- * 公共配制数据(应用)
- *
- * @param string $key
- * @param mixed $default
- * @param string $app_name
- * @return mixed
- */
-function global_apps(string $key, $default = null, string $app_name = '')
-{
-    $app_name ??= ounun::$app_name;
-    if ($app_name) {
-        $tag = ounun::$global_apps[$app_name];
-        if ($tag && $value = $tag[$key]) {
-            return $value;
+    $ret = $default;
+    if ($key && isset(ounun::$global[$key])) {
+        if (is_null($sub_key)) {
+            $ret = ounun::$global[$key];
+        }
+        $value = ounun::$global[$key];
+        if (is_array($value) && isset($value[$sub_key])) {
+            $ret = $value[$sub_key];
         }
     }
-    return $default;
+    if (is_null($default)) {
+        return $ret;
+    } elseif (empty($ret)) {
+        return $default;
+    }
+    return $ret;
 }
 
 /**
  * 公共配制数据(插件)
  *
- * @param string $key
- * @param mixed $default
  * @param string $addon_tag
+ * @param string|null $key
+ * @param mixed $default
+ * @param string|null $sub_key
  * @return mixed
  */
-function global_addons(string $key, string $addon_tag, $default = null)
+function global_addons(string $addon_tag, ?string $key = null, $default = null, ?string $sub_key = null)
 {
-    // 加载  -> runtime_apps 生成时加载
-    // 转换翻译
-    $tag = ounun::$global_addons[$addon_tag];
-    if ($tag && $value = $tag[$key]) {
-        return $value;
+    $ret    = $default;
+    $values = ounun::$global_addons[$addon_tag];
+    if (is_null($key)) {
+        $ret = $values;
     }
-    return $default;
+    if ($values && isset($values[$key])) {
+        if (is_null($sub_key)) {
+            $ret = $values[$key];
+        }
+        $value = $values[$key];
+        if (is_array($value) && isset($value[$sub_key])) {
+            $ret = $value[$sub_key];
+        }
+    }
+    if (is_null($default)) {
+        return $ret;
+    } elseif (empty($ret)) {
+        return $default;
+    }
+    return $ret;
 }
 
 /**
@@ -869,16 +900,11 @@ class ounun
     public static array $global = [];
     /** @var array 公共配制数据(插件) */
     public static array $global_addons = [];
-    /** @var array 公共配制数据(应用) */
-    public static array $global_apps = [];
 
     /** @var array DB配制数据 */
     public static array $database = [];
     /** @var string 默认 数据库 */
     public static string $database_default = '';
-
-    /** @var array 命令s */
-    public static array $commands = [];
 
     /** @var array 添加App路径(根目录) */
     public static array $paths = [];
@@ -906,8 +932,6 @@ class ounun
     public static array $maps_path = [];
     /** @var array 自动加载路径maps */
     public static array $maps_class = [];
-    /** @var array 当前已安装的功能模块(插件) */
-    public static array $maps_installed_addon = [];
 
 
     /** @var array 插件addons数据 */
@@ -957,15 +981,11 @@ class ounun
     /**
      * 添加命令行
      *
-     * @param array $commands
+     * @param array $commands $key => $command   索引关键key:命令实例
      */
     static public function commands_set(array $commands)
     {
-        foreach ($commands as $command) {
-            if ($command && !in_array($command, ounun::$commands)) {
-                ounun::$commands[] = $command;
-            }
-        }
+        console::add($commands);
     }
 
     /**
@@ -973,9 +993,8 @@ class ounun
      *
      * @param string $lang
      * @param string $lang_default
-     * @param array $lang_support_list 设定支持的语言
      */
-    static public function lang_set(string $lang = '', string $lang_default = '', array $lang_support_list = [])
+    static public function lang_set(string $lang = '', string $lang_default = '')
     {
         if ($lang) {
             static::$lang = $lang;
@@ -983,16 +1002,11 @@ class ounun
         if ($lang_default) {
             static::$lang_default = $lang_default;
         }
-        if ($lang_support_list && is_array($lang_support_list)) {
-            foreach ($lang_support_list as $lang => $lang_name) {
-                static::$lang_support[$lang] = $lang_name;
-            }
-        }
         // 加载 语言包
         if (static::$lang && static::$lang != static::$lang_default) {
-            $file = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang . '.php';
-            if (is_file($file)) {
-                require $file;
+            $filename = Dir_Storage . 'runtime/.lang_' . static::$app_name . '_' . static::$lang . '.php';
+            if (is_file($filename)) {
+                require_once $filename;
             }
         }
         // 加载 默认语言包 -> runtime_apps 自动加载
@@ -1006,31 +1020,13 @@ class ounun
     static public function global_set(array $config = [])
     {
         if ($config) {
+            if (empty(static::$global) || !is_array(static::$global)) {
+                static::$global = [];
+            }
             foreach ($config as $key => $value) {
                 static::$global[$key] = $value;
             }
         }
-    }
-
-    /**
-     * 设定公共配制数据(应用)
-     *
-     * @param array $config
-     * @param string $app_name
-     */
-    static public function global_apps_set(array $config = [], string $app_name = '')
-    {
-        if ($config) {
-            $app_name ??= static::$app_name;
-            if (!isset(static::$global_apps[$app_name])) {
-                static::$global_apps[$app_name] = [];
-            } elseif (is_array(static::$global_apps[$app_name])) {
-                static::$global_apps[$app_name] = [];
-            }
-            foreach ($config as $key => $value) {
-                static::$global_apps[$app_name][$key] = $value;
-            }
-        } // end $config
     }
 
     /**
@@ -1043,9 +1039,7 @@ class ounun
     {
         if ($config) {
             if ($addon_tag) {
-                if (!isset(static::$global_addons[$addon_tag])) {
-                    static::$global_addons[$addon_tag] = [];
-                } elseif (is_array(static::$global_addons[$addon_tag])) {
+                if (!isset(static::$global_addons[$addon_tag]) || !is_array(static::$global_addons[$addon_tag])) {
                     static::$global_addons[$addon_tag] = [];
                 }
                 foreach ($config as $key => $value) {
@@ -1078,7 +1072,7 @@ class ounun
      *
      * @return string
      */
-    static public function database_default_get()
+    static public function database_default_get(): string
     {
         if (empty(static::$database_default)) {
             static::$database_default = static::$app_name;
@@ -1092,11 +1086,11 @@ class ounun
      * @param string $addon_tag
      * @param string $addon_view
      * @param string $path
-     * @param string $lang
+     * @param string|null $lang
      * @param bool $is_current 是否当前页面
      * @return string
      */
-    static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false)
+    static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false): string
     {
         // 空
         if (empty($addon_tag)) {
@@ -1126,6 +1120,7 @@ class ounun
         } else {
             $page_file_path = $key . $path;
         }
+
         return static::url_get($page_file_path, $lang, $is_current);
     }
 
@@ -1133,11 +1128,11 @@ class ounun
      * 当前面页
      *
      * @param string $page_file_path
-     * @param string $lang
+     * @param string|null $lang
      * @param bool $is_current 是否当前页面
      * @return string
      */
-    static public function url_get(string $page_file_path = '', string $lang = null, bool $is_current = true)
+    static public function url_get(string $page_file_path = '', string $lang = null, bool $is_current = true): string
     {
         $lang ??= static::$lang;
         if ($lang == static::$lang_default) {
@@ -1151,9 +1146,6 @@ class ounun
         if ($is_current && empty(static::$page_url)) {
             static::url_set($page_file_path, $page_url, $lang_path);
         }
-
-//        echo json_encode_unescaped(['$page_file_path'=>$page_file_path,'$page_url'=>$page_url,'$lang_path'=>$lang_path,'$lang'=>$lang,'static::$lang'=>static::$lang,
-//                                    'static::$app_path'=>static::$app_path,'static::$page_url'=>static::$page_url])."\n";
         return $page_url;
     }
 
@@ -1173,18 +1165,18 @@ class ounun
 
         /** @var string Www Page */
         $pages            = explode('/', static::$root_www, 4);
-        $path             = $pages[3] ? "/{$pages[3]}" : '';
-        static::$page_www = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
+        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_www = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
 
         /** @var string Mobile Page */
         $pages            = explode('/', static::$root_wap, 4);
-        $path             = $pages[3] ? "/{$pages[3]}" : '';
-        static::$page_wap = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
+        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_wap = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
 
         /** @var string Mip Page */
         $pages            = explode('/', static::$root_mip, 4);
-        $path             = $pages[3] ? "/{$pages[3]}" : '';
-        static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path}{$page_file_path}";
+        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
     }
 
     /**
@@ -1207,7 +1199,7 @@ class ounun
      *
      * @return string
      */
-    static public function root_curr_get()
+    static public function root_curr_get(): string
     {
         if (template::$type == template::Type_Mip) {
             return static::$root_mip;
@@ -1262,7 +1254,7 @@ class ounun
     }
 
     /**
-     * 添加自动加载路径
+     * 添加自动加载路径(尽量少调用，生成配制)
      * @param string $path_root 目录路径
      * @param string $namespace_prefix 命名空间
      * @param bool $cut_path 是否剪切 目录路径中的 命名空间
@@ -1280,12 +1272,10 @@ class ounun
             if (empty(static::$maps_path)
                 || empty(static::$maps_path[$first])
                 || !(is_array(static::$maps_path[$first]) && in_array($path_root, array_column(static::$maps_path[$first], 'path')))) {
-                static::$maps_path[$first][] = [
-                    'path'      => $path_root,
-                    'len'       => $len,
-                    'cut'       => $cut_path,
-                    'namespace' => $namespace_prefix
-                ];
+                static::$maps_path[$first][] = ['path'      => $path_root,
+                                                'len'       => $len,
+                                                'cut'       => $cut_path,
+                                                'namespace' => $namespace_prefix];
             }
         }
     }
@@ -1296,7 +1286,7 @@ class ounun
      * @param $class
      * @return string
      */
-    static protected function load_class_file_exists($class)
+    static protected function load_class_file_exists($class): string
     {
         // 类库映射
         if (!empty(static::$maps_class[$class])) {
@@ -1352,79 +1342,7 @@ class ounun
         /** src-0 \addons   自动加载  */
         ounun::load_class_set($path_root . 'addons/', 'addons', true);
     }
-
-    /**
-     * 模块 快速路由
-     *
-     * @param array $url_mods
-     * @return array
-     */
-    static public function addon_get(array $url_mods = [])
-    {
-        // debug::header([$url_mods, ounun::$addon_route], 'addon_route', __FILE__, __LINE__);
-
-        // 修正App_Name
-        $app_name = (static::$app_name === static::App_Name_Web || in_array(static::$app_name, static::App_Names))
-            ? static::$app_name
-            : static::App_Name_Web;
-
-        // 插件路由
-        $addon_tag = '';
-        /** @var apps $apps */
-        if ($url_mods[1] && ($addon = static::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
-            array_shift($url_mods);
-            array_shift($url_mods);
-            $addon_tag = $apps::Addon_Tag;
-        } elseif ($url_mods[0] && ($addon = static::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
-            array_shift($url_mods);
-            $addon_tag = $apps::Addon_Tag;
-        } elseif (($addon = static::$addon_route['']) && $apps = $addon['apps']) {
-            $addon_tag = $apps::Addon_Tag;
-        } else {
-            error_php('ounun::$addon_mount[\'\']: There is no default value -> $addon_mount:' . json_encode(ounun::$addon_route) . '');
-        }
-
-        // api
-        if ($app_name == static::App_Name_Api) {
-            $filename   = Dir_Ounun . 'ounun/restful.php';
-            $class_name = "\\ounun\\restful";
-            return [$filename, $class_name, $addon_tag, $url_mods];
-        }
-
-        // view
-        if ($addon['view']) {
-            $class_filename = "{$addon_tag}/{$app_name}/{$addon['view']}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$addon['view']}";
-        } else {
-            $class_filename = "{$addon_tag}/{$app_name}.php";
-            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
-        }
-        debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
-
-        // paths
-        if ($class_filename) {
-            $paths = static::$maps_path['addons'];
-            if ($paths && is_array($paths)) {
-                foreach ($paths as $v) {
-                    $filename = $v['path'] . $class_filename;
-                    // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
-                    if (is_file($filename)) {
-                        if (empty($url_mods)) {
-                            if (isset($addon['method']) && $addon['method']) {
-                                $url_mods = [$addon['method']];
-                            } else {
-                                $url_mods = [static::Def_Method];
-                            }
-                        }
-                        return [$filename, $class_name, $addon_tag, $url_mods];
-                    }
-                }
-            } // if ($paths
-        }
-        return ['', '', '', $url_mods];
-    }
 }
-
 
 /**
  * 构造模块基类 Class ViewBase
@@ -1436,14 +1354,8 @@ abstract class v
     /** @var logic logic */
     public static $logic;
 
-    /** @var html|null cache_html */
-    public static ?html $cache_html;
-
     /** @var  template|null  Template句柄容器 */
     public static ?template $tpl;
-
-    /** @var debug|null debug调试相关 */
-    public static ?debug $debug;
 
     /** @var string 插件唯一标识 */
     public static string $addon_tag = '';
@@ -1480,54 +1392,6 @@ abstract class v
     }
 
     /**
-     * 网址路径前缀(Url)
-     *
-     * @param string $path
-     * @param string|null $lang
-     * @param bool $is_current 是否当前页面
-     * @param string|null $addon_view
-     * @param string|null $addon_tag
-     * @return string
-     */
-    public static function url_addon_get(string $path = '', ?string $lang = null, bool $is_current = false, ?string $addon_view = null, ?string $addon_tag = null)
-    {
-        $addon_tag  ??= static::$addon_tag;
-        $addon_view ??= static::$addon_view;
-        return ounun::url_addon_get($addon_tag, $addon_view, $path, $lang, $is_current);
-    }
-
-    /**
-     * 当前面页
-     *
-     * @param string $page_file_path
-     * @param string|null $lang
-     * @param bool $is_current 是否当前页面
-     * @return string
-     */
-    public static function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true)
-    {
-        return ounun::url_get($page_file_path, $lang, $is_current);
-    }
-
-    /**
-     * 本页跳转 - 带参数$replace_ext
-     *
-     * @param array $replace_ext 要替换的数据
-     * @param string|null $url URL
-     * @param array $data_query 数据
-     * @param array $skip 忽略的数据 如:page
-     */
-    public static function url_go(array $replace_ext = [], ?string $url = null, array $data_query = [], array $skip = [])
-    {
-        $url ??= \ounun::$page_url;
-        if (empty($data_query)) {
-            $data_query = (array)$_GET;
-        }
-        $url = url_build_query($url, $data_query, $replace_ext, $skip);
-        go_url($url);
-    }
-
-    /**
      * ounun_view constructor.
      *
      * @param array $url_mods
@@ -1554,167 +1418,11 @@ abstract class v
     abstract protected function _initialize(string $method);
 
     /**
-     * 初始化Page
-     *
-     * @param string $page_file_path
-     * @param bool $is_cache_html
-     * @param bool $ext_req
-     * @param string $domain
-     * @param int $cache_html_time_expire
-     * @param bool $cache_html_trim
-     */
-    protected function _initialize_page(string $page_file_path = '', bool $is_cache_html = true, bool $ext_req = true, string $domain = '',
-                                        int $cache_html_time_expire = 0, bool $cache_html_trim = true)
-    {
-        // url
-        $this->url_addon_get($page_file_path, null, true);
-
-        // url_check
-        url_check(ounun::$page_url, $ext_req, $domain);
-
-        // cache_html
-        if ('' == Environment) {
-            $debug           = global_all('debug');
-            $cache_html_trim = ($debug && isset($debug['html_trim'])) ? $debug['html_trim'] : $cache_html_trim;
-        }
-        if ($is_cache_html) {
-            $cache_html_time_expire = $cache_html_time_expire > 300 ? $cache_html_time_expire : 300;
-            $this->cache_html(ounun::$page_url, $cache_html_trim, $cache_html_time_expire);
-        }
-
-        // template
-        if (empty(static::$tpl)) {
-            static::$tpl = new template($cache_html_trim);
-        }
-    }
-
-    /**
-     * 网页Cache
-     *
-     * @param string $key
-     * @param bool $cache_html_trim
-     * @param int $cache_html_time_expire
-     */
-    protected function cache_html(string $key, bool $cache_html_trim, int $cache_html_time_expire = 2678400)
-    {
-        if ('' == Environment && $cache_config = global_all('cache', [])['html']) {
-            $cache_config['prefix'] = 'c_html_' . ounun::$app_name . '_' . template::$theme . '_' . template::$type;
-            static::$cache_html     = new html($cache_config, $key, $cache_html_time_expire, $cache_html_trim);
-            static::$cache_html->run(true);
-        }
-    }
-
-    /**
-     * 是否马上输出cache
-     *
-     * @param bool $output
-     */
-    protected function cache_html_stop(bool $output)
-    {
-        if (static::$cache_html) {
-            static::$cache_html->stop($output);
-            static::$tpl->assign();
-        }
-    }
-
-    /**
      * 默认 首页
      *
      * @param array $url_mods
      */
-    public function index(array $url_mods)
-    {
-        error404("<strong>method</strong>  --> " . __METHOD__ . " <br />\n  
-                       <strong>url_mods</strong> ------> " . json_encode($url_mods, JSON_UNESCAPED_UNICODE) . " <br />\n  
-                       <strong>class</strong> ------> " . get_class($this));
-    }
-
-    /**
-     * 默认 robots.txt文件
-     *
-     * @param array $url_mods
-     */
-    public function robots(array $url_mods = [])
-    {
-        url_check('/robots.txt');
-        // 执行
-        $filename = Dir_Root . 'env/app.robots.' . ounun::$app_name . '.txt';
-        $type     = 'text/plain';
-        $time     = 14400;
-        if (file_exists($filename)) {
-            $mtime = filemtime($filename);
-            expires($time, $mtime, $mtime, $type);
-            readfile($filename);
-        } else {
-            $mtime = time();
-            expires($time, $mtime, $mtime, $type);
-            exit("User-agent: *\nDisallow:");
-        }
-    }
-
-    /**
-     * 默认 ads.txt文件    google.com
-     *
-     * @param array $url_mods
-     */
-    public function ads(array $url_mods = [])
-    {
-        url_check('/ads.txt');
-        // 执行
-        $filename = Dir_Root . 'env/app.ads.' . ounun::$app_name . '.txt';
-        $type     = 'text/plain';
-        $time     = 14400;
-        if (file_exists($filename)) {
-            $mtime = filemtime($filename);
-            expires($time, $mtime, $mtime, $type);
-            readfile($filename);
-        } else {
-            $mtime = time();
-            expires($time, $mtime, $mtime, $type);
-            exit("google.com, pub-7081168645550959, DIRECT, f08c47fec0942fa0");
-        }
-    }
-
-    /**
-     * /favicon.ico
-     *
-     * @param array $url_mods
-     */
-    public function favicon(array $url_mods = [])
-    {
-        $filenames = [Dir_Root . 'public/static/favicon.ico', Dir_Root . 'public/favicon.ico'];
-        $type      = 'image/x-icon';
-        $time      = 14400;
-        foreach ($filenames as $filename) {
-            if (file_exists($filename)) {
-                $mtime = filemtime($filename);
-                expires($time, $mtime, $mtime, $type);
-                readfile($filename);
-                exit();
-            }
-        }
-        if ($_GET['t'] || empty(ounun::$url_static)) {
-            error404();
-        }
-        go_url(ounun::$url_static . 'favicon.ico?t=' . time(), false, 301);
-    }
-
-    /**
-     * 没定的方法
-     *
-     * @param string $method
-     * @param String $arguments
-     */
-    public function __call($method, $arguments)
-    {
-        header('HTTP/1.1 404 Not Found');
-        if (Environment) {
-            debug::i('404');
-        }
-        error404("<strong>method</strong> -->   {$method} <br />\n 
-                        <strong>args</strong> ------> " . json_encode($arguments, JSON_UNESCAPED_UNICODE) . " <br />\n 
-                        <strong>class</strong> -----> " . get_class($this));
-    }
+    abstract public function index(array $url_mods);
 }
 
 /** Web 开始 */
@@ -1724,7 +1432,7 @@ function start_web()
     $host     = $_SERVER['HTTP_HOST'];
     $uri      = url_original($_SERVER['REQUEST_URI']);
     $url_mods = url_to_mod($uri);
-
+    debug::header(['REQUEST_URI' => $_SERVER['REQUEST_URI'], '$url_mods' => $url_mods], '', __FILE__, __LINE__);
     // 语言lang
     if ($url_mods && $url_mods[0] && ounun::$lang_support[$url_mods[0]]) {
         $lang = array_shift($url_mods);
@@ -1749,6 +1457,11 @@ function start_web()
     $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
     if (is_file($filename)) {
         require $filename;
+    } else {
+        $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
+        if (is_file($filename)) {
+            require $filename;
+        }
     }
 
     // lang
@@ -1771,10 +1484,90 @@ function start_web()
     header('X-Powered-By: cms.cc; ounun.org;');
     debug::header(['$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
+    // URL path_find
+    $find = function (string $class_filename, array $url_mods, array $addon) {
+        $paths = ounun::$maps_path['addons'];
+        if ($paths && is_array($paths)) {
+            foreach ($paths as $v) {
+                $filename = $v['path'] . $class_filename;
+                if (is_file($filename)) {
+                    // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
+                    if (empty($url_mods)) {
+                        if (isset($addon['method']) && $addon['method']) {
+                            $url_mods = [$addon['method']];
+                        } else {
+                            $url_mods = [ounun::Def_Method];
+                        }
+                    }
+                    return [$filename, $url_mods];
+                }
+            }
+        }
+        return ['', $url_mods];
+    };
+
+    // 模块 快速路由
+    $addon_get = function ($url_mods) use ($find) {
+        // 修正App_Name
+        $app_name = (ounun::$app_name === ounun::App_Name_Web || in_array(ounun::$app_name, ounun::App_Names))
+            ? ounun::$app_name
+            : ounun::App_Name_Web;
+
+        // 插件路由
+        $addon_tag = '';
+        /** @var apps $apps */
+        if ($url_mods[1] && ($addon = ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
+            array_shift($url_mods);
+            array_shift($url_mods);
+            $addon_tag = $apps::Addon_Tag;
+        } elseif ($url_mods[0] && ($addon = ounun::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
+            array_shift($url_mods);
+            $addon_tag = $apps::Addon_Tag;
+        } elseif (($addon = ounun::$addon_route['']) && $apps = $addon['apps']) {
+            $addon_tag = $apps::Addon_Tag;
+        } else {
+            error404('ounun::$addon_route[\'\']: There is no default value -> $addon_route:' . json_encode(ounun::$addon_route) . '');
+        }
+
+        // api
+        if ($app_name == ounun::App_Name_Api) {
+            // 插件路由api
+            $class_filename = "{$addon_tag}/restful.php";
+            $class_name     = "\\addons\\{$addon_tag}\\restful";
+            list($filename, $url_mods) = $find($class_filename, $url_mods, $addon);
+            if ($filename) {
+                return [$filename, $class_name, $addon_tag, $url_mods];
+            }
+            // 默认
+            $filename   = Dir_Ounun . 'ounun/restful.php';
+            $class_name = "\\ounun\\restful";
+            return [$filename, $class_name, $addon_tag, $url_mods];
+        }
+
+        // view
+        if ($addon['view']) {
+            $class_filename = "{$addon_tag}/{$app_name}/{$addon['view']}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}\\{$addon['view']}";
+        } else {
+            $class_filename = "{$addon_tag}/{$app_name}.php";
+            $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
+        }
+        // debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
+
+        // paths
+        if ($class_filename) {
+            list($filename, $url_mods) = $find($class_filename, $url_mods, $addon);
+            if ($filename) {
+                return [$filename, $class_name, $addon_tag, $url_mods];
+            }
+        }
+        return ['', '', '', $url_mods];
+    };
+
     // 设定 模块与方法(缓存)
     /** @var v $classname */
-    list($filename, $classname, $addon_tag, $url_mods) = ounun::addon_get($url_mods);
-    debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
+    list($filename, $classname, $addon_tag, $url_mods) = $addon_get($url_mods);
+    // debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
     // 包括模块文件
     if ($filename) {
@@ -1792,32 +1585,39 @@ function start_web()
 /**
  * Cli 开始
  * @param array $argv
+ * @param array $commands
+ * @param string $name
+ * @param string $version
  * @return int
  */
-function start_cli(array $argv)
+function start_cli(array $argv, array $commands = [], string $name = 'Ounun Command', string $version = '0.1'): int
 {
-    \ounun::$app_name = \ounun::App_Name_Command;
-    \ounun::$app_path = '/';
+    ounun::$app_name = ounun::App_Name_Command;
+    ounun::$app_path = '/';
 
     // runtime_apps
-    $filename = Dir_Storage . 'runtime/.runtime_' . \ounun::$app_name . '.php';
+    $filename = Dir_Storage . 'runtime/.runtime_' . ounun::$app_name . '.php';
     if (is_file($filename)) {
         require $filename;
-    }
-
-    // paths
-    foreach (\ounun::$paths as $v) {
-        // path_set
-        \ounun::path_root_set($v['path']);
-        if ($v['is_auto_helper']) {
-            // load_helper
-            \ounun::load_helper($v['path']);
+    } else {
+        $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
+        if (is_file($filename)) {
+            require $filename;
         }
     }
 
-    return (new \ounun\addons\console([]))->execute($argv);
-}
+    // paths
+    foreach (ounun::$paths as $v) {
+        // path_set
+        ounun::path_root_set($v['path']);
+        if ($v['is_auto_helper']) {
+            // load_helper
+            ounun::load_helper($v['path']);
+        }
+    }
 
+    return (new console($commands, $name, $version))->execute($argv);
+}
 
 /** 自动加载 src-4 \ounun  */
 ounun::load_class_set(Dir_Ounun, 'ounun', false);

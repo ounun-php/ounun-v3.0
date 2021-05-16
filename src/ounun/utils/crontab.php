@@ -70,7 +70,6 @@ class crontab
             $this->_cron  = [];
             $this->_error = "cron_str与cron_data 不能为都为空";
         }
-        return;
     }
 
     /**
@@ -133,7 +132,7 @@ class crontab
      *
      * @return array 若为空数组则表示可任意取值
      */
-    protected function parse($part, $f_min, $f_max)
+    protected function parse(string $part, int $f_min, int $f_max): array
     {
         $list = [];
         // 处理"," -- 列表

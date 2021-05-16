@@ -70,7 +70,7 @@ class pdo
     /** @var string pdo驱动默认为mysql */
     protected string $_driver = 'mysql';
     /** @var string table前缀 - 替换成的前缀 */
-    protected string $_table_prefix_replace = 'v1';
+    protected string $_table_prefix_replace = 'v2';
     /** @var string table前缀 - 被替换的常量 */
     protected string $_table_prefix_search = '#@_';
 
@@ -80,6 +80,8 @@ class pdo
     protected string $_option = '';
     /** @var array 字段 */
     protected array $_fields = [];
+    /** @var array 字段 */
+    protected array $_fields_json = [];
     /** @var array 排序字段 */
     protected array $_order = [];
     /** @var array 分组字段 */
@@ -109,12 +111,11 @@ class pdo
     protected bool $_is_multiple = false;
     /** @var bool 是否替换插入 */
     protected bool $_is_replace = false;
-    /** @var bool  条件参数 默认true:执行execute  绑定false:bind_param */
-//    protected $_is_execute  = true;
 
-
-    /** @var array DB 相关 */
-    private static array $_instance = [];
+    /** @var self 数据库实例 */
+    protected static $_instance;
+    /** @var array pdo实例 */
+    private static array $_pdos = [];
 
     /**
      * @param string $tag
@@ -123,20 +124,20 @@ class pdo
      */
     public static function i(string $tag = '', array $config = []): ?self
     {
-        if (empty($tag)) {
-            $tag = \ounun::database_default_get();
-        }
-        if (empty(self::$_instance[$tag])) {
+        if (empty(static::$_instance)) {
             if (empty($config)) {
+                if (empty($tag)) {
+                    $tag = \ounun::database_default_get();
+                }
                 $config = \ounun::$database[$tag];
             }
             if ($config) {
-                self::$_instance[$tag] = new static($config);
+                static::$_instance = new static($config);
             } else {
                 return null;
             }
         }
-        return self::$_instance[$tag];
+        return static::$_instance;
     }
 
     /**
@@ -183,27 +184,27 @@ class pdo
     /**
      * 发送一条MySQL查询
      * @param string $sql
-     * @param array|string $param 条件参数
+     * @param array|string $bind_params 条件参数
      * @param bool $check_active
      * @return $this
      */
-    public function query(string $sql = '', $param = [], bool $check_active = true)
+    public function query(string $sql = '', $bind_params = [], bool $check_active = true)
     {
         if (strpos($sql, '?') !== false) {
             if ($check_active) {
                 $this->active();
             }
-            $sql = str_replace('?', $this->quote($param), $sql);
+            $sql = str_replace('?', $this->quote($bind_params), $sql);
             $this->_prepare($sql, false);
             $this->_stmt->execute();
         } else {
             $this->_prepare($sql, $check_active);
-            if ($param && is_array($param)) {
-                $param = $this->_values_parse($param);
+            if ($bind_params && is_array($bind_params)) {
+                $bind_params = $this->_values_parse($bind_params);
             } else {
-                $param = [];
+                $bind_params = [];
             }
-            $this->_execute($param);
+            $this->_execute($bind_params);
         }
         return $this;
     }
@@ -239,15 +240,18 @@ class pdo
     public function active(): self
     {
         if (null == $this->_pdo) {
-            $dsn     = "{$this->_driver}:host={$this->_host};port={$this->_port};dbname={$this->_database};charset={$this->_charset}";
-            $options = [];
-            if (self::Driver_Mysql == $this->_driver) {
-                $options = [
-                    \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                    //\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '{$this->_charset}'"
-                ];
+            $dsn = "{$this->_driver}:host={$this->_host};port={$this->_port};dbname={$this->_database};charset={$this->_charset}";
+            $key = md5($dsn . $this->_username . $this->_password);
+            if (self::$_pdos && isset(self::$_pdos[$key]) && $pdo = self::$_pdos[$key]) {
+                $this->_pdo = $pdo;
+            } else {
+                $options = [];
+                if (self::Driver_Mysql == $this->_driver) {
+                    $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,];
+                }
+                $this->_pdo        = new \PDO($dsn, $this->_username, $this->_password, $options);
+                self::$_pdos[$key] = $this->_pdo;
             }
-            $this->_pdo = new \PDO($dsn, $this->_username, $this->_password, $options);
         }
         return $this;
     }
@@ -378,6 +382,17 @@ class pdo
             $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
                 ->_execute($this->_bind_param);
         }
+        if ($this->_fields_json) {
+            $rs = $this->_stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($rs && is_array($rs)) {
+                foreach ($this->_fields_json as $field) {
+                    if (isset($rs[$field])) {
+                        $rs[$field] = json_decode_array($rs[$field]);
+                    }
+                }
+            }
+            return $rs;
+        }
         return $this->_stmt->fetch(\PDO::FETCH_ASSOC);
     }
 
@@ -393,12 +408,36 @@ class pdo
             $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
                 ->_execute($this->_bind_param);
         }
-        if ($this->_assoc) {
+        if ($this->_assoc || $this->_fields_json) {
             $rs  = [];
             $rs0 = $this->_stmt->fetchAll(\PDO::FETCH_ASSOC);
-            if ($rs0 && is_array($rs0)) {
-                foreach ($rs0 as $v) {
-                    $rs[$v[$this->_assoc]] = $v;
+            if ($this->_assoc && $this->_fields_json) {
+                if ($rs0 && is_array($rs0)) {
+                    foreach ($rs0 as $v) {
+                        foreach ($this->_fields_json as $field) {
+                            if (isset($v[$field])) {
+                                $v[$field] = json_decode_array($v[$field]);
+                            }
+                        }
+                        $rs[$v[$this->_assoc]] = $v;
+                    }
+                }
+            } elseif ($this->_fields_json) {
+                if ($rs0 && is_array($rs0)) {
+                    foreach ($rs0 as $k => $v) {
+                        foreach ($this->_fields_json as $field) {
+                            if (isset($v[$field])) {
+                                $v[$field] = json_decode_array($v[$field]);
+                            }
+                        }
+                        $rs[$k] = $v;
+                    }
+                }
+            } else { // elseif($this->_assoc){
+                if ($rs0 && is_array($rs0)) {
+                    foreach ($rs0 as $v) {
+                        $rs[$v[$this->_assoc]] = $v;
+                    }
                 }
             }
             return $rs;
@@ -413,10 +452,10 @@ class pdo
      * @param bool $force_prepare 是否强行 prepare
      * @return mixed|null  直接返回对应的值
      */
-    public function column_value(string $field, $default_value, bool $force_prepare = false)
+    public function column_value(string $field, $default_value = null, bool $force_prepare = false)
     {
         $rs    = $this->column_one($force_prepare);
-        $field = str_replace('`', '', trim($field));
+        $field = trim(str_replace('`', '', $field));
         if ($rs && $rs[$field]) {
             return $rs[$field];
         } else {
@@ -519,9 +558,24 @@ class pdo
      * @param string $field
      * @return $this
      */
-    public function field($field = '*'): self
+    public function field(string $field = '*'): self
     {
         $this->_fields[] = $field;
+        return $this;
+    }
+
+    /**
+     * @param array $fields
+     * @return $this
+     */
+    public function json_field(array $fields): self
+    {
+        foreach ($fields as $field) {
+            $field = trim(str_replace('`', '', $field));
+            if ($field && !in_array($field, $this->_fields_json)) {
+                $this->_fields_json[] = $field;
+            }
+        }
         return $this;
     }
 
@@ -587,21 +641,21 @@ class pdo
 
     /**
      * 条件
-     * @param string $where 条件
-     * @param array $param 条件参数
+     * @param string $where_str 条件
+     * @param array $bind_params 条件参数
      * @return $this
      */
-    public function where(string $where = '', array $param = []): self
+    public function where(string $where_str = '', array $bind_params = []): self
     {
-        if ($where) {
+        if ($where_str) {
             if ($this->_where) {
-                $this->_where = $this->_where . ' ' . $where;
+                $this->_where = $this->_where . ' ' . $where_str;
             } else {
-                $this->_where = 'WHERE ' . $where;
+                $this->_where = 'WHERE ' . $where_str;
             }
-            if ($param && is_array($param)) {
-                $param             = $this->_values_parse($param);
-                $this->_bind_param = array_merge($this->_bind_param, $param);
+            if ($bind_params && is_array($bind_params)) {
+                $bind_params       = $this->_values_parse($bind_params);
+                $this->_bind_param = array_merge($this->_bind_param, $bind_params);
             }
         }
         return $this;
@@ -609,21 +663,21 @@ class pdo
 
     /**
      * having条件
-     * @param string $having 条件
-     * @param array $param 条件参数
+     * @param string $having_str 条件
+     * @param array $bind_params 条件参数
      * @return $this
      */
-    public function having(string $having = '', array $param = []): self
+    public function having(string $having_str = '', array $bind_params = []): self
     {
-        if ($having) {
+        if ($having_str) {
             if ($this->_having) {
-                $this->_having = $this->_having . ' ' . $having;
+                $this->_having = $this->_having . ' ' . $having_str;
             } else {
-                $this->_having = 'HAVING ' . $having;
+                $this->_having = 'HAVING ' . $having_str;
             }
-            if ($param && is_array($param)) {
-                $param             = $this->_values_parse($param);
-                $this->_bind_param = array_merge($this->_bind_param, $param);
+            if ($bind_params && is_array($bind_params)) {
+                $bind_params       = $this->_values_parse($bind_params);
+                $this->_bind_param = array_merge($this->_bind_param, $bind_params);
             }
         }
         return $this;
@@ -668,7 +722,7 @@ class pdo
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
-     * @return mixed|null
+     * @return int
      */
     public function count_value(string $field = '*', string $alias = '`count`', $default_value = 0)
     {
@@ -1110,6 +1164,7 @@ class pdo
         $this->_option        = '';
         $this->_distinct      = '';
         $this->_fields        = [];
+        $this->_fields_json   = [];
         $this->_order         = [];
         $this->_group         = [];
         $this->_limit         = '';

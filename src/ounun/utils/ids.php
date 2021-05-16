@@ -26,7 +26,7 @@ class ids
     /**
      * 设置机器ID
      *
-     * @param  integer $machine_id 机器ID
+     * @param  int $machine_id 机器ID
      */
     public function setMachineId($machine_id = 0)
     {
@@ -89,9 +89,9 @@ class ids
         $result_num = $base . $this->machine_id . $random_seq_id;
 
         //转化为十进制
-        $increId = bindec($result_num);
+        $increId = (int)bindec($result_num);
 
-        $checkResult = $this->setGenerateIdCache($increId);
+        $checkResult = $this->setMachineId($increId);
         if ($checkResult) {
             return $increId;
         } else {
@@ -108,7 +108,7 @@ class ids
         $uniqid_prefix   = '';
         $uniqid_filename = '/tmp/php_session_uniqid.txt';
         if (!file_exists($uniqid_filename)) {
-            $uniqid_prefix = \substr(\uniqid('', false), 3);
+            $uniqid_prefix = substr(uniqid('', false), 3);
             file_put_contents($uniqid_filename, $uniqid_prefix);
         }
         if (!$uniqid_prefix) {
@@ -116,10 +116,10 @@ class ids
                 $uniqid_prefix = file_get_contents($uniqid_filename);
             }
             if (!$uniqid_prefix) {
-                $uniqid_prefix = \substr(\uniqid('', false), 3);
+                $uniqid_prefix = substr(uniqid('', false), 3);
             }
         }
-        $session_id = \uniqid($uniqid_prefix, true);
-        return \substr($session_id, 0, 24) . \substr($session_id, 25);
+        $session_id = uniqid($uniqid_prefix, true);
+        return substr($session_id, 0, 24) . substr($session_id, 25);
     }
 }

@@ -7,6 +7,9 @@
 namespace ounun\utils;
 
 
+use Exception;
+use function random_bytes;
+
 class uuid
 {
     public static function v3($namespace, $name)
@@ -51,7 +54,7 @@ class uuid
         );
     }
 
-    public static function v4()
+    public static function v4(): string
     {
         return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
 
@@ -115,7 +118,7 @@ class uuid
         );
     }
 
-    public static function is_valid($uuid)
+    public static function is_valid($uuid): bool
     {
         return preg_match('/^\{?[0-9a-f]{8}\-?[0-9a-f]{4}\-?[0-9a-f]{4}\-?' . '[0-9a-f]{4}\-?[0-9a-f]{12}\}?$/i', $uuid) === 1;
     }
@@ -123,17 +126,17 @@ class uuid
     /**
      * @param int $lenght
      * @return bool|string
-     * @throws \Exception
+     * @throws Exception
      */
     public static function uniqid_real($lenght = 13)
     {
         // uniqid gives 13 chars, but you could adjust it to your needs.
         if (function_exists("random_bytes")) {
-            $bytes = \random_bytes(ceil($lenght / 2));
+            $bytes = random_bytes(ceil($lenght / 2));
         } elseif (function_exists("openssl_random_pseudo_bytes")) {
             $bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
         } else {
-            throw new \Exception("no cryptographically secure random function available");
+            throw new Exception("no cryptographically secure random function available");
         }
         return substr(bin2hex($bytes), 0, $lenght);
     }

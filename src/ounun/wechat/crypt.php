@@ -40,7 +40,7 @@ class crypt
      *
      * @return int 成功0，失败返回对应的错误码
      */
-    public function decrypt($encrypted_data, $iv, &$data)
+    public function decrypt($encrypted_data, $iv, &$data): int
     {
         if (strlen($this->_session_key) != 24) {
             return error_code::IllegalAesKey;

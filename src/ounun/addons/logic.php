@@ -6,8 +6,10 @@
 
 namespace ounun\addons;
 
+
 /**
  * Class logic
+ *
  * @package ounun\addons
  */
 abstract class logic
@@ -18,30 +20,32 @@ abstract class logic
     /** @var self 实例 */
     protected static $_instance;
 
-    /** @var model 数据模型 */
-    protected $_model;
+    /** @var database_model 数据模型 */
+    protected $_db;
 
     /**
      * 业务逻辑
      *
-     * @param model|null $model
-     * @return $this 返回数据库连接对像
+     * @param database_model|null $db
+     * @return self 返回数据库连接对像
      */
-    public static function i(?model $model = null): self
+    public static function i(?database_model $db = null): self
     {
         if (empty(static::$_instance)) {
-            static::$_instance = new static($model);
+            static::$_instance = new static($db);
         }
         return static::$_instance;
     }
 
     /**
      * cms constructor.
-     * @param model|null $model
+     * @param database_model|null $db
      */
-    public function __construct(?model $model = null)
+    public function __construct(?database_model $db = null)
     {
-        $this->model_set($model);
+        if ($db) {
+            $this->db_set($db);
+        }
         $this->_initialize(); // 控制器初始化
     }
 
@@ -50,28 +54,78 @@ abstract class logic
      */
     abstract protected function _initialize();
 
+
     /**
      * 数据模型set
      *
-     * @param $model
+     * @param database_model $db
      */
-    public function model_set($model)
+    public function db_set(database_model $db)
     {
-        if ($model && is_subclass_of($model, model::class)) {
-            $this->_model = $model;
-            $this->_model->logic_set($this);
+        if ($db && is_subclass_of($db, database_model::class)) {
+            $this->_db = $db;
+        } else {
+            error_php("\$db:type error value->" . var_export($db, true));
         }
     }
 
     /**
      * get数据模型
      *
-     * @return model
+     * @return database_model
      */
-    public function model_get()
+    public function db_get(): database_model
     {
-        return $this->_model;
+        return $this->_db;
     }
+
+    /**
+     * 删除 - 操作动作
+     *
+     * @param array $data 数据
+     * @param string|null $type 类型
+     * @return array
+     */
+    public function data_del(array $data = [], ?string $type = null): array
+    {
+        return error('TODO: Implement data_del() method.');
+    }
+
+    /**
+     * 添加数据 - 操作动作
+     *
+     * @param array $data
+     * @param string|null $type 类型
+     * @return array
+     */
+    public function data_set(array $data = [], ?string $type = null): array
+    {
+        return error('TODO: Implement data_set() method.');
+    }
+
+    /**
+     * 获取数据 - 操作动作
+     *
+     * @param array $data
+     * @param string|null $type 类型
+     * @return array
+     */
+    public function data_get(array $data = [], ?string $type = null): array
+    {
+        return error('TODO: Implement data_get() method.');
+    }
+
+    /**
+     * 编辑 - 操作动作
+     *
+     * @param array $data
+     * @param string|null $type 类型
+     * @return array
+     */
+//    public function data_editor(array $data = [], ?string $type = null): array
+//    {
+//        return error('TODO: Implement data_editor() method.');
+//    }
 
     /**
      * 错误代码
@@ -81,7 +135,7 @@ abstract class logic
      * @param array $extend
      * @return array
      */
-    protected function error($error_code = 1, $data = null, $extend = [])
+    protected function error($error_code = 1, $data = null, $extend = []): array
     {
         if (static::Error_Msg && isset(static::Error_Msg[$error_code])) {
             $msg = static::Error_Msg[$error_code] . "(code:{$error_code})";

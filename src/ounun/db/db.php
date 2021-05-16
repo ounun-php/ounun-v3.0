@@ -6,196 +6,241 @@
 
 namespace ounun\db;
 
-
 class db
 {
-    /** @var string 整数类型 */
-    const Type_Int = 'int';
-    /** @var string 浮点类型 */
-    const Type_Float = 'float';
     /** @var string 布尔类型 */
-    const Type_Bool = 'bool';
-    /** @var string JSON类型 */
-    const Type_Json = 'json';
-    /** @var string 字符串类型 */
-    const Type_String = 'string';
+    const Bool = 'bool';
+    /** @var string 整数类型 */
+    const Int = 'int';
+    /** @var string 浮点类型 */
+    const Float = 'float';
     /** @var string 枚举 - 字段类型 */
-    const Type_Enum = 'enum';
+    const Enum = 'enum';
+    /** @var string 字符串类型 */
+    const String = 'string';
+    /** @var string JSON类型 */
+    const Json = 'json';
     /** @var string 下线(子集) - 字段类型 */
-    const Type_Child = 'child';
-
-    /** @var string 日期转秒数0点0分 */
-    const Type_Date2Time_00 = 'd2t00';
-    /** @var string 日期转秒数23点59分59秒 */
-    const Type_Date2Time_24 = 'd2t24';
-    /** @var string 日期时间转秒数 */
-    const Type_String2Time = 's2t';
+    const Child = 'child';
 
     /**
-     * 数据库bind
-     * @param array $bind_data    字段数据
-     * @param array $data_default 默认字段数据
-     * @param bool $is_update true:更新  false:插入
-     * @param bool $is_update_default 数据插入 -> 本字段无效，
-     *                                           数据更新 -> true:已默认字段数据为主  false:已字段数据为主
+     * Types 数据类型
+     */
+    const Types = [
+        self::Bool,
+        self::Int,
+        self::Float,
+        self::Enum,
+        self::String,
+        self::Json,
+        self::Child,
+    ];
+
+    /** @var string 日期转秒数0点0分 */
+    const Date2Time_00 = 'd2t00';
+    /** @var string 日期转秒数23点59分59秒 */
+    const Date2Time_24 = 'd2t24';
+    /** @var string 日期时间转秒数 */
+    const String2Time = 's2t';
+
+    /**
+     * 数据format
+     * @param array $data 数据字段
+     * @param array $data_default 数据字段(默认)
+     * @param bool $is_use_default_fields 是否使用默认字段  true:用默认数据字段(全部)  false:限数据字段
      * @return array
      */
-    static public function bind(array $bind_data, array $data_default, bool $is_update = true, bool $is_update_default = false)
+    static public function format(array $data, array $data_default, bool $is_use_default_fields = false): array
     {
-        // extend ext
-        if($bind_data['ext'] && is_array($bind_data['ext'])){
-            if($bind_data['extend'] && is_string($bind_data['extend'])) {
-                $bind_data['extend'] = json_decode_array($bind_data['extend']);
-            }else{
-                $bind_data['extend'] = (array)$bind_data['extend'];
-            }
-            if(!is_array($bind_data['extend'])){
-                $bind_data['extend'] = [];
-            }
-            foreach ($bind_data['ext'] as $k=>$v){
-                if($v){
-                    $bind_data['extend'][$k]=$v;
-                }
-            }
-        }
-
-        // bind
-        $bind = [];
-        if ($is_update) {
-            $fields = $is_update_default ? array_keys($data_default) : array_keys($bind_data);
-        } else {
-            $fields = array_keys($data_default);
-        }
+        $data2  = [];
+        $fields = $is_use_default_fields ? array_keys($data_default) : array_keys($data);
         foreach ($fields as $field) {
-            $value = $data_default[$field];
-            if ($value && isset($bind_data[$field])) {
-                if (static::Type_Int == $value['type']) {
-                    $bind[$field] = (int)$bind_data[$field];
-                } elseif (static::Type_Float == $value['type']) {
-                    $bind[$field] = (float)$bind_data[$field];
-                } elseif (static::Type_Bool == $value['type']) {
-                    $bind[$field] = $bind_data[$field] ? true : false;
-                } elseif (static::Type_Json == $value['type']) {
-                    $extend = $bind_data[$field];
-                    if(is_array($extend) || is_object($extend)){
-                        $bind[$field] = json_encode_unescaped($extend);
-                    }else{
-                        $extend = json_decode_array($bind_data[$field]);
-                        if ($extend) {
-                            $bind[$field] = json_encode_unescaped($extend);
-                        }
-                    }
-                } elseif (static::Type_Date2Time_00 == $value['type']) {
-                    $value_data  = $bind_data[$field];
-                    if(empty($value_data)){
-                        $value_data = $value['default'];
-                    }
-                    $bind[$field] = strtotime($value_data . " 00:00:00");
-                } elseif (static::Type_Date2Time_24 == $value['type']) {
-                    $value_data  = $bind_data[$field];
-                    if(empty($value_data)){
-                        $value_data = $value['default'];
-                    }
-                    $bind[$field] = strtotime($value_data . " 23:59:59") + 1;
-                } elseif (static::Type_String2Time == $value['type']) {
-                    $value_data  = $bind_data[$field];
-                    if(empty($value_data)){
-                        $value_data = $value['default'];
-                    }
-                    $bind[$field] = strtotime($value_data);
+            $dv = $data_default[$field];
+            if ($dv && isset($data[$field])) {
+                if (static::Bool == $dv['type']) {
+                    $data2[$field] = $data[$field] ? true : false;
+                } elseif (static::Int == $dv['type']) {
+                    $data2[$field] = (int)$data[$field];
+                } elseif (static::Float == $dv['type']) {
+                    $data2[$field] = (float)$data[$field];
+                } elseif (static::Json == $dv['type']) {
+                    $data2[$field] = json_encode_unescaped($data[$field]);
+                } elseif (static::Date2Time_00 == $dv['type']) {
+                    $data2[$field] = strtotime(($data[$field] ?? $dv['default']) . " 00:00:00");
+                } elseif (static::Date2Time_24 == $dv['type']) {
+                    $data2[$field] = strtotime(($data[$field] ?? $dv['default']) . " 23:59:59") + 1;
+                } elseif (static::String2Time == $dv['type']) {
+                    $data2[$field] = strtotime($data[$field] ?? $dv['default']);
                 } else {
-                    $bind[$field] = (string)$bind_data[$field];
+                    $data2[$field] = (string)$data[$field];
                 }
-            } elseif ($value) {
-                if (static::Type_Json == $value['type']) {
-                    $extend = $value['default'];
-                    if(is_array($extend) || is_object($extend)){
-                        $bind[$field] = json_encode_unescaped($extend);
-                    }else{
-                        $extend = json_decode_array($bind_data[$field]);
-                        if ($extend) {
-                            $bind[$field] = json_encode_unescaped($extend);
-                        }
-                    }
-                }elseif (static::Type_Date2Time_00 == $value['type']) {
-                    $value_data = $value['default'];
-                    $bind[$field] = strtotime($value_data . " 00:00:00");
-                } elseif (static::Type_Date2Time_24 == $value['type']) {
-                    $value_data = $value['default'];
-                    $bind[$field] = strtotime($value_data . " 23:59:59") + 1;
-                } elseif (static::Type_String2Time == $value['type']) {
-                    $value_data = $value['default'];
-                    $bind[$field] = strtotime($value_data);
-                } elseif(null === $value['default']){
-                    unset($bind[$field]);
+            } elseif ($dv) {
+                if (static::Json == $dv['type']) {
+                    $data2[$field] = json_encode_unescaped($dv['default']);
+                } elseif (static::Date2Time_00 == $dv['type']) {
+                    $data2[$field] = strtotime($dv['default'] . " 00:00:00");
+                } elseif (static::Date2Time_24 == $dv['type']) {
+                    $data2[$field] = strtotime($dv['default'] . " 23:59:59") + 1;
+                } elseif (static::String2Time == $dv['type']) {
+                    $data2[$field] = strtotime($dv['default']);
+                } elseif (null === $dv['default']) {
+                    unset($data2[$field]);
                 } else {
-                    $bind[$field] = $value['default'];
+                    $data2[$field] = $dv['default'];
                 }
             }
             // echo "\$field:{$field} \$value['type']:{$value['type']} \$bind[\$field]:{$bind[$field]} \$value:".json_encode_unescaped($value)."\n";
         }
-        return $bind;
+        return $data2;
+    }
+
+
+    /**
+     * 数据自适应"更新"或"插入"
+     *
+     * @param pdo $db 数据库句柄
+     * @param array $data 字段数据(要包含$primary_data里字段数据)
+     * @param array $data_default 默认字段数据
+     * @param bool $is_use_default_fields 是否使用默认字段  true:用默认数据字段(全部)  false:限数据字段
+     * @param array|null $primary_data 主要数据，判断是否更新还是插入
+     * @param string $table 表名
+     * @param bool $is_auto_increment 数据插入时自增长
+     *
+     * @return array|int
+     */
+    static public function update(pdo $db, array $data, array $data_default,
+                                  ?array $primary_data = null, bool $is_use_default_fields = false, string $table = '', bool $is_auto_increment = true)
+    {
+        // 自检 数据更新还是插入
+        $is_update = false;
+        if ($primary_data) {
+            list($where_str, $paras) = self::where_str_bind($primary_data);
+            $is_update = $db->table($table)->where($where_str, $paras)->count_value(array_keys($primary_data)[0]) > 0;
+        }
+        if (empty($is_update)) {
+            $is_use_default_fields = true;
+        }
+
+        // 格式化
+        $data_format = static::format($data, $data_default, $is_use_default_fields);
+
+        // 更新数据
+        if ($is_update) {
+            foreach ($primary_data as $key => $val) {
+                unset($data_format[$key]);
+            }
+            $modify_cc = $db->table($table)->where($where_str, $paras)->update($data_format);
+            if ($modify_cc) {
+                return succeed(array_merge($primary_data, ['_type_' => 'update']));
+            } else {
+                return error("失败:更新数据库失败[" . __LINE__ . "][" . json_encode_unescaped($primary_data) . "]");
+            }
+        } else {
+            // 插入数据
+            if ($is_auto_increment) {
+                $value = $db->table($table)->insert($data_format);
+                if ($value) {
+                    $rs = ['_type_' => 'insert', '_auto_' => $value];
+                    $rs = is_array($primary_data) ? array_merge($primary_data, $rs) : $rs;
+                    return succeed($rs);
+                } else {
+                    return error("失败:插入数据库失败[" . __LINE__ . "][" . json_encode_unescaped($primary_data) . "]");
+                }
+            } elseif ($primary_data) {
+                $db->table($table)->insert($data_format);
+                if ($db->table($table)->where($where_str, $paras)->count_value(array_keys($data)[0]) > 0) {
+                    $rs = ['_type_' => 'insert'];
+                    $rs = is_array($primary_data) ? array_merge($primary_data, $rs) : $rs;
+                    return succeed($rs);
+                } else {
+                    return error("失败:插入数据库失败[" . __LINE__ . "][" . json_encode_unescaped($primary_data) . "]");
+                }
+            }
+            return error("失败:插入数据库失败[" . __LINE__ . "][参数有误\$is_auto_increment:" . json_encode_unescaped($is_auto_increment) . "或\$primary_data]:" . json_encode_unescaped($primary_data) . "");
+        }
     }
 
     /**
-     * @param pdo $db
-     * @param string $table
-     * @param string $field         字段名称 有 `
-     * @param string|int $id
-     * @param array $bind_data      字段数据
-     * @param array $bind_default   默认字段数据
-     * @param bool $is_update_force        只是数据更新
-     * @param bool $is_update_default      数据插入 -> 本字段无效，数据更新 -> true:已默认字段数据为主  false:已字段数据为主
-     * @param bool $is_not_auto_increment  只是数据插入(无自增长)
-     * @param string $field2               字段名称 没有 `
-     * @return array|int
+     * SQL where str bind 数据生成
+     *
+     * @param array $fields
+     * @param array|null $arrays
+     * @param pdo|null $pdo
+     * @return array
      */
-    static public function update(pdo $db, string $table, string $field, $id, array $bind_data, array $bind_default,
-                                  bool $is_update_force = false, bool $is_update_default = false,
-                                  bool $is_not_auto_increment = false,string $field2 = '')
+    static public function where_str_bind(array $fields, ?array $arrays = null, ?pdo $pdo = null): array
     {
-        $is_update = true;
-        if ($id) {
-            if ($is_update_force == false) {
-                $is_update = $db->table($table)->exists($field, $id);
-            }
-        } else {
-            $is_update = false;
+        // 初始化
+        if ($fields && empty($arrays)) {
+            $arrays = $fields;
+            $fields = array_map(function () {
+                return '=';
+            }, $fields);
         }
-
-        $bind = static::bind($bind_data, $bind_default, $is_update, $is_update_default);
-
-        if ($is_update) {
-            $modify_cc = $db->table($table)->where(" {$field} =:field  ", ['field' => $id])->update($bind);
-            if ($modify_cc) {
-                return $id;
-            } else {
-                return error("失败:更新数据库失败[".__LINE__."]\$table:{$table} \$id:{$id}");
-            }
-        } else {
-            if($is_not_auto_increment){
-                $field2 = $field2?$field2:str_replace(['`',' '],'',$field);
-                if($id){
-                    $bind[$field2] = $id;
-                }else{
-                    $id = $bind[$field2];
-                }
-                $db->table($table)->insert($bind);
-                $modify_cc = $db->table($table)->exists($field, $id);
-                if ($modify_cc) {
-                    return $id;
-                } else {
-                    return error("失败:插入数据库失败[".__LINE__."]\$table:{$table} \$id:{$id}");
-                }
-            }else{
-                $id = $db->table($table)->insert($bind);
-                if ($id) {
-                    return $id;
-                } else {
-                    return error("失败:插入数据库失败[".__LINE__."]\$table:{$table} \$id:{$id}");
+        // 执行
+        $where_str  = [];
+        $where_bind = [];
+        foreach ($fields as $field => $operation) {
+            if (isset($arrays[$field])) {
+                if ('=' == $operation) {
+                    $where_str[]        = " `{$field}` =:{$field} ";
+                    $where_bind[$field] = $arrays[$field];
+                } elseif ('>' == $operation) {
+                    $where_str[]        = " `{$field}` >:{$field} ";
+                    $where_bind[$field] = $arrays[$field];
+                } elseif ('<=' == $operation) {
+                    $where_str[]        = " `{$field}` <=:{$field} ";
+                    $where_bind[$field] = $arrays[$field];
+                } elseif ('<' == $operation) {
+                    $where_str[]        = " `{$field}` <:{$field} ";
+                    $where_bind[$field] = $arrays[$field];
+                } elseif ('<=' == $operation) {
+                    $where_str[]        = " `{$field}` <=:{$field} ";
+                    $where_bind[$field] = $arrays[$field];
+                } elseif ('like' == $operation) {
+                    $where_str[]        = " `{$field}` like :{$field} ";
+                    $where_bind[$field] = $arrays[$field];
+                } elseif ('%like' == $operation) {
+                    $where_str[]        = " `{$field}` like :{$field} ";
+                    $where_bind[$field] = "%{$arrays[$field]}";
+                } elseif ('like%' == $operation) {
+                    $where_str[]        = " `{$field}` like :{$field} ";
+                    $where_bind[$field] = "{$arrays[$field]}%";
+                } elseif ('%like%' == $operation) {
+                    $where_str[]        = " `{$field}` like :{$field} ";
+                    $where_bind[$field] = "%{$arrays[$field]}%";
+                } elseif ('between' == $operation) {
+                    $where_str[]                   = " `{$field}` >:{$field}_start and `{$field}` <:{$field}_end ";
+                    $where_bind[$field . '_start'] = $arrays[$field . '_start'];
+                    $where_bind[$field . '_end']   = $arrays[$field . '_end'];
+                } elseif ('between=' == $operation) {
+                    $where_str[]                   = " `{$field}` >=:{$field}_start and `{$field}` <=:{$field}_end ";
+                    $where_bind[$field . '_start'] = $arrays[$field . '_start'];
+                    $where_bind[$field . '_end']   = $arrays[$field . '_end'];
+                } elseif ('in' == $operation || 'in_str' == $operation) {
+                    $vals = [];
+                    if (is_array($arrays[$field])) {
+                        if ('in_str' == $operation) {
+                            foreach ($arrays[$field] as $val) {
+                                $vals[] = $pdo->quote($val, \PDO::PARAM_STR);
+                            }
+                        } else {
+                            foreach ($arrays[$field] as $val) {
+                                $vals[] = (int)$val;
+                            }
+                        }
+                        if ($vals) {
+                            $where_str[] = " `{$field}` in (" . implode(',', $vals) . ") ";
+                        }
+                    }
+                } else { // 默认
+                    $where_str[]        = " `{$field}` =:{$field} ";
+                    $where_bind[$field] = $arrays[$field];
                 }
             }
         }
+        $where_str = implode(' and ', $where_str);
+        return [$where_str, $where_bind];
     }
 
 
@@ -203,16 +248,16 @@ class db
      * @param string $rows
      * @return array
      */
-    static public function rows2array(string $rows = '')
+    static public function rows2array(string $rows = ''): array
     {
         $rs   = [];
         $rows = trim($rows);
-        if($rows){
-            $rows2 = explode("\n",$rows);
-            if($rows2 &&  is_array($rows2)){
-                foreach ($rows  as $v){
+        if ($rows) {
+            $rows2 = explode("\n", $rows);
+            if ($rows2 && is_array($rows2)) {
+                foreach ($rows2 as $v) {
                     $v = trim($v);
-                    if($v){
+                    if ($v) {
                         $rs[] = $v;
                     }
                 }
@@ -243,10 +288,10 @@ class db
      * @param    $data  array|string|mixed
      * @param    $key   string
      * @param    $t     string
-     * @param    $ps    boolean        true:有父级
-     *                               false:没父级
+     * @param    $ps    boolean     true:有父级
+     *                              false:没父级
      * @param    $ps_auto boolean   true:$ps无效数组多于1时加s父级 等于1时 没有父级
-     *                               false:有没有父级 看$ps
+     *                              false:有没有父级 看$ps
      * @return  string
      */
     public static function array2xml($data, $key, $t = "", $ps = false, $ps_auto = false)
@@ -256,9 +301,9 @@ class db
             return $xml;
         } elseif (!is_array($data)) {
             if (strstr($key, '$')) {
-                $key = substr($key, 1);
+                $key  = substr($key, 1);
                 $data = stripslashes($data);
-                $xml .= "{$t}<{$key}><![CDATA[{$data}]]></{$key}>\n";
+                $xml  .= "{$t}<{$key}><![CDATA[{$data}]]></{$key}>\n";
             } else {
                 if (is_numeric($data)) {
                     // $data = printf("%s",$data);
@@ -282,7 +327,7 @@ class db
         } else {
             if ($ps_auto) {
                 $ps_c = 0;
-                $ps = false; // 是否唯一子结节，唯一子结点就不包
+                $ps   = false; // 是否唯一子结节，唯一子结点就不包
                 foreach ($data as $key2 => $data2) {
                     if ('#' != $key2) {
                         $ps_c++;
@@ -334,12 +379,13 @@ class db
 
     /**
      * 数据XML编码
-     * @param mixed  $data 数据
+     *
+     * @param mixed $data 数据
      * @param string $item 数字索引时的节点名称
      * @param string $id 数字索引key转换为的属性名
      * @return string
      */
-    public static  function data2xml($data, $item = 'item', $id = 'id')
+    public static function data2xml($data, $item = 'item', $id = 'id')
     {
         $xml = $attr = '';
         foreach ($data as $key => $val) {
@@ -364,8 +410,8 @@ class db
      */
     public static function str2array(string $data_str, string $fields, string $data_rows_delimiter = "\n", $data_delimiter = ':', string $fields_delimiter = ',')
     {
-        $data = explode($data_rows_delimiter, $data_str);
-        $fields2 = explode($fields_delimiter, $fields);
+        $data        = explode($data_rows_delimiter, $data_str);
+        $fields2     = explode($fields_delimiter, $fields);
         $fields2_len = count($fields2);
 
         $result = [];
@@ -373,7 +419,7 @@ class db
             $v = trim($v);
             if ($v) {
                 $v_data = explode($data_delimiter, $v);
-                $v_len = count($v_data);
+                $v_len  = count($v_data);
                 if ($fields2_len == $v_len) {
                     $v_data2 = [];
                     foreach ($v_data as $k2 => $v2) {
@@ -388,28 +434,28 @@ class db
 
 
     /**
-     * @param mixed  $data_str   数据
-     * @param string $fields     字段多个,分格
-     * @param string $data_delimiter    数据分格符
-     * @param string $fields_delimiter  字段分格符
+     * @param mixed $data_str 数据
+     * @param string $fields 字段多个,分格
+     * @param string $data_delimiter 数据分格符
+     * @param string $fields_delimiter 字段分格符
      * @return array
      */
-    public static function array2str($data_str,string $fields,$data_delimiter = ':', string $fields_delimiter = ',')
+    public static function array2str($data_str, string $fields, $data_delimiter = ':', string $fields_delimiter = ',')
     {
         $data = [];
-        if(is_string($data_str)){
+        if (is_string($data_str)) {
             $data_str = json_decode($data_str, true);
         }
-        if($fields){
-            $fields = explode($fields_delimiter,$fields);
+        if ($fields) {
+            $fields = explode($fields_delimiter, $fields);
         }
-        if($data_str && is_array($data_str)){
+        if ($data_str && is_array($data_str)) {
             foreach ($data_str as $v) {
-                $v2     = [];
-                foreach ($fields as $v3){
-                    $v2[] =  $v[$v3];
+                $v2 = [];
+                foreach ($fields as $v3) {
+                    $v2[] = $v[$v3];
                 }
-                $data[] = implode($data_delimiter,$v2);
+                $data[] = implode($data_delimiter, $v2);
             }
         }
         return $data;
@@ -417,7 +463,8 @@ class db
 
     /**
      * XML编码
-     * @param mixed  $data 数据
+     *
+     * @param mixed $data 数据
      * @param string $root 根节点名
      * @param string $item 数字索引的子节点名
      * @param string $attr 根节点属性
@@ -436,10 +483,10 @@ class db
         }
         $attr = trim($attr);
         $attr = empty($attr) ? '' : " {$attr}";
-        $xml = "<?xml version=\"1.0\" encoding=\"{$encoding}\"?>";
-        $xml .= "<{$root}{$attr}>";
-        $xml .= static::data2xml($data, $item, $id);
-        $xml .= "</{$root}>";
+        $xml  = "<?xml version=\"1.0\" encoding=\"{$encoding}\"?>";
+        $xml  .= "<{$root}{$attr}>";
+        $xml  .= static::data2xml($data, $item, $id);
+        $xml  .= "</{$root}>";
 
         return $xml;
     }
@@ -453,7 +500,7 @@ class db
     {
         // 创建 SimpleXMLElement 对象
         $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
-        foreach($data as $key=> $value) {
+        foreach ($data as $key => $value) {
             $xml->addChild($key, $value);
         }
         return $xml->asXML();
@@ -465,14 +512,15 @@ class db
      * @param string $table_attributes
      * @return string
      */
-    public static function html_table_encode($data,string $table_attributes = '') {
-        if(empty($table_attributes)){
+    public static function html_table_encode($data, string $table_attributes = '')
+    {
+        if (empty($table_attributes)) {
             $table_attributes = ' style="border: darkcyan solid 1px;"';
         }
-        if(is_array($data)){
-            $html = '<table'.$table_attributes.'>';
-            foreach($data as $key => $value) {
-                $html .= "<tr><td>". $key. "</td><td>". $value. "</td></tr>";
+        if (is_array($data)) {
+            $html = '<table' . $table_attributes . '>';
+            foreach ($data as $key => $value) {
+                $html .= "<tr><td>" . $key . "</td><td>" . $value . "</td></tr>";
             }
             $html .= "</table>";
             return $html;

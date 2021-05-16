@@ -26,7 +26,7 @@ class rss
      * @param string $rss
      * @param string $encoding
      */
-    public function __construct($xml = '1.0', $rss = '2.0', $encoding = 'utf-8')
+    public function __construct(string $xml = '1.0',string $rss = '2.0',string $encoding = 'utf-8')
     {
         $this->header($xml, $rss, $encoding);
     }

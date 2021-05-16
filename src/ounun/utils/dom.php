@@ -80,7 +80,7 @@ class dom
      */
     static public function kv2a_s(array $array, string $url_fun, string $glue = ""): string
     {
-        $rs = static::kv2a_m($array, $url_fun, true);
+        $rs = static::kv2a_m($array, $url_fun);
         return implode($glue, $rs);
     }
 

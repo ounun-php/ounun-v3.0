@@ -8,6 +8,7 @@ namespace ounun\cache;
 
 use ounun\debug;
 use ounun\template;
+use v;
 
 class html
 {
@@ -125,19 +126,19 @@ class html
      * [1/3] 判断是否存缓存
      * @return bool
      */
-    public function run_cache_check()
+    public function run_cache_check(): bool
     {
         $this->cache_time();
         debug::header($this->_cache_time, 'time', __FILE__, __LINE__);
         debug::header($this->_time_expire, 'expire', __FILE__, __LINE__);
         if ($this->_cache_time + $this->_time_expire > $this->_time_curr) {
-            debug::header($this->filename(), 'xypc', __FILE__, __LINE__);
+            debug::header($this->filename(), 'xyp-c', __FILE__, __LINE__);
             return true;
         }
         $cache_time_t = $this->cache_time_tmp();
         debug::header($cache_time_t, 'time_t', __FILE__, __LINE__);
         if ($cache_time_t + self::Cache_Time_Interval > $this->_time_curr) {
-            debug::header($this->filename() . '.t time:' . $cache_time_t, 'xypc_t', __FILE__, __LINE__);
+            debug::header($this->filename() . '.t time:' . $cache_time_t, 'xyp-c_t', __FILE__, __LINE__);
             return true;
         }
         $this->_cache_time = 0;
@@ -150,7 +151,7 @@ class html
      */
     public function run_execute(bool $output)
     {
-        debug::header($this->filename(), 'xypm', __FILE__, __LINE__);
+        debug::header($this->filename(), 'xyp-m', __FILE__, __LINE__);
         $this->stop = false;
         $this->cache_time_tmp_set();
         // 生成
@@ -201,11 +202,11 @@ class html
         ob_clean();
         ob_implicit_flush(1);
         // 写文件
-        debug::header($filesize, 'xypm_size', __FILE__, __LINE__);
+        debug::header($filesize, 'xyp-m_size', __FILE__, __LINE__);
         if ($filesize > self::Cache_Mini_Size) {
-            debug::header($this->filename(), 'xypm_ok', __FILE__, __LINE__);
+            debug::header($this->filename(), 'xyp-m_ok', __FILE__, __LINE__);
 
-            $buffer = \ounun\template::trim($buffer, $this->_is_trim);
+            $buffer = template::trim($buffer, $this->_is_trim);
             $buffer = gzencode($buffer, 9);
             $this->cache_html($buffer);
             $this->_cache_time = $this->cache_time();
@@ -214,7 +215,7 @@ class html
             }
         } else {
             $this->clean();
-            debug::header('xypm_noc', 'nocache', __FILE__, __LINE__);
+            debug::header('xyp-m_noc', 'nocache', __FILE__, __LINE__);
             if ($output) {
                 header('Content-Length: ' . $filesize);
                 exit($buffer);
@@ -230,8 +231,8 @@ class html
     {
         $this->stop = true;
         if ($output) {
-            if (\v::$tpl) {
-                \v::$tpl->assign();
+            if (v::$tpl) {
+                v::$tpl->assign();
             }
             $this->run_output();
         }
@@ -241,7 +242,7 @@ class html
      * 是否清理本缓存
      * @return bool
      */
-    public function clean()
+    public function clean(): bool
     {
         $this->_cache_time   = -1;
         $this->_cache_time_t = -1;
@@ -260,10 +261,10 @@ class html
     /**
      * 有效Cache数据类型
      *
-     * @param $cdn_type
+     * @param int $cdn_type
      * @return array
      */
-    public function valid($cdn_type)
+    public function valid(int $cdn_type): array
     {
         if ($cdn_type == self::Cdn_Type_Min) {
             return [driver\redis::Type, driver\memcached::Type, driver\sqlite::Type];
@@ -277,7 +278,7 @@ class html
      *
      * @return string
      */
-    public function filename()
+    public function filename(): string
     {
         if (empty($this->_cache_filename)) {
             $this->_cache_filename = $this->_cache_driver->key_get($this->_cache_key);
@@ -316,7 +317,7 @@ class html
      *
      * @return int 文件生成时间(临时)
      */
-    public function cache_time_tmp()
+    public function cache_time_tmp(): int
     {
         if (0 <= $this->_cache_time_t) {
             return $this->_cache_time_t;
@@ -342,7 +343,7 @@ class html
      *
      * @return int
      */
-    public function cache_size_tmp()
+    public function cache_size_tmp(): int
     {
         return $this->_cache_size_t;
     }
@@ -359,9 +360,9 @@ class html
             if (file_exists($filename)) {
                 touch($filename);
             } else {
-                $filedir = dirname($filename);
-                if (!is_dir($filedir)) {
-                    mkdir($filedir, 0777, true);
+                $file_dir = dirname($filename);
+                if (!is_dir($file_dir)) {
+                    mkdir($file_dir, 0777, true);
                 }
                 touch($filename);
             }
@@ -376,7 +377,7 @@ class html
      *
      * @return int 文件大小
      */
-    public function cache_size()
+    public function cache_size(): int
     {
         if (0 <= $this->_cache_size) {
             return $this->_cache_size;
@@ -406,7 +407,7 @@ class html
         if (driver\file::Type == $this->_cache_type) {
             $this->_cache_driver->set($this->_cache_key, $html, $this->_time_expire);
             $filename = $this->filename() . '.t';
-            debug::header($filename, 'delfile', __FILE__, __LINE__);
+            debug::header($filename, 'del-file', __FILE__, __LINE__);
             if (file_exists($filename)) {
                 unlink($filename);
             }

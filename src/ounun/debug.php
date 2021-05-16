@@ -56,19 +56,24 @@ class debug
                                 $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
                                 $is_bof = false, $is_run_time = true)
     {
+//        print_r(['$filename'       => $filename, '$is_out_buffer' => $is_out_buffer, '$is_out_get' => $is_out_get, '$is_out_url' => $is_out_url, '$is_out_cookie' => $is_out_cookie,
+//                 '$is_out_session' => $is_out_session, '$is_out_server' => $is_out_server, '$is_bof' => $is_bof, '$is_run_time' => $is_run_time]);
         if ($filename) {
             $dirname = dirname($filename);
             if (!file_exists($dirname)) {
                 mkdir($dirname, 0777, true);
             }
         }
-        //
+
+        // callback
         if (class_exists(template::class) && template::ob_status()) {
             template::ob_func([$this, 'callback'], []);
         } else {
             ob_start();
             register_shutdown_function([$this, 'callback']);
         }
+        set_error_handler([$this, 'callback_error'], E_ERROR);
+        set_exception_handler([$this, 'callback_exception']);
 
         $this->_filename    = $filename;
         $this->_is_bof      = $is_bof;
@@ -87,7 +92,7 @@ class debug
             $this->_time = -microtime(true);
         }
 
-        // init写
+        // init write
         $this->write();
 
         // header
@@ -100,7 +105,7 @@ class debug
      * @param bool $v
      * @return debug
      */
-    public function out(string $k, bool $v)
+    public function out(string $k, bool $v): debug
     {
         $_k        = '_is_out_' . $k;
         $this->$_k = $v;
@@ -113,7 +118,7 @@ class debug
      * @param string $filename 文件路径
      * @return debug
      */
-    public function filename(string $filename)
+    public function filename(string $filename): debug
     {
         $this->_filename = $filename;
         return $this;
@@ -124,7 +129,7 @@ class debug
      * @param bool $show true:显示 false:不显示
      * @return debug
      */
-    public function run_time(bool $show)
+    public function run_time(bool $show): debug
     {
         $this->_is_run_time = $show;
         return $this;
@@ -136,7 +141,7 @@ class debug
      * @param bool $bof true:倒序(新内容在头部) false:正序(新内容在尾部)
      * @return debug
      */
-    public function bof(bool $bof)
+    public function bof(bool $bof): debug
     {
         $this->_is_bof = $bof;
         return $this;
@@ -150,7 +155,7 @@ class debug
      * @param bool $is_replace 是否替换
      * @return debug
      */
-    public function logs(string $k, $log, $is_replace = true)
+    public function logs(string $k, $log, $is_replace = true): debug
     {
         if ($k && $log) {
             // 直接替换
@@ -178,7 +183,7 @@ class debug
      *
      * @return debug
      */
-    public function stop()
+    public function stop(): debug
     {
         $this->_logs     = [];
         $this->_filename = '';
@@ -209,12 +214,68 @@ class debug
     }
 
     /**
+     * @param $exception
+     */
+    public function callback_exception($exception)
+    {
+        $this->logs('__exception__', $exception, false);
+    }
+
+    /**
+     * @param $error_code
+     * @param $error_str
+     * @param $error_file
+     * @param $error_line
+     */
+    public function callback_error($error_code, $error_str, $error_file, $error_line)
+    {
+        switch ($error_code) {
+            case E_WARNING:
+                // x / 0 错误 PHP7 依然不能很友好的自动捕获 只会产生 E_WARNING 级的错误
+                // 捕获判断后 throw new DivisionByZeroError($errstr)
+                // 或者使用 intdiv(x, 0) 方法 会自动抛出 DivisionByZeroError 的错误
+                if (strcmp('Division by zero', $error_str) == 0) {
+                    throw new \DivisionByZeroError($error_str);
+                }
+
+                $level_tips = 'PHP Warning: ';
+                break;
+            case E_NOTICE:
+                $level_tips = 'PHP Notice: ';
+                break;
+            case E_DEPRECATED:
+                $level_tips = 'PHP Deprecated: ';
+                break;
+            case E_USER_ERROR:
+                $level_tips = 'User Error: ';
+                break;
+            case E_USER_WARNING:
+                $level_tips = 'User Warning: ';
+                break;
+            case E_USER_NOTICE:
+                $level_tips = 'User Notice: ';
+                break;
+            case E_USER_DEPRECATED:
+                $level_tips = 'User Deprecated: ';
+                break;
+            case E_STRICT:
+                $level_tips = 'PHP Strict: ';
+                break;
+            default:
+                $level_tips = 'Unknown Type Error: ';
+                break;
+        }
+        $error = $error_str . ' in ' . $error_file . ' on ' . $error_line;
+        $this->logs($level_tips, $error, false);
+    }
+
+    /**
      * 析构调试相关
      *
      * @param bool $is_end 是否当前请求 最后一次写入
      * @return debug
      */
-    public function write(bool $is_end = false)
+    public function write(bool $is_end = false): debug
     {
         if (!$this->_filename) {
             return $this;
@@ -271,11 +332,12 @@ class debug
             $str         .= 'LOGS:' . var_export($this->_logs, true) . PHP_EOL;
             $this->_logs = [];
         }
+
         // 日志尾部
         if ($is_end) {
             if ($this->_is_run_time) {
                 $this->_time += microtime(true);
-                $run_time    = 'RunTime:' . sprintf('%f', $this->_time);
+                $run_time    = sprintf('%f', $this->_time);
             } else {
                 $run_time = '';
             }
@@ -285,14 +347,20 @@ class debug
             }
             $str .= '------------------' . PHP_EOL;
         }
+
         // 写文件
         if ($this->_is_bof && $str) {
             if (file_exists($filename)) {
                 $str = $str . file_get_contents($filename);
             }
-            file_put_contents($filename, $str);
+            $ret = file_put_contents($filename, $str);
         } elseif ($str) {
-            file_put_contents($filename, $str, FILE_APPEND);
+            $ret = file_put_contents($filename, $str, FILE_APPEND);
+        } else {
+            $ret = 1;
+        }
+        if (empty($ret)) {
+            // error_php('debug write error');
         }
         return $this;
     }
@@ -350,8 +418,7 @@ class debug
                              $is_bof = false, $is_run_time = true, string $date_dir = '_', ?string $filename = null): self
     {
         if (empty(static::$_instances[$channel])) {
-            $debug                        = global_all('debug', []);
-            $dir                          = ($debug && $debug['out_dir']) ? $debug['out_dir'] : Dir_Root . 'storage/logs/';
+            $dir                          = global_all('debug', Dir_Storage . 'logs/', 'out_dir');
             $filename                     = $dir . date('Y-m-d') . $date_dir . $channel . ($filename ? '_' . $filename : '.log');
             static::$_instances[$channel] = new static($filename, $is_out_buffer, $is_out_get, $is_out_post, $is_out_url,
                 $is_out_cookie, $is_out_session, $is_out_server,
@@ -364,9 +431,8 @@ class debug
      * 是否开启 http头debug
      * @return bool
      */
-    public static function is_header()
+    public static function is_header(): bool
     {
-        $debug = global_all('debug');
-        return ($debug && $debug['header']) ?? false;
+        return global_all('debug', false, 'header');
     }
 }

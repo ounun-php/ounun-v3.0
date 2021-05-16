@@ -7,59 +7,101 @@
 namespace ounun\addons;
 
 
-class command
+abstract class command
 {
-    /** @var string 命令的名字（"ounun" 后面的部分） */
-    public string $name = '';
-    /** @var string 运行命令时使用 "--help" 选项时的完整命令描述 */
-    public string $help = '';
-    /** @var string 运行 "php ./ounun list" 时的简短描述 */
-    public string $description = '';
-    /** @var string  脚本版本 */
-    public string $script_version = '';
+    /** @var logic logic */
+    public static $logic;
 
-    /** @var bool 是否有效 */
-    protected bool $_is_enabled = true;
+    /** @var string 插件唯一标识 */
+    public static string $addon_tag = '';
+
+    /** @var string 插件展示子类 */
+    public static string $addon_view = '';
+
+    /** @var string 命令的名字（"ounun" 后面的部分） */
+    public string $name;
+
+    /** @var string 运行命令时使用 "--help" 选项时的完整命令描述 */
+    public string $help;
+
+    /** @var string 运行命令时使用 "php ./ounun" 参数... */
+    public string $help_paras;
+
+    /** @var string 运行 "php ./ounun --help" 时的简短描述 */
+    public string $description;
+
+    /** @var string  脚本版本 */
+    public string $script_version;
+
+
     /** @var bool 是否正在运行 */
-    protected bool $_is_run = false;
+    protected bool $_state = false;
+
     /** @var float 执行时间 */
-    protected float $_time_run = 0;
+    protected float $_time = 0;
 
     /**
      * task constructor.
      */
     public function __construct()
     {
+        $this->_initialize();
         $this->configure();
     }
 
     /**
-     * 有效状态 true:有效   false:关闭
-     * @return bool
+     * 控制器初始化
      */
-    public function is_enabled()
-    {
-        return $this->_is_enabled;
-    }
+    abstract protected function _initialize();
 
     /**
      * 运行状态 true:运行中  false:关闭
+     *
      * @return bool
      */
-    public function is_run()
+    public function state(): bool
     {
-        return $this->_is_run;
+        return $this->_state;
     }
 
     /**
-     * 帮
-     * @param array $argv
+     * 执行时间
+     *
+     * @return float|int
+     */
+    public function time()
+    {
+        return $this->_time;
+    }
+
+    /**
+     * 开始
+     */
+    public function start()
+    {
+        $this->_time  = 0 - microtime(true);
+        $this->_state = true;
+    }
+
+    /**
+     * 停止
+     */
+    public function stop()
+    {
+        $this->_state = false;
+        $this->_time  += microtime(true);
+    }
+
+    /**
+     * 帮助
+     *
+     * @param array $argv  参数
      */
     public function help(array $argv)
     {
         console::echo("命令:", command_c::Color_Purple, '', 0, 0, '');
         console::echo("({$this->description})");
-        console::echo('./ounun ' . $this->name . ' [参数...]', command_c::Color_Blue);
+        console::echo('./ounun ' . $this->name . $this->help_paras, command_c::Color_Blue);
         console::echo($this->help, command_c::Color_Purple);
     }
 
@@ -81,37 +123,41 @@ class command
             $this->description = '命令进程';
         }
 
+        // [参数...]
+        if (empty($this->help_paras)) {
+            $this->help_paras = ' [参数...]';
+        }
         // 运行命令时使用 "--help" 选项时的完整命令描述
-        $this->help = "命令\n" .
-            "./ounun {$this->name} [间隔(秒,默认5秒)] [寿命(秒,默认300秒)] [任务ID] [网站tag]\n";
+        if (empty($this->help)) {
+            $this->help = "命令\n" .
+                "./ounun {$this->name} ".$this->help_paras."\n";
+        }
     }
 
     /**
      * 执行入口
+     *
      * @param array $argc_input
      * @return int
      */
-    public function execute(array $argc_input)
+    public function execute(array $argc_input): int
     {
-        $start         = microtime(true);
-        $this->_is_run = true;
         $this->_execute_inside($argc_input);
-        $this->_is_run   = false;
-        $this->_time_run = microtime(true) - $start;
-
-        echo "time run: " . $this->_time_run . " \n";
+        $this->stop();
+        console::echo("运行时间: " . $this->time(), command_c::Color_Green);
         return 0;
     }
 
-
     /**
+     * 内部执行入口
+     *
      * @param array $argc_input
      * @return int
      */
-    protected function _execute_inside(array $argc_input)
+    protected function _execute_inside(array $argc_input): int
     {
         usleep(100);
-        echo __METHOD__ . " \$input:" . json_encode_unescaped($argc_input) . "\n";
+        console::echo(__METHOD__ . " \$input:" . json_encode_unescaped($argc_input), command_c::Color_Cyan);
         return 0;
     }
 }

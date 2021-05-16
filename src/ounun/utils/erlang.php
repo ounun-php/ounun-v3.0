@@ -6,8 +6,7 @@
 
 namespace ounun\utils;
 
-
-use ounun\client\http;
+use ounun\client\httpc;
 
 class erlang
 {
@@ -21,13 +20,15 @@ class erlang
      *   $dir     = "<<".private_string_binary($dir).">>";
      *   $cmd     = "<<".private_string_binary($cmd).">>";
      *   $data   = "[{$dir},{$cmd}]";
+     * @param $string
+     * @return string
      */
-    public static function string2binary($string)
+    public static function string2binary($string): string
     {
         $i      = 0;
         $number = [];
-        while (isset($string{$i})) {
-            $number[] = ord($string{$i});
+        while (isset($string[$i])) {
+            $number[] = ord($string[$i]);
             $i++;
         }
         return "<<" . implode(',', $number) . ">>";
@@ -114,11 +115,11 @@ class erlang
      * @param string $data 数据
      * @return array
      */
-    protected function _port(string $mod, string $fun, string $data = "[]")
+    protected function _port(string $mod, string $fun, string $data = "[]"): array
     {
         $url   = "http://{$this->_host}:{$this->_port}/";
         $model = "{{$mod},{$fun},{$data}}";
-        return http::stream_post($url, $model, [], 600);
+        return httpc::stream_post($url, $model, [], 600);
     }
 }
 

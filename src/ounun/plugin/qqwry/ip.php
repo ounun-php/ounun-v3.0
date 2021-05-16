@@ -28,7 +28,7 @@ namespace ounun\plugin\qqwry;
  */
 class ip
 {
-    /** @var self    实例 */
+    /** @var self 实例 */
     protected static $_instance;
 
     /**
@@ -45,6 +45,19 @@ class ip
     }
 
     /**
+     * @param string $ip
+     * @return array
+     */
+    static public function ip2local(string $ip): array
+    {
+        $rs = [];
+        if ($ip) {
+            $rs = ip::i('utf-8')->location($ip);
+        }
+        return $rs;
+    }
+
+    /**
      * QQWry.Dat文件指针
      * @var resource
      */
@@ -58,17 +71,17 @@ class ip
      * 最后一条IP记录的偏移地址
      * @var int
      */
-    private int $lastip;
+    private int $last_ip;
     /**
      * IP记录的总条数（不包含版本信息记录）
      * @var int
      */
-    private $totalip;
+    private int $total_ip;
     /**
      * 编码（可选gbk utf-8 默认gbk）
-     * @var int
+     * @var string
      */
-    private $charset = 'gbk';
+    private string $charset = 'gbk';
 
     /**
      * 返回读取的长整型数
@@ -147,7 +160,7 @@ class ip
      * @param string $ip
      * @return array
      */
-    public function location($ip)
+    public function location($ip): ?array
     {
         if (!$this->fp) {
             return null; // 如果数据文件没有被正确打开，则直接返回空
@@ -158,8 +171,8 @@ class ip
         // 不合法的IP地址会被转化为255.255.255.255
         // 对分搜索
         $l      = 0; // 搜索的下边界
-        $u      = $this->totalip; // 搜索的上边界
-        $findip = $this->lastip; // 如果没有找到就返回最后一条IP记录（QQWry.Dat的版本信息）
+        $u      = $this->total_ip; // 搜索的上边界
+        $findip = $this->last_ip; // 如果没有找到就返回最后一条IP记录（QQWry.Dat的版本信息）
         while ($l <= $u) // 当上边界小于下边界时，查找失败
         {
             $i = floor(($l + $u) / 2); // 计算近似中间记录
@@ -241,14 +254,14 @@ class ip
      *
      * @param string $charset
      */
-    function __construct($charset = 'gbk')
+    public function __construct($charset = 'gbk')
     {
         // 本插件所在目录
         $filename = __DIR__ . '/res/qqwryip.dat';
         if (($this->fp = fopen($filename, 'rb')) !== false) {
             $this->first_ip = $this->long();
-            $this->lastip   = $this->long();
-            $this->totalip  = ($this->lastip - $this->first_ip) / 7;
+            $this->last_ip  = $this->long();
+            $this->total_ip = ($this->last_ip - $this->first_ip) / 7;
             //注册析构函数，使其在程序执行结束时执行
             //register_shutdown_function ( array (&$this, '_IpLocation' ) );
         }
@@ -258,7 +271,7 @@ class ip
     /**
      * 析构函数，用于在页面执行结束后自动关闭打开的文件。
      */
-    function __destruct()
+    public function __destruct()
     {
         fclose($this->fp);
     }

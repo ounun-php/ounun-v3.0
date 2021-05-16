@@ -15,7 +15,7 @@ class xxtea
      * @param string $key
      * @return string
      */
-    public static function encrypt($str, $key)
+    public static function encrypt(string $str, string $key): string
     {
         $key = xxtea_key($key);
         return base64_encode(xxtea_encrypt($str, $key));
@@ -39,7 +39,7 @@ class xxtea
      * @param string $key
      * @return string
      */
-    public static function decrypt($str, $key)
+    public static function decrypt(string $str, string $key)
     {
         if ($str == "") {
             return "";
@@ -151,7 +151,7 @@ if (!extension_loaded('xxtea')) {
      * @param boolean $w
      * @return string
      */
-    function xxtea_long2str($v, $w)
+    function xxtea_long2str(array $v, bool $w)
     {
         $len = count($v);
         $n   = ($len - 1) << 2;
@@ -179,7 +179,7 @@ if (!extension_loaded('xxtea')) {
      * @param boolean $w
      * @return array
      */
-    function xxtea_str2long($s, $w)
+    function xxtea_str2long(string $s, bool $w): array
     {
         $v = unpack("V*", $s . str_repeat("\0", (4 - strlen($s) % 4) & 3));
         $v = array_values($v);
@@ -195,7 +195,7 @@ if (!extension_loaded('xxtea')) {
      * @param int $n
      * @return int
      */
-    function xxtea_int32($n)
+    function xxtea_int32(int $n): int
     {
         while ($n >= 2147483648) {
             $n -= 4294967296;

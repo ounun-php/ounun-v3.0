@@ -28,7 +28,7 @@ class client
         $this->method = $method;
     }
 
-    function request($method, $params, $output_options = [])
+    function request($method, $params, $output_options = []): bool
     {
         $request = xmlrpc_encode_request($method, $params, $output_options);
         $options = ['http' => ['method' => $this->method, 'header' => "Content-Type: text/xml", 'content' => $request]];

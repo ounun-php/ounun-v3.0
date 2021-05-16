@@ -158,7 +158,7 @@ class domain
      * @param string $host 域名
      * @return string 返回根域名
      */
-    public static function domain($host)
+    public static function domain(string $host): string
     {
         $array_domain = explode('.', $host);
         $array_num    = count($array_domain);

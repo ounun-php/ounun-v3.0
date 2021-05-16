@@ -7,6 +7,8 @@
 namespace ounun\utils;
 
 
+use Exception;
+
 class caiji
 {
     /**
@@ -17,7 +19,7 @@ class caiji
      * @param string $right 目标内容右边标识点
      * @return string
      */
-    static public function left(string $content, string $left, string $right)
+    static public function left(string $content, string $left, string $right): string
     {
         return explode($right, explode($left, $content, 2)[1], 2)[0];
     }
@@ -30,7 +32,7 @@ class caiji
      * @param string $left 目标内容左边标识点
      * @return string
      */
-    static public function right(string $content, string $right, string $left)
+    static public function right(string $content, string $right, string $left): string
     {
         return explode($left, explode($right, $content, 2)[0], 2)[1];
     }
@@ -43,7 +45,7 @@ class caiji
      * @param string $right 目标内容右边标识点
      * @return string
      */
-    static public function left_right(string $content, string $left, string $right)
+    static public function left_right(string $content, string $left, string $right): string
     {
         $pos = strpos($content, $left);
         if ($pos !== false) {
@@ -65,7 +67,7 @@ class caiji
      * @param string $right 目标内容右边标识点
      * @return array
      */
-    static public function list_left(string $content, string $middle, string $left, string $right)
+    static public function list_left(string $content, string $middle, string $left, string $right): array
     {
         $rs = [];
         $c2 = explode($middle, $content);
@@ -87,7 +89,7 @@ class caiji
      * @param string $left 目标内容左边标识点
      * @return array
      */
-    static public function list_right(string $content, string $middle, string $right, string $left)
+    static public function list_right(string $content, string $middle, string $right, string $left): array
     {
         $rs = [];
         $c2 = explode($middle, $content);
@@ -108,7 +110,7 @@ class caiji
      * @param array $rules 分析规则 ['key'=> 主键, 'type' => <'left'默认,'right'> , 'left' => $left, 'right'=>$right]
      * @return mixed
      */
-    static public function list(string $content, string $middle, array $rules)
+    static public function list(string $content, string $middle, array $rules): array
     {
         $rs   = [];
         $c2   = explode($middle, $content);
@@ -140,7 +142,7 @@ class caiji
      * @param  $subject string
      * @return mixed
      */
-    static public function preg_match_all(string $pattern, string $subject)
+    static public function preg_match_all(string $pattern, string $subject): array
     {
         $matches = [];
         preg_match_all('/' . $pattern . '/', $subject, $matches, PREG_SET_ORDER);
@@ -155,10 +157,10 @@ class caiji
      */
     static public function img_urls(string $content): array
     {
-        preg_match_all('/<img.*?src="(.*?)"/si', $content, $imgarr);///(?<=img.src=").*?(?=")/si
+        preg_match_all('/<img.*?src="(.*?)"/si', $content, $imgs);///(?<=img.src=").*?(?=")/si
         // print_r($imgarr[1]);
         // preg_match_all('/(?<=src=").*?(?=")/si', implode('" ', $imgarr[0]) . '" ', $imgarr);
-        return $imgarr[1];
+        return $imgs[1];
     }
 
     /**
@@ -166,7 +168,7 @@ class caiji
      *
      * @return string
      */
-    static public function rand_inland_ip()
+    static public function rand_inland_ip(): string
     {
         $ip_long  = [
             [607649792, 608174079], //36.56.0.0-36.63.255.255
@@ -195,7 +197,7 @@ class caiji
      *
      * @return string
      */
-    static public function rand_views()
+    static public function rand_views(): string
     {
         $ip_long  = [
             [1000, 100000],
@@ -270,7 +272,7 @@ class caiji
                 if (!empty($post_data) && !empty($from_encode) && !in_array(strtolower($from_encode), array('auto', 'utf-8', 'utf8'))) {
 
                     if (!is_array($post_data)) {
-                        if (preg_match_all('/([^\&]+?)\=([^\&]*)/', $post_data, $m_post_data)) {
+                        if (preg_match_all('/([^&]+?)=([^&]*)/', $post_data, $m_post_data)) {
                             $new_post_data = array();
                             foreach ($m_post_data[1] as $k => $v) {
                                 $new_post_data[$v] = rawurldecode($m_post_data[2][$k]);
@@ -289,7 +291,7 @@ class caiji
 
                 $curl = proxy::post($url, $headers, $options, $post_data);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $curl = null;
         }
         $html = null;
@@ -300,7 +302,7 @@ class caiji
                 $html = $curl->body;
                 if ($from_encode == 'auto') {
                     $htmlCharset = [];
-                    if (preg_match('/<meta[^<>]*?content=[\'\"]text\/html\;\s*charset=(?P<charset>[^\'\"\<\>]+?)[\'\"]/i', $html, $htmlCharset) || preg_match('/<meta[^<>]*?charset=[\'\"](?P<charset>[^\'\"\<\>]+?)[\'\"]/i', $html, $htmlCharset)) {
+                    if (preg_match('/<meta[^<>]*?content=[\'\"]text\/html;\s*charset=(?P<charset>[^\'\"<>]+?)[\'\"]/i', $html, $htmlCharset) || preg_match('/<meta[^<>]*?charset=[\'\"](?P<charset>[^\'\"<>]+?)[\'\"]/i', $html, $htmlCharset)) {
                         $htmlCharset = strtolower(trim($htmlCharset['charset']));
                         if ('utf8' == $htmlCharset) {
                             $htmlCharset = 'utf-8';

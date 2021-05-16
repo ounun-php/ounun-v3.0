@@ -11,8 +11,10 @@ class cookie
 {
     /** @var string cookie前缀 */
     protected static string $_prefix = '';
+
     /** @var string 目录 */
     protected static string $_path = '/';
+
     /** @var string 域名 */
     protected static string $_domain = '';
 
