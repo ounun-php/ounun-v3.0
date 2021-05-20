@@ -129,7 +129,7 @@ class pdo
                 if (empty($tag)) {
                     $tag = \ounun::database_default_get();
                 }
-                $config = \ounun::$database[$tag];
+                $config = \ounun::$database[$tag] ?? null;
             }
             if ($config) {
                 static::$_instance = new static($config);

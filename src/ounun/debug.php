@@ -51,10 +51,10 @@ class debug
      * @param bool $is_bof 倒序(后面的日志写到前面)
      * @param bool $is_run_time 运行时间毫秒
      */
-    public function __construct($filename = 'debug.txt',
-                                $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true,
-                                $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
-                                $is_bof = false, $is_run_time = true)
+    public function __construct(string $filename = 'debug.txt',
+                                bool $is_out_buffer = true, bool $is_out_get = true, bool $is_out_post = true, bool $is_out_url = true,
+                                bool $is_out_cookie = true, bool $is_out_session = true, bool $is_out_server = false,
+                                bool $is_bof = false, bool $is_run_time = true)
     {
 //        print_r(['$filename'       => $filename, '$is_out_buffer' => $is_out_buffer, '$is_out_get' => $is_out_get, '$is_out_url' => $is_out_url, '$is_out_cookie' => $is_out_cookie,
 //                 '$is_out_session' => $is_out_session, '$is_out_server' => $is_out_server, '$is_bof' => $is_bof, '$is_run_time' => $is_run_time]);
@@ -155,7 +155,7 @@ class debug
      * @param bool $is_replace 是否替换
      * @return debug
      */
-    public function logs(string $k, $log, $is_replace = true): debug
+    public function logs(string $k, $log, bool $is_replace = true): debug
     {
         if ($k && $log) {
             // 直接替换
@@ -237,7 +237,6 @@ class debug
                 if (strcmp('Division by zero', $error_str) == 0) {
                     throw new \DivisionByZeroError($error_str);
                 }
-
                 $level_tips = 'PHP Warning: ';
                 break;
             case E_NOTICE:
@@ -311,17 +310,17 @@ class debug
                 }
             }
             // cookie
-            if ($this->_is_out_cookie && $_COOKIE) {
+            if ($this->_is_out_cookie && isset($_COOKIE)) {
                 $this->_is_out_cookie = false;
                 $str                  .= 'COOKIE:' . var_export($_COOKIE, true) . PHP_EOL;
             }
             // session
-            if ($this->_is_out_session && $_SESSION) {
+            if ($this->_is_out_session && isset($_SESSION)) {
                 $this->_is_out_session = false;
                 $str                   .= 'SESSION:' . var_export($_SESSION, true) . PHP_EOL;
             }
             // server
-            if ($this->_is_out_server && $_SERVER) {
+            if ($this->_is_out_server && isset($_SERVER)) {
                 $this->_is_out_server = false;
                 $str                  .= 'SERVER:' . var_export($_SERVER, true) . PHP_EOL;
             }

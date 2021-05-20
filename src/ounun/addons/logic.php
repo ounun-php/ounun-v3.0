@@ -60,7 +60,7 @@ abstract class logic
      *
      * @param database_model $db
      */
-    public function db_set(database_model $db)
+    public function db_set(?database_model $db = null)
     {
         if ($db && is_subclass_of($db, database_model::class)) {
             $this->_db = $db;

@@ -155,12 +155,13 @@ class domain
 
     /**
      * 取得根域名
+     *
      * @param string $host 域名
      * @return string 返回根域名
      */
     public static function domain(string $host): string
     {
-        $array_domain = explode('.', $host);
+        $array_domain = explode('.', explode(':',$host)[0]);
         $array_num    = count($array_domain);
         if ($array_num <= 2) {
             return $host;
@@ -177,5 +178,21 @@ class domain
             }
         }
         return $host;
+    }
+
+    /**
+     * 端口
+     *
+     * @param string $host
+     * @return string
+     */
+    public static function port(string $host):string
+    {
+        $array_port = explode(':',$host);
+        $array_num  = count($array_port);
+        if($array_num < 2){
+            return '';
+        }
+        return $array_port[1];
     }
 }

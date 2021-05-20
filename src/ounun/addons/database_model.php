@@ -6,7 +6,7 @@
 
 namespace ounun\addons;
 
-use \ounun\db\pdo;
+use ounun\db\pdo;
 use ounun\page\simple;
 
 /**

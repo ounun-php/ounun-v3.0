@@ -195,7 +195,7 @@ function url_check(string $url_original = '', bool $ext_req = true, string $doma
         }
     }
     // echo("\$url_reset:{$url_reset} \$url_original:{$url_original}\n");
-    // exit("\$domain:{$domain}\n");
+    // echo("\$domain:{$domain}\n");
     // 域名
     if ($domain && $domain != $_SERVER['HTTP_HOST']) {
         // $domain  = $_SERVER['HTTP_HOST'];
@@ -1513,17 +1513,18 @@ function start_web()
             ? ounun::$app_name
             : ounun::App_Name_Web;
 
+        // print_r(['ounun::$addon_route'=>ounun::$addon_route,"{$url_mods[0]}/$url_mods[1]",$url_mods[0],$url_mods]);
         // 插件路由
         $addon_tag = '';
         /** @var apps $apps */
-        if ($url_mods[1] && ($addon = ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
+        if (isset($url_mods[1]) && (isset(ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $addon = ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
             array_shift($url_mods);
             array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-        } elseif ($url_mods[0] && ($addon = ounun::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
+        } elseif (isset($url_mods[0]) && (isset(ounun::$addon_route[$url_mods[0]]) && $addon = ounun::$addon_route[$url_mods[0]]) && $apps = $addon['apps']) {
             array_shift($url_mods);
             $addon_tag = $apps::Addon_Tag;
-        } elseif (($addon = ounun::$addon_route['']) && $apps = $addon['apps']) {
+        } elseif ((isset(ounun::$addon_route['']) && $addon = ounun::$addon_route['']) && $apps = $addon['apps']) {
             $addon_tag = $apps::Addon_Tag;
         } else {
             error404('ounun::$addon_route[\'\']: There is no default value -> $addon_route:' . json_encode(ounun::$addon_route) . '');
@@ -1565,7 +1566,7 @@ function start_web()
     };
 
     // 设定 模块与方法(缓存)
-    /** @var v $classname */
+    /** @var string $classname */
     list($filename, $classname, $addon_tag, $url_mods) = $addon_get($url_mods);
     // debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
