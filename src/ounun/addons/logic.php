@@ -54,7 +54,6 @@ abstract class logic
      */
     abstract protected function _initialize();
 
-
     /**
      * 数据模型set
      *
@@ -62,10 +61,13 @@ abstract class logic
      */
     public function db_set(?database_model $db = null)
     {
-        if ($db && is_subclass_of($db, database_model::class)) {
+        if (empty($db)) {
+            return;
+        }
+        if (is_subclass_of($db, database_model::class)) {
             $this->_db = $db;
         } else {
-            error_php("\$db:type error value->" . var_export($db, true));
+            error_php("error \ounun::database_default_get():" . \ounun::database_default_get() . "  \$db:" . var_export($db, true));
         }
     }
 

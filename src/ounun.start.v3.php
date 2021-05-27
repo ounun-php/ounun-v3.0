@@ -1432,22 +1432,24 @@ function start_web()
     $host     = $_SERVER['HTTP_HOST'];
     $uri      = url_original($_SERVER['REQUEST_URI']);
     $url_mods = url_to_mod($uri);
-    debug::header(['REQUEST_URI' => $_SERVER['REQUEST_URI'], '$url_mods' => $url_mods], '', __FILE__, __LINE__);
+
     // 语言lang
-    if ($url_mods && $url_mods[0] && ounun::$lang_support[$url_mods[0]]) {
+    if ($url_mods && $url_mods[0] && isset(ounun::$lang_support[$url_mods[0]]) && ounun::$lang_support[$url_mods[0]]) {
         $lang = array_shift($url_mods);
     } else {
         $lang = ounun::$lang ?? ounun::$lang_default;
     }
 
     // 应用app
-    if ($url_mods && $url_mods[0] && $app = ounun::$app["{$host}/{$url_mods[0]}"]) {
+    if ($url_mods && $url_mods[0] && isset(ounun::$app["{$host}/{$url_mods[0]}"]) && $app = ounun::$app["{$host}/{$url_mods[0]}"]) {
         array_shift($url_mods);
     } elseif (ounun::$app[$host]) {
         $app = ounun::$app[$host];
     } else {
         $app = ounun::$app_default;
     }
+
+    debug::header(['$host'=>$host,'$app'=>$app,'$lang'=>$lang,'$url_mods' => $url_mods,'REQUEST_URI' => $_SERVER['REQUEST_URI']], '$app', __FILE__, __LINE__);
 
     // 设定
     ounun::$app_name = (string)$app['app_name']; // 当前APP
@@ -1482,7 +1484,7 @@ function start_web()
 
     // 开始 重定义头
     header('X-Powered-By: cms.cc; ounun.org;');
-    debug::header(['$url_mods' => $url_mods], '', __FILE__, __LINE__);
+    // debug::header(['$url_mods' => $url_mods,'REQUEST_URI' => $_SERVER['REQUEST_URI'],'$host'=>$host], '', __FILE__, __LINE__);
 
     // URL path_find
     $find = function (string $class_filename, array $url_mods, array $addon) {
@@ -1491,7 +1493,6 @@ function start_web()
             foreach ($paths as $v) {
                 $filename = $v['path'] . $class_filename;
                 if (is_file($filename)) {
-                    // debug::header('is:'.(is_file($filename)?'1':'0').' '.$filename, '$filename', __FILE__, __LINE__);
                     if (empty($url_mods)) {
                         if (isset($addon['method']) && $addon['method']) {
                             $url_mods = [$addon['method']];
@@ -1513,7 +1514,6 @@ function start_web()
             ? ounun::$app_name
             : ounun::App_Name_Web;
 
-        // print_r(['ounun::$addon_route'=>ounun::$addon_route,"{$url_mods[0]}/$url_mods[1]",$url_mods[0],$url_mods]);
         // 插件路由
         $addon_tag = '';
         /** @var apps $apps */
@@ -1553,7 +1553,7 @@ function start_web()
             $class_filename = "{$addon_tag}/{$app_name}.php";
             $class_name     = "\\addons\\{$addon_tag}\\{$app_name}";
         }
-        // debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
+        debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
 
         // paths
         if ($class_filename) {
@@ -1568,7 +1568,7 @@ function start_web()
     // 设定 模块与方法(缓存)
     /** @var string $classname */
     list($filename, $classname, $addon_tag, $url_mods) = $addon_get($url_mods);
-    // debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
+    debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
     // 包括模块文件
     if ($filename) {

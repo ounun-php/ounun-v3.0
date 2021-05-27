@@ -359,7 +359,7 @@ class debug
             $ret = 1;
         }
         if (empty($ret)) {
-            // error_php('debug write error');
+            error_php('debug write error');
         }
         return $this;
     }
@@ -390,7 +390,7 @@ class debug
                 $v = stripslashes(json_encode($v, JSON_UNESCAPED_UNICODE));
             }
             $idx = str_pad(static::$_header_idx, 4, '0', STR_PAD_LEFT);
-            header("o{$idx}-{$key}: {$v}", false);
+            header("o{$idx}-{$key}: {$v}", true);
         }
     }
 
@@ -412,9 +412,9 @@ class debug
      * @param string|null $filename 输出文件名
      * @return $this 调试日志单例
      */
-    public static function i(string $channel = 'comm', $is_out_buffer = true, $is_out_get = true, $is_out_post = true, $is_out_url = true,
-                             $is_out_cookie = true, $is_out_session = true, $is_out_server = false,
-                             $is_bof = false, $is_run_time = true, string $date_dir = '_', ?string $filename = null): self
+    public static function i(string $channel = 'comm', bool $is_out_buffer = true, bool $is_out_get = true, bool $is_out_post = true, bool $is_out_url = true,
+                             bool $is_out_cookie = true, bool $is_out_session = true, bool $is_out_server = false,
+                             bool $is_bof = false, bool $is_run_time = true, string $date_dir = '_', ?string $filename = null): self
     {
         if (empty(static::$_instances[$channel])) {
             $dir                          = global_all('debug', Dir_Storage . 'logs/', 'out_dir');
