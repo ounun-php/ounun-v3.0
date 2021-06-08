@@ -84,7 +84,7 @@ abstract class database_model extends pdo
     {
         $url = url_build_query(url_original(), $page_gets, ['page' => '{page}']);
         $pg  = new simple($url, $page_config);
-        $ps  = $pg->fn_total_set($fn_total)->initialize((int)$page_gets['page'], $page_title, $end_index);
+        $ps  = $pg->fn_total_set($fn_total)->initialize((int)($page_gets['page'] ?? 0), $page_title, $end_index);
         return [$ps, $fn_ret($pg)];
     }
 

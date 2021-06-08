@@ -94,24 +94,24 @@ class simple
         $url_prev = '';
         $url_next = '';
         foreach ($data as $v) {
-            if ($v['begin']) {
+            if (isset($v['begin']) && $v['begin']) {
                 $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['begin']) . '" title="' . $title . '第' . $v['begin'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[0]) . '</a>' . $tag_default[1];
-            } elseif ($v['previous']) {
+            } elseif (isset($v['previous']) && $v['previous']) {
                 $url_prev = $this->_url_set($v['previous']);
                 $pages[]  = $tag_default[0] . '<a href="' . $url_prev . '" title="' . $title . '第' . $v['previous'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[1]) . '</a>' . $tag_default[1];
-            } elseif ($v['next']) {
+            } elseif (isset($v['next']) && $v['next']) {
                 $url_next = $this->_url_set($v['next']);
                 $pages[]  = $tag_default[0] . '<a href="' . $url_next . '" title="' . $title . '第' . $v['next'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[2]) . '</a>' . $tag_default[1];
-            } elseif ($v['end']) {
+            } elseif (isset($v['end']) && $v['end']) {
                 $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['end']) . '" title="' . $title . '第' . $v['end'] . '页" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[3]) . '</a>' . $tag_default[1];
-            } elseif ($v['default']) {
+            } elseif (isset($v['default']) && $v['default']) {
                 if ($this->_page_curr == $v['default']) {
                     $pages[] = $tag_curr[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" ' . $tag_curr[2] . ' onclick="return false">' . $v['default'] . '</a>' . $tag_curr[1];
                 } else {
                     $pages[] = $tag_default[0] . '<a href="' . $this->_url_set($v['default']) . '" title="' . $title . '第' . $v['default'] . '页" ' . $tag_default[2] . '>' . $v['default'] . '</a>' . $tag_default[1];
                 }
-            } elseif ($v['index']) {
-                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set(0) . '" title="' . $title . $tag_name[4] . '" ' . $tag_default[2] . '>' . htmlspecialchars($tag_name[4]) . '</a>' . $tag_default[1];
+            } elseif (isset($v['index']) && $v['index']) {
+                $pages[] = $tag_default[0] . '<a href="' . $this->_url_set(0) . '" title="' . $title . ($tag_name[3]??'') . '" ' . ($tag_default[2]??'') . '>' . htmlspecialchars($tag_name[3]??'') . '</a>' . $tag_default[1];
             }
         }
         return [
@@ -301,7 +301,7 @@ class simple
      * @param callable $fn
      * @return $this
      */
-    public function fn_total_set(callable $fn):self
+    public function fn_total_set(callable $fn): self
     {
         $this->_fn_total = $fn;
         return $this;

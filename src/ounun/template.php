@@ -7,7 +7,7 @@
 namespace ounun;
 
 use ounun;
-use v;
+use apps\v_web;
 
 /**
  * Class template
@@ -358,7 +358,7 @@ class template
      */
     public function assign()
     {
-        if (empty(v::$cache_html) || v::$cache_html->stop) {
+        if (empty(v_web::$cache_html) || v_web::$cache_html->stop) {
             static::ob_start();
             register_shutdown_function([$this, 'callback'], true);
         }

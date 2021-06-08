@@ -67,7 +67,7 @@ abstract class logic
         if (is_subclass_of($db, database_model::class)) {
             $this->_db = $db;
         } else {
-            error_php("error \ounun::database_default_get():" . \ounun::database_default_get() . "  \$db:" . var_export($db, true));
+            error_php("error ounun::database_default_get():" . \ounun::database_default_get() . "  \$db:" . var_export($db, true));
         }
     }
 

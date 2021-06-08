@@ -134,7 +134,7 @@ class pdo
             if ($config) {
                 static::$_instance = new static($config);
             } else {
-                return null;
+                error_php('error db tag:'.$tag.' default:'.\ounun::database_default_get());
             }
         }
         return static::$_instance;

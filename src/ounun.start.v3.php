@@ -834,7 +834,7 @@ function global_all(string $key, $default = null, ?string $sub_key = null)
 function global_addons(string $addon_tag, ?string $key = null, $default = null, ?string $sub_key = null)
 {
     $ret    = $default;
-    $values = ounun::$global_addons[$addon_tag];
+    $values = ounun::$global_addons[$addon_tag]??[];
     if (is_null($key)) {
         $ret = $values;
     }
@@ -1165,17 +1165,17 @@ class ounun
 
         /** @var string Www Page */
         $pages            = explode('/', static::$root_www, 4);
-        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        $path_dir         = isset($pages[3]) && $pages[3] ? "/{$pages[3]}" : '';
         static::$page_www = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
 
         /** @var string Mobile Page */
         $pages            = explode('/', static::$root_wap, 4);
-        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        $path_dir         = isset($pages[3]) && $pages[3] ? "/{$pages[3]}" : '';
         static::$page_wap = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
 
         /** @var string Mip Page */
         $pages            = explode('/', static::$root_mip, 4);
-        $path_dir         = $pages[3] ? "/{$pages[3]}" : '';
+        $path_dir         = isset($pages[3]) && $pages[3] ? "/{$pages[3]}" : '';
         static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
     }
 
