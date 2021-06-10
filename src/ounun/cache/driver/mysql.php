@@ -33,11 +33,11 @@ class mysql extends driver
         'prefix'        => '',    // 模块名称
         'prefix_list'   => 'd',
 
-
         'servers'  => [
             ['127.0.0.1', 3306, 100],
             // ['127.0.0.1',11211,100]
         ],
+
         'timeout'  => 0, // 超时时间（单位：毫秒）
         'username' => '', //账号
         'password' => '', //密码

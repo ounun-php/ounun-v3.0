@@ -373,7 +373,7 @@ class pdo
 
     /**
      * @param bool $force_prepare 是否强行 prepare
-     * @return array 得到一条数据数组
+     * @return mixed 得到一条数据数组
      */
     public function column_one(bool $force_prepare = false)
     {
