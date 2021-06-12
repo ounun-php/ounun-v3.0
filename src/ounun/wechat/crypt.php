@@ -3,6 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+declare (strict_types = 1);
+namespace ounun\wechat;
 
 /**
  * 对微信小程序用户加密数据的解密示例代码.
@@ -10,7 +12,6 @@
  * @copyright Copyright (c) 1998-2014 Tencent Inc.
  */
 
-namespace ounun\wechat;
 
 
 class crypt

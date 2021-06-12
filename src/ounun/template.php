@@ -3,11 +3,10 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
 namespace ounun;
 
 use ounun;
-use apps\v_web;
+use v;
 
 /**
  * Class template
@@ -358,7 +357,7 @@ class template
      */
     public function assign()
     {
-        if (empty(v_web::$cache_html) || v_web::$cache_html->stop) {
+        if (empty(v::$cache_html) || v::$cache_html->stop) {
             static::ob_start();
             register_shutdown_function([$this, 'callback'], true);
         }
@@ -426,7 +425,7 @@ class template
      */
     static public function replace(string $subject, array $data, ?string $regex = null): string
     {
-        $regex ??= '/\{\$(\w+)\}/';
+        $regex ??= '/\{(\w+)\}/';
         return preg_replace_callback($regex, function ($var) use ($data) {
             return $data[$var[1]] ?? $var[0];
         }, $subject);

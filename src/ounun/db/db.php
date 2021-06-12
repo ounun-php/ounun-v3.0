@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+declare (strict_types=1);
 
 namespace ounun\db;
 
@@ -55,7 +56,7 @@ class db
         $data2  = [];
         $fields = $is_use_default_fields ? array_keys($data_default) : array_keys($data);
         foreach ($fields as $field) {
-            $dv = $data_default[$field];
+            $dv = $data_default[$field]??null;
             if ($dv && isset($data[$field])) {
                 if (static::Bool == $dv['type']) {
                     $data2[$field] = $data[$field] ? true : false;
@@ -114,8 +115,8 @@ class db
         // 自检 数据更新还是插入
         $is_update = false;
         if ($primary_data) {
-            list($where_str, $paras) = self::where_str_bind($primary_data);
-            $is_update = $db->table($table)->where($where_str, $paras)->count_value(array_keys($primary_data)[0]) > 0;
+            list($where_str, $paras) = self::where_str_bind($primary_data,$primary_data);
+            $is_update = $db->table($table)->where($where_str, $paras)->count_value('`'.array_keys($primary_data)[0].'`') > 0;
         }
         if (empty($is_update)) {
             $is_use_default_fields = true;
@@ -164,78 +165,73 @@ class db
      * SQL where str bind 数据生成
      *
      * @param array $fields
-     * @param array|null $arrays
+     * @param array|null $where_data
      * @param pdo|null $pdo
      * @return array
      */
-    static public function where_str_bind(array $fields, ?array $arrays = null, ?pdo $pdo = null): array
+    static public function where_str_bind(array $fields, ?array $where_data, ?pdo $pdo = null): array
     {
-        // 初始化
-        if ($fields && empty($arrays)) {
-            $arrays = $fields;
-            $fields = array_map(function () {
-                return '=';
-            }, $fields);
-        }
         // 执行
         $where_str  = [];
         $where_bind = [];
-        foreach ($fields as $field => $operation) {
-            if (isset($arrays[$field])) {
-                if ('=' == $operation) {
-                    $where_str[]        = " `{$field}` =:{$field} ";
-                    $where_bind[$field] = $arrays[$field];
-                } elseif ('>' == $operation) {
-                    $where_str[]        = " `{$field}` >:{$field} ";
-                    $where_bind[$field] = $arrays[$field];
-                } elseif ('<=' == $operation) {
-                    $where_str[]        = " `{$field}` <=:{$field} ";
-                    $where_bind[$field] = $arrays[$field];
-                } elseif ('<' == $operation) {
-                    $where_str[]        = " `{$field}` <:{$field} ";
-                    $where_bind[$field] = $arrays[$field];
-                } elseif ('<=' == $operation) {
-                    $where_str[]        = " `{$field}` <=:{$field} ";
-                    $where_bind[$field] = $arrays[$field];
-                } elseif ('like' == $operation) {
-                    $where_str[]        = " `{$field}` like :{$field} ";
-                    $where_bind[$field] = $arrays[$field];
-                } elseif ('%like' == $operation) {
-                    $where_str[]        = " `{$field}` like :{$field} ";
-                    $where_bind[$field] = "%{$arrays[$field]}";
-                } elseif ('like%' == $operation) {
-                    $where_str[]        = " `{$field}` like :{$field} ";
-                    $where_bind[$field] = "{$arrays[$field]}%";
-                } elseif ('%like%' == $operation) {
-                    $where_str[]        = " `{$field}` like :{$field} ";
-                    $where_bind[$field] = "%{$arrays[$field]}%";
-                } elseif ('between' == $operation) {
-                    $where_str[]                   = " `{$field}` >:{$field}_start and `{$field}` <:{$field}_end ";
-                    $where_bind[$field . '_start'] = $arrays[$field . '_start'];
-                    $where_bind[$field . '_end']   = $arrays[$field . '_end'];
-                } elseif ('between=' == $operation) {
-                    $where_str[]                   = " `{$field}` >=:{$field}_start and `{$field}` <=:{$field}_end ";
-                    $where_bind[$field . '_start'] = $arrays[$field . '_start'];
-                    $where_bind[$field . '_end']   = $arrays[$field . '_end'];
-                } elseif ('in' == $operation || 'in_str' == $operation) {
-                    $vals = [];
-                    if (is_array($arrays[$field])) {
-                        if ('in_str' == $operation) {
-                            foreach ($arrays[$field] as $val) {
-                                $vals[] = $pdo->quote($val, \PDO::PARAM_STR);
+        if ($where_data) { // 请求参数不能为空
+            foreach ($fields as $field => $operation) {
+                if (isset($where_data[$field])) {
+                    if ('=' == $operation) {
+                        $where_str[]        = " `{$field}` =:{$field} ";
+                        $where_bind[$field] = $where_data[$field];
+                    } elseif ('>' == $operation) {
+                        $where_str[]        = " `{$field}` >:{$field} ";
+                        $where_bind[$field] = $where_data[$field];
+                    } elseif ('<=' == $operation) {
+                        $where_str[]        = " `{$field}` <=:{$field} ";
+                        $where_bind[$field] = $where_data[$field];
+                    } elseif ('<' == $operation) {
+                        $where_str[]        = " `{$field}` <:{$field} ";
+                        $where_bind[$field] = $where_data[$field];
+                    } elseif ('<=' == $operation) {
+                        $where_str[]        = " `{$field}` <=:{$field} ";
+                        $where_bind[$field] = $where_data[$field];
+                    } elseif ('like' == $operation) {
+                        $where_str[]        = " `{$field}` like :{$field} ";
+                        $where_bind[$field] = $where_data[$field];
+                    } elseif ('%like' == $operation) {
+                        $where_str[]        = " `{$field}` like :{$field} ";
+                        $where_bind[$field] = "%{$where_data[$field]}";
+                    } elseif ('like%' == $operation) {
+                        $where_str[]        = " `{$field}` like :{$field} ";
+                        $where_bind[$field] = "{$where_data[$field]}%";
+                    } elseif ('%like%' == $operation) {
+                        $where_str[]        = " `{$field}` like :{$field} ";
+                        $where_bind[$field] = "%{$where_data[$field]}%";
+                    } elseif ('between' == $operation) {
+                        $where_str[]                   = " `{$field}` >:{$field}_start and `{$field}` <:{$field}_end ";
+                        $where_bind[$field . '_start'] = $where_data[$field . '_start'];
+                        $where_bind[$field . '_end']   = $where_data[$field . '_end'];
+                    } elseif ('between=' == $operation) {
+                        $where_str[]                   = " `{$field}` >=:{$field}_start and `{$field}` <=:{$field}_end ";
+                        $where_bind[$field . '_start'] = $where_data[$field . '_start'];
+                        $where_bind[$field . '_end']   = $where_data[$field . '_end'];
+                    } elseif ('in' == $operation || 'in_str' == $operation) {
+                        $vals = [];
+                        if (is_array($where_data[$field])) {
+                            if ('in_str' == $operation) {
+                                foreach ($where_data[$field] as $val) {
+                                    $vals[] = $pdo->quote($val, \PDO::PARAM_STR);
+                                }
+                            } else {
+                                foreach ($where_data[$field] as $val) {
+                                    $vals[] = (float)$val;
+                                }
                             }
-                        } else {
-                            foreach ($arrays[$field] as $val) {
-                                $vals[] = (int)$val;
+                            if ($vals) {
+                                $where_str[] = " `{$field}` in (" . implode(',', $vals) . ") ";
                             }
                         }
-                        if ($vals) {
-                            $where_str[] = " `{$field}` in (" . implode(',', $vals) . ") ";
-                        }
+                    } else { // 默认
+                        $where_str[]        = " `{$field}` =:{$field} ";
+                        $where_bind[$field] = $where_data[$field];
                     }
-                } else { // 默认
-                    $where_str[]        = " `{$field}` =:{$field} ";
-                    $where_bind[$field] = $arrays[$field];
                 }
             }
         }

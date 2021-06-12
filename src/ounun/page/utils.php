@@ -3,78 +3,80 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
+declare (strict_types=1);
 namespace ounun\page;
 
 class utils
 {
     /**
-     * @param array $data_query 数据
-     * @param array $replace_ext 要替换的数据
-     * @param array $skip 忽略的数据 如:page
+     * @param string $path
+     * @param string $addon_tag
+     * @param string $addon_view
+     * @param array|null $query 数据
+     * @param array|null $replace_ext
+     * @param array|null $skip 忽略的数据 如:page
      * @param string $url_key
-     * @param string $url_original URL
      * @return string
      */
-    static public function url(array $data_query = [], array $replace_ext = [], array $skip = [],string $url_key = 'p',string $url_original = '')
+    static public function query(string $path, string $addon_tag, string $addon_view = '', ?array $query = null, ?array $replace_ext = null, ?array $skip = null, string $url_key = 'u'): string
     {
-        $data_query   = $data_query   ? $data_query   : $_GET;
-        $replace_ext  = $replace_ext  ? $replace_ext  : ['page' => '{page}'];
-        $url_original = $url_original ? $url_original : url_original();
-        $url          = url_build_query($url_original, $data_query, $replace_ext, $skip);
+        $query = $query ?? $_GET;
+        $path2 = url_build_query($path, $query, $replace_ext ?? [], $skip ?? []);
         // print_r(['$url_original'=>$url_original,'$url'=>$url,'$paras_gets'=>$paras_gets,'$paras_page'=>$paras_page]);
         // exit();
-        self::page_set($_SERVER['REQUEST_URI'],$url_key);
-        return $url;
+        self::url_set($path2, $addon_tag, $addon_view, $url_key);
+        return $path2;
     }
 
     /**
      * 设定当前页面
      *
-     * @param string $url
+     * @param string $path
      * @param string $addon_tag
      * @param string $addon_view
      * @param string $url_key
      */
-    static public function page_set(string $url,string $addon_tag, string $addon_view = '', string $url_key = 'p')
+    static public function url_set(string $path, string $addon_tag, string $addon_view = '', string $url_key = 'u')
     {
-        $url = \ounun::url_addon_get($addon_tag,$addon_view,$url);
+        $url = \ounun::url_addon_get($addon_tag, $addon_view, $path);
         self::value_set($url_key, $url);
     }
 
     /**
      * 获取URL
      *
-     * @param string $default_url
+     * @param string $path
      * @param string $addon_tag
      * @param string $addon_view
      * @param string $url_key
      * @return mixed
      */
-    static public function page_get(string $default_url,string $addon_tag, string $addon_view = '', string $url_key = 'p')
+    static public function url_get(string $path, string $addon_tag, string $addon_view = '', string $url_key = 'u')
     {
-        $default_url = \ounun::url_addon_get($addon_tag,$addon_view,$default_url);
-        return self::value_get($url_key, $default_url);
+        $url = \ounun::url_addon_get($addon_tag, $addon_view, $path);
+        return self::value_get($url_key, $url);
     }
 
     /**
-     * 设定当前页
+     * 设定当前页码
+     *
      * @param int $page 页数
      * @param string $page_key
      */
-    static public function curr_set(int $page = 1, string $page_key = 'page')
+    static public function curr_page_set(int $page = 1, string $page_key = 'page')
     {
         self::value_set($page_key, $page);
     }
 
     /**
-     * 获取当前页
+     * 获取当前页码
+     *
      * @param string $pre
      * @param string $page_key GET 页数key
      * @param int $default_page 默认忽略 的页数
      * @return string
      */
-    static public function curr_get(string $pre = '?', string $page_key = 'page', int $default_page = 1)
+    static public function curr_page_get(string $pre = '?', string $page_key = 'page', int $default_page = 1): string
     {
         $page = self::value_get($page_key, $default_page);
         if ($page == $default_page) {
@@ -85,23 +87,24 @@ class utils
 
     /**
      * 设定值
+     *
      * @param string $key
      * @param mixed $value
      */
     static public function value_set(string $key, $value)
     {
-        setcookie("pu_{$key}", $value, time() * 1.2, '/');
+        setcookie("pu_{$key}", $value, time() + 31100000, '/');
     }
 
     /**
      * 获取值
+     *
      * @param string $key 值key
      * @param mixed $default_value 如值为空，返回本值
      * @return mixed
      */
     static public function value_get(string $key, $default_value)
     {
-        $val = $_COOKIE["pu_{$key}"];
-        return $val ? $val : $default_value;
+        return $_COOKIE["pu_{$key}"] ?? $default_value;
     }
 }

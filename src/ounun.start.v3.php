@@ -7,6 +7,7 @@
 use ounun\addons\apps;
 use ounun\addons\console;
 use ounun\addons\logic;
+use ounun\cache\html;
 use ounun\db\db;
 use ounun\debug;
 use ounun\c;
@@ -113,13 +114,13 @@ function url_build_query(string $url, array $data_query, array $replace_ext = []
         $rs     = [];
         $rs_str = '';
         foreach ($data_query as $key => $value) {
-            if ('{page}' === $value) {
-                $rs_str = $key . '={page}';
+            if (is_string($value) && '{' === $value[0]) {
+                $rs_str = $key . '=' . $value; // '={page}'
             } elseif (is_array($value)) {
                 foreach ($value as $k2 => $v2) {
                     $rs[] = $key . '[' . $k2 . ']=' . urlencode($v2);
                 }
-            } elseif ($value || 0 === $value) {
+            } elseif ($value || 0 === $value || '0' === $value) {
                 $rs[] = $key . '=' . urlencode($value);
             }
         }
@@ -834,7 +835,7 @@ function global_all(string $key, $default = null, ?string $sub_key = null)
 function global_addons(string $addon_tag, ?string $key = null, $default = null, ?string $sub_key = null)
 {
     $ret    = $default;
-    $values = ounun::$global_addons[$addon_tag]??[];
+    $values = ounun::$global_addons[$addon_tag] ?? [];
     if (is_null($key)) {
         $ret = $values;
     }
@@ -1357,6 +1358,9 @@ abstract class v
     /** @var  template|null  Template句柄容器 */
     public static ?template $tpl;
 
+    /** @var html|null cache_html */
+    public static ?html $cache_html;
+
     /** @var string 插件唯一标识 */
     public static string $addon_tag = '';
 
@@ -1449,7 +1453,7 @@ function start_web()
         $app = ounun::$app_default;
     }
 
-    debug::header(['$host'=>$host,'$app'=>$app,'$lang'=>$lang,'$url_mods' => $url_mods,'REQUEST_URI' => $_SERVER['REQUEST_URI']], '$app', __FILE__, __LINE__);
+    debug::header(['$host' => $host, '$app' => $app, '$lang' => $lang, '$url_mods' => $url_mods, 'REQUEST_URI' => $_SERVER['REQUEST_URI']], '$app', __FILE__, __LINE__);
 
     // 设定
     ounun::$app_name = (string)$app['app_name']; // 当前APP

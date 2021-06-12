@@ -1,6 +1,9 @@
 <?php
-
-
+/**
+ * [Ounun System] Copyright (c) 2019 Ounun.ORG
+ * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ */
+declare (strict_types = 1);
 namespace ounun\page;
 
 
@@ -23,8 +26,9 @@ class simple
     protected int $_config_show_max = 9;
     /** @var int     一页显示几条数据 */
     protected int $_config_rows = 20;
+
     /** @var bool 是否最后一页为首页  false:第一页为首页  true:最后一页为首页 */
-    protected bool $_page_end_index = false;
+    protected bool $_page_is_end_index = false;
     /** @var string */
     protected string $_url;
 
@@ -43,28 +47,27 @@ class simple
      * page constructor.
      *
      * @param string $url
-     * @param array $where
-     * @param array $config
+     * @param array  $paging_config  
      */
-    public function __construct(string $url, array $config = [])
+    public function __construct(string $url, array $paging_config = [])
     {
         $this->_url = $url;
-        $this->config_set($config);
+        $this->config_set($paging_config);
     }
 
     /**
      * 设定总接口
      *
-     * @param array $config
+     * @param array $paging_config
      * @return self
      */
-    public function config_set(array $config): self
+    public function config_set(array $paging_config): self
     {
-        if ($config && is_array($config)) {
+        if ($paging_config && is_array($paging_config)) {
             foreach (['note', 'page_tag_default', 'page_tag_curr', 'page_tag_name', 'show_max', 'rows', 'index'] as $key) {
-                if (isset($config[$key])) {
+                if (isset($paging_config[$key])) {
                     $m        = "_config_{$key}";
-                    $this->$m = $config[$key];
+                    $this->$m = $paging_config[$key];
                 }
             }
         }
@@ -76,10 +79,10 @@ class simple
      *
      * @param int $page_curr
      * @param string $title
-     * @param bool $end_index
+     * @param bool $is_end_index
      * @return array
      */
-    public function initialize(int $page_curr = 0, string $title = '', bool $end_index = false): array
+    public function initialize(int $page_curr = 0, string $title = '', bool $is_end_index = false): array
     {
         $tag_default = $this->_config_page_tag_default;
         $tag_curr    = $this->_config_page_tag_curr;
@@ -88,7 +91,7 @@ class simple
         $title = $title ? "{$title}-" : '';
         $pages = [];
 
-        $data = $this->_data($page_curr, $end_index);
+        $data = $this->_data($page_curr, $is_end_index);
         $note = $this->_note_set();
 
         $url_prev = '';
@@ -130,26 +133,26 @@ class simple
      * 算出分页数据
      *
      * @param int $page_curr
-     * @param bool $end_index
+     * @param bool $is_end_index
      * @return array
      */
-    protected function _data(int $page_curr = 0, bool $end_index = false): array
+    protected function _data(int $page_curr = 0, bool $is_end_index = false): array
     {
         $page_middle = ceil($this->_config_show_max / 2);
 
         $this->_total           = $this->total_size();
-        $this->_total_page_real = ceil($this->_total / $this->_config_rows);
-        if ($end_index) {
+        $this->_total_page_real = (int)ceil($this->_total / $this->_config_rows);
+        if ($is_end_index) {
             $this->_total_page = $this->_total_page_real - 1;
         } else {
             $this->_total_page = $this->_total_page_real;
         }
 
-        $page_curr = $end_index ? ($page_curr < 1 ? 0 : $page_curr) : ($page_curr < 1 ? 1 : $page_curr);
+        $page_curr = $is_end_index ? ($page_curr < 1 ? 0 : $page_curr) : ($page_curr < 1 ? 1 : $page_curr);
         $page_curr = $page_curr > $this->_total_page ? $this->_total_page : $page_curr;
 
         $this->_page_curr      = $page_curr;
-        $this->_page_end_index = $end_index;
+        $this->_page_is_end_index = $is_end_index;
 
         if ($this->_total_page > $this->_config_show_max) {
             $sub_total = $this->_config_show_max;
@@ -224,11 +227,11 @@ class simple
     /**
      * 翻页排序  false:1...max  true:max...1
      *
-     * @return int
+     * @return bool
      */
-    public function page_end_index(): int
+    public function page_is_end_index(): bool
     {
-        return $this->_page_end_index;
+        return $this->_page_is_end_index;
     }
 
     /**
@@ -244,7 +247,7 @@ class simple
      */
     public function limit_offset(): int
     {
-        if ($this->_page_end_index && $this->_page_curr == 0) {
+        if ($this->_page_is_end_index && $this->_page_curr == 0) {
             $start = $this->_total - $this->_config_rows;
         } else {
             $start = ($this->_page_curr - 1) * $this->_config_rows;
@@ -273,12 +276,12 @@ class simple
     {
         $search  = [];
         $replace = [];
-        $url     = str_replace('{page}', $page, $this->_url);
+        $url     = str_replace('{page}', (string)$page, $this->_url);
         if ($this->_config_index) {
-            if ($this->_page_end_index) {
+            if ($this->_page_is_end_index) {
                 if ($page == 0) {
                     foreach ($this->_config_index as $v) {
-                        $search[]  = str_replace('{total_page}', $this->_total_page, $v[0]);
+                        $search[]  = str_replace('{total_page}', (string)$this->_total_page, $v[0]);
                         $replace[] = $v[1];
                     }
                 }

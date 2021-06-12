@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+declare (strict_types=1);
 
 namespace ounun\db;
 
@@ -134,7 +135,7 @@ class pdo
             if ($config) {
                 static::$_instance = new static($config);
             } else {
-                error_php('error db tag:'.$tag.' default:'.\ounun::database_default_get());
+                error_php('error db tag:' . $tag . ' default:' . \ounun::database_default_get());
             }
         }
         return static::$_instance;
@@ -281,7 +282,7 @@ class pdo
         } else {
             $this->_execute($fields);
         }
-        return $this->_pdo->lastInsertId();
+        return (int)$this->_pdo->lastInsertId();
     }
 
     /**
@@ -377,11 +378,7 @@ class pdo
      */
     public function column_one(bool $force_prepare = false)
     {
-        if (null == $this->_stmt || $force_prepare) {
-            $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
-            $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
-                ->_execute($this->_bind_param);
-        }
+        $this->_prepare_column($force_prepare);
         if ($this->_fields_json) {
             $rs = $this->_stmt->fetch(\PDO::FETCH_ASSOC);
             if ($rs && is_array($rs)) {
@@ -399,15 +396,11 @@ class pdo
     /**
      * 得到多条數椐數組的数组
      * @param bool $force_prepare 是否强行 prepare
-     * @return array
+     * @return array|null
      */
-    public function column_all(bool $force_prepare = false)
+    public function column_all(bool $force_prepare = false): ?array
     {
-        if (null == $this->_stmt || $force_prepare) {
-            $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
-            $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
-                ->_execute($this->_bind_param);
-        }
+        $this->_prepare_column($force_prepare);
         if ($this->_assoc || $this->_fields_json) {
             $rs  = [];
             $rs0 = $this->_stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -443,6 +436,18 @@ class pdo
             return $rs;
         } else {
             return $this->_stmt->fetchAll(\PDO::FETCH_ASSOC);
+        }
+    }
+
+    /**
+     * @param bool $force_prepare
+     */
+    protected function _prepare_column(bool $force_prepare)
+    {
+        if (null == $this->_stmt || $force_prepare) {
+            $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
+            $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
+                ->_execute($this->_bind_param);
         }
     }
 
@@ -724,9 +729,9 @@ class pdo
      * @param int $default_value 默认值
      * @return int
      */
-    public function count_value(string $field = '*', string $alias = '`count`', $default_value = 0)
+    public function count_value(string $field = '*', string $alias = '`count`', $default_value = 0): int
     {
-        return $this->count($field, $alias)->column_value($alias, $default_value);
+        return (int)$this->count($field, $alias)->column_value($alias, $default_value);
     }
 
     /**
@@ -747,7 +752,7 @@ class pdo
      * @param int $default_value 默认值
      * @return float
      */
-    public function sum_value(string $field, string $alias = '`sum`', $default_value = 0)
+    public function sum_value(string $field, string $alias = '`sum`', $default_value = 0): float
     {
         return $this->sum($field, $alias)->column_value($alias, $default_value);
     }
@@ -836,7 +841,7 @@ class pdo
      */
     public function insert_id(): int
     {
-        return $this->_pdo->lastInsertId();
+        return (int)$this->_pdo->lastInsertId();
     }
 
     /**
@@ -850,11 +855,13 @@ class pdo
 
     /**
      * 得到最后一次查询的sql
-     * @return string
+     * Dump an SQL prepared command
      */
-    public function last_sql(): string
+    public function dump()
     {
-        return $this->_last_sql;
+        if ($this->_stmt) {
+            $this->_stmt->debugDumpParams();
+        }
     }
 
     /**
@@ -867,10 +874,33 @@ class pdo
     }
 
     /**
+     * 执行数据库事务
+     * @param callable $callback 数据操作方法回调
+     * @return mixed
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    public function transaction(callable $callback)
+    {
+        $this->trans_begin();
+        try {
+            $result = null;
+            if (is_callable($callback)) {
+                $result = $callback($this);
+            }
+            $this->trans_commit();
+            return $result;
+        } catch (\Exception | \Throwable $e) {
+            $this->trans_rollback();
+            throw $e;
+        }
+    }
+
+    /**
      * 开启事务
      * @return bool
      */
-    public function trans_begin()
+    public function trans_begin(): bool
     {
         return $this->_pdo->beginTransaction();
     }
@@ -879,7 +909,7 @@ class pdo
      * 提交事务
      * @return bool
      */
-    public function trans_commit()
+    public function trans_commit(): bool
     {
         return $this->_pdo->commit();
     }
@@ -888,17 +918,17 @@ class pdo
      * 关闭事务
      * @return bool
      */
-    public function trans_rollback()
+    public function trans_rollback(): bool
     {
         return $this->_pdo->rollBack();
     }
 
     /**
      * 根据结果提交滚回事务
-     * @param $res
+     * @param bool $res
      * @return bool
      */
-    public function trans_check($res)
+    public function trans_check(bool $res): bool
     {
         if ($res) {
             return $this->trans_commit();
@@ -922,7 +952,7 @@ class pdo
      */
     public function is_connect(): bool
     {
-        return $this->_pdo ? true : false;
+        return (bool)$this->_pdo;
     }
 
 
@@ -951,8 +981,9 @@ class pdo
      * @param int $type
      * @return string
      */
-    public function quote($data, int $type = \PDO::PARAM_INT)
+    public function quote($data, int $type = \PDO::PARAM_STR): string
     {
+        $this->active();
         $rs = [];
         if (is_array($data)) {
             foreach ($data as $value) {
@@ -965,7 +996,7 @@ class pdo
     }
 
     /** order */
-    protected function _order_get()
+    protected function _order_get(): string
     {
         $rs = '';
         if ($this->_order && is_array($this->_order)) {
@@ -979,7 +1010,7 @@ class pdo
     }
 
     /** group */
-    protected function _group_get()
+    protected function _group_get(): string
     {
         $rs = '';
         if ($this->_group && is_array($this->_group)) {
@@ -992,7 +1023,7 @@ class pdo
      * @param string $types
      * @return int
      */
-    protected function _types2param(string $types = '')
+    protected function _types2param(string $types = ''): int
     {
         switch ($types) {
             case 'i':
@@ -1018,7 +1049,7 @@ class pdo
      * @param int $param
      * @return string
      */
-    protected function _param2types(int $param = \PDO::PARAM_STR)
+    protected function _param2types(int $param = \PDO::PARAM_STR): string
     {
         switch ($param) {
             case \PDO::PARAM_INT:
@@ -1045,7 +1076,7 @@ class pdo
      * @param string $sql
      * @return array
      */
-    protected function _keys_parse(string $sql)
+    protected function _keys_parse(string $sql): array
     {
         $splits = preg_split('/(:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $result = [];
@@ -1062,7 +1093,7 @@ class pdo
      * @param array $data
      * @return array
      */
-    protected function _values_parse(array $data)
+    protected function _values_parse(array $data): array
     {
         $fields = [];
         if ($data && is_array($data)) {
@@ -1111,9 +1142,9 @@ class pdo
     {
         $update = [];
         foreach ($fields_data as $col => $val) {
-            if ($operate[$col] == self::Update_Add) {
+            if (isset($operate[$col]) && $operate[$col] === self::Update_Add) {
                 $update[] = "`$col` = `{$col}` + :{$col} ";
-            } elseif ($operate[$col] == self::Update_Cut) {
+            } elseif (isset($operate[$col]) && $operate[$col] === self::Update_Cut) {
                 $update[] = "`$col` = `{$col}` - :{$col} ";
             } else {
                 $update[] = "`{$col}` = :{$col} ";

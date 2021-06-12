@@ -3,8 +3,9 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-
+declare (strict_types = 1);
 namespace ounun;
+
 
 class debug
 {
@@ -13,7 +14,7 @@ class debug
     /** @var string|null 输出文件名 */
     private ?string $_logs_buffer;
     /** @var int    输出文件名 */
-    private int $_time = 0;
+    private float $_time = 0;
 
     /** @var string 输出文件名 */
     private string $_filename;
@@ -162,7 +163,7 @@ class debug
             if ($is_replace) {
                 $this->_logs[$k] = $log;
             } else {
-                if ($this->_logs[$k]) {
+                if (isset($this->_logs[$k]) && $this->_logs[$k]) {
                     // 已是数组,添加到后面
                     if (is_array($this->_logs[$k])) {
                         $this->_logs[$k][] = $log;
@@ -199,7 +200,7 @@ class debug
         if (empty($buffer)) {
             $buffer = ob_get_contents();
             ob_clean();
-            ob_implicit_flush(1);
+            ob_implicit_flush(true);
             if ($this->_is_out_buffer) {
                 $this->_logs_buffer = $buffer;
             }
@@ -232,8 +233,8 @@ class debug
         switch ($error_code) {
             case E_WARNING:
                 // x / 0 错误 PHP7 依然不能很友好的自动捕获 只会产生 E_WARNING 级的错误
-                // 捕获判断后 throw new DivisionByZeroError($errstr)
-                // 或者使用 intdiv(x, 0) 方法 会自动抛出 DivisionByZeroError 的错误
+                // 捕获判断后 throw new DivisionByZeroError($err_str)
+                // 或者使用 int_div(x, 0) 方法 会自动抛出 DivisionByZeroError 的错误
                 if (strcmp('Division by zero', $error_str) == 0) {
                     throw new \DivisionByZeroError($error_str);
                 }
@@ -389,7 +390,7 @@ class debug
             if (is_array($v) || is_object($v)) {
                 $v = stripslashes(json_encode($v, JSON_UNESCAPED_UNICODE));
             }
-            $idx = str_pad(static::$_header_idx, 4, '0', STR_PAD_LEFT);
+            $idx = str_pad((string)static::$_header_idx, 4, '0', STR_PAD_LEFT);
             header("o{$idx}-{$key}: {$v}", true);
         }
     }
