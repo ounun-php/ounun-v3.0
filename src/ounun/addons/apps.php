@@ -11,19 +11,16 @@ abstract class apps
 {
     /** @var string 插件名称 */
     const Addon_Name = '[基类]';
-
     /** @var string 插件tag */
     const Addon_Tag = '_base';
-
     /** @var string|null 版本号 */
     const Addon_Version = null;
-
     /** @var string|null 版本号 */
     const Logo = null;
-
     /** @var string 菜单tag */
     const Menu_Tag = '_base';
-
     /** @var string 系统 */
     const Is_System = false;
+    /** @var array 应用支持类型 */
+    const App_Type_Support = \ounun::App_Names;
 }

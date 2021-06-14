@@ -49,9 +49,7 @@ abstract class logic
         $this->_initialize(); // 控制器初始化
     }
 
-    /**
-     * 控制器初始化
-     */
+    /** 控制器初始化 */
     abstract protected function _initialize();
 
     /**

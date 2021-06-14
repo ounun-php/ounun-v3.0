@@ -3,7 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+
 namespace ounun\plugin\qqwry;
 
 /**
@@ -34,9 +34,9 @@ class ip
     /**
      * 返回数据库连接对像
      * @param string $charset
-     * @return ip
+     * @return self
      */
-    public static function i($charset = 'gbk'): self
+    public static function i(string $charset = 'gbk'): self
     {
         if (empty(static::$_instance)) {
             static::$_instance = new static($charset);

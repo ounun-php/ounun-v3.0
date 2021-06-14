@@ -3,6 +3,7 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
+
 namespace ounun;
 
 use ounun;
@@ -198,6 +199,9 @@ class template
     /** @var bool 是否去空格 换行 */
     protected bool $_is_trim;
 
+    /** @var array 模板文件查找 */
+    protected array $_try_files = [];
+
     /**
      * 创建对像 template constructor.
      *
@@ -247,6 +251,7 @@ class template
      */
     public function fixed(string $filename, string $addon_tag, bool $remember_dir_current = true): string
     {
+        $this->_try_files = [];
         // $types
         if ($this->_type_default && $this->_type != $this->_type_default) {
             $types = [$this->_type, $this->_type_default];
@@ -271,7 +276,8 @@ class template
                 }
                 foreach ($styles as $style) {
                     foreach ($types as $type) {
-                        $filename2 = "{$tpl_dir['path']}{$style}/{$type}/{$addon_tag2}{$filename}";
+                        $filename2          = "{$tpl_dir['path']}{$style}/{$type}/{$addon_tag2}{$filename}";
+                        $this->_try_files[] = $filename2;
                         // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                         if (is_file($filename2)) {
                             if ($remember_dir_current) {
@@ -284,7 +290,8 @@ class template
 //          }elseif ('addons' == $tpl_dir['type']){
             } else {
                 foreach ($types as $type) {
-                    $filename2 = "{$tpl_dir['path']}{$addon_tag2}template/{$type}/{$filename}";
+                    $filename2          = "{$tpl_dir['path']}{$addon_tag2}template/{$type}/{$filename}";
+                    $this->_try_files[] = $filename2;
                     // echo "line:".__LINE__." filename:{$filename2} <br />\n";
                     if (is_file($filename2)) {
                         if ($remember_dir_current) {
@@ -295,7 +302,7 @@ class template
                 }
             }
         }
-        if (global_all('debug', false,'template')) {
+        if (global_all('debug', false, 'template')) {
             $this->error($filename, $addon_tag);
         }
         return '';
@@ -340,14 +347,23 @@ class template
      */
     protected function error(string $filename, string $addon_tag = '')
     {
+        $paths = '';
+        foreach (static::$paths as $v){
+            $paths .= '<div style="color: darkcyan;"><strong style="color: blue;">type</strong>:'.$v['type'].' <strong <strong style="color: blue;">path</strong>:'.$v['path'].'</div>';
+        }
+        $try = '';
+        foreach ($this->_try_files as $v){
+            $try .= '<div style="color: darkcyan;">'.$v.'</div>';
+        }
         echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
-                    <strong style='padding:0 10px 0 0;color: red;'>Template: </strong>{$filename} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} " . ($addon_tag ? "\$addon_tag:{$addon_tag}" : '') . "<br />
+                    <strong style='padding:0 10px 0 0;color: red;'>TemplateFilename: </strong>{$filename} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} " . ($addon_tag ? " <strong style=\"padding:0 10px 0 10px;color: red;\">parameter \$addon_tag:</strong>{$addon_tag}" : '') . "<br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_theme} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_current_path} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>" . json_encode_unescaped(static::$paths) . " <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br /><br />
+                    <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>{$paths} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>TryFiles: </strong>{$try} <br />
               </div>";
         error_php("Can't find \$filename:{$filename} \$addon_tag:{$addon_tag}");
     }
@@ -407,7 +423,7 @@ class template
             }, $buffer);
 
             $pattern     = ['/\s{2,}/', '/>\s?</', '/\"\s?' . '>/'];
-            $replacement = [' ', '><','">'];
+            $replacement = [' ', '><', '">'];
             $buffer      = preg_replace($pattern, $replacement, $buffer);
         }
 

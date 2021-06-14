@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\plugin\google;
 
 use ounun\debug;
@@ -23,53 +24,49 @@ class auth_code
      * Create new secret.
      * 16 characters, randomly chosen from the allowed base32 characters.
      *
-     * @param int $secretLength
+     * @param int $secret_length
      * @return string
      */
-    public function secret_create($secretLength = 16)
+    public function secret_create(int $secret_length = 16): string
     {
-        $validChars = $this->_base32_lookup_table_get();
-        unset($validChars[32]);
+        $valid_chars = $this->_base32_lookup_table_get();
+        unset($valid_chars[32]);
 
-        $secret = '';
-        for ($i = 0; $i < $secretLength; $i++) {
-            $secret .= $validChars[array_rand($validChars)];
-        }
-        return $secret;
+        return str_repeat($valid_chars[array_rand($valid_chars)], $secret_length);
     }
 
     /**
      * Calculate the code, with given secret and point in time
      *
      * @param string $secret
-     * @param int|null $timeSlice
+     * @param int|null $time_slice
      * @return string
      */
-    public function code_get($secret, $timeSlice = null)
+    public function code_get(string $secret, ?int $time_slice = null): string
     {
-        if ($timeSlice === null) {
-            $timeSlice = floor(time() / 30);
+        if ($time_slice === null) {
+            $time_slice = floor(time() / 30);
         }
 
         $secret_key = $this->_base32_decode($secret);
 
         // Pack time into binary string
-        $time = chr(0) . chr(0) . chr(0) . chr(0) . pack('N*', $timeSlice);
+        $time = chr(0) . chr(0) . chr(0) . chr(0) . pack('N*', $time_slice);
         // Hash it with users secret key
         $hm = hash_hmac('SHA1', $time, $secret_key, true);
         // Use last nipple of result as index/offset
         $offset = ord(substr($hm, -1)) & 0x0F;
         // grab 4 bytes of the result
-        $hashpart = substr($hm, $offset, 4);
+        $hash_part = substr($hm, $offset, 4);
 
         // Unpak binary value
-        $value = unpack('N', $hashpart);
+        $value = unpack('N', $hash_part);
         $value = $value[1];
         // Only 32 bits
         $value = $value & 0x7FFFFFFF;
 
         $modulo = pow(10, $this->_code_length);
-        return str_pad($value % $modulo, $this->_code_length, '0', STR_PAD_LEFT);
+        return str_pad((string)($value % $modulo), $this->_code_length, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -77,17 +74,17 @@ class auth_code
      *
      * @param string $name
      * @param string $secret
-     * @param string $title
+     * @param string|null $title
      * @param string $url_root
      * @return string
      */
-    public function qrcode_google_url_get($name, $secret, $title = null,$url_root = 'https://qr.7pk.cn/')
+    public function qrcode_google_url_get(string $name, string $secret, ?string $title = null, string $url_root = 'https://qr.7pk.cn/'): string
     {
         $urlencoded = urlencode('otpauth://totp/' . urlencode($name) . '?secret=' . $secret . '');
         if (isset($title) && $title) {
             $urlencoded .= urlencode('&issuer=' . urlencode($title));
         }
-        return $url_root.'qrout.php?c=' . $urlencoded . '';
+        return $url_root . 'qrout.php?c=' . $urlencoded . '';
     }
 
     /**
@@ -96,19 +93,19 @@ class auth_code
      * @param string $secret
      * @param string $code
      * @param int $discrepancy This is the allowed time drift in 30 second units (8 means 4 minutes before or after)
-     * @param int|null $currentTimeSlice time slice if we want use other that time()
+     * @param int|null $current_time_slice time slice if we want use other that time()
      * @return bool
      */
-    public function verify_code($secret, $code, $discrepancy = 1, $currentTimeSlice = null)
+    public function verify_code(string $secret, string $code, int $discrepancy = 1, ?int $current_time_slice = null): bool
     {
-        if ($currentTimeSlice === null) {
-            $currentTimeSlice = floor(time() / 30);
+        if ($current_time_slice === null) {
+            $current_time_slice = (int)floor(time() / 30);
         }
 
         for ($i = -$discrepancy; $i <= $discrepancy; $i++) {
-            $calculatedCode = $this->code_get($secret, $currentTimeSlice + $i);
-            debug::header([$calculatedCode, $code, $secret, $calculatedCode == $code ? '1' : 0,$currentTimeSlice + $i], '', __FILE__, __LINE__);
-            if ($calculatedCode == $code) {
+            $calculated_code = $this->code_get($secret, $current_time_slice + $i);
+            // debug::header([$calculatedCode, $code, $secret, $calculatedCode == $code ? '1' : 0,$current_time_slice + $i], '', __FILE__, __LINE__);
+            if ($calculated_code === $code) {
                 return true;
             }
         }
@@ -122,7 +119,7 @@ class auth_code
      * @param int $length
      * @return auth_code GoogleAuthenticator
      */
-    public function code_length_set($length)
+    public function code_length_set(int $length): auth_code
     {
         $this->_code_length = $length;
         return $this;
@@ -136,10 +133,12 @@ class auth_code
      */
     protected function _base32_decode($secret)
     {
-        if (empty($secret)) return '';
+        if (empty($secret)) {
+            return '';
+        }
 
-        $base32chars        = $this->_base32_lookup_table_get();
-        $base32charsFlipped = array_flip($base32chars);
+        $base32chars         = $this->_base32_lookup_table_get();
+        $base32chars_flipped = array_flip($base32chars);
 
         $paddingCharCount = substr_count($secret, $base32chars[32]);
         $allowedValues    = array(6, 4, 3, 1, 0);
@@ -148,21 +147,26 @@ class auth_code
             if ($paddingCharCount == $allowedValues[$i] &&
                 substr($secret, -($allowedValues[$i])) != str_repeat($base32chars[32], $allowedValues[$i])) return false;
         }
-        $secret       = str_replace('=', '', $secret);
-        $secret       = str_split($secret);
-        $binaryString = "";
-        for ($i = 0; $i < count($secret); $i = $i + 8) {
-            $x = "";
-            if (!in_array($secret[$i], $base32chars)) return false;
-            for ($j = 0; $j < 8; $j++) {
-                $x .= str_pad(base_convert(@$base32charsFlipped[@$secret[$i + $j]], 10, 2), 5, '0', STR_PAD_LEFT);
+        $secret        = str_replace('=', '', $secret);
+        $secret        = str_split($secret);
+        $secret_len    = count($secret);
+        $binary_string = '';
+        for ($i = 0; $i < $secret_len; $i = $i + 8) {
+            $x = '';
+            if (!in_array($secret[$i], $base32chars)) {
+                return false;
             }
-            $eightBits = str_split($x, 8);
-            for ($z = 0; $z < count($eightBits); $z++) {
-                $binaryString .= (($y = chr(base_convert($eightBits[$z], 2, 10))) || ord($y) == 48) ? $y : "";
+            for ($j = 0; $j < 8; $j++) {
+                $k = $secret[$i + $j];
+                $x .= str_pad(base_convert((string)$base32chars_flipped[$k], 10, 2), 5, '0', STR_PAD_LEFT);
+            }
+            $eight_bits     = str_split($x, 8);
+            $eight_bits_len = count($eight_bits);
+            for ($z = 0; $z < $eight_bits_len; $z++) {
+                $binary_string .= (($y = chr((int)base_convert($eight_bits[$z], 2, 10))) || ord($y) == 48) ? $y : "";
             }
         }
-        return $binaryString;
+        return $binary_string;
     }
 
     /**
@@ -172,7 +176,7 @@ class auth_code
      * @param bool $padding
      * @return string
      */
-    protected function _base32_encode($secret, $padding = true)
+    protected function _base32_encode(string $secret, bool $padding = true): string
     {
         if (empty($secret)) return '';
 
@@ -181,7 +185,7 @@ class auth_code
         $secret       = str_split($secret);
         $binaryString = "";
         for ($i = 0; $i < count($secret); $i++) {
-            $binaryString .= str_pad(base_convert(ord($secret[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
+            $binaryString .= str_pad(base_convert((string)ord($secret[$i]), 10, 2), 8, '0', STR_PAD_LEFT);
         }
         $fiveBitBinaryArray = str_split($binaryString, 5);
         $base32             = "";
@@ -204,7 +208,7 @@ class auth_code
      *
      * @return array
      */
-    protected function _base32_lookup_table_get()
+    protected function _base32_lookup_table_get(): array
     {
         return array(
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', //  7
