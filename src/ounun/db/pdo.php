@@ -173,12 +173,12 @@ class pdo
      * @param string $table 表名
      * @return pdo
      */
-    public function table(string $table = ''): pdo
+    public function table(string $table): pdo
     {
         if ($this->_table || $table) {
             $this->_clean();
+            $this->_table = $table;
         }
-        $this->_table = $table;
         return $this;
     }
 
@@ -191,13 +191,26 @@ class pdo
      */
     public function query(string $sql = '', $bind_params = [], bool $check_active = true)
     {
-        if (strpos($sql, '?') !== false) {
+        if (strpos($sql, 'i:?') !== false) {
             if ($check_active) {
                 $this->active();
             }
-            $sql = str_replace('?', $this->quote($bind_params), $sql);
+            $bind_params2 = [];
+            foreach ($bind_params as $value) {
+                $value                = (float)$value;
+                $bind_params2[$value] = $value;
+            }
+            $bind_params2 = array_values($bind_params2);
+            $sql          = str_replace('i:?', implode(',', $bind_params2), $sql);
             $this->_prepare($sql, false);
-            $this->_stmt->execute();
+            $this->_execute();
+        } elseif (strpos($sql, '?') !== false) {
+            if ($check_active) {
+                $this->active();
+            }
+            $sql = str_replace(['s:?', '?'], $this->quote($bind_params), $sql);
+            $this->_prepare($sql, false);
+            $this->_execute();
         } else {
             $this->_prepare($sql, $check_active);
             if ($bind_params && is_array($bind_params)) {
@@ -729,7 +742,7 @@ class pdo
      * @param int $default_value 默认值
      * @return int
      */
-    public function count_value(string $field = '*', string $alias = '`count`', $default_value = 0): int
+    public function count_value(string $field = '*', string $alias = '`count`', int $default_value = 0): int
     {
         return (int)$this->count($field, $alias)->column_value($alias, $default_value);
     }
@@ -987,7 +1000,7 @@ class pdo
         $rs = [];
         if (is_array($data)) {
             foreach ($data as $value) {
-                $rs[] = $this->_pdo->quote($value, $type);
+                $rs[] = $this->_pdo->quote((string)$value, $type);
             }
         } else {
             $rs[] = $this->_pdo->quote($data, $type);
@@ -1098,7 +1111,21 @@ class pdo
         $fields = [];
         if ($data && is_array($data)) {
             foreach ($data as $col => &$val) {
-                if ('-' == $col[1]) {
+                if (':' === $col[0]) {
+                    list($type, $field) = explode(':', $col);
+                    $fields[$field] = [
+                        'field' => ':' . $field,
+                        'value' => $val,
+                        'type'  => $this->_types2param($type),
+                    ];
+                } elseif (isset($col[1]) && ':' === $col[1]) {
+                    list($type, $field) = explode(':', $col);
+                    $fields[$field] = [
+                        'field' => ':' . $field,
+                        'value' => $val,
+                        'type'  => $this->_types2param($type),
+                    ];
+                } elseif (isset($col[1]) && '-' === $col[1]) {
                     list($type_length, $field) = explode(':', $col);
                     list($type, $length) = explode('-', $type_length);
                     $fields[$field] = [
@@ -1106,20 +1133,6 @@ class pdo
                         'value'  => $val,
                         'type'   => $this->_types2param($type),
                         'length' => $length
-                    ];
-                } elseif (':' == $col[1]) {
-                    list($type, $field) = explode(':', $col);
-                    $fields[$field] = [
-                        'field' => ':' . $field,
-                        'value' => $val,
-                        'type'  => $this->_types2param($type),
-                    ];
-                } elseif (':' == $col[0]) {
-                    list($type, $field) = explode(':', $col);
-                    $fields[$field] = [
-                        'field' => ':' . $field,
-                        'value' => $val,
-                        'type'  => $this->_types2param($type),
                     ];
                 } else {
                     $fields[$col] = [
@@ -1156,21 +1169,22 @@ class pdo
     /**
      * @param array $fields
      */
-    protected function _execute(array $fields)
+    protected function _execute(array $fields = [])
     {
-        // $i = 0; echo "\n\n";
-        foreach ($this->_bind_keys as $key) {
-            $v = $fields[$key];
-            if ($v) {
-                // $i++; echo "{$i} -> field:{$v['field']}, value:{$v['value']}, type:{$v['type']}\n";
-                if (\PDO::PARAM_STR == $v['type'] && isset($v['length'])) {
-                    $this->_stmt->bindParam($v['field'], $v['value'], $v['type'], $v['length']);
+        if ($fields) {
+            foreach ($this->_bind_keys as $key) {
+                $v = $fields[$key];
+                if ($v) {
+                    // $i++; echo "{$i} -> field:{$v['field']}, value:{$v['value']}, type:{$v['type']}\n";
+                    if (\PDO::PARAM_STR == $v['type'] && isset($v['length'])) {
+                        $this->_stmt->bindParam($v['field'], $v['value'], $v['type'], $v['length']);
+                    } else {
+                        $this->_stmt->bindParam($v['field'], $v['value'], $v['type']);
+                    }
                 } else {
-                    $this->_stmt->bindParam($v['field'], $v['value'], $v['type']);
+                    $this->_stmt->debugDumpParams();
+                    error_php("SQL:Can't find \$fields[{$key}] ", '', 'mysql');
                 }
-            } else {
-                $this->_stmt->debugDumpParams();
-                error_php("SQL:Can't find \$fields[{$key}] ", '', 'mysql');
             }
         }
 

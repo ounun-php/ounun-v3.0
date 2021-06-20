@@ -217,12 +217,14 @@ class command_c
     const Run_Type_Caiji = 'caiji';
     /** @var string 发布 - 运行类型 */
     const Run_Type_Post = 'post';
-    /** @var string 系统 - 运行类型 */
+    /** @var string 系统(SEO) - 运行类型 */
     const Run_Type_System = 'system';
+
     /** @var string 站点 - 运行类型 */
     const Run_Type_Site = 'site';
     /** @var string 总后台管理(采集) - 运行类型 */
     const Run_Type_Admin = 'admin';
+
     /** @var array 运行类型(采集/发布/系统) */
     const Run_Types = [
         self::Run_Type_Caiji  => '采集',

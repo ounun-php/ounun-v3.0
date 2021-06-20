@@ -88,15 +88,15 @@ function ip(): string
  * 输出带参数的URL
  *
  * @param string $url URL
- * @param array $data_query 数据
- * @param array $replace_ext 要替换的数据
- * @param array $skip 忽略的数据 如:page
+ * @param array|null $data_query  数据
+ * @param array|null $replace_ext 要替换的数据
+ * @param array|null $skip        忽略的数据 如:page
  * @return string
  */
-function url_build_query(string $url, array $data_query, array $replace_ext = [], array $skip = []): string
+function url_build_query(string $url, ?array $data_query, ?array $replace_ext = null, ?array $skip = null): string
 {
     $rs = [];
-    if (is_array($data_query)) {
+    if ($data_query && is_array($data_query)) {
         if ($replace_ext && is_array($replace_ext)) {
             foreach ($replace_ext as $key => $value) {
                 $data_query[$key] = $value;
@@ -1427,6 +1427,12 @@ abstract class v
      * @param array $url_mods
      */
     abstract public function index(array $url_mods);
+
+    /** toString */
+    public function __toString(): string
+    {
+        return get_class($this);
+    }
 }
 
 /** Web 开始 */

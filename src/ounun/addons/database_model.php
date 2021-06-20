@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\addons;
 
 use ounun\db\pdo;
@@ -45,12 +46,15 @@ abstract class database_model extends pdo
     abstract protected function _initialize();
 
     /**
-     * @param string $table 表名
+     * @param string|null $table 表名
      * @return pdo
      */
-    public function table(string $table = ''): pdo
+    public function table(?string $table = null): pdo
     {
-        if (empty($table) && $this->table) {
+        if (empty($table)) {
+            if (empty($this->table)) {
+                error_php(get_class($this) . '::$this->table is empty');
+            }
             $table = $this->table;
         }
         return parent::table($table);
@@ -70,42 +74,44 @@ abstract class database_model extends pdo
     /**
      * 分页
      *
-     * @param callable|null $fn_data_list     获取数据列表
-     * @param callable|null $fn_total         获取总数
-     * @param array $http_request_gets        请求如$_GET参数 
-     * @param array $paging_config            分页参数
-     * @param bool  $is_end_index             是否倒序 false:正序 true:倒序
-     * @param string $page_title              分页标题
+     * @param callable|null $fn_data_list 获取数据列表
+     * @param callable|null $fn_total 获取总数
+     * @param array|null $http_request_gets 请求如$_GET参数
+     * @param array|null $paging_config 分页参数
+     * @param bool $is_end_index 是否倒序 false:正序 true:倒序
+     * @param string $page_title 分页标题
      * @return array
      */
-    public function paging(callable $fn_data_list, callable $fn_total, array $http_request_gets = [], array $paging_config = [], bool $is_end_index = true, string $page_title = ''): array
+    public function paging(?callable $fn_data_list, ?callable $fn_total, ?array $http_request_gets = null, ?array $paging_config = null, bool $is_end_index = true, string $page_title = ''): array
     {
-        $url = url_build_query(url_original(), $http_request_gets, ['page' => '{page}']);
-        $pg  = new simple($url, $paging_config);
-        $ps  = $pg->fn_total_set($fn_total)->initialize((int)($http_request_gets['page'] ?? 0), $page_title, $is_end_index);
+        $http_request_gets = $http_request_gets ?? $_GET;
+        $paging_config     = $paging_config ?? [];
+        $url               = url_build_query(url_original(), $http_request_gets, ['page' => '{page}']);
+        $pg                = new simple($url, $paging_config);
+        $ps                = $pg->fn_total_set($fn_total)->initialize((int)($http_request_gets['page'] ?? 0), $page_title, $is_end_index);
         return [$ps, $fn_data_list($pg)];
     }
 
     /**
      * 简单 分页
      *
-     * @param string $where_str            查询条件
-     * @param array $where_paras           查询条件参数
-     * @param array $orders                排序orders
-     * @param string|null $table           表名
-     * @param array  $http_request_gets    请求如$_GET参数 
-     * @param array  $paging_config        分页参数
-     * @param bool   $is_end_index         是否倒序 false:正序 true:倒序
-     * @param string $page_title           分页标题
+     * @param string $where_str 查询条件
+     * @param array $where_paras 查询条件参数
+     * @param array $orders 排序orders
+     * @param string|null $table 表名
+     * @param array $http_request_gets 请求如$_GET参数
+     * @param array $paging_config 分页参数
+     * @param bool $is_end_index 是否倒序 false:正序 true:倒序
+     * @param string $page_title 分页标题
      * @return array
      */
     public function paging_simple(string $where_str = '', array $where_paras = [], array $orders = [], ?string $table = null, array $http_request_gets = [], array $paging_config = [], bool $is_end_index = true, string $page_title = ''): array
     {
-        $table    ??= $this->table;
-        $fn_total = function () use ($table, $where_str, $where_paras) {
+        $table        ??= $this->table;
+        $fn_total     = function () use ($table, $where_str, $where_paras) {
             return $this->table($table)->where($where_str, $where_paras)->count_value();
         };
-        $fn_data_list   = function (simple $pg) use ($orders, $table, $where_str, $where_paras) {
+        $fn_data_list = function (simple $pg) use ($orders, $table, $where_str, $where_paras) {
             $this->table($table)->where($where_str, $where_paras)->limit($pg->limit_length(), $pg->limit_offset());
             foreach ($orders as $field => $order) {
                 $this->order($field, $order);
