@@ -95,24 +95,30 @@ function ip(): string
  */
 function url_build_query(string $url, ?array $data_query, ?array $replace_ext = null, ?array $skip = null): string
 {
-    $rs = [];
-    if ($data_query && is_array($data_query)) {
-        if ($replace_ext && is_array($replace_ext)) {
-            foreach ($replace_ext as $key => $value) {
-                $data_query[$key] = $value;
+    // 参数
+    $data_query ??= [];
+
+    // replace_ext
+    if (is_array($replace_ext)) {
+        foreach ($replace_ext as $key => $value) {
+            $data_query[$key] = $value;
+        }
+    }
+    // skip
+    if (is_array($skip)) {
+        foreach ($skip as $key => $value) {
+            if (is_array($value) && in_array($data_query[$key], $value)) {
+                unset($data_query[$key]);
+            } else {
+                unset($data_query[$value]);
             }
         }
-        if ($skip && is_array($skip)) {
-            foreach ($skip as $key => $value) {
-                if (is_array($value) && in_array($data_query[$key], $value)) {
-                    unset($data_query[$key]);
-                } else {
-                    unset($data_query[$value]);
-                }
-            }
-        }
-        $rs     = [];
-        $rs_str = '';
+    }
+
+    // data_query
+    $rs     = [];
+    $rs_str = '';
+    if (is_array($data_query)) {
         foreach ($data_query as $key => $value) {
             if (is_string($value) && '{' === $value[0]) {
                 $rs_str = $key . '=' . $value; // '={page}'
@@ -129,6 +135,8 @@ function url_build_query(string $url, ?array $data_query, ?array $replace_ext = 
             $rs[] = $rs_str;
         }
     }
+
+    // url
     $url = trim($url);
     if ($rs) {
         $len = strlen($url);

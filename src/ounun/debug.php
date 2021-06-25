@@ -13,7 +13,7 @@ class debug
     private array $_logs = [];
     /** @var string|null 输出文件名 */
     private ?string $_logs_buffer;
-    /** @var int    输出文件名 */
+    /** @var float 输出文件名 */
     private float $_time = 0;
 
     /** @var string 输出文件名 */
@@ -104,9 +104,9 @@ class debug
      * 通过配置单独定义函数的配置
      * @param string $k buffer/get/post/url
      * @param bool $v
-     * @return debug
+     * @return $this
      */
-    public function out(string $k, bool $v): debug
+    public function out(string $k, bool $v): self
     {
         $_k        = '_is_out_' . $k;
         $this->$_k = $v;
@@ -117,9 +117,9 @@ class debug
     /**
      * 设置文件路径
      * @param string $filename 文件路径
-     * @return debug
+     * @return $this
      */
-    public function filename(string $filename): debug
+    public function filename(string $filename): self
     {
         $this->_filename = $filename;
         return $this;
@@ -128,9 +128,9 @@ class debug
     /**
      * 运行时间是否显示
      * @param bool $show true:显示 false:不显示
-     * @return debug
+     * @return $this
      */
-    public function run_time(bool $show): debug
+    public function run_time(bool $show): self
     {
         $this->_is_run_time = $show;
         return $this;
@@ -140,9 +140,9 @@ class debug
      * 日志追加位置
      *
      * @param bool $bof true:倒序(新内容在头部) false:正序(新内容在尾部)
-     * @return debug
+     * @return $this
      */
-    public function bof(bool $bof): debug
+    public function bof(bool $bof): self
     {
         $this->_is_bof = $bof;
         return $this;
@@ -154,9 +154,9 @@ class debug
      * @param string $k
      * @param mixed $log 日志内容
      * @param bool $is_replace 是否替换
-     * @return debug
+     * @return $this
      */
-    public function logs(string $k, $log, bool $is_replace = true): debug
+    public function logs(string $k, mixed $log, bool $is_replace = true): self
     {
         if ($k && $log) {
             // 直接替换
@@ -273,9 +273,9 @@ class debug
      * 析构调试相关
      *
      * @param bool $is_end 是否当前请求 最后一次写入
-     * @return debug
+     * @return $this
      */
-    public function write(bool $is_end = false): debug
+    public function write(bool $is_end = false): self
     {
         if (!$this->_filename) {
             return $this;
@@ -395,8 +395,8 @@ class debug
         }
     }
 
-    /** @var self 单例模式 */
-    static protected $_instances = [];
+    /** @var array 单例模式 */
+    static protected array $_instances = [];
 
     /**
      * @param string $channel

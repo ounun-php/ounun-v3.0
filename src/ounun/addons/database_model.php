@@ -105,7 +105,7 @@ abstract class database_model extends pdo
      * @param string $page_title 分页标题
      * @return array
      */
-    public function paging_simple(string $where_str = '', array $where_paras = [], array $orders = [], ?string $table = null, array $http_request_gets = [], array $paging_config = [], bool $is_end_index = true, string $page_title = ''): array
+    public function paging_simple(string $where_str = '', array $where_paras = [], array $orders = [], ?string $table = null, ?array $http_request_gets = null, ?array $paging_config = null, bool $is_end_index = true, string $page_title = ''): array
     {
         $table        ??= $this->table;
         $fn_total     = function () use ($table, $where_str, $where_paras) {

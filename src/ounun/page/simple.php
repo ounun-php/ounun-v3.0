@@ -14,6 +14,7 @@ class simple
 
     /** @var string  提示串 */
     protected string $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
+    
     /** @var array   默认页 */
     protected array $_config_page_tag_default = ['<li>', '</li>', ''];
     /** @var array   当前页面时 */
@@ -21,7 +22,8 @@ class simple
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
     protected array $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
     /** @var array   第一页 */
-    protected array $_config_index = [];
+    protected array $_config_index = []; 
+
     /** @var int     最多显示几页 */
     protected int $_config_show_max = 9;
     /** @var int     一页显示几条数据 */

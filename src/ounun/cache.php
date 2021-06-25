@@ -81,7 +81,7 @@ class cache
      * @param array $options 参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
+    public function get(string $key, mixed $default = 0, bool $add_prefix = true, array $options = []): mixed
     {
         return $this->_driver->get($key, $default, $add_prefix, $options);
     }
@@ -95,7 +95,7 @@ class cache
      * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
+    public function set(string $key, mixed $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
     {
         return $this->_driver->set($key, $value, $expire, $add_prefix, $options);
     }
@@ -108,7 +108,7 @@ class cache
      * @param bool $add_prefix
      * @return int|string
      */
-    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    public function hash_hget(string $key, string $field, mixed $default = 0, bool $add_prefix = true): int|string
     {
         if ($this->_value[$key] && isset($this->_value[$key][$field])) {
             return $this->_value[$key][$field];
@@ -173,7 +173,7 @@ class cache
      * @param callable $callback
      * @return mixed
      */
-    public function data(string $key, callable $callback)
+    public function data(string $key, callable $callback): mixed
     {
         if (isset($this->_value[$key])) {
             return $this->_value[$key];

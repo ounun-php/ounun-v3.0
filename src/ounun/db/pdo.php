@@ -7,6 +7,10 @@ declare (strict_types=1);
 
 namespace ounun\db;
 
+use Exception;
+use PDOStatement;
+use Throwable;
+
 class pdo
 {
     /** @var string 倒序大在前 - 排序 */
@@ -46,9 +50,9 @@ class pdo
     const Update_Add = 'add';
 
     /** @var \PDO|null  pdo */
-    protected ?\PDO $_pdo = null; // pdo
-    /** @var \PDOStatement|null  stmt */
-    protected ?\PDOStatement $_stmt = null; // stmt
+    protected ?\PDO $_pdo = null;
+    /** @var PDOStatement|null  stmt */
+    protected ?PDOStatement $_stmt = null;
 
 
     /** @var string */
@@ -116,12 +120,12 @@ class pdo
     /** @var self 数据库实例 */
     protected static $_instance;
     /** @var array pdo实例 */
-    private static array $_pdos = [];
+    private static array $_pdo_list = [];
 
     /**
      * @param string $tag
      * @param array $config
-     * @return pdo|null 返回数据库连接对像
+     * @return self|null 返回数据库连接对像
      */
     public static function i(string $tag = '', array $config = []): ?self
     {
@@ -171,9 +175,9 @@ class pdo
 
     /**
      * @param string $table 表名
-     * @return pdo
+     * @return $this
      */
-    public function table(string $table): pdo
+    public function table(string $table): self
     {
         if ($this->_table || $table) {
             $this->_clean();
@@ -189,9 +193,9 @@ class pdo
      * @param bool $check_active
      * @return $this
      */
-    public function query(string $sql = '', $bind_params = [], bool $check_active = true)
+    public function query(string $sql = '', array|string $bind_params = [], bool $check_active = true): self
     {
-        if (strpos($sql, 'i:?') !== false) {
+        if (str_contains($sql, 'i:?')) {
             if ($check_active) {
                 $this->active();
             }
@@ -204,7 +208,7 @@ class pdo
             $sql          = str_replace('i:?', implode(',', $bind_params2), $sql);
             $this->_prepare($sql, false);
             $this->_execute();
-        } elseif (strpos($sql, '?') !== false) {
+        } elseif (str_contains($sql, '?')) {
             if ($check_active) {
                 $this->active();
             }
@@ -256,15 +260,15 @@ class pdo
         if (null == $this->_pdo) {
             $dsn = "{$this->_driver}:host={$this->_host};port={$this->_port};dbname={$this->_database};charset={$this->_charset}";
             $key = md5($dsn . $this->_username . $this->_password);
-            if (self::$_pdos && isset(self::$_pdos[$key]) && $pdo = self::$_pdos[$key]) {
+            if (self::$_pdo_list && isset(self::$_pdo_list[$key]) && $pdo = self::$_pdo_list[$key]) {
                 $this->_pdo = $pdo;
             } else {
                 $options = [];
                 if (self::Driver_Mysql == $this->_driver) {
                     $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,];
                 }
-                $this->_pdo        = new \PDO($dsn, $this->_username, $this->_password, $options);
-                self::$_pdos[$key] = $this->_pdo;
+                $this->_pdo            = new \PDO($dsn, $this->_username, $this->_password, $options);
+                self::$_pdo_list[$key] = $this->_pdo;
             }
         }
         return $this;
@@ -408,6 +412,7 @@ class pdo
 
     /**
      * 得到多条數椐數組的数组
+     *
      * @param bool $force_prepare 是否强行 prepare
      * @return array|null
      */
@@ -501,6 +506,7 @@ class pdo
 
     /**
      * 设定插入数据为替换
+     *
      * @param bool $is_replace
      * @return $this;
      */
@@ -512,6 +518,7 @@ class pdo
 
     /**
      * 多条数据 true:多条数据 false:单条数据
+     *
      * @param bool $is_multiple
      * @return $this;
      */
@@ -523,6 +530,7 @@ class pdo
 
     /**
      * 参数 install update replace
+     *
      * @param string $option
      * @return $this
      */
@@ -534,6 +542,7 @@ class pdo
 
     /**
      * 滤掉name和id等字段都重复的记录
+     *
      * @param string $distinct
      * @return $this
      */
@@ -545,6 +554,7 @@ class pdo
 
     /**
      * 插入时已存在数据
+     *
      * @param array $duplicate 更新内容   [字段=>操作]
      * @param string $duplicate_ext 更新的扩展
      * @return $this
@@ -558,6 +568,7 @@ class pdo
 
     /**
      * 指定查询数量
+     *
      * @param int $length 查询数量
      * @param int $offset 起始位置
      * @return $this
@@ -703,6 +714,7 @@ class pdo
 
     /**
      * 指定排序
+     *
      * @param string $field 排序字段
      * @param string $order 排序
      * @return $this
@@ -715,6 +727,7 @@ class pdo
 
     /**
      * 聚合分组
+     *
      * @param string $field
      * @return $this
      */
@@ -726,6 +739,7 @@ class pdo
 
     /**
      * COUNT查询
+     *
      * @param string $field 字段名
      * @param string $alias SUM查询别名
      * @return $this
@@ -737,6 +751,7 @@ class pdo
 
     /**
      * COUNT查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
@@ -749,6 +764,7 @@ class pdo
 
     /**
      * SUM查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @return $this
@@ -760,6 +776,7 @@ class pdo
 
     /**
      * SUM查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
@@ -772,6 +789,7 @@ class pdo
 
     /**
      * MIN查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @return $this
@@ -783,6 +801,7 @@ class pdo
 
     /**
      * MIN查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
@@ -795,6 +814,7 @@ class pdo
 
     /**
      * MAX查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @return $this
@@ -806,6 +826,7 @@ class pdo
 
     /**
      * MAX查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
@@ -818,6 +839,7 @@ class pdo
 
     /**
      * AVG查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @return $this
@@ -829,6 +851,7 @@ class pdo
 
     /**
      * AVG查询
+     *
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param int $default_value 默认值
@@ -841,6 +864,7 @@ class pdo
 
     /**
      * 返回查询次数
+     *
      * @return int
      */
     public function query_times(): int
@@ -850,6 +874,7 @@ class pdo
 
     /**
      * 最后一次插入的自增ID
+     *
      * @return int
      */
     public function insert_id(): int
@@ -859,6 +884,7 @@ class pdo
 
     /**
      * 最后一次更新影响的行数
+     *
      * @return int
      */
     public function affected(): int
@@ -868,6 +894,7 @@ class pdo
 
     /**
      * 得到最后一次查询的sql
+     *
      * Dump an SQL prepared command
      */
     public function dump()
@@ -879,6 +906,7 @@ class pdo
 
     /**
      * 返回PDO
+     *
      * @return \PDO 返回PDO
      */
     public function pdo(): \PDO
@@ -888,12 +916,13 @@ class pdo
 
     /**
      * 执行数据库事务
+     *
      * @param callable $callback 数据操作方法回调
      * @return mixed
-     * @throws \Exception
-     * @throws \Throwable
+     * @throws Exception
+     * @throws Throwable
      */
-    public function transaction(callable $callback)
+    public function transaction(callable $callback): mixed
     {
         $this->trans_begin();
         try {
@@ -903,7 +932,7 @@ class pdo
             }
             $this->trans_commit();
             return $result;
-        } catch (\Exception | \Throwable $e) {
+        } catch (Exception | Throwable $e) {
             $this->trans_rollback();
             throw $e;
         }
@@ -952,9 +981,9 @@ class pdo
 
     /**
      * 返回PDO
-     * @return \PDOStatement 返回PDOStatement
+     * @return PDOStatement 返回PDOStatement
      */
-    public function stmt(): \PDOStatement
+    public function stmt(): PDOStatement
     {
         return $this->_stmt;
     }
@@ -1038,24 +1067,13 @@ class pdo
      */
     protected function _types2param(string $types = ''): int
     {
-        switch ($types) {
-            case 'i':
-                return \PDO::PARAM_INT;
-            //break;
-            case 's': // -> default
-            case 'd': // -> default
-                return \PDO::PARAM_STR;
-            //break;
-            case 'b':
-                return \PDO::PARAM_LOB;
-            //break;
-            case 'null':
-                return \PDO::PARAM_NULL;
-            case 'bool':
-                return \PDO::PARAM_BOOL;
-            default:
-                return \PDO::PARAM_STR;
-        }
+        return match ($types) {
+            'i' => \PDO::PARAM_INT,
+            'b' => \PDO::PARAM_LOB,
+            'null' => \PDO::PARAM_NULL,
+            'bool' => \PDO::PARAM_BOOL,
+            default => \PDO::PARAM_STR,
+        };
     }
 
     /**
@@ -1064,25 +1082,14 @@ class pdo
      */
     protected function _param2types(int $param = \PDO::PARAM_STR): string
     {
-        switch ($param) {
-            case \PDO::PARAM_INT:
-                return 'i';
-            // break;
-            case \PDO::PARAM_STR:
-                return 's';
-            // break;
-            case \PDO::PARAM_LOB:
-                return 'b';
-            // break;
-            case \PDO::PARAM_NULL:
-                return 'null';
-            // break;
-            case \PDO::PARAM_BOOL:
-                return 'bool';
-            // break;
-            default:
-                return '';
-        }
+        return match ($param) {
+            \PDO::PARAM_INT => 'i',
+            \PDO::PARAM_STR => 's',
+            \PDO::PARAM_LOB => 'b',
+            \PDO::PARAM_NULL => 'null',
+            \PDO::PARAM_BOOL => 'bool',
+            default => '',
+        };
     }
 
     /**
@@ -1190,7 +1197,7 @@ class pdo
 
         try {
             $this->_stmt->execute();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->_stmt->debugDumpParams();
             error_php("Sql Error:" . $e->getMessage() .
                 "\n\tlast_sql:" . $this->_last_sql . "\n" .
