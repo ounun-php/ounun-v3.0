@@ -14,3 +14,4 @@ example/*
 source/ounun/cache2
 .project
 .buildpath
+src/vendor
