@@ -24,7 +24,7 @@ class base
      * @param int $img_height
      * @param int $img_lenght
      */
-    public function make($img_width = 75, $img_height = 24, $img_lenght = 4)
+    public function make(int $img_width = 75, int $img_height = 24, int $img_lenght = 4)
     {
         if (!function_exists("imagecreatetruecolor")) {
             $input      = ['1335', '3114', '4922', '2320', '1268', '9011'];

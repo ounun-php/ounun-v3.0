@@ -87,10 +87,10 @@ class restful
     /**
      * 构建前执行
      *
-     * @param $url_mods
-     * @return bool|array
+     * @param array $url_mods
+     * @return bool
      */
-    protected function _construct_before(array $url_mods = [])
+    protected function _construct_before(array $url_mods = []): bool
     {
         return true;
     }

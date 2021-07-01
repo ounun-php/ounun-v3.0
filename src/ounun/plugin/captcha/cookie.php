@@ -36,7 +36,7 @@ class cookie
      * @param string $cookie
      * @return boolean
      */
-    public static function check(string $code, string $cookie = 'captcha')
+    public static function check(string $code, string $cookie = 'captcha'): bool
     {
         $rs = $code && $_COOKIE[$cookie] && md5($code) == $_COOKIE[$cookie];
         setcookie($cookie, '', -3600);

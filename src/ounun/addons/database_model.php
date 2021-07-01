@@ -47,9 +47,9 @@ abstract class database_model extends pdo
 
     /**
      * @param string|null $table 表名
-     * @return pdo
+     * @return self
      */
-    public function table(?string $table = null): pdo
+    public function table(?string $table = null): self
     {
         if (empty($table)) {
             if (empty($this->table)) {
@@ -139,9 +139,9 @@ abstract class database_model extends pdo
      * @param mixed $default_value
      * @return mixed
      */
-    public function data_get(string $name, $default_value = null)
+    public function data_get(string $name, mixed $default_value = null): mixed
     {
-        return isset($this->_data[$name]) ? $this->_data[$name] : $default_value;
+        return $this->_data[$name]??$default_value;
     }
 
     /**

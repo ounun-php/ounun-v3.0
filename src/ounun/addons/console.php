@@ -176,7 +176,7 @@ class console
      * @param string $file 文件名称
      * @param int $line 行号
      */
-    static public function print_r($array, $tab = '', int $depth0 = 0, string $file = '', int $line = 0)
+    static public function print_r(mixed $array, string $tab = '', int $depth0 = 0, string $file = '', int $line = 0)
     {
         $depth = $depth0 % command_c::Depth_Colors_Count;
         $color = command_c::Depth_Colors[$depth];

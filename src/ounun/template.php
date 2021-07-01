@@ -348,12 +348,12 @@ class template
     protected function error(string $filename, string $addon_tag = '')
     {
         $paths = '';
-        foreach (static::$paths as $v){
-            $paths .= '<div style="color: darkcyan;"><strong style="color: blue;">type</strong>:'.$v['type'].' <strong <strong style="color: blue;">path</strong>:'.$v['path'].'</div>';
+        foreach (static::$paths as $v) {
+            $paths .= '<div style="color: darkcyan;"><strong style="color: blue;">type</strong>:' . $v['type'] . ' <strong <strong style="color: blue;">path</strong>:' . $v['path'] . '</div>';
         }
         $try = '';
-        foreach ($this->_try_files as $v){
-            $try .= '<div style="color: darkcyan;">'.$v.'</div>';
+        foreach ($this->_try_files as $v) {
+            $try .= '<div style="color: darkcyan;">' . $v . '</div>';
         }
         echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
                     <strong style='padding:0 10px 0 0;color: red;'>TemplateFilename: </strong>{$filename} <br />

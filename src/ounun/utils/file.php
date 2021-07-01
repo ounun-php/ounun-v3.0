@@ -310,7 +310,7 @@ class file
      * @param string $dir 文件或目录的路径（目录尾部带/）。
      * @param string|null $type 返回类型
      * @param array $return_files
-     * @return array|mixed
+     * @return array
      */
     static function tree(string $dir, ?string $type = null, array &$return_files = []): array
     {

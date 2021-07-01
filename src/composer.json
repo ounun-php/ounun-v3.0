@@ -25,7 +25,7 @@
     "ext-xmlrpc": "*",
     "ext-simplexml": "*",
     "ext-iconv": "*",
-    "php": "7.4.*",
+    "php": ">=8.0",
     "ext-fileinfo": "*",
     "ext-imagick": "*"
   },

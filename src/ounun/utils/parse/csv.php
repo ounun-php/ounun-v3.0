@@ -8,7 +8,7 @@ namespace ounun\utils\parse;
 
 class csv
 {
-    public function parse(string $config, bool $is_head_field = true)
+    public function parse(string $config, bool $is_head_field = true): array
     {
         $dataset = [];
         $fields  = [];

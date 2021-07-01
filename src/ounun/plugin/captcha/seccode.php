@@ -14,7 +14,7 @@ class seccode
     public int $length = 4;
     public int $angle = 10;        //倾斜度
     public int $contort = 2;    //扭曲度
-    public $fonts;
+    public string $fonts;
 
     public function __construct()
     {

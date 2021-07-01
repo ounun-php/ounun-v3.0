@@ -9,6 +9,8 @@ namespace ounun\page;
 class utils
 {
     /**
+     * 获取当前页面 并保存到cookie(可定义参数)
+     *
      * @param string $path
      * @param string $addon_tag
      * @param string $addon_view
@@ -22,89 +24,37 @@ class utils
     {
         $query = $query ?? $_GET;
         $path2 = url_build_query($path, $query, $replace_ext ?? [], $skip ?? []);
-        // print_r(['$url_original'=>$url_original,'$url'=>$url,'$paras_gets'=>$paras_gets,'$paras_page'=>$paras_page]);
-        // exit();
-        self::url_set($path2, $addon_tag, $addon_view, $url_key);
-        return $path2;
+
+        return self::url_set($path2, $addon_tag, $addon_view, $url_key);
     }
 
     /**
-     * 设定当前页面
+     * 获取当前页面 并保存到cookie(不可定义参数，没有?后面的参数)
      *
      * @param string $path
      * @param string $addon_tag
      * @param string $addon_view
      * @param string $url_key
-     */
-    static public function url_set(string $path, string $addon_tag, string $addon_view = '', string $url_key = 'u')
-    {
-        $url = \ounun::url_addon_get($addon_tag, $addon_view, $path);
-        self::value_set($url_key, $url);
-    }
-
-    /**
-     * 获取URL
-     *
-     * @param string $path
-     * @param string $addon_tag
-     * @param string $addon_view
-     * @param string $url_key
-     * @return mixed
-     */
-    static public function url_get(string $path, string $addon_tag, string $addon_view = '', string $url_key = 'u')
-    {
-        $url = \ounun::url_addon_get($addon_tag, $addon_view, $path);
-        return self::value_get($url_key, $url);
-    }
-
-    /**
-     * 设定当前页码
-     *
-     * @param int $page 页数
-     * @param string $page_key
-     */
-    static public function curr_page_set(int $page = 1, string $page_key = 'page')
-    {
-        self::value_set($page_key, $page);
-    }
-
-    /**
-     * 获取当前页码
-     *
-     * @param string $pre
-     * @param string $page_key GET 页数key
-     * @param int $default_page 默认忽略 的页数
      * @return string
      */
-    static public function curr_page_get(string $pre = '?', string $page_key = 'page', int $default_page = 1): string
+    static public function url_set(string $path, string $addon_tag, string $addon_view = '', string $url_key = 'u'): string
     {
-        $page = self::value_get($page_key, $default_page);
-        if ($page == $default_page) {
-            return '';
-        }
-        return "{$pre}{$page_key}={$page}";
+        $url = \ounun::url_addon_get($addon_tag, $addon_view, $path);
+        setcookie("pu_{$url_key}", $url, time() + 31100000, '/');
+        return $url;
     }
 
     /**
-     * 设定值
+     * 获取当前页面，优先读cookie里的
      *
-     * @param string $key
-     * @param mixed $value
-     */
-    static public function value_set(string $key, $value)
-    {
-        setcookie("pu_{$key}", $value, time() + 31100000, '/');
-    }
-
-    /**
-     * 获取值
-     *
-     * @param string $key 值key
-     * @param mixed $default_value 如值为空，返回本值
+     * @param string $path
+     * @param string $addon_tag
+     * @param string $addon_view
+     * @param string $url_key
      * @return mixed
      */
-    static public function value_get(string $key, $default_value)
+    static public function url_get(string $path, string $addon_tag, string $addon_view = '', string $url_key = 'u'): mixed
     {
-        return $_COOKIE["pu_{$key}"] ?? $default_value;
+        return $_COOKIE["pu_{$url_key}"] ?? \ounun::url_addon_get($addon_tag, $addon_view, $path);
     }
 }

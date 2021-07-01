@@ -4,6 +4,7 @@
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
 
+use JetBrains\PhpStorm\NoReturn;
 use ounun\addons\apps;
 use ounun\addons\console;
 use ounun\addons\logic;
@@ -16,7 +17,7 @@ use ounun\template;
 /** 是否Cli - 环境常量 */
 define('Is_Cli', PHP_SAPI == 'cli');
 /** 是否Win - 环境常量 */
-define('Is_Win', strpos(PHP_OS, 'WIN') !== false);
+define('Is_Win', str_contains(PHP_OS, 'WIN'));
 /** Ounun版本号 */
 define('Ounun_Version', '3.5.0');
 
@@ -88,9 +89,9 @@ function ip(): string
  * 输出带参数的URL
  *
  * @param string $url URL
- * @param array|null $data_query  数据
+ * @param array|null $data_query 数据
  * @param array|null $replace_ext 要替换的数据
- * @param array|null $skip        忽略的数据 如:page
+ * @param array|null $skip 忽略的数据 如:page
  * @return string
  */
 function url_build_query(string $url, ?array $data_query, ?array $replace_ext = null, ?array $skip = null): string
@@ -104,13 +105,30 @@ function url_build_query(string $url, ?array $data_query, ?array $replace_ext = 
             $data_query[$key] = $value;
         }
     }
+
     // skip
     if (is_array($skip)) {
-        foreach ($skip as $key => $value) {
-            if (is_array($value) && in_array($data_query[$key], $value)) {
-                unset($data_query[$key]);
-            } else {
+        if (array_keys($skip) === range(0, count($skip) - 1)) {
+            foreach ($skip as $value) {
                 unset($data_query[$value]);
+            }
+        } else {
+            foreach ($skip as $key => $value) {
+                if (isset($data_query[$key])) {
+                    if (is_array($value)) {
+                        if (in_array($data_query[$key], $value)) {
+                            unset($data_query[$key]);
+                        }
+                    } elseif (is_string($value)) {
+                        if ($value == $data_query[$key]) {
+                            unset($data_query[$key]);
+                        }
+                    } elseif (is_bool($value) && is_numeric($value)) {
+                        if ($value) {
+                            unset($data_query[$key]);
+                        }
+                    }
+                }
             }
         }
     }
@@ -141,7 +159,7 @@ function url_build_query(string $url, ?array $data_query, ?array $replace_ext = 
     if ($rs) {
         $len = strlen($url);
         if ($url && $len > 0) {
-            if (strpos($url, '?') === false) {
+            if (!str_contains($url, '?')) {
                 return $url . '?' . implode('&', $rs);
             } elseif ('?' === $url[$len - 1]) {
                 return $url . implode('&', $rs);
@@ -227,6 +245,7 @@ function url_check(string $url_original = '', bool $ext_req = true, string $doma
  * @param string $note
  * @param bool $top
  */
+#[NoReturn]
 function go_confirm(string $url1, string $url2, string $note, bool $top = false): void
 {
     $top  = "\t" . ($top ? 'window.top.' : '');
@@ -252,6 +271,7 @@ function go_confirm(string $url1, string $url2, string $note, bool $top = false)
  * @param int $head_code
  * @param int $delay 延时跳转(单位秒)
  */
+#[NoReturn]
 function go_url(string $url, bool $top = false, int $head_code = 302, int $delay = 0): void
 {
     // error_php($url);
@@ -274,7 +294,8 @@ function go_url(string $url, bool $top = false, int $head_code = 302, int $delay
  *
  * @param int $num
  */
-function go_back($num = -1): void
+#[NoReturn]
+function go_back(int $num = -1): void
 {
     echo '<script type="text/javascript">', "\n", 'window.history.go(' . $num . ');', "\n", '</script>', "\n";
     exit();
@@ -286,6 +307,7 @@ function go_back($num = -1): void
  * @param string $msg
  * @param string $url
  */
+#[NoReturn]
 function go_msg(string $msg, string $url = ''): void
 {
     if ($url) {
@@ -326,7 +348,8 @@ function msg(string $msg, bool $outer = true, $meta = true, $charset = 'utf-8'):
  * @param bool $close
  * @param string $charset
  */
-function msg_close(string $msg, bool $close = false, $charset = 'utf-8'): void
+#[NoReturn]
+function msg_close(string $msg, bool $close = false, string $charset = 'utf-8'): void
 {
     $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     $mt = '<meta http-equiv="Content-Type" content="text/html; charset=' . $charset . '" />' . "\n";
@@ -362,30 +385,30 @@ function https_is(): bool
  * @param string $msg
  * @param int $status
  * @param mixed $data
- * @param array $extend 延伸数据
+ * @param array|null $extend 延伸数据
  * @return array
  */
-function error(string $msg = '', int $status = 1, $data = null, $extend = []): array
+function error(string $msg = '', int $status = 1, mixed $data = null, ?array $extend = null): array
 {
-    $rs = ['msg' => $msg, 'status' => $status,];
+    $result = ['msg' => $msg, 'status' => $status,];
     if ($data) {
-        $rs['data'] = $data;
+        $result['data'] = $data;
     }
     if ($extend) {
-        $rs = array_merge($extend, $rs);
+        $result = array_merge($extend, $result);
     }
-    return $rs;
+    return $result;
 }
 
 /**
  * 确认是否错误 数据
  *
- * @param mixed $data
+ * @param array|null $result
  * @return bool
  */
-function error_is($data): bool
+function error_is(?array $result = null): bool
 {
-    if (empty($data) || !is_array($data) || !array_key_exists('status', $data) || (array_key_exists('status', $data) && $data['status'] == 0)) {
+    if (empty($result) || !is_array($result) || !array_key_exists('status', $result) || (array_key_exists('status', $result) && $result['status'] == 0)) {
         return false;
     } else {
         return true;
@@ -395,23 +418,23 @@ function error_is($data): bool
 /**
  * 返回错误提示信息
  *
- * @param mixed $data
+ * @param array $result
  * @return string
  */
-function error_message($data): string
+function error_message(array $result): string
 {
-    return $data['msg'];
+    return $result['msg'];
 }
 
 /**
  * 返回 错误代码
  *
- * @param mixed $data
+ * @param array $result
  * @return int
  */
-function error_code($data): int
+function error_code(array $result): int
 {
-    return $data['status'];
+    return $result['status'];
 }
 
 /**
@@ -422,45 +445,45 @@ function error_code($data): int
  * @param array $extend 延伸数据
  * @return array
  */
-function succeed($data, string $message = '', $extend = []): array
+function succeed(mixed $data, string $message = '', array $extend = []): array
 {
-    $rs = ['msg' => $message, 'status' => 0, 'data' => $data];
+    $result = ['msg' => $message, 'status' => 0, 'data' => $data];
     if ($extend) {
-        return array_merge($extend, $rs);
+        return array_merge($extend, $result);
     }
-    return $rs;
+    return $result;
 }
 
 /**
  * 返回 成功数据
  *
+ * @param array $result
+ * @return mixed
+ */
+function succeed_data(array $result): mixed
+{
+    return $result['data'];
+}
+
+/**
+ * 返回 成功数据
+ *
+ * @param array $result
  * @param mixed $data
  * @return mixed
  */
-function succeed_data($data)
+function succeed_data_set(array $result, mixed $data): array
 {
-    return $data['data'];
-}
-
-/**
- * 返回 成功数据
- *
- * @param array $data
- * @param mixed $data_data
- * @return mixed
- */
-function succeed_data_set(array $data, $data_data): array
-{
-    if (isset($data['data'])) {
-        if (is_array($data['data'])) {
-            $data['data'] = array_merge($data['data'], $data_data);
+    if (isset($result['data'])) {
+        if (is_array($result['data'])) {
+            $result['data'] = array_merge($result['data'], $data);
         } else {
-            $data['data'] = array_merge($data_data, ['_data_' => $data['data']]);
+            $result['data'] = array_merge($data, ['_data_' => $result['data']]);
         }
     } else {
-        $data['data'] = $data_data;
+        $result['data'] = $data;
     }
-    return $data;
+    return $result;
 }
 
 /**
@@ -471,7 +494,7 @@ function succeed_data_set(array $data, $data_data): array
  * @param string $jsonp_callback
  * @param int $json_options 传递给json_encode的option参数
  */
-function out($data, string $type = c::Format_Json, string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
+#[NoReturn] function out(mixed $data, string $type = c::Format_Json, string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
         $type = c::Format_Json;
@@ -511,7 +534,7 @@ function out($data, string $type = c::Format_Json, string $jsonp_callback = '', 
  * @param mixed $data
  * @return string|null
  */
-function json_encode_unescaped($data)
+function json_encode_unescaped(mixed $data): ?string
 {
     if (is_null($data)) {
         return null;
@@ -525,7 +548,7 @@ function json_encode_unescaped($data)
  * @param string|null $json_string
  * @return mixed
  */
-function json_decode_array($json_string)
+function json_decode_array(?string $json_string): mixed
 {
     if (is_null($json_string)) {
         return null;
@@ -539,9 +562,9 @@ function json_decode_array($json_string)
  * 获得 extend数据php
  *
  * @param string $extend_string
- * @return array|mixed
+ * @return mixed
  */
-function extend_decode_php(string $extend_string)
+function extend_decode_php(string $extend_string): mixed
 {
     $extend = [];
     if ($extend_string) {
@@ -554,9 +577,9 @@ function extend_decode_php(string $extend_string)
  * 获得 extend数据json
  *
  * @param string|null $extend_string
- * @return mixed|array|null
+ * @return mixed
  */
-function extend_decode_json(?string $extend_string)
+function extend_decode_json(?string $extend_string): mixed
 {
     $extend = [];
     if ($extend_string) {
@@ -666,7 +689,7 @@ function expires(int $expires = 0, string $etag = '', int $last_modified = 0, st
  * @param string $filename
  * @return mixed
  */
-function data(string $filename)
+function data(string $filename): mixed
 {
     if (file_exists($filename)) {
         return require $filename;
@@ -679,7 +702,8 @@ function data(string $filename)
  *
  * @param string $msg
  */
-function error404(string $msg = ''): void
+#[NoReturn]
+function error404(string $msg = '')
 {
     header('Cache-Control: no-cache, must-revalidate, max-age=0');
     header('HTTP/1.1 404 Not Found');
@@ -721,7 +745,8 @@ function error404(string $msg = ''): void
  * @param string $error_html
  * @param string $channel
  */
-function error_php(string $error_msg, string $error_html = '', string $channel = 'php'): void
+#[NoReturn]
+function error_php(string $error_msg, string $error_html = '', string $channel = 'php')
 {
     // global_all
     $out = global_all('debug_out');
@@ -741,7 +766,7 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
         echo $error_html;
     }
     echo '<pre>' . PHP_EOL;
-    echo '$app:' . var_export(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => json_encode_unescaped(ounun::$paths)], true) . PHP_EOL;
+    echo '$app:' . var_export(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths], true) . PHP_EOL;
     debug_print_backtrace();
     echo '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
@@ -757,7 +782,7 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
  * @return mixed
  * @throws Exception
  */
-function retry(int $times, callable $callback, int $sleep = 0)
+function retry(int $times, callable $callback, int $sleep = 0): mixed
 {
     $times--;
     beginning:
@@ -836,11 +861,11 @@ function global_all(string $key, $default = null, ?string $sub_key = null)
  *
  * @param string $addon_tag
  * @param string|null $key
- * @param mixed $default
+ * @param mixed|null $default
  * @param string|null $sub_key
  * @return mixed
  */
-function global_addons(string $addon_tag, ?string $key = null, $default = null, ?string $sub_key = null)
+function global_addons(string $addon_tag, ?string $key = null, mixed $default = null, ?string $sub_key = null): mixed
 {
     $ret    = $default;
     $values = ounun::$global_addons[$addon_tag] ?? [];
@@ -1097,7 +1122,7 @@ class ounun
      * @param string $path
      * @param string|null $lang
      * @param bool $is_current 是否当前页面
-     * @return string
+     * @return string 返回 $path 所对应的 $page_url
      */
     static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false): string
     {
@@ -1139,9 +1164,9 @@ class ounun
      * @param string $page_file_path
      * @param string|null $lang
      * @param bool $is_current 是否当前页面
-     * @return string
+     * @return string 返回 $page_url | ounun::$page_url
      */
-    static public function url_get(string $page_file_path = '', string $lang = null, bool $is_current = true): string
+    static public function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true): string
     {
         $lang ??= static::$lang;
         if ($lang == static::$lang_default) {
@@ -1159,7 +1184,7 @@ class ounun
     }
 
     /**
-     * 设定$page_www/$page_wap/$page_mip
+     * 设定$page_www/$page_wap/$page_mip/$page_url
      *
      * @param string $page_file_path
      * @param string $page_url
@@ -1322,7 +1347,7 @@ class ounun
                         if (is_file($file)) {
                             return $file;
                         }
-                    } elseif (0 === strpos($class, $v['namespace'])) {
+                    } elseif (str_starts_with($class, $v['namespace'])) {
                         $file = $v['path'] . (($v['cut'] && $v['len']) ? substr($filename, $v['len']) : $filename);
 //                                                echo " load_class  -> \$class0 :{$class}  \$first:{$first}  \$len:{$v['len']}\n".
 //                                                    "                \t\t\$path:{$v['path']}\n".
@@ -1444,6 +1469,7 @@ abstract class v
 }
 
 /** Web 开始 */
+#[NoReturn]
 function start_web()
 {
     // 开始

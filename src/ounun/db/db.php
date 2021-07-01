@@ -63,7 +63,7 @@ class db
             } elseif (static::String === $type) {
                 $rs[$field] = null === $value ? null : (string)$value;
             } elseif (static::Json === $type) {
-                $rs[$field] = null === $value ? null : json_encode_unescaped($value);
+                $rs[$field] = null === $value ? null : static::json_encode($value);
             } elseif (static::Date2Time_00 === $type) {
                 $rs[$field] = strtotime($value . ' 00:00:00');
             } elseif (static::Date2Time_24 === $type) {
@@ -97,6 +97,90 @@ class db
     }
 
 
+    static private function json_encode($value)
+    {
+        if (is_string($value)) {
+            if (strtolower($value) === "null" || "" === $value || "''" === $value || '""' === $value) {
+                return null;
+            }
+            try {
+                $value2 = json_decode_array($value);
+                if ($value2) {
+                    return json_encode_unescaped($value2);
+                }
+            } catch (Exception $exception) {
+            }
+        }
+        return json_encode_unescaped($value);
+    }
+
+    /**
+     * 是否 新增并自增长
+     *
+     * @param array $result
+     * @return int|null 自增长插入ID
+     */
+    static public function is_insert_auto_increment(array $result): ?int
+    {
+        $data = succeed_data($result);
+        if (isset($data['_type_']) && 'insert' === $data['_type_'] && isset($data['_type2_']) && 'auto_increment' === $data['_type2_']) {
+            return $data['_insert_value_'] ?? null;
+        }
+        return null;
+    }
+
+    /**
+     * 是否新增
+     *
+     * @param array $result
+     * @return bool true:新增 false:更新
+     */
+    static public function is_insert(array $result): bool
+    {
+        $data = succeed_data($result);
+        if (isset($data['_type_']) && 'insert' === $data['_type_']) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否 为更新
+     *
+     * @param array $result
+     * @return bool true:新增 false:更新
+     */
+    static public function is_update(array $result): bool
+    {
+        $data = succeed_data($result);
+        if (isset($data['_type_']) && 'update' === $data['_type_']) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 是否 更新成功
+     *
+     * @param array $result
+     * @return array $result|$error
+     */
+    static public function is_update_modify(array $result): array
+    {
+        $data = succeed_data($result);
+        if (isset($data['_type_']) && 'update' === $data['_type_']) {
+            $modify_cc = $data['_modify_cc_'] ?? 0;
+            if ($modify_cc > 0) {
+                return $result;
+            } else {
+                unset($data['_type_']);
+                unset($data['_modify_cc_']);
+                return error("提示:更新后数据库没有变化[行:" . __LINE__ . "][数据:" . json_encode_unescaped($data) . "]");
+            }
+        }
+        return $result;
+    }
+
     /**
      * 数据"插入"
      *
@@ -124,7 +208,7 @@ class db
                 $rs = is_array($primary_data) ? array_merge($primary_data, $rs) : $rs;
                 return succeed($rs);
             } else {
-                return error("失败:插入数据库失败[" . __LINE__ . "][" . json_encode_unescaped($primary_data) . "]");
+                return error("失败:插入数据库失败[行:" . __LINE__ . "][数据:" . json_encode_unescaped($primary_data) . "]");
             }
         } elseif ($primary_data) {
             $insert_value = $db->table($table)->insert(array_merge($data_format, $primary_data));
@@ -139,13 +223,13 @@ class db
             if ($modify_cc > 0) {
                 return succeed($rs);
             } else {
-                return error("失败:插入数据库失败[" . __LINE__ . "][" . json_encode_unescaped($rs) . "]");
+                return error("失败:插入数据库失败[行:" . __LINE__ . "][数据:" . json_encode_unescaped($rs) . "]");
             }
         } else {
             $insert_value = $db->table($table)->insert($data_format);
             $rs           = ['_type_'         => 'insert',
                              '_type2_'        => 'data',
-                             '_insert_value_' => $insert_value];
+                             '_insert_value_' => (int)$insert_value];
             return succeed($rs);
         }
     }
@@ -168,11 +252,7 @@ class db
 
         list($where_str, $where_paras) = $where ?? self::where_str_bind($primary_data, $primary_data);
         $modify_cc = $db->table($table)->where($where_str, $where_paras)->update($data_format);
-        if ($modify_cc) {
-            return succeed(array_merge($primary_data, ['_type_' => 'update', '_modify_cc_' => $modify_cc]));
-        } else {
-            return error("失败:更新数据库失败[" . __LINE__ . "][" . json_encode_unescaped($primary_data) . "]");
-        }
+        return succeed(array_merge($primary_data, ['_type_' => 'update', '_modify_cc_' => $modify_cc]));
     }
 
 

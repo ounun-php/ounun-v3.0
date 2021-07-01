@@ -32,7 +32,7 @@ class c
     /** @var int 等待空置状态 */
     const Status_Await = 3030;
     /** @var int 工作中... */
-    const Status_Runing = 3050;
+    const Status_Running = 3050;
     /** @var int 过载状态 */
     const Status_Full = 3090;
     /** @var int 完成 - 状态 */
@@ -55,7 +55,7 @@ class c
 
         self::Status_Normal  => '正常(灰)',
         self::Status_Await   => '空置',
-        self::Status_Runing  => '工作中...',
+        self::Status_Running => '工作中...',
         self::Status_Full    => '过载状态',
         self::Status_Done    => '完成',
         self::Status_Succeed => '成功(绿色)',

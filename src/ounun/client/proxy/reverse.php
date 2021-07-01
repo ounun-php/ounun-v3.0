@@ -53,8 +53,8 @@ class reverse
 
     /** @var int */
     protected int $_http_code = 200;
-    /** @var int */
-    protected int $_last_modified = 0;
+    /** @var string */
+    protected string $_last_modified = '0';
     /** @var string */
     protected string $_http_if_modified_304 = '';
 
@@ -174,7 +174,7 @@ class reverse
      * @param string $content
      * @return false|int
      */
-    protected function write(string $local_filename, string $content)
+    protected function write(string $local_filename, string $content): bool|int
     {
         $local_dir = dirname($local_filename);
         if (!file_exists($local_dir)) {

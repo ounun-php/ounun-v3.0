@@ -13,7 +13,7 @@ class ids
     protected int $epoch_time = 1546593387000;
 
     /** @var int 序列号支持1毫秒产生4095个自增序列ID */
-    protected int $incre_id_max_12bit = 4095;
+    protected int $increase_id_max_12bit = 4095;
 
     /** @var int 默认情况下41bit的时间戳可以支持该算法使用到2082年 */
     protected int $start_time_max_41bit = 1546593387000;
@@ -26,9 +26,9 @@ class ids
     /**
      * 设置机器ID
      *
-     * @param  int $machine_id 机器ID
+     * @param int $machine_id 机器ID
      */
-    public function setMachineId($machine_id = 0)
+    public function setMachineId(int $machine_id = 0)
     {
         $this->machine_id = $machine_id;
     }
@@ -36,9 +36,9 @@ class ids
     /**
      * 获取机器ID
      *
-     * @return number
+     * @return int
      */
-    public function machine_id_get()
+    public function machine_id_get(): int
     {
         return $this->machine_id;
     }
@@ -46,25 +46,25 @@ class ids
     /**
      * 设置序列号一定顺序出现，不然一亳秒内经常碰撞
      *
-     * @return number
+     * @return int
      */
-    public function seq_num()
+    public function seq_num(): int
     {
-        if ($this->seq_num > $this->incre_id_max_12bit) {
+        if ($this->seq_num > $this->increase_id_max_12bit) {
             $this->seq_num = 0;
         }
 
         $this->seq_num++;
 
-        return $this->seq_num + mt_rand(0, $this->incre_id_max_12bit);
+        return $this->seq_num + mt_rand(0, $this->increase_id_max_12bit);
     }
 
     /**
      * 生成自增iD
      *
-     * @return number
+     * @return int
      */
-    public function generateIncreId()
+    public function generate_incre_id(): int
     {
         //现在时间(毫秒) - 42 bits
         $time = floor(microtime(true) * 1000);
@@ -79,7 +79,7 @@ class ids
         if (empty($this->machine_id)) {
             $this->setMachineId();
         } else {
-            $this->setMachineId(str_pad(decbin($this->machine_id), 10, "0", STR_PAD_LEFT));
+            $this->setMachineId((int)str_pad(decbin($this->machine_id), 10, "0", STR_PAD_LEFT));
         }
 
         //序列号码(最高到4096,共12bit)
@@ -95,7 +95,7 @@ class ids
         if ($checkResult) {
             return $increId;
         } else {
-            return $this->generateIncreId();
+            return $this->generate_incre_id();
         }
     }
 

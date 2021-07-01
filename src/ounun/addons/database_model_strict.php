@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\addons;
 
 
@@ -32,7 +33,7 @@ abstract class database_model_strict extends database_model
     ];
 
 
-    /** @var array|string[][]  */
+    /** @var array|string[][] */
     public array $event = [
         'guest'    => ['after_add', 'after_edit', 'after_get', 'after_delete'],
         'question' => ['after_get'],

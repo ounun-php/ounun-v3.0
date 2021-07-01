@@ -8,7 +8,7 @@ namespace ounun\utils\parse;
 
 class xml
 {
-    public function parse($config)
+    public function parse($config): array
     {
         if (is_file($config)) {
             $content = simplexml_load_file($config);

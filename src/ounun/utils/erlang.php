@@ -74,9 +74,9 @@ class erlang
      * @param string $mod
      * @param string $fun
      * @param string $arg_data
-     * @return mixed|boolean string
+     * @return array string
      */
-    protected function _erlang_call(string $node_type, string $mod, string $fun, string $arg_data)
+    protected function _erlang_call(string $node_type, string $mod, string $fun, string $arg_data): array
     {
         $time = time();
         $fun  = substr($fun, 0, 3) == 'gm_' ? substr($fun, 3) : $fun;

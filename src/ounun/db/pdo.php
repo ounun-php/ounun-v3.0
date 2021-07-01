@@ -8,6 +8,7 @@ declare (strict_types=1);
 namespace ounun\db;
 
 use Exception;
+use ounun;
 use PDOStatement;
 use Throwable;
 
@@ -132,14 +133,14 @@ class pdo
         if (empty(static::$_instance)) {
             if (empty($config)) {
                 if (empty($tag)) {
-                    $tag = \ounun::database_default_get();
+                    $tag = ounun::database_default_get();
                 }
-                $config = \ounun::$database[$tag] ?? null;
+                $config = ounun::$database[$tag] ?? null;
             }
             if ($config) {
                 static::$_instance = new static($config);
             } else {
-                error_php('error db tag:' . $tag . ' default:' . \ounun::database_default_get());
+                error_php('error db tag:' . $tag . ' default:' . ounun::database_default_get());
             }
         }
         return static::$_instance;
@@ -175,7 +176,7 @@ class pdo
 
     /**
      * @param string $table 表名
-     * @return $this
+     * @return self
      */
     public function table(string $table): self
     {
@@ -1023,7 +1024,7 @@ class pdo
      * @param int $type
      * @return string
      */
-    public function quote($data, int $type = \PDO::PARAM_STR): string
+    public function quote(mixed $data, int $type = \PDO::PARAM_STR): string
     {
         $this->active();
         $rs = [];
@@ -1158,7 +1159,7 @@ class pdo
      * @param array $operate
      * @return array
      */
-    protected function _fields_update(array &$fields_data, array &$operate = [])
+    protected function _fields_update(array &$fields_data, array &$operate = []): array
     {
         $update = [];
         foreach ($fields_data as $col => $val) {
@@ -1180,7 +1181,7 @@ class pdo
     {
         if ($fields) {
             foreach ($this->_bind_keys as $key) {
-                $v = $fields[$key];
+                $v = $fields[$key]??null;
                 if ($v) {
                     // $i++; echo "{$i} -> field:{$v['field']}, value:{$v['value']}, type:{$v['type']}\n";
                     if (\PDO::PARAM_STR == $v['type'] && isset($v['length'])) {

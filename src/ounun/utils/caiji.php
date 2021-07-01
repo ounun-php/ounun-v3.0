@@ -157,10 +157,8 @@ class caiji
      */
     static public function img_urls(string $content): array
     {
-        preg_match_all('/<img.*?src="(.*?)"/si', $content, $imgs);///(?<=img.src=").*?(?=")/si
-        // print_r($imgarr[1]);
-        // preg_match_all('/(?<=src=").*?(?=")/si', implode('" ', $imgarr[0]) . '" ', $imgarr);
-        return $imgs[1];
+        preg_match_all('/<img.*?src="(.*?)"/si', $content, $images);///(?<=img.src=").*?(?=")/si
+        return $images[1];
     }
 
     /**
@@ -195,9 +193,9 @@ class caiji
     /**
      * 随机 显示次数
      *
-     * @return string
+     * @return int
      */
-    static public function rand_views(): string
+    static public function rand_views(): int
     {
         $ip_long  = [
             [1000, 100000],
@@ -230,7 +228,7 @@ class caiji
      * @param null $post_data 通过isset判断是否是post模式
      * @return bool|string|null
      */
-    static public function html_get($url, $headers = null, $options = [], $from_encode = 'auto', $post_data = null)
+    static public function html_get($url, $headers = null, array $options = [], string $from_encode = 'auto', $post_data = null)
     {
         $headers = is_array($headers) ? $headers : [];
         $options = is_array($options) ? $options : [];

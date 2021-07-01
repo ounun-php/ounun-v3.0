@@ -7,6 +7,8 @@ declare (strict_types = 1);
 namespace ounun\page;
 
 
+use JetBrains\PhpStorm\ArrayShape;
+
 class simple
 {
     /** @var Callable 计算总量的功能函数 */
@@ -84,6 +86,7 @@ class simple
      * @param bool $is_end_index
      * @return array
      */
+    #[ArrayShape(['url_prev' => "string", 'url_next' => "string", 'page_total' => "int", 'page_curr' => "int", 'note' => "string", 'page' => "array"])]
     public function initialize(int $page_curr = 0, string $title = '', bool $is_end_index = false): array
     {
         $tag_default = $this->_config_page_tag_default;

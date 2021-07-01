@@ -44,7 +44,7 @@ class crontab
         } elseif ($cron_str) {
             // 格式检查
             $cron_str = trim($cron_str);
-            $reg      = '#^([\*,\/,\-\d]+)( [,\/,\-\d\*]+){4}$#';
+            $reg      = '/^([\*,\/,\-\d]+)( [,\/,\-\d\*]+){4}$/';
             if (!preg_match($reg, $cron_str)) {
                 $this->_cron  = [];
                 $this->_error = "格式错误:{$cron_str}";
@@ -58,7 +58,7 @@ class crontab
                 ['min' => 0, 'max' => 6, 'name' => '周']];
             $parts = explode(' ', $cron_str);
             foreach ($parts as $k => $v) {
-                $tmp = $this->parse($parts[$k], $n2m[$k]['min'], $n2m[$k]['max']); // 分
+                $tmp = $this->parse($v, $n2m[$k]['min'], $n2m[$k]['max']); // 分
                 if (error_is($tmp)) {
                     $this->_cron  = [];
                     $this->_error = "{$n2m[$k]['name']}:" . error_message($tmp);
@@ -136,7 +136,7 @@ class crontab
     {
         $list = [];
         // 处理"," -- 列表
-        if (false !== strpos($part, ',')) {
+        if (str_contains($part, ',')) {
             $arr = explode(',', $part);
             foreach ($arr as $v) {
                 $tmp = $this->parse($v, $f_min, $f_max);
@@ -151,10 +151,10 @@ class crontab
         // 处理"/" -- 间隔
         $tmp  = explode('/', $part);
         $part = $tmp[0];
-        $step = isset($tmp[1]) ? $tmp[1] : 1;
+        $step = $tmp[1] ?? 1;
 
         // 处理"-" -- 范围
-        if (false !== strpos($part, '-')) {
+        if (str_contains($part, '-')) {
             list($min, $max) = explode('-', $part);
             if ($min > $max) {
                 return error('使用"-"设置范围时，左不能大于右');

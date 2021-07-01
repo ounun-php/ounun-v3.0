@@ -132,10 +132,10 @@ abstract class logic
      *
      * @param int $error_code
      * @param mixed $data
-     * @param array $extend
+     * @param array|null $extend
      * @return array
      */
-    protected function error($error_code = 1, $data = null, $extend = []): array
+    protected function error(int $error_code = 1, mixed $data = null, ?array $extend = null): array
     {
         if (static::Error_Msg && isset(static::Error_Msg[$error_code])) {
             $msg = static::Error_Msg[$error_code] . "(code:{$error_code})";

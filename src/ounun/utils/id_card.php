@@ -73,7 +73,7 @@ class id_card
      * @param $id
      * @return float
      */
-    public static function age($id)
+    public static function age($id): float
     {
         // 18位身份证号
         // $id   ='430223198203016917';
@@ -88,7 +88,6 @@ class id_card
         $diff = floor(($today - $date) / 86400 / 365);
 
         // strtotime加上这个年数后得到那日的时间戳后与今日的时间戳相比
-        $age = strtotime(substr($id, 6, 8) . ' +' . $diff . 'years') > $today ? ($diff + 1) : $diff;
-        return $age;
+        return strtotime(substr($id, 6, 8) . ' +' . $diff . 'years') > $today ? ($diff + 1) : $diff;
     }
 }
