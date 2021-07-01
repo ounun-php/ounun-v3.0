@@ -126,8 +126,8 @@ class template
     static public function assign_array_get(): array
     {
         return array_merge([
-            '{$page_url}'         => ounun::$page_url,      // $lang/$app_path/$base_url,
-            '{$page_file}'        => ounun::$page_file_path,// 基础url,
+            '{$page_url}'         => ounun::$page_url,      // 等于"{$lang}/{$app_path}/{$page_file_path}"
+            '{$page_file}'        => ounun::$page_file_path,// 基础path 等于"{'/addon_tag/addon_view'=>$url}/{$path}"
             // 根目录/面面路径
             '{$page_www}'         => ounun::$page_www,
             '{$page_wap}'         => ounun::$page_wap,

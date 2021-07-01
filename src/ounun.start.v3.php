@@ -94,10 +94,10 @@ function ip(): string
  * @param array|null $skip 忽略的数据 如:page
  * @return string
  */
-function url_build_query(string $url, ?array $data_query, ?array $replace_ext = null, ?array $skip = null): string
+function url_build_query(string $url, ?array $data_query = null, ?array $replace_ext = null, ?array $skip = null): string
 {
     // 参数
-    $data_query ??= [];
+    $data_query ??= $_GET;
 
     // replace_ext
     if (is_array($replace_ext)) {
@@ -975,9 +975,9 @@ class ounun
     /** @var array 插件addons网址映射url前缀Path(URL)数据 */
     public static array $addon_path = [];
 
-    /** @var string 当前面页(文件名)  Page Base */
+    /** @var string 当前面页(文件名)  Page Base 基础path 等于"{'/addon_tag/addon_view'=>$url}/{$path}" */
     public static string $page_file_path = '';
-    /** @var string 当前面页(网址)    Page URL */
+    /** @var string 当前面页(网址)    Page URL  等于"{$lang}/{$app_path}/{$page_file_path}" */
     public static string $page_url = '';
 
     /** @var string Www Page */
@@ -1188,21 +1188,6 @@ class ounun
     }
 
     /**
-     * 静态地址
-     *
-     * @param string $url
-     * @param string $static_root
-     * @return string
-     */
-    static public function url_static(string $url, string $static_root = '/static/'): string
-    {
-        if ($url && is_array($url)) {
-            $url = count($url) > 1 ? '??' . implode(',', $url) : $url[0];
-        }
-        return "{$static_root}{$url}";
-    }
-
-    /**
      * 当前面页
      *
      * @param string $page_file_path
@@ -1255,6 +1240,21 @@ class ounun
         $pages            = explode('/', static::$root_mip, 4);
         $path_dir         = isset($pages[3]) && $pages[3] ? "/{$pages[3]}" : '';
         static::$page_mip = "{$pages[0]}//{$pages[2]}{$lang_path}{$path_dir}{$page_file_path}";
+    }
+
+    /**
+     * 静态地址
+     *
+     * @param string $url
+     * @param string $static_root
+     * @return string
+     */
+    static public function url_static(string $url, string $static_root = '/static/'): string
+    {
+        if ($url && is_array($url)) {
+            $url = count($url) > 1 ? '??' . implode(',', $url) : $url[0];
+        }
+        return "{$static_root}{$url}";
     }
 
     /**
