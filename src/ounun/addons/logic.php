@@ -53,78 +53,80 @@ abstract class logic
     abstract protected function _initialize();
 
     /**
-     * 数据模型set
-     *
-     * @param database_model $db
-     */
-    public function db_set(?database_model $db = null)
-    {
-        if (empty($db)) {
-            return;
-        }
-        if (is_subclass_of($db, database_model::class)) {
-            $this->_db = $db;
-        } else {
-            error_php("error ounun::database_default_get():" . \ounun::database_default_get() . "  \$db:" . var_export($db, true));
-        }
-    }
-
-    /**
      * get数据模型
      *
      * @return database_model
      */
-    public function db_get(): database_model
+    public function db(): database_model
     {
         return $this->_db;
     }
 
     /**
-     * 删除 - 操作动作
+     * 数据模型set
      *
-     * @param array $data 数据
-     * @param string|null $type 类型
-     * @return array
+     * @param database_model|null $db
+     * @return static
      */
-    public function data_del(array $data = [], ?string $type = null): array
+    public function db_set(?database_model $db = null): static
     {
-        return error('TODO: Implement data_del() method.');
+        if (empty($db)) {
+            return $this;
+        }
+        if (is_subclass_of($db, database_model::class)) {
+            $this->_db = $db;
+        } else {
+            error_php("error ounun::database_default():" . \ounun::database_default() . "  \$db:" . var_export($db, true));
+        }
+        return $this;
     }
 
-    /**
-     * 添加数据 - 操作动作
-     *
-     * @param array $data
-     * @param string|null $type 类型
-     * @return array
-     */
-    public function data_set(array $data = [], ?string $type = null): array
-    {
-        return error('TODO: Implement data_set() method.');
-    }
-
-    /**
-     * 获取数据 - 操作动作
-     *
-     * @param array $data
-     * @param string|null $type 类型
-     * @return array
-     */
-    public function data_get(array $data = [], ?string $type = null): array
-    {
-        return error('TODO: Implement data_get() method.');
-    }
-
-    /**
-     * 编辑 - 操作动作
-     *
-     * @param array $data
-     * @param string|null $type 类型
-     * @return array
-     */
-//    public function data_editor(array $data = [], ?string $type = null): array
+//    /**
+//     * 添加数据 - 操作动作
+//     *
+//     * @param mixed $data
+//     * @param string|null $type 类型
+//     * @return array
+//     */
+//    public function data(mixed $data = null, ?string $type = null): array
 //    {
-//        return error('TODO: Implement data_editor() method.');
+//        return error('TODO: Implement data_set() method.');
+//    }
+//
+//    /**
+//     * 获取数据 - 操作动作
+//     *
+//     * @param mixed $data
+//     * @param string|null $type 类型
+//     * @return array
+//     */
+//    public function data_get(array $data = [], ?string $type = null): array
+//    {
+//        return error('TODO: Implement data_get() method.');
+//    }
+//
+//    /**
+//     * 删除 - 操作动作
+//     *
+//     * @param mixed $data 数据
+//     * @param string|null $type 类型
+//     * @return array
+//     */
+//    public function data_del(array $data = [], ?string $type = null): array
+//    {
+//        return error('TODO: Implement data_del() method.');
+//    }
+//
+//    /**
+//     * 编辑 - 操作动作
+//     *
+//     * @param mixed $data
+//     * @param string|null $type 类型
+//     * @return array
+//     */
+//    public function data_edit(array $data = [], ?string $type = null): array
+//    {
+//        return error('TODO: Implement data_edit() method.');
 //    }
 
     /**

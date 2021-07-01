@@ -1023,6 +1023,35 @@ class ounun
     }
 
     /**
+     * 添加类库映射 (为什么不直接包进来？到时才包这样省一点)
+     *
+     * @param string $class
+     * @param string $filename
+     * @param bool $is_require 是否默认加载
+     */
+    static public function class_set(string $class, string $filename, bool $is_require = false)
+    {
+        if ($is_require && is_file($filename)) {
+            require $filename;
+        } else {
+            static::$maps_class[$class] = $filename;
+        }
+    }
+
+    /**
+     * 添加App路径(根目录)
+     *
+     * @param string $path_root
+     */
+    static public function path_root_set(string $path_root)
+    {
+        /** src-0 \         自动加载 */
+        ounun::load_class_set($path_root . 'src/', '', false);
+        /** src-0 \addons   自动加载  */
+        ounun::load_class_set($path_root . 'addons/', 'addons', true);
+    }
+
+    /**
      * 设定语言 & 设定支持的语言
      *
      * @param string $lang
@@ -1106,7 +1135,7 @@ class ounun
      *
      * @return string
      */
-    static public function database_default_get(): string
+    static public function database_default(): string
     {
         if (empty(static::$database_default)) {
             static::$database_default = static::$app_name;
@@ -1124,11 +1153,11 @@ class ounun
      * @param bool $is_current 是否当前页面
      * @return string 返回 $path 所对应的 $page_url
      */
-    static public function url_addon_get(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false): string
+    static public function url_addon(string $addon_tag, string $addon_view = '', string $path = '', ?string $lang = null, bool $is_current = false): string
     {
         // 空
         if (empty($addon_tag)) {
-            return static::url_get($path, $lang, $is_current);
+            return static::url($path, $lang, $is_current);
         }
 
         // tag view都存在
@@ -1136,15 +1165,15 @@ class ounun
             $key = '/' . $addon_tag . '/' . $addon_view;
             if (isset(static::$addon_path[$key])) {
                 $page_file_path = static::$addon_path[$key] . $path;
-                return static::url_get($page_file_path, $lang, $is_current);
+                return static::url($page_file_path, $lang, $is_current);
             }
             $key2 = '/' . $addon_tag;
             if (isset(static::$addon_path[$key2])) {
                 $page_file_path = static::$addon_path[$key2] . '/' . $addon_view . $path;
-                return static::url_get($page_file_path, $lang, $is_current);
+                return static::url($page_file_path, $lang, $is_current);
             }
             $page_file_path = $key . $path;
-            return static::url_get($page_file_path, $lang, $is_current);
+            return static::url($page_file_path, $lang, $is_current);
         }
 
         // tag
@@ -1155,7 +1184,22 @@ class ounun
             $page_file_path = $key . $path;
         }
 
-        return static::url_get($page_file_path, $lang, $is_current);
+        return static::url($page_file_path, $lang, $is_current);
+    }
+
+    /**
+     * 静态地址
+     *
+     * @param string $url
+     * @param string $static_root
+     * @return string
+     */
+    static public function url_static(string $url, string $static_root = '/static/'): string
+    {
+        if ($url && is_array($url)) {
+            $url = count($url) > 1 ? '??' . implode(',', $url) : $url[0];
+        }
+        return "{$static_root}{$url}";
     }
 
     /**
@@ -1166,7 +1210,7 @@ class ounun
      * @param bool $is_current 是否当前页面
      * @return string 返回 $page_url | ounun::$page_url
      */
-    static public function url_get(string $page_file_path = '', ?string $lang = null, bool $is_current = true): string
+    static public function url(string $page_file_path = '', ?string $lang = null, bool $is_current = false): string
     {
         $lang ??= static::$lang;
         if ($lang == static::$lang_default) {
@@ -1214,26 +1258,11 @@ class ounun
     }
 
     /**
-     * 静态地址
-     *
-     * @param $url
-     * @param string $static_root
-     * @return string
-     */
-    static public function root_static($url, string $static_root = '/static/'): string
-    {
-        if ($url && is_array($url)) {
-            $url = count($url) > 1 ? '??' . implode(',', $url) : $url[0];
-        }
-        return "{$static_root}{$url}";
-    }
-
-    /**
-     * 当前带http的网站根
+     * 当前app所对应http的网站根
      *
      * @return string
      */
-    static public function root_curr_get(): string
+    static public function url_root_current_app(): string
     {
         if (template::$type == template::Type_Mip) {
             return static::$root_mip;
@@ -1241,22 +1270,6 @@ class ounun
             return static::$root_wap;
         }
         return static::$root_www;
-    }
-
-    /**
-     * 添加类库映射 (为什么不直接包进来？到时才包这样省一点)
-     *
-     * @param string $class
-     * @param string $filename
-     * @param bool $is_require 是否默认加载
-     */
-    static public function class_set(string $class, string $filename, bool $is_require = false)
-    {
-        if ($is_require && is_file($filename)) {
-            require $filename;
-        } else {
-            static::$maps_class[$class] = $filename;
-        }
     }
 
     /**
@@ -1289,13 +1302,13 @@ class ounun
 
     /**
      * 添加自动加载路径(尽量少调用，生成配制)
-     * @param string $path_root 目录路径
+     * @param string $root_path 目录路径
      * @param string $namespace_prefix 命名空间
-     * @param bool $cut_path 是否剪切 目录路径中的 命名空间
+     * @param bool $is_cut_path 是否剪切 目录路径中的 命名空间
      */
-    static public function load_class_set(string $path_root, string $namespace_prefix = '', bool $cut_path = false)
+    static public function load_class_set(string $root_path, string $namespace_prefix = '', bool $is_cut_path = false)
     {
-        if ($path_root) {
+        if ($root_path) {
             if ($namespace_prefix) {
                 $first = explode('\\', $namespace_prefix)[0];
                 $len   = strlen($namespace_prefix) + 1;
@@ -1305,10 +1318,10 @@ class ounun
             }
             if (empty(static::$maps_path)
                 || empty(static::$maps_path[$first])
-                || !(is_array(static::$maps_path[$first]) && in_array($path_root, array_column(static::$maps_path[$first], 'path')))) {
-                static::$maps_path[$first][] = ['path'      => $path_root,
+                || !(is_array(static::$maps_path[$first]) && in_array($root_path, array_column(static::$maps_path[$first], 'path')))) {
+                static::$maps_path[$first][] = ['path'      => $root_path,
                                                 'len'       => $len,
-                                                'cut'       => $cut_path,
+                                                'cut'       => $is_cut_path,
                                                 'namespace' => $namespace_prefix];
             }
         }
@@ -1362,19 +1375,6 @@ class ounun
         }
         // echo ' ---> bad';
         return '';
-    }
-
-    /**
-     * 添加App路径(根目录)
-     *
-     * @param string $path_root
-     */
-    static public function path_root_set(string $path_root)
-    {
-        /** src-0 \         自动加载 */
-        ounun::load_class_set($path_root . 'src/', '', false);
-        /** src-0 \addons   自动加载  */
-        ounun::load_class_set($path_root . 'addons/', 'addons', true);
     }
 }
 

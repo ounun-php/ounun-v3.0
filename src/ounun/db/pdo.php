@@ -133,14 +133,14 @@ class pdo
         if (empty(static::$_instance)) {
             if (empty($config)) {
                 if (empty($tag)) {
-                    $tag = ounun::database_default_get();
+                    $tag = ounun::database_default();
                 }
                 $config = ounun::$database[$tag] ?? null;
             }
             if ($config) {
                 static::$_instance = new static($config);
             } else {
-                error_php('error db tag:' . $tag . ' default:' . ounun::database_default_get());
+                error_php('error db tag:' . $tag . ' default:' . ounun::database_default());
             }
         }
         return static::$_instance;
@@ -474,9 +474,9 @@ class pdo
      * @param string $field
      * @param mixed $default_value 默认值
      * @param bool $force_prepare 是否强行 prepare
-     * @return mixed|null  直接返回对应的值
+     * @return mixed  直接返回对应的值
      */
-    public function column_value(string $field, $default_value = null, bool $force_prepare = false)
+    public function column_value(string $field, mixed $default_value = null, bool $force_prepare = false): mixed
     {
         $rs    = $this->column_one($force_prepare);
         $field = trim(str_replace('`', '', $field));
@@ -509,9 +509,9 @@ class pdo
      * 设定插入数据为替换
      *
      * @param bool $is_replace
-     * @return $this;
+     * @return static;
      */
-    public function replace(bool $is_replace = false): self
+    public function replace(bool $is_replace = false): static
     {
         $this->_is_replace = $is_replace;
         return $this;
@@ -521,9 +521,9 @@ class pdo
      * 多条数据 true:多条数据 false:单条数据
      *
      * @param bool $is_multiple
-     * @return $this;
+     * @return static;
      */
-    public function multiple(bool $is_multiple = false): self
+    public function multiple(bool $is_multiple = false): static
     {
         $this->_is_multiple = $is_multiple;
         return $this;
@@ -533,9 +533,9 @@ class pdo
      * 参数 install update replace
      *
      * @param string $option
-     * @return $this
+     * @return static
      */
-    public function option(string $option = ''): self
+    public function option(string $option = ''): static
     {
         $this->_option = $option;
         return $this;
@@ -545,9 +545,9 @@ class pdo
      * 滤掉name和id等字段都重复的记录
      *
      * @param string $distinct
-     * @return $this
+     * @return static
      */
-    public function distinct(string $distinct = 'distinct'): self
+    public function distinct(string $distinct = 'distinct'): static
     {
         $this->_distinct = $distinct;
         return $this;
@@ -558,9 +558,9 @@ class pdo
      *
      * @param array $duplicate 更新内容   [字段=>操作]
      * @param string $duplicate_ext 更新的扩展
-     * @return $this
+     * @return static
      */
-    public function duplicate(array $duplicate, string $duplicate_ext = ''): self
+    public function duplicate(array $duplicate, string $duplicate_ext = ''): static
     {
         $this->_duplicate     = $duplicate;
         $this->_duplicate_ext = $duplicate_ext;
@@ -572,9 +572,9 @@ class pdo
      *
      * @param int $length 查询数量
      * @param int $offset 起始位置
-     * @return $this
+     * @return static
      */
-    public function limit(int $length, int $offset = 0): self
+    public function limit(int $length, int $offset = 0): static
     {
         if (0 == $offset) {
             $this->_limit = "LIMIT {$length}";
@@ -586,9 +586,9 @@ class pdo
 
     /**
      * @param string $field
-     * @return $this
+     * @return static
      */
-    public function field(string $field = '*'): self
+    public function field(string $field = '*'): static
     {
         $this->_fields[] = $field;
         return $this;
@@ -596,9 +596,9 @@ class pdo
 
     /**
      * @param array $fields
-     * @return $this
+     * @return static
      */
-    public function json_field(array $fields): self
+    public function json_field(array $fields): static
     {
         foreach ($fields as $field) {
             $field = trim(str_replace('`', '', $field));
@@ -611,9 +611,9 @@ class pdo
 
     /**
      * @param string $assoc 设定返回关联数据 assoc
-     * @return $this
+     * @return static
      */
-    public function assoc(string $assoc = ''): self
+    public function assoc(string $assoc = ''): static
     {
         $this->_assoc = $assoc;
         return $this;
@@ -622,9 +622,9 @@ class pdo
     /**
      * @param string $inner_join
      * @param string $on
-     * @return $this
+     * @return static
      */
-    public function inner_join(string $inner_join, string $on): self
+    public function inner_join(string $inner_join, string $on): static
     {
         $this->_join = 'INNER JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
@@ -634,9 +634,9 @@ class pdo
      * @param string $inner_join
      * @param string $on
      * @param bool $is_outer
-     * @return $this
+     * @return static
      */
-    public function full_join(string $inner_join, string $on, bool $is_outer = false): self
+    public function full_join(string $inner_join, string $on, bool $is_outer = false): static
     {
         $outer       = $is_outer ? 'OUTER' : '';
         $this->_join = 'FULL ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
@@ -647,9 +647,9 @@ class pdo
      * @param string $inner_join
      * @param string $on
      * @param bool $is_outer
-     * @return $this
+     * @return static
      */
-    public function left_join(string $inner_join, string $on, bool $is_outer = false): self
+    public function left_join(string $inner_join, string $on, bool $is_outer = false): static
     {
         $outer       = $is_outer ? 'OUTER' : '';
         $this->_join = 'LEFT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
@@ -660,9 +660,9 @@ class pdo
      * @param string $inner_join
      * @param string $on
      * @param bool $is_outer
-     * @return $this
+     * @return static
      */
-    public function right_join(string $inner_join, string $on, bool $is_outer = false): self
+    public function right_join(string $inner_join, string $on, bool $is_outer = false): static
     {
         $outer       = $is_outer ? 'OUTER' : '';
         $this->_join = 'RIGHT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
@@ -673,9 +673,9 @@ class pdo
      * 条件
      * @param string $where_str 条件
      * @param array $bind_params 条件参数
-     * @return $this
+     * @return static
      */
-    public function where(string $where_str = '', array $bind_params = []): self
+    public function where(string $where_str = '', array $bind_params = []): static
     {
         if ($where_str) {
             if ($this->_where) {
@@ -695,9 +695,9 @@ class pdo
      * having条件
      * @param string $having_str 条件
      * @param array $bind_params 条件参数
-     * @return $this
+     * @return static
      */
-    public function having(string $having_str = '', array $bind_params = []): self
+    public function having(string $having_str = '', array $bind_params = []): static
     {
         if ($having_str) {
             if ($this->_having) {
@@ -718,9 +718,9 @@ class pdo
      *
      * @param string $field 排序字段
      * @param string $order 排序
-     * @return $this
+     * @return static
      */
-    public function order(string $field, string $order = self::Order_Desc): self
+    public function order(string $field, string $order = self::Order_Desc): static
     {
         $this->_order[] = ['field' => $field, 'order' => $order];
         return $this;
@@ -730,9 +730,9 @@ class pdo
      * 聚合分组
      *
      * @param string $field
-     * @return $this
+     * @return static
      */
-    public function group(string $field): self
+    public function group(string $field): static
     {
         $this->_group[] = $field;
         return $this;
@@ -743,9 +743,9 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias SUM查询别名
-     * @return $this
+     * @return static
      */
-    public function count(string $field = '*', string $alias = '`count`'): self
+    public function count(string $field = '*', string $alias = '`count`'): static
     {
         return $this->field("COUNT({$field}) AS {$alias}");
     }
@@ -768,9 +768,9 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @return $this
+     * @return static
      */
-    public function sum(string $field, string $alias = '`sum`'): self
+    public function sum(string $field, string $alias = '`sum`'): static
     {
         return $this->field("SUM({$field}) AS {$alias}");
     }
@@ -780,12 +780,12 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @param int $default_value 默认值
+     * @param float $default_value 默认值
      * @return float
      */
-    public function sum_value(string $field, string $alias = '`sum`', $default_value = 0): float
+    public function sum_value(string $field, string $alias = '`sum`', float $default_value = 0): float
     {
-        return $this->sum($field, $alias)->column_value($alias, $default_value);
+        return (float)$this->sum($field, $alias)->column_value($alias, $default_value);
     }
 
     /**
@@ -793,9 +793,9 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @return $this
+     * @return static
      */
-    public function min(string $field, string $alias = '`min`'): self
+    public function min(string $field, string $alias = '`min`'): static
     {
         return $this->field("MIN({$field}) AS {$alias}");
     }
@@ -805,10 +805,10 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @param int $default_value 默认值
+     * @param float $default_value 默认值
      * @return float
      */
-    public function min_value(string $field, string $alias = '`min`', $default_value = 0)
+    public function min_value(string $field, string $alias = '`min`', float $default_value = 0): float
     {
         return $this->min($field, $alias)->column_value($alias, $default_value);
     }
@@ -818,9 +818,9 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @return $this
+     * @return static
      */
-    public function max(string $field, string $alias = '`max`'): self
+    public function max(string $field, string $alias = '`max`'): static
     {
         return $this->field("MAX({$field}) AS {$alias}");
     }
@@ -830,10 +830,10 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @param int $default_value 默认值
+     * @param float $default_value 默认值
      * @return float
      */
-    public function max_value(string $field, string $alias = '`max`', $default_value = 0)
+    public function max_value(string $field, string $alias = '`max`', float $default_value = 0)
     {
         return $this->max($field, $alias)->column_value($alias, $default_value);
     }
@@ -843,9 +843,9 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @return $this
+     * @return static
      */
-    public function avg(string $field, string $alias = '`avg`'): self
+    public function avg(string $field, string $alias = '`avg`'): static
     {
         return $this->field("AVG({$field}) AS {$alias}");
     }
@@ -855,10 +855,10 @@ class pdo
      *
      * @param string $field 字段名
      * @param string $alias 查询别名
-     * @param int $default_value 默认值
+     * @param float $default_value 默认值
      * @return float
      */
-    public function avg_value(string $field, string $alias = '`avg`', $default_value = 0)
+    public function avg_value(string $field, string $alias = '`avg`',float $default_value = 0)
     {
         return $this->avg($field, $alias)->column_value($alias, $default_value);
     }
@@ -941,6 +941,7 @@ class pdo
 
     /**
      * 开启事务
+     *
      * @return bool
      */
     public function trans_begin(): bool
@@ -950,6 +951,7 @@ class pdo
 
     /**
      * 提交事务
+     *
      * @return bool
      */
     public function trans_commit(): bool
@@ -959,6 +961,7 @@ class pdo
 
     /**
      * 关闭事务
+     *
      * @return bool
      */
     public function trans_rollback(): bool
@@ -968,6 +971,7 @@ class pdo
 
     /**
      * 根据结果提交滚回事务
+     *
      * @param bool $res
      * @return bool
      */
@@ -982,6 +986,7 @@ class pdo
 
     /**
      * 返回PDO
+     *
      * @return PDOStatement 返回PDOStatement
      */
     public function stmt(): PDOStatement
@@ -991,6 +996,7 @@ class pdo
 
     /**
      * 是否连接成功
+     *
      * @return bool
      */
     public function is_connect(): bool
@@ -1001,6 +1007,7 @@ class pdo
 
     /**
      * 捡查指定字段数据是否存在
+     *
      * @param string $field 字段
      * @param mixed $value 值
      * @param int $param 值数据类型 PDO::PARAM_INT
@@ -1020,6 +1027,7 @@ class pdo
 
     /**
      * 为 SQL 查询里的字符串添加引号(特殊情况时才用)
+     *
      * @param mixed $data
      * @param int $type
      * @return string

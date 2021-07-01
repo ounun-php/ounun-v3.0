@@ -64,9 +64,9 @@ abstract class database_model extends pdo
      * @param string $field
      * @param mixed $default_value 默认值
      * @param bool $force_prepare 是否强行 prepare
-     * @return mixed|null  直接返回对应的值
+     * @return mixed  直接返回对应的值
      */
-    public function column_value_json(string $field, $default_value = null, bool $force_prepare = false)
+    public function column_value_json(string $field, mixed $default_value = null, bool $force_prepare = false): mixed
     {
         return $this->json_field([$field])->column_value($field, $default_value, $force_prepare);
     }
