@@ -7,9 +7,12 @@ declare (strict_types = 1);
 namespace ounun\middleware;
 
 
-class allow_cross_domain implements \ounun\interfaces\middleware_interface
+use Closure;
+use ounun\interfaces\middleware_interface;
+
+class allow_cross_domain implements middleware_interface
 {
-    protected $cookie_domain;
+    protected string $cookie_domain;
 
     protected array $header = [
         'Access-Control-Allow-Credentials' => 'true',
@@ -24,9 +27,9 @@ class allow_cross_domain implements \ounun\interfaces\middleware_interface
     }
 
 
-    public function handle(\Closure $next, string $origin = '', ?array $header = [])
+    public function handle(Closure $next, string $origin = '', ?array $header = null)
     {
-        $header = !empty($header) ? array_merge($this->header, $header) : $this->header;
+        $header = $header ? $this->header : array_merge($this->header, $header);
 
         if (!isset($header['Access-Control-Allow-Origin'])) {
             if ($origin && ('' == $this->cookie_domain || strpos($origin, $this->cookie_domain))) {

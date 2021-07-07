@@ -99,22 +99,26 @@ abstract class database_model extends pdo
      * @param array $where_paras 查询条件参数
      * @param array $orders 排序orders
      * @param string|null $table 表名
-     * @param array $http_request_gets 请求如$_GET参数
-     * @param array $paging_config 分页参数
+     * @param array|null $http_request_gets 请求如$_GET参数
+     * @param array|null $paging_config 分页参数
      * @param bool $is_end_index 是否倒序 false:正序 true:倒序
      * @param string $page_title 分页标题
      * @return array
      */
-    public function paging_simple(string $where_str = '', array $where_paras = [], array $orders = [], ?string $table = null, ?array $http_request_gets = null, ?array $paging_config = null, bool $is_end_index = true, string $page_title = ''): array
+    public function paging_simple(string $where_str = '', array $where_paras = [], array $orders = [], ?string $table = null, ?array $json_field = null,
+                                  ?array $http_request_gets = null, ?array $paging_config = null, bool $is_end_index = true, string $page_title = ''): array
     {
         $table        ??= $this->table;
         $fn_total     = function () use ($table, $where_str, $where_paras) {
             return $this->table($table)->where($where_str, $where_paras)->count_value();
         };
-        $fn_data_list = function (simple $pg) use ($orders, $table, $where_str, $where_paras) {
+        $fn_data_list = function (simple $pg) use ($orders, $table, $where_str, $where_paras, $json_field) {
             $this->table($table)->where($where_str, $where_paras)->limit($pg->limit_length(), $pg->limit_offset());
             foreach ($orders as $field => $order) {
                 $this->order($field, $order);
+            }
+            if ($json_field) {
+                $this->json_field($json_field);
             }
             return $this->column_all();
         };
@@ -141,7 +145,7 @@ abstract class database_model extends pdo
      */
     public function data_get(string $name, mixed $default_value = null): mixed
     {
-        return $this->_data[$name]??$default_value;
+        return $this->_data[$name] ?? $default_value;
     }
 
     /**

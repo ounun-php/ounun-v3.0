@@ -7,6 +7,8 @@ declare (strict_types = 1);
 namespace ounun\addons;
 
 
+use ounun;
+
 abstract class apps
 {
     /** @var string 插件名称 */
@@ -22,5 +24,5 @@ abstract class apps
     /** @var string 系统 */
     const Is_System = false;
     /** @var array 应用支持类型 */
-    const App_Type_Support = \ounun::App_Names;
+    const App_Type_Support = ounun::App_Names;
 }

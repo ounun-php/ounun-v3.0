@@ -42,7 +42,7 @@ defined('Dir_Cache_Html') || define('Dir_Cache_Html', Dir_Storage . 'html/');
  * @param string $s
  * @return string
  */
-function l(string $s)
+function l(string $s): string
 {
     if ($l = $GLOBALS['$L']) {
         if ($lang = $l[ounun::$lang]) {
@@ -97,7 +97,7 @@ function ip(): string
 function url_build_query(string $url, ?array $data_query = null, ?array $replace_ext = null, ?array $skip = null): string
 {
     // 参数
-    $data_query ??= $_GET;
+    $data_query ??= [];
 
     // replace_ext
     if (is_array($replace_ext)) {
@@ -136,25 +136,23 @@ function url_build_query(string $url, ?array $data_query = null, ?array $replace
     // data_query
     $rs     = [];
     $rs_str = '';
-    if (is_array($data_query)) {
-        foreach ($data_query as $key => $value) {
-            if (is_string($value) && '{' === $value[0]) {
-                $rs_str = $key . '=' . $value; // '={page}'
-            } elseif (is_array($value)) {
-                foreach ($value as $k2 => $v2) {
-                    $rs[] = $key . '[' . $k2 . ']=' . urlencode($v2);
-                }
-            } elseif ($value || 0 === $value || '0' === $value) {
-                $rs[] = $key . '=' . urlencode($value);
+    foreach ($data_query as $key => $value) {
+        if (is_string($value) && '{' === $value[0]) {
+            $rs_str = $key . '=' . $value; // '={page}'
+        } elseif (is_array($value)) {
+            foreach ($value as $k2 => $v2) {
+                $rs[] = $key . '[' . $k2 . ']=' . urlencode($v2);
             }
-        }
-        // 已保正page 是最后项
-        if ($rs_str) {
-            $rs[] = $rs_str;
+        } elseif (0 === $value || '0' === $value || 'false' === $value || $value) {
+            $rs[] = $key . '=' . urlencode($value);
         }
     }
+    // 已保正page 是最后项
+    if ($rs_str) {
+        $rs[] = $rs_str;
+    }
 
-    // url
+    // url out
     $url = trim($url);
     if ($rs) {
         $len = strlen($url);
@@ -305,10 +303,10 @@ function go_back(int $num = -1): void
  *  挑转网页 彈出alert對話框
  *
  * @param string $msg
- * @param string $url
+ * @param string|null $url
  */
 #[NoReturn]
-function go_msg(string $msg, string $url = ''): void
+function go_msg(string $msg, ?string $url = null): void
 {
     if ($url) {
         exit(msg($msg) . '<meta http-equiv="refresh" content="0.5;url=' . $url . '">');
@@ -327,7 +325,7 @@ function go_msg(string $msg, string $url = ''): void
  * @param string $charset
  * @return string
  */
-function msg(string $msg, bool $outer = true, $meta = true, $charset = 'utf-8'): string
+function msg(string $msg, bool $outer = true, bool $meta = true, string $charset = 'utf-8'): string
 {
     $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
     if ($outer) {

@@ -3,13 +3,14 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\plugin\captcha;
 
 class session
 {
     /** @var int */
-    public int $max_angle  = 15;
+    public int $max_angle = 15;
 
     /** @var int */
     public int $max_offset = 5;
@@ -26,26 +27,23 @@ class session
     /**
      * @param $width
      * @param $height
-     * @return $this|array
+     * @return $this
      */
-    public function build($width, $height)
+    public function build($width, $height): static
     {
         $image = imagecreatetruecolor($width, $height);
-        if (empty($image)) {
-            return error( 'Not supplied GD','1');
-        }
-        $bg = imagecolorallocate($image, $this->rand(200, 255), $this->rand(200, 255), $this->rand(200, 255));
+        $bg    = imagecolorallocate($image, $this->rand(200, 255), $this->rand(200, 255), $this->rand(200, 255));
         imagefill($image, 0, 0, $bg);
 
-        $square = $width * $height * 3;
+        $square  = $width * $height * 3;
         $effects = $this->rand($square / 2000, $square / 1000);
         for ($e = 0; $e < $effects; $e++) {
             $this->draw_line($image, $width, $height);
         }
-        $this->phrase = 0; //  $this->phrase();
-        $color = $this->write_phrase($image, $this->phrase, $this->font(), $width, $height);
+        $this->phrase = ""; //  $this->phrase();
+        $color        = $this->write_phrase($image, $this->phrase, $this->font(), $width, $height);
 
-        $square = $width * $height;
+        $square  = $width * $height;
         $effects = $this->rand($square / 3000, $square / 2000);
         if ($this->_max_front_lines !== 0) {
             for ($e = 0; $e < $effects; $e++) {
@@ -53,7 +51,7 @@ class session
             }
         }
 
-        $image = $this->distort($image, $width, $height, $bg);
+        $image        = $this->distort($image, $width, $height, $bg);
         $this->_image = $image;
         return $this;
     }
@@ -61,7 +59,7 @@ class session
     /**
      * @param int $quality
      */
-    public function output($quality = 90)
+    public function output(int $quality = 90)
     {
         header('content-type: image/png');
         imagepng($this->_image, null, $quality);
@@ -73,7 +71,7 @@ class session
      * @param $max
      * @return int
      */
-    protected function rand($min, $max)
+    protected function rand($min, $max): int
     {
         mt_srand((double)microtime() * 1000000);
         return mt_rand($min, $max);
@@ -108,21 +106,21 @@ class session
 
     protected function write_phrase($image, $phrase, $font, $width, $height)
     {
-        $size = $width / strlen($phrase) - $this->rand(0, 3) - 1;
-        $box = imagettfbbox($size, 0, $font, $phrase);
-        $textWidth = $box[2] - $box[0];
+        $size       = $width / strlen($phrase) - $this->rand(0, 3) - 1;
+        $box        = imagettfbbox($size, 0, $font, $phrase);
+        $textWidth  = $box[2] - $box[0];
         $textHeight = $box[1] - $box[7];
-        $x = ($width - $textWidth) / 2;
-        $y = ($height - $textHeight) / 2 + $size;
+        $x          = ($width - $textWidth) / 2;
+        $y          = ($height - $textHeight) / 2 + $size;
 
         $textColor = array($this->rand(0, 150), $this->rand(0, 150), $this->rand(0, 150));
-        $col = imagecolorallocate($image, $textColor[0], $textColor[1], $textColor[2]);
+        $col       = imagecolorallocate($image, $textColor[0], $textColor[1], $textColor[2]);
 
         $length = strlen($phrase);
         for ($i = 0; $i < $length; $i++) {
-            $box = imagettfbbox($size, 0, $font, $phrase[$i]);
-            $w = $box[2] - $box[0];
-            $angle = $this->rand(-$this->max_angle, $this->max_angle);
+            $box    = imagettfbbox($size, 0, $font, $phrase[$i]);
+            $w      = $box[2] - $box[0];
+            $angle  = $this->rand(-$this->max_angle, $this->max_angle);
             $offset = $this->rand(-$this->max_offset, $this->max_offset);
             imagettftext($image, $size, $angle, $x, $y + $offset, $col, $font, $phrase[$i]);
             $x += $w;
@@ -133,10 +131,10 @@ class session
     public function distort($image, $width, $height, $bg)
     {
         $contents = imagecreatetruecolor($width, $height);
-        $X = $this->rand(0, $width);
-        $Y = $this->rand(0, $height);
-        $phase = $this->rand(0, 10);
-        $scale = 1.1 + $this->rand(0, 10000) / 30000;
+        $X        = $this->rand(0, $width);
+        $Y        = $this->rand(0, $height);
+        $phase    = $this->rand(0, 10);
+        $scale    = 1.1 + $this->rand(0, 10000) / 30000;
         for ($x = 0; $x < $width; $x++) {
             for ($y = 0; $y < $height; $y++) {
                 $Vx = $x - $X;
@@ -145,8 +143,8 @@ class session
 
                 if ($Vn != 0) {
                     $Vn2 = $Vn + 4 * sin($Vn / 30);
-                    $nX = $X + ($Vx * $Vn2 / $Vn);
-                    $nY = $Y + ($Vy * $Vn2 / $Vn);
+                    $nX  = $X + ($Vx * $Vn2 / $Vn);
+                    $nY  = $Y + ($Vy * $Vn2 / $Vn);
                 } else {
                     $nX = $X;
                     $nY = $Y;
@@ -185,15 +183,15 @@ class session
 
         $m0 = $cx * $r0 + $x * $r1;
         $m1 = $cx * $r2 + $x * $r3;
-        $r = (int)($cy * $m0 + $y * $m1);
+        $r  = (int)($cy * $m0 + $y * $m1);
 
         $m0 = $cx * $g0 + $x * $g1;
         $m1 = $cx * $g2 + $x * $g3;
-        $g = (int)($cy * $m0 + $y * $m1);
+        $g  = (int)($cy * $m0 + $y * $m1);
 
         $m0 = $cx * $b0 + $x * $b1;
         $m1 = $cx * $b2 + $x * $b3;
-        $b = (int)($cy * $m0 + $y * $m1);
+        $b  = (int)($cy * $m0 + $y * $m1);
 
         return ($r << 16) | ($g << 8) | $b;
     }

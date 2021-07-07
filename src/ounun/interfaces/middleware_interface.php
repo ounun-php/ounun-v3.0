@@ -6,7 +6,9 @@
 declare (strict_types = 1);
 namespace ounun\interfaces;
 
+use Closure;
+
 interface middleware_interface
 {
-    public function handle(\Closure $next);
+    public function handle(Closure $next);
 }

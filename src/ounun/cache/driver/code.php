@@ -88,11 +88,12 @@ class code extends driver
     /**
      * 读取缓存
      * @access public
-     * @param string $name 缓存变量名
+     * @param string $key
      * @param mixed $default 默认值
+     * @param bool $add_prefix
      * @return mixed
      */
-    public function get2(string $key, $default = 0, bool $add_prefix = true)
+    public function get2(string $key, mixed $default = 0, bool $add_prefix = true): mixed
     {
         $filename = $this->key_get($key);
         if (!is_file($filename)) {
@@ -111,8 +112,7 @@ class code extends driver
                 //启用数据压缩
                 $content = gzuncompress($content);
             }
-            $content = unserialize($content);
-            return $content;
+            return unserialize($content);
         } else {
             return $default;
         }
