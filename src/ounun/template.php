@@ -441,7 +441,7 @@ class template
      */
     static public function replace(string $subject, array $data, ?string $regex = null): string
     {
-        $regex ??= '/\{(\w+)\}/';
+        $regex ??= '/{(\w+)}/'; // "/\{(\w+)\}/";
         return preg_replace_callback($regex, function ($var) use ($data) {
             return $data[$var[1]] ?? $var[0];
         }, $subject);

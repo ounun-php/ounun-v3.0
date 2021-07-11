@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun;
 
 use ounun;
@@ -123,76 +124,47 @@ class restful
 
     /**
      * @param string $key
-     * @return array|mixed
+     * @return mixed
      */
-    public function gets(string $key = ''): array
+    public function gets(string $key): mixed
     {
-        if ($key) {
-            // return $this->_request_gets[$key];
-            return $_GET[$key];
-        }
-        // return $this->_request_gets;
-        return $_GET;
+        return $_GET[$key] ?? null;
     }
 
     /**
      * @param string $key
-     * @return array|mixed
+     * @return mixed
      */
-    public function post(string $key = ''): array
+    public function post(string $key): mixed
     {
-        if ($key) {
-            // return $this->_request_post[$key];
-            return $_POST[$key];
-        }
-        // return $this->_request_post;
-        return $_POST;
+        return $_POST[$key] ?? null;
     }
 
     /**
      * @param string $key
-     * @return array|mixed
+     * @return mixed
      */
-    public function cookie(string $key = ''): array
+    public function cookie(string $key): mixed
     {
-        if ($key) {
-            // return $this->_request_cookie[$key];
-            return $_COOKIE[$key];
-        }
-        // return $this->_request_cookie;
-        return $_COOKIE;
+        return $_COOKIE[$key] ?? null;
     }
 
     /**
      * @param string $key
-     * @return array|mixed
+     * @return mixed
      */
-    public function input(string $key = ''): ?array
+    public function input(string $key): mixed
     {
-        if ($key) {
-            return $this->_request_inputs[$key];
-        }
-        return $this->_request_inputs;
+        return $this->_request_inputs[$key] ?? null;
     }
 
     /**
      * @param string $key
-     * @return array|mixed
+     * @return mixed
      */
-    public function request(string $key): ?array
+    public function request(string $key): mixed
     {
-        if ($key) {
-            if ($_GET && isset($_GET[$key])) {
-                return $_GET[$key];
-            } elseif ($_POST && isset($_POST[$key])) {
-                return $_POST[$key];
-            } elseif ($this->_request_inputs && isset($this->_request_inputs[$key])) {
-                return $this->_request_inputs[$key];
-            } elseif ($_COOKIE && isset($_COOKIE[$key])) {
-                return $_COOKIE[$key];
-            }
-        }
-        return null;
+        $_GET[$key] ?? ($_POST[$key] ?? ($this->_request_inputs[$key] ?? ($_COOKIE[$key] ?? null)));
     }
 
     /**
