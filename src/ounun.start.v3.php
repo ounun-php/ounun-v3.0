@@ -401,10 +401,10 @@ function error(string $msg = '', int $status = 1, mixed $data = null, ?array $ex
 /**
  * 确认是否错误 数据
  *
- * @param array|null $result
+ * @param mixed $result
  * @return bool
  */
-function error_is(?array $result = null): bool
+function error_is(mixed $result = null): bool
 {
     if (empty($result) || !is_array($result) || !array_key_exists('status', $result) || (array_key_exists('status', $result) && $result['status'] == 0)) {
         return false;

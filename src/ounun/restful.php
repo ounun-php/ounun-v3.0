@@ -68,7 +68,7 @@ class restful
         // before
         $rs = $this->_construct_before($url_mods);
         if (error_is($rs)) {
-            out($rs);
+            error_php(error_message($rs));
         }
 
         // url_mods
@@ -164,7 +164,7 @@ class restful
      */
     public function request(string $key): mixed
     {
-        $_GET[$key] ?? ($_POST[$key] ?? ($this->_request_inputs[$key] ?? ($_COOKIE[$key] ?? null)));
+        return $_GET[$key] ?? ($_POST[$key] ?? ($this->_request_inputs[$key] ?? ($_COOKIE[$key] ?? null)));
     }
 
     /**

@@ -11,7 +11,7 @@ use ounun\utils\caiji;
 
 class translator
 {
-    public static array $langs = [
+    public static array $lang = [
         'zh'  => '中文',
         'en'  => '英语',
         'fra' => '法语',
@@ -293,10 +293,10 @@ class translator
         $allow_langs = self::$allow_langs[$api_type];
         if (!empty($allow_langs) && is_array($allow_langs)) {
             foreach ($allow_langs as $k => $v) {
-                if (empty(self::$langs[$k])) {
+                if (empty(self::$lang[$k])) {
                     unset($allow_langs[$k]);
                 } else {
-                    $allow_langs[$k] = self::$langs[$k];
+                    $allow_langs[$k] = self::$lang[$k];
                 }
             }
         }

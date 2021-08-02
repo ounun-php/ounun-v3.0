@@ -376,7 +376,7 @@ class debug
      * @param string $filename
      * @param int $line
      */
-    static public function header($v, string $k = '', string $filename = '', int $line = 0)
+    static public function header(mixed $v, string $k = '', string $filename = '', int $line = 0)
     {
         if (static::is_header() && !headers_sent()) {
             $key = [];

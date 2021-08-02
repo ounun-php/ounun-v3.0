@@ -122,6 +122,7 @@ class cache
      * 设置 key 指定的哈希集中指定字段的值。
      * 如果 key 指定的哈希集不存在，会创建一个新的哈希集并与 key 关联。
      * 如果字段在哈希集中存在，它将被重写。
+     *
      * @param string $key
      * @param string $field
      * @param mixed $value
@@ -137,6 +138,7 @@ class cache
 
     /**
      * 缓存KEY
+     *
      * @param string $key
      * @param bool $add_prefix
      * @return string
@@ -148,6 +150,7 @@ class cache
 
     /**
      * 返回key是否存在
+     *
      * @param string $key 缓存变量名
      * @param bool $add_prefix 是否活加前缀
      * @return bool
@@ -160,6 +163,7 @@ class cache
 
     /**
      * 简单方式，删除$key对应值$val
+     *
      * @param string $key
      * @param bool $add_prefix
      */

@@ -8,6 +8,7 @@ declare (strict_types=1);
 namespace ounun\db;
 
 use Exception;
+use JetBrains\PhpStorm\Pure;
 use ounun;
 use PDOStatement;
 use Throwable;
@@ -196,35 +197,13 @@ class pdo
      */
     public function query(string $sql = '', array|string $bind_params = [], bool $check_active = true): self
     {
-        if (str_contains($sql, 'i:?')) {
-            if ($check_active) {
-                $this->active();
-            }
-            $bind_params2 = [];
-            foreach ($bind_params as $value) {
-                $value                = (float)$value;
-                $bind_params2[$value] = $value;
-            }
-            $bind_params2 = array_values($bind_params2);
-            $sql          = str_replace('i:?', implode(',', $bind_params2), $sql);
-            $this->_prepare($sql, false);
-            $this->_execute();
-        } elseif (str_contains($sql, '?')) {
-            if ($check_active) {
-                $this->active();
-            }
-            $sql = str_replace(['s:?', '?'], $this->quote($bind_params), $sql);
-            $this->_prepare($sql, false);
-            $this->_execute();
+        $this->_prepare($this->quote_array($sql, $bind_params['?'] ?? [], $check_active), $check_active);
+        if ($bind_params && is_array($bind_params)) {
+            $bind_params = $this->_values_parse($bind_params);
         } else {
-            $this->_prepare($sql, $check_active);
-            if ($bind_params && is_array($bind_params)) {
-                $bind_params = $this->_values_parse($bind_params);
-            } else {
-                $bind_params = [];
-            }
-            $this->_execute($bind_params);
+            $bind_params = [];
         }
+        $this->_execute($bind_params);
         return $this;
     }
 
@@ -671,6 +650,7 @@ class pdo
 
     /**
      * 条件
+     *
      * @param string $where_str 条件
      * @param array $bind_params 条件参数
      * @return static
@@ -678,6 +658,10 @@ class pdo
     public function where(string $where_str = '', array $bind_params = []): static
     {
         if ($where_str) {
+            if (isset($bind_params['?'])) {
+                $where_str = $this->quote_array($where_str, $bind_params['?']);
+                unset($bind_params['?']);
+            }
             if ($this->_where) {
                 $this->_where = $this->_where . ' ' . $where_str;
             } else {
@@ -693,6 +677,7 @@ class pdo
 
     /**
      * having条件
+     *
      * @param string $having_str 条件
      * @param array $bind_params 条件参数
      * @return static
@@ -858,7 +843,7 @@ class pdo
      * @param float $default_value 默认值
      * @return float
      */
-    public function avg_value(string $field, string $alias = '`avg`',float $default_value = 0)
+    public function avg_value(string $field, string $alias = '`avg`', float $default_value = 0)
     {
         return $this->avg($field, $alias)->column_value($alias, $default_value);
     }
@@ -1028,22 +1013,43 @@ class pdo
     /**
      * 为 SQL 查询里的字符串添加引号(特殊情况时才用)
      *
-     * @param mixed $data
+     * @param array|string $data
      * @param int $type
      * @return string
      */
-    public function quote(mixed $data, int $type = \PDO::PARAM_STR): string
+    public function quote(array|string $data, int $type = \PDO::PARAM_STR): string
     {
         $this->active();
-        $rs = [];
         if (is_array($data)) {
+            $rs = [];
             foreach ($data as $value) {
                 $rs[] = $this->_pdo->quote((string)$value, $type);
             }
+            return implode(',', $rs);
         } else {
-            $rs[] = $this->_pdo->quote($data, $type);
+            return $this->_pdo->quote($data, $type);
         }
-        return implode(',', $rs);
+    }
+
+    /**
+     * @param string $sql
+     * @param array|string $data
+     * @param bool $check_active
+     * @return string|null
+     */
+    public function quote_array(string $sql, array|string $data = [], bool $check_active = true): string|null
+    {
+        if (str_contains($sql, 'i:?')) {
+            $data2 = [];
+            foreach ($data as $value) {
+                $value         = (float)$value;
+                $data2[$value] = $value;
+            }
+            return str_replace('i:?', implode(',', array_values($data2)), $sql);
+        } elseif (str_contains($sql, '?')) {
+            return str_replace(['s:?', '?'], $this->quote($data), $sql);
+        }
+        return $sql;
     }
 
     /** order */
@@ -1122,10 +1128,11 @@ class pdo
      * @param array $data
      * @return array
      */
+    #[Pure]
     protected function _values_parse(array $data): array
     {
         $fields = [];
-        if ($data && is_array($data)) {
+        if ($data) {
             foreach ($data as $col => &$val) {
                 if (':' === $col[0]) {
                     list($type, $field) = explode(':', $col);
@@ -1189,7 +1196,7 @@ class pdo
     {
         if ($fields) {
             foreach ($this->_bind_keys as $key) {
-                $v = $fields[$key]??null;
+                $v = $fields[$key] ?? null;
                 if ($v) {
                     // $i++; echo "{$i} -> field:{$v['field']}, value:{$v['value']}, type:{$v['type']}\n";
                     if (\PDO::PARAM_STR == $v['type'] && isset($v['length'])) {

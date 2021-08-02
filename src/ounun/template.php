@@ -6,6 +6,7 @@
 
 namespace ounun;
 
+use JetBrains\PhpStorm\NoReturn;
 use ounun;
 use v;
 
@@ -345,6 +346,7 @@ class template
      * @param string $filename
      * @param string $addon_tag
      */
+    #[NoReturn]
     protected function error(string $filename, string $addon_tag = '')
     {
         $paths = '';

@@ -16,6 +16,7 @@ class sendmail
     public string  $smtp_host;
     public int  $smtp_port;
     public bool  $smtp_auth;
+
     public string  $smtp_username;
     public string  $smtp_password;
 
@@ -37,7 +38,7 @@ class sendmail
         $this->smtp_password = $smtp_password;
     }
 
-    function execute($to, $subject, $message, $from = null)
+    function execute($to, $subject, $message, $from = null): bool
     {
         $subject = '=?' . $this->charset . '?B?' . base64_encode(str_replace("\r", '', str_replace("\n", '', $subject))) . '?=';
         $message .= $this->sign;
@@ -59,7 +60,7 @@ class sendmail
         }
     }
 
-    function mail($to, $subject, $message, $headers, $from)
+    function mail($to, $subject, $message, $headers, $from): bool
     {
         ini_set('SMTP', $this->smtp_host);
         ini_set('smtp_port', $this->smtp_port);
@@ -76,60 +77,60 @@ class sendmail
         }
 
         stream_set_blocking($fp, true);
-        $lastmessage = fgets($fp, 512);
-        if (substr($lastmessage, 0, 3) != '220') {
-            $this->errno = substr($lastmessage, 0, 3);
-            $this->error = $lastmessage;
+        $last_message = fgets($fp, 512);
+        if (substr($last_message, 0, 3) != '220') {
+            $this->errno = substr($last_message, 0, 3);
+            $this->error = $last_message;
             return false;
         }
 
         fputs($fp, ($this->smtp_auth ? 'EHLO' : 'HELO') . " CmsTop\r\n");
-        $lastmessage = fgets($fp, 512);
-        if (substr($lastmessage, 0, 3) != 220 && substr($lastmessage, 0, 3) != 250) {
-            $this->errno = substr($lastmessage, 0, 3);
-            $this->error = $lastmessage;
+        $last_message = fgets($fp, 512);
+        if (substr($last_message, 0, 3) != 220 && substr($last_message, 0, 3) != 250) {
+            $this->errno = substr($last_message, 0, 3);
+            $this->error = $last_message;
             return false;
         }
 
         while (1) {
-            if (substr($lastmessage, 3, 1) != '-' || empty($lastmessage)) break;
-            $lastmessage = fgets($fp, 512);
+            if (substr($last_message, 3, 1) != '-' || empty($last_message)) break;
+            $last_message = fgets($fp, 512);
         }
 
         if ($this->smtp_auth) {
             fputs($fp, "AUTH LOGIN\r\n");
-            $lastmessage = fgets($fp, 512);
-            if (substr($lastmessage, 0, 3) != 334) {
-                $this->errno = substr($lastmessage, 0, 3);
-                $this->error = $lastmessage;
+            $last_message = fgets($fp, 512);
+            if (substr($last_message, 0, 3) != 334) {
+                $this->errno = substr($last_message, 0, 3);
+                $this->error = $last_message;
                 return false;
             }
 
             fputs($fp, base64_encode($this->smtp_username) . "\r\n");
-            $lastmessage = fgets($fp, 512);
-            if (substr($lastmessage, 0, 3) != 334) {
-                $this->errno = substr($lastmessage, 0, 3);
-                $this->error = $lastmessage;
+            $last_message = fgets($fp, 512);
+            if (substr($last_message, 0, 3) != 334) {
+                $this->errno = substr($last_message, 0, 3);
+                $this->error = $last_message;
                 return false;
             }
 
             fputs($fp, base64_encode($this->smtp_password) . "\r\n");
-            $lastmessage = fgets($fp, 512);
-            if (substr($lastmessage, 0, 3) != 235) {
-                $this->errno = substr($lastmessage, 0, 3);
-                $this->error = $lastmessage;
+            $last_message = fgets($fp, 512);
+            if (substr($last_message, 0, 3) != 235) {
+                $this->errno = substr($last_message, 0, 3);
+                $this->error = $last_message;
                 return false;
             }
         }
 
         fputs($fp, "MAIL FROM: <" . preg_replace("/.*\<(.+?)\>.*/", "\\1", $from) . ">\r\n");
-        $lastmessage = fgets($fp, 512);
-        if (substr($lastmessage, 0, 3) != 250) {
+        $last_message = fgets($fp, 512);
+        if (substr($last_message, 0, 3) != 250) {
             fputs($fp, "MAIL FROM: <" . preg_replace("/.*\<(.+?)\>.*/", "\\1", $from) . ">\r\n");
-            $lastmessage = fgets($fp, 512);
-            if (substr($lastmessage, 0, 3) != 250) {
-                $this->errno = substr($lastmessage, 0, 3);
-                $this->error = $lastmessage;
+            $last_message = fgets($fp, 512);
+            if (substr($last_message, 0, 3) != 250) {
+                $this->errno = substr($last_message, 0, 3);
+                $this->error = $last_message;
                 return false;
             }
         }
@@ -139,22 +140,22 @@ class sendmail
             $touser = trim($touser);
             if ($touser) {
                 fputs($fp, "RCPT TO: <" . preg_replace("/.*\<(.+?)\>.*/", "\\1", $touser) . ">\r\n");
-                $lastmessage = fgets($fp, 512);
-                if (substr($lastmessage, 0, 3) != 250) {
+                $last_message = fgets($fp, 512);
+                if (substr($last_message, 0, 3) != 250) {
                     fputs($fp, "RCPT TO: <" . preg_replace("/.*\<(.+?)\>.*/", "\\1", $touser) . ">\r\n");
-                    $lastmessage = fgets($fp, 512);
-                    $this->errno = substr($lastmessage, 0, 3);
-                    $this->error = $lastmessage;
+                    $last_message = fgets($fp, 512);
+                    $this->errno = substr($last_message, 0, 3);
+                    $this->error = $last_message;
                     return false;
                 }
             }
         }
 
         fputs($fp, "DATA\r\n");
-        $lastmessage = fgets($fp, 512);
-        if (substr($lastmessage, 0, 3) != 354) {
-            $this->errno = substr($lastmessage, 0, 3);
-            $this->error = $lastmessage;
+        $last_message = fgets($fp, 512);
+        if (substr($last_message, 0, 3) != 354) {
+            $this->errno = substr($last_message, 0, 3);
+            $this->error = $last_message;
             return false;
         }
 
@@ -166,10 +167,10 @@ class sendmail
         fputs($fp, $headers . "\r\n");
         fputs($fp, "\r\n\r\n");
         fputs($fp, "$message\r\n.\r\n");
-        $lastmessage = fgets($fp, 512);
-        if (substr($lastmessage, 0, 3) != 250) {
-            $this->errno = substr($lastmessage, 0, 3);
-            $this->error = $lastmessage;
+        $last_message = fgets($fp, 512);
+        if (substr($last_message, 0, 3) != 250) {
+            $this->errno = substr($last_message, 0, 3);
+            $this->error = $last_message;
             return false;
         }
         fputs($fp, "QUIT\r\n");

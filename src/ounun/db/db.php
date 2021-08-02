@@ -7,6 +7,10 @@ declare (strict_types=1);
 
 namespace ounun\db;
 
+use Exception;
+use JetBrains\PhpStorm\Pure;
+use SimpleXMLElement;
+
 class db
 {
     /** @var string 布尔类型 */
@@ -114,20 +118,6 @@ class db
         return json_encode_unescaped($value);
     }
 
-    /**
-     * 是否 新增并自增长
-     *
-     * @param array $result
-     * @return int|null 自增长插入ID
-     */
-    static public function is_insert_auto_increment(array $result): ?int
-    {
-        $data = succeed_data($result);
-        if (isset($data['_type_']) && 'insert' === $data['_type_'] && isset($data['_type2_']) && 'auto_increment' === $data['_type2_']) {
-            return $data['_insert_value_'] ?? null;
-        }
-        return null;
-    }
 
     /**
      * 是否新增
@@ -135,6 +125,7 @@ class db
      * @param array $result
      * @return bool true:新增 false:更新
      */
+    #[Pure]
     static public function is_insert(array $result): bool
     {
         $data = succeed_data($result);
@@ -145,11 +136,28 @@ class db
     }
 
     /**
+     * 是否 自增长（插入）
+     *
+     * @param array $result
+     * @return bool true:自增长新增 false:非自增长
+     */
+    #[Pure]
+    static public function is_auto_increment(array $result): bool
+    {
+        $data = succeed_data($result);
+        if (isset($data['_type_']) && 'insert' === $data['_type_'] && isset($data['_type2_']) && 'auto_increment' === $data['_type2_']) {
+            return ((int)$data['_insert_value_']) > 0;
+        }
+        return false;
+    }
+
+    /**
      * 是否 为更新
      *
      * @param array $result
      * @return bool true:新增 false:更新
      */
+    #[Pure]
     static public function is_update(array $result): bool
     {
         $data = succeed_data($result);
@@ -179,6 +187,67 @@ class db
             }
         }
         return $result;
+    }
+
+
+    /**
+     * 获取 插入、更新 主键数据或ID
+     *
+     * @param array $result insert_update执行结果
+     * @param mixed $primary_data_unique_id 主键数据唯一标识id
+     * @param bool $is_strict 是否严格（更新时一定要有改变）
+     * @return int|string|array 插入、更新ID 或 错误信息
+     */
+    static public function insert_update_primary_data(array $result, mixed $primary_data_unique_id = null, bool $is_strict = false): int|string|array
+    {
+        if (error_is($result)) {
+            return $result;
+        }
+        if (static::is_insert($result)) {
+            if (static::is_auto_increment($result)) {
+                $data_id = static::insert_auto_increment_id($result);
+                if (is_numeric($data_id) && $data_id > 0) {
+                    return $data_id;
+                }
+                return error("提示:插入数据没有自增ID[行:" . __LINE__ . "][数据:" . json_encode_unescaped($result) . "]");
+            } else {
+                if ($primary_data_unique_id) {
+                    return $primary_data_unique_id;
+                }
+                return error("提示:插入数据\$primary_data为空[行:" . __LINE__ . "][数据:" . json_encode_unescaped($primary_data_unique_id) . "]");
+            }
+        }
+        if (static::is_update($result)) {
+            if ($is_strict) {
+                $result2 = static::is_update_modify($result);
+                if (error_is($result2)) {
+                    return $result2;
+                }
+            }
+            if ($primary_data_unique_id) {
+                return $primary_data_unique_id;
+            }
+            return error("提示:更新数据\$primary_data为空[行:" . __LINE__ . "][数据:" . json_encode_unescaped($primary_data_unique_id) . "]");
+        }
+
+        return error("提示:参数\$result有误[行:" . __LINE__ . "][数据:" . json_encode_unescaped($result) . "]");
+    }
+
+
+    /**
+     * 获取 插入自增长
+     *
+     * @param array $result
+     * @return int|null 自增长插入ID
+     */
+    #[Pure]
+    static public function insert_auto_increment_id(array $result): ?int
+    {
+        $data = succeed_data($result);
+        if (isset($data['_type_']) && 'insert' === $data['_type_'] && isset($data['_type2_']) && 'auto_increment' === $data['_type2_']) {
+            return $data['_insert_value_'] ?? null;
+        }
+        return null;
     }
 
     /**
@@ -212,7 +281,7 @@ class db
             }
         } elseif ($primary_data) {
             $insert_value = $db->table($table)->insert(array_merge($data_format, $primary_data));
-            list($where_str, $where_paras) = $where ?? self::where_str_bind($primary_data, $primary_data);
+            list($where_str, $where_paras) = $where ?? static::where_str_paras($primary_data, $primary_data);
 
             $modify_cc = $db->table($table)->where($where_str, $where_paras)->count_value();
             $rs        = ['_type_'         => 'insert',
@@ -250,7 +319,7 @@ class db
         // 格式化
         $data_format = static::format($data, $field_info, true);
 
-        list($where_str, $where_paras) = $where ?? self::where_str_bind($primary_data, $primary_data);
+        list($where_str, $where_paras) = $where ?? static::where_str_paras($primary_data, $primary_data);
         $modify_cc = $db->table($table)->where($where_str, $where_paras)->update($data_format);
         return succeed(array_merge($primary_data, ['_type_' => 'update', '_modify_cc_' => $modify_cc]));
     }
@@ -274,9 +343,12 @@ class db
         $is_update = false;
         $where     = null;
         if ($primary_data) {
-            $where = self::where_str_bind($primary_data, $primary_data);
+            $where = static::where_str_paras($primary_data, $primary_data);
             list($where_str, $where_paras) = $where;
             $is_update = $db->table($table)->where($where_str, $where_paras)->count_value('`' . array_keys($primary_data)[0] . '`') > 0;
+            if (!$is_update) {
+                $is_auto_increment = false;
+            }
         }
 
         // 更新数据
@@ -296,74 +368,91 @@ class db
      * @param pdo|null $pdo
      * @return array
      */
-    static public function where_str_bind(array $fields, ?array $where_data, ?pdo $pdo = null): array
+    static public function where_str_paras(array $fields, ?array $where_data = null, ?pdo $pdo = null): array
     {
+        // where_data为空时
+        if (null === $where_data) {
+            return ['', []];
+        }
         // 执行
-        $where_str  = [];
-        $where_bind = [];
+        $where_str   = [];
+        $where_paras = [];
         if ($where_data) { // 请求参数不能为空
             foreach ($fields as $field => $operation) {
                 if (isset($where_data[$field])) {
-                    if ('=' == $operation) {
-                        $where_str[]        = " `{$field}` =:{$field} ";
-                        $where_bind[$field] = $where_data[$field];
-                    } elseif ('>' == $operation) {
-                        $where_str[]        = " `{$field}` >:{$field} ";
-                        $where_bind[$field] = $where_data[$field];
-                    } elseif ('<=' == $operation) {
-                        $where_str[]        = " `{$field}` <=:{$field} ";
-                        $where_bind[$field] = $where_data[$field];
-                    } elseif ('<' == $operation) {
-                        $where_str[]        = " `{$field}` <:{$field} ";
-                        $where_bind[$field] = $where_data[$field];
-                    } elseif ('<=' == $operation) {
-                        $where_str[]        = " `{$field}` <=:{$field} ";
-                        $where_bind[$field] = $where_data[$field];
-                    } elseif ('like' == $operation) {
-                        $where_str[]        = " `{$field}` like :{$field} ";
-                        $where_bind[$field] = $where_data[$field];
-                    } elseif ('%like' == $operation) {
-                        $where_str[]        = " `{$field}` like :{$field} ";
-                        $where_bind[$field] = "%{$where_data[$field]}";
-                    } elseif ('like%' == $operation) {
-                        $where_str[]        = " `{$field}` like :{$field} ";
-                        $where_bind[$field] = "{$where_data[$field]}%";
-                    } elseif ('%like%' == $operation) {
-                        $where_str[]        = " `{$field}` like :{$field} ";
-                        $where_bind[$field] = "%{$where_data[$field]}%";
-                    } elseif ('between' == $operation) {
-                        $where_str[]                   = " `{$field}` >:{$field}_start and `{$field}` <:{$field}_end ";
-                        $where_bind[$field . '_start'] = $where_data[$field . '_start'];
-                        $where_bind[$field . '_end']   = $where_data[$field . '_end'];
-                    } elseif ('between=' == $operation) {
-                        $where_str[]                   = " `{$field}` >=:{$field}_start and `{$field}` <=:{$field}_end ";
-                        $where_bind[$field . '_start'] = $where_data[$field . '_start'];
-                        $where_bind[$field . '_end']   = $where_data[$field . '_end'];
-                    } elseif ('in' == $operation || 'in_str' == $operation) {
-                        $vals = [];
-                        if (is_array($where_data[$field])) {
-                            if ('in_str' == $operation) {
-                                foreach ($where_data[$field] as $val) {
-                                    $vals[] = $pdo->quote($val, \PDO::PARAM_STR);
+                    switch ($operation) {
+                        case '=':
+                            $where_str[]         = " `{$field}` =:{$field} ";
+                            $where_paras[$field] = $where_data[$field];
+                            break;
+                        case '>':
+                            $where_str[]         = " `{$field}` >:{$field} ";
+                            $where_paras[$field] = $where_data[$field];
+                            break;
+                        case '>=':
+                            $where_str[]         = " `{$field}` >=:{$field} ";
+                            $where_paras[$field] = $where_data[$field];
+                            break;
+                        case '<':
+                            $where_str[]         = " `{$field}` <:{$field} ";
+                            $where_paras[$field] = $where_data[$field];
+                            break;
+                        case '<=':
+                            $where_str[]         = " `{$field}` <=:{$field} ";
+                            $where_paras[$field] = $where_data[$field];
+                            break;
+                        case 'like':
+                            $where_str[]         = " `{$field}` like :{$field} ";
+                            $where_paras[$field] = $where_data[$field];
+                            break;
+                        case '%like':
+                            $where_str[]         = " `{$field}` like :{$field} ";
+                            $where_paras[$field] = "%{$where_data[$field]}";
+                            break;
+                        case 'like%':
+                            $where_str[]         = " `{$field}` like :{$field} ";
+                            $where_paras[$field] = "{$where_data[$field]}%";
+                            break;
+                        case '%like%':
+                            $where_str[]         = " `{$field}` like :{$field} ";
+                            $where_paras[$field] = "%{$where_data[$field]}%";
+                            break;
+                        case 'between':
+                            $where_str[]                    = " `{$field}` >:{$field}_start and `{$field}` <:{$field}_end ";
+                            $where_paras[$field . '_start'] = $where_data[$field . '_start'];
+                            $where_paras[$field . '_end']   = $where_data[$field . '_end'];
+                            break;
+                        case 'between=':
+                            $where_str[]                    = " `{$field}` >=:{$field}_start and `{$field}` <=:{$field}_end ";
+                            $where_paras[$field . '_start'] = $where_data[$field . '_start'];
+                            $where_paras[$field . '_end']   = $where_data[$field . '_end'];
+                            break;
+                        case 'in':
+                        case 'in_str':
+                            $vals = [];
+                            if (is_array($where_data[$field])) {
+                                if ('in_str' == $operation) {
+                                    foreach ($where_data[$field] as $val) {
+                                        $vals[] = $pdo->quote($val, \PDO::PARAM_STR);
+                                    }
+                                } else {
+                                    foreach ($where_data[$field] as $val) {
+                                        $vals[] = (float)$val;
+                                    }
                                 }
-                            } else {
-                                foreach ($where_data[$field] as $val) {
-                                    $vals[] = (float)$val;
+                                if ($vals) {
+                                    $where_str[] = " `{$field}` in (" . implode(',', $vals) . ") ";
                                 }
                             }
-                            if ($vals) {
-                                $where_str[] = " `{$field}` in (" . implode(',', $vals) . ") ";
-                            }
-                        }
-                    } else { // 默认
-                        $where_str[]        = " `{$field}` =:{$field} ";
-                        $where_bind[$field] = $where_data[$field];
+                            break;
+                        default:
+                            $where_str[]         = " `{$field}` =:{$field} ";
+                            $where_paras[$field] = $where_data[$field];
                     }
                 }
             }
         }
-        $where_str = implode(' and ', $where_str);
-        return [$where_str, $where_bind];
+        return [implode(' and ', $where_str), $where_paras];
     }
 
 
@@ -623,7 +712,7 @@ class db
     public static function xml_encode_simple($data): string|bool
     {
         // 创建 SimpleXMLElement 对象
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><site></site>');
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><site></site>');
         foreach ($data as $key => $value) {
             $xml->addChild($key, $value);
         }
