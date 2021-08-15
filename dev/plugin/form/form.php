@@ -2,7 +2,7 @@
 namespace ounun\plugin\form;
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
- * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 
 class form

@@ -1,7 +1,7 @@
 <?php
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
- * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 
 namespace ounun\plugin;
@@ -16,7 +16,7 @@ namespace ounun\plugin;
 | This file is part of PHP_XLS project.                                         |
 |                                                                               |
 | PHP_XLS is free software: you can redistribute it and/or modify               |
-| it under the terms of the GNU Lesser General Public License as published by   |
+| it is under the terms of the GNU Lesser General Public License as published by   |
 | the Free Software Foundation, either version 3 of the License, or             |
 | (at your option) any later version.                                           |
 |                                                                               |

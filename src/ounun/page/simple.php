@@ -1,7 +1,7 @@
 <?php
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
- * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 declare (strict_types = 1);
 namespace ounun\page;
@@ -16,7 +16,7 @@ class simple
 
     /** @var string  提示串 */
     protected string $_config_note = '总共有{total}条数据,共{total_page}页,第{page}页';
-    
+
     /** @var array   默认页 */
     protected array $_config_page_tag_default = ['<li>', '</li>', ''];
     /** @var array   当前页面时 */
@@ -24,7 +24,7 @@ class simple
     /** @var array   第一页 上一页 下一页 最后一页   ['|&lt;','&lt;','&gt;','&gt;|']; */
     protected array $_config_page_tag_name = ['第一页', '上一页', '下一页', '最后一页'];
     /** @var array   第一页 */
-    protected array $_config_index = []; 
+    protected array $_config_index = [];
 
     /** @var int     最多显示几页 */
     protected int $_config_show_max = 9;
@@ -51,7 +51,7 @@ class simple
      * page constructor.
      *
      * @param string $url
-     * @param array  $paging_config  
+     * @param array  $paging_config
      */
     public function __construct(string $url, array $paging_config = [])
     {

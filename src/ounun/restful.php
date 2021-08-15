@@ -1,7 +1,7 @@
 <?php
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
- * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 declare (strict_types=1);
 
@@ -89,9 +89,9 @@ class restful
      * 构建前执行
      *
      * @param array $url_mods
-     * @return bool
+     * @return bool|array
      */
-    protected function _construct_before(array $url_mods = []): bool
+    protected function _construct_before(array $url_mods = []): bool|array
     {
         return true;
     }

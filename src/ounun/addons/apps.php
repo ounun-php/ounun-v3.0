@@ -1,7 +1,7 @@
 <?php
 /**
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
- * Ounun.ORG is NOT a free software, it under the license terms, visited https://www.ounun.org/ for more details.
+ * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 declare (strict_types = 1);
 namespace ounun\addons;
@@ -25,4 +25,10 @@ abstract class apps
     const Is_System = false;
     /** @var array 应用支持类型 */
     const App_Type_Support = ounun::App_Names;
+
+    /** toString */
+    public function __toString(): string
+    {
+        return get_class($this);
+    }
 }
