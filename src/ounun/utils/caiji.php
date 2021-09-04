@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\utils;
 
 
@@ -67,13 +68,17 @@ class caiji
      * @param string $right 目标内容右边标识点
      * @return array
      */
-    static public function list_left(string $content, string $middle, string $left, string $right): array
+    static public function list_left(string $content, string $middle, string $left, string $right, bool $filter_empty = true): array
     {
         $rs = [];
         $c2 = explode($middle, $content);
         foreach ($c2 as $v2) {
             $v3 = self::left($v2, $left, $right);
-            if ($v3) {
+            if ($filter_empty) {
+                if ($v3) {
+                    $rs[] = $v3;
+                }
+            } else {
                 $rs[] = $v3;
             }
         }
@@ -89,15 +94,20 @@ class caiji
      * @param string $left 目标内容左边标识点
      * @return array
      */
-    static public function list_right(string $content, string $middle, string $right, string $left): array
+    static public function list_right(string $content, string $middle, string $right, string $left, bool $filter_empty = true): array
     {
         $rs = [];
         $c2 = explode($middle, $content);
         foreach ($c2 as $v2) {
             $v3 = self::right($v2, $right, $left);
-            if ($v3) {
+            if ($filter_empty) {
+                if ($v3) {
+                    $rs[] = $v3;
+                }
+            } else {
                 $rs[] = $v3;
             }
+
         }
         return $rs;
     }
