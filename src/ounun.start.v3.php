@@ -6,6 +6,7 @@
 
 use JetBrains\PhpStorm\NoReturn;
 use ounun\addons\apps;
+use ounun\addons\command_c;
 use ounun\addons\console;
 use ounun\addons\logic;
 use ounun\cache\html;
@@ -1349,7 +1350,7 @@ class ounun
             if (isset(static::$maps_path[$first])) {
                 foreach (static::$maps_path[$first] as $v) {
                     if ('' == $v['namespace']) {
-                        // print_r(static::$maps_paths);
+                        // print_r(static::$maps_path);
                         $file = $v['path'] . $filename;
 //                                                echo " load_class2  -> \$class1 :{$class}  \$first:{$first}   \$len:{$v['len']}\n".
 //                                                    "                \t\t\$path:{$v['path']}\n".
@@ -1371,7 +1372,7 @@ class ounun
                 }
             }
         }
-        // echo ' ---> bad';
+        echo '\$class:'.$class.' ---> bad'."\n";
         return '';
     }
 }
@@ -1643,6 +1644,7 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
     if (is_file($filename)) {
         require $filename;
     } else {
+        console::echo("warning... file:{$filename} not found\n", command_c::Color_Light_Red);
         $filename = Dir_Root . 'env/example.runtime_' . ounun::$app_name . '.php';
         if (is_file($filename)) {
             require $filename;
@@ -1659,7 +1661,10 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
         }
     }
 
-    return (new console($commands, $name, $version))->execute($argv);
+    return (new console(array_merge($commands, [
+        'help' => \apps\command\help::class,
+        'test' => \apps\command\test::class,
+    ]), $name, $version))->execute($argv);
 }
 
 /** 自动加载 src-4 \ounun  */

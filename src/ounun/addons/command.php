@@ -15,9 +15,6 @@ abstract class command
     /** @var string 插件唯一标识 */
     public static string $addon_tag = '';
 
-    /** @var string 插件展示子类 */
-    public static string $addon_view = '';
-
     /** @var string 命令的名字（"ounun" 后面的部分） */
     public string $name;
 
@@ -101,7 +98,7 @@ abstract class command
     {
         console::echo("命令:", command_c::Color_Purple, '', 0, 0, '');
         console::echo("({$this->description})");
-        console::echo('./ounun ' . $this->name . $this->help_paras, command_c::Color_Blue);
+        console::echo('./ounun ' . $this->name . $this->help_paras, command_c::Color_White);
         console::echo($this->help, command_c::Color_Purple);
     }
 
@@ -112,7 +109,7 @@ abstract class command
     {
         // 任务名称
         if (empty($this->name)) {
-            $this->name = 'command';
+            $this->name = static::$addon_tag;
         }
         // 脚本版本
         if (empty($this->script_version)) {
@@ -129,8 +126,7 @@ abstract class command
         }
         // 运行命令时使用 "--help" 选项时的完整命令描述
         if (empty($this->help)) {
-            $this->help = "命令\n" .
-                "./ounun {$this->name} ".$this->help_paras."\n";
+            $this->help = "选项时的完整命令描述\n";
         }
     }
 

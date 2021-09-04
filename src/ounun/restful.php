@@ -96,6 +96,18 @@ class restful
         return true;
     }
 
+
+    /**
+     * 输出前执行
+     *
+     * @param array $data
+     */
+    public function out_before(array $data)
+    {
+        static::headers_allow_origin_set();
+        out($data,c::Format_Jsonp);
+    }
+
     /**
      * @param string $methods
      * @param string $domain
@@ -156,6 +168,14 @@ class restful
     public function input(string $key): mixed
     {
         return $this->_request_inputs[$key] ?? null;
+    }
+
+    /**
+     * @return array|mixed|null
+     */
+    public function inputs()
+    {
+        return $this->_request_inputs;
     }
 
     /**

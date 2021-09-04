@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\addons;
 
 
@@ -51,11 +52,9 @@ class console
      */
     public static function add(array $commands): int
     {
-        if (is_array($commands)) {
-            foreach ($commands as $key => $command) {
-                if ($key && $command) {
-                    static::$commands[$key] = $command;
-                }
+        foreach ($commands as $key => $command) {
+            if ($key && $command) {
+                static::$commands[$key] = $command;
             }
         }
         return count(static::$commands);
@@ -69,19 +68,19 @@ class console
      */
     public function execute(array $argv): int
     {
-        if (empty($argv) || empty($argv[1]) || '--help' == $argv[1] || '--list' == $argv[1]) {
+        $argv_1 = $argv[1] ?? null;
+        if (empty($argv) || empty($argv_1) || '--help' == $argv_1 || '--list' == $argv_1) {
             /** @var string $command */
-            $command = static::$commands[command_c::Default_Cmd];
-        } else if ($argv[1]) {
-            // 插件路由
-            if ($argv[1] && ($addon = ounun::$addon_route[$argv[1]]) && $apps = $addon['apps']) {
-                // $addon_tag = $apps::Addon_Tag;
-                $command = '\\addons\\' . $apps::Addon_Tag . '\\command';
-                // command
-                if (!class_exists($command)) {
-                    if (isset(static::$commands[$argv[1]])) {
-                        /** @var string $command */
-                        $command = static::$commands[$argv[1]];
+            $command = static::$commands[command_c::Default_Cmd] ?? null;
+        } else if ($argv_1) {
+            // 系统
+            $command = static::$commands[$argv_1]??null;
+            // 插件
+            if(empty($command)){
+                if(isset(ounun::$addon_path["/{$argv_1}"])){
+                    $path = ounun::$addon_path["/{$argv_1}"];
+                    if (isset(ounun::$addon_route[$path]) && ($addon = ounun::$addon_route[$path]) && $apps = $addon['apps']) {
+                        $command = '\\addons\\' . $apps::Addon_Tag . '\\command';
                     }
                 }
             }
@@ -89,11 +88,10 @@ class console
 
         // command 为空
         if (empty($command)) {
-            static::echo("命令:{$argv[1]} 不存在!", command_c::Color_Light_Red);
+            static::echo('命令:' . ($argv_1 ?? '空') . ' 不存在!', command_c::Color_Light_Red);
             static::echo("你可以尝试下面", command_c::Color_Green);
-            $command = static::$commands[command_c::Default_Cmd];
+            $command = static::$commands[command_c::Default_Cmd] ?? null;
         }
-
         // command 执行
         if ($command && class_exists($command)) {
             if (is_subclass_of($command, command::class)) {
@@ -114,7 +112,7 @@ class console
                     /** @var command $command_o */
                     $command_o = new $command();
                     $command_o->start();
-                    static::echo(date("Y-m-d H:i:s") . "    runing... {$run_cmd}                      --------------------", command_c::Color_Cyan);
+                    static::echo(date("Y-m-d H:i:s") . "    running... {$run_cmd}                     --------------------", command_c::Color_Cyan);
                     $command_o->execute($argv);  // 执行指令
                     if ($command_o->state()) {
                         $command_o->stop();
@@ -125,7 +123,7 @@ class console
                 static::echo("命令:{$command} 父类不是:" . command::class, command_c::Color_Light_Red);
             }
         } else {
-            static::echo("命令:{$argv[1]} 文件不存在!", command_c::Color_Light_Red);
+            static::echo("命令:{$argv_1} 文件不存在!", command_c::Color_Light_Red);
         }
         return 0;
     }

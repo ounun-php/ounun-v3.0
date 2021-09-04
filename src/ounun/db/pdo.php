@@ -373,7 +373,7 @@ class pdo
      * @param bool $force_prepare 是否强行 prepare
      * @return mixed 得到一条数据数组
      */
-    public function column_one(bool $force_prepare = false)
+    public function column_one(bool $force_prepare = false): mixed
     {
         $this->_prepare_column($force_prepare);
         if ($this->_fields_json) {
@@ -1047,7 +1047,7 @@ class pdo
             }
             return str_replace('i:?', implode(',', array_values($data2)), $sql);
         } elseif (str_contains($sql, '?')) {
-            return str_replace(['s:?', '?'], $this->quote($data), $sql);
+            return str_replace(['s:?', ':?', '?'], $this->quote($data), $sql);
         }
         return $sql;
     }
