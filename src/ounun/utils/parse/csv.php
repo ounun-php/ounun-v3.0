@@ -28,9 +28,9 @@ class csv
                 }
             }
         } else {
-            $datas = str_getcsv($config, "\n");
+            $data_list = str_getcsv($config, "\n");
             if ($is_head_field) {
-                foreach ($datas as &$data) {
+                foreach ($data_list as &$data) {
                     if ($fields) {
                         $dataset[] = array_combine($fields, str_getcsv($data));
                     } else {
@@ -38,7 +38,7 @@ class csv
                     }
                 }
             } else {
-                foreach ($datas as &$data) {
+                foreach ($data_list as &$data) {
                     $dataset[] = str_getcsv($data);
                 }
             }

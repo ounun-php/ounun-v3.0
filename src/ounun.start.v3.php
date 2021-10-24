@@ -1372,7 +1372,12 @@ class ounun
                 }
             }
         }
-        echo '\$class:'.$class.' ---> bad'."\n";
+        $error_msg = __METHOD__. ' $class:'.$class.' ====> bad'."\n";
+        //  error_php($error_msg);
+        echo '<pre style="font-size: 12px;text-align: left;padding: 10px;border: #EEEEEE 1px dashed;margin: 20px;">' . PHP_EOL;
+        echo 'error:' . $error_msg . PHP_EOL;
+        debug_print_backtrace();
+        echo '</pre>';
         return '';
     }
 }

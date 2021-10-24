@@ -188,7 +188,7 @@ class simple
         $sub_begin && $rs[] = ['begin' => 1];
         $sub_previous && $rs[] = ['previous' => $page_curr - 1];
         for ($i = $sub_start; $i < $sub_start + $sub_total; $i++) {
-            $rs[] = ['default' => $i];
+            $rs[] = ['default' => (int)$i];
         }
         $sub_next && $rs[] = ['next' => $page_curr + 1];
         $sub_end && $rs[] = ['end' => $this->_total_page];
@@ -277,7 +277,7 @@ class simple
      * @param int $page
      * @return string
      */
-    protected function _url_set(int $page): string
+    protected function _url_set(int|float $page): string
     {
         $search  = [];
         $replace = [];
