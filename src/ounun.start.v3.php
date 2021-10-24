@@ -4,7 +4,6 @@
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-use JetBrains\PhpStorm\NoReturn;
 use ounun\addons\apps;
 use ounun\addons\command_c;
 use ounun\addons\console;
@@ -721,7 +720,7 @@ function error404(string $msg = '')
     $is_backtrace = global_all('debug', false, 'backtrace');
     if ($is_backtrace) {
         echo($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '');
-        echo '<pre>' . PHP_EOL;
+        echo '<pre style="font-size: 12px;text-align: left;padding: 10px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
         debug_print_backtrace();
         echo '</pre>';
     }
@@ -764,8 +763,8 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
     if ($error_html) {
         echo $error_html;
     }
-    echo '<pre>' . PHP_EOL;
-    echo '$app:' . var_export(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths], true) . PHP_EOL;
+    echo '<pre style="font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
+    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths], true) . PHP_EOL.PHP_EOL;
     debug_print_backtrace();
     echo '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
@@ -831,11 +830,11 @@ function environment(): string
  * 公共配制数据
  *
  * @param string $key
- * @param mixed $default
+ * @param mixed|null $default
  * @param string|null $sub_key
  * @return mixed
  */
-function global_all(string $key, $default = null, ?string $sub_key = null)
+function global_all(string $key, mixed $default = null, ?string $sub_key = null): mixed
 {
     $ret = $default;
     if ($key && isset(ounun::$global[$key])) {
@@ -1374,7 +1373,7 @@ class ounun
         }
         $error_msg = __METHOD__. ' $class:'.$class.' ====> bad'."\n";
         //  error_php($error_msg);
-        echo '<pre style="font-size: 12px;text-align: left;padding: 10px;border: #EEEEEE 1px dashed;margin: 20px;">' . PHP_EOL;
+        echo '<pre style="font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
         echo 'error:' . $error_msg . PHP_EOL;
         debug_print_backtrace();
         echo '</pre>';

@@ -74,10 +74,10 @@ class console
             $command = static::$commands[command_c::Default_Cmd] ?? null;
         } else if ($argv_1) {
             // 系统
-            $command = static::$commands[$argv_1]??null;
+            $command = static::$commands[$argv_1] ?? null;
             // 插件
-            if(empty($command)){
-                if(isset(ounun::$addon_path["/{$argv_1}"])){
+            if (empty($command)) {
+                if (isset(ounun::$addon_path["/{$argv_1}"])) {
                     $path = ounun::$addon_path["/{$argv_1}"];
                     if (isset(ounun::$addon_route[$path]) && ($addon = ounun::$addon_route[$path]) && $apps = $addon['apps']) {
                         $command = '\\addons\\' . $apps::Addon_Tag . '\\command';
@@ -92,6 +92,7 @@ class console
             static::echo("你可以尝试下面", command_c::Color_Green);
             $command = static::$commands[command_c::Default_Cmd] ?? null;
         }
+
         // command 执行
         if ($command && class_exists($command)) {
             if (is_subclass_of($command, command::class)) {

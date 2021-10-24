@@ -7,6 +7,8 @@ declare (strict_types = 1);
 namespace ounun\addons;
 
 
+use ounun\addons\command\command_c;
+
 abstract class command
 {
     /** @var logic logic */

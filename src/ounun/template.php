@@ -212,7 +212,7 @@ class template
      * @param string|null $type 类型
      * @param string|null $type_default 模板文件所以目录(默认)
      */
-    public function __construct(bool $is_trim = false,
+    public function __construct(bool    $is_trim = false,
                                 ?string $theme = null, ?string $theme_default = null,
                                 ?string $type = null, ?string $type_default = null)
     {
@@ -357,7 +357,7 @@ class template
         foreach ($this->_try_files as $v) {
             $try .= '<div style="color: darkcyan;">' . $v . '</div>';
         }
-        echo "<div style='border: #eeeeee 1px dotted;padding: 10px;'>
+        echo "<div style='font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;'>
                     <strong style='padding:0 10px 0 0;color: red;'>TemplateFilename: </strong>{$filename} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} " . ($addon_tag ? " <strong style=\"padding:0 10px 0 10px;color: red;\">parameter \$addon_tag:</strong>{$addon_tag}" : '') . "<br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_theme} <br />
@@ -365,7 +365,7 @@ class template
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br /><br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>{$paths} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>TryFiles: </strong>{$try} <br />
+                    <strong style='padding:0 10px 0 0;color: red;'>TryFiles: </strong>{$try} 
               </div>";
         error_php("Can't find \$filename:{$filename} \$addon_tag:{$addon_tag}");
     }
