@@ -5,7 +5,9 @@
  */
 
 use ounun\addons\apps;
-use ounun\addons\command_c;
+use ounun\addons\command\command_c;
+use ounun\addons\command\help;
+use ounun\addons\command\test;
 use ounun\addons\console;
 use ounun\addons\logic;
 use ounun\cache\html;
@@ -243,7 +245,6 @@ function url_check(string $url_original = '', bool $ext_req = true, string $doma
  * @param string $note
  * @param bool $top
  */
-#[NoReturn]
 function go_confirm(string $url1, string $url2, string $note, bool $top = false): void
 {
     $top  = "\t" . ($top ? 'window.top.' : '');
@@ -264,15 +265,16 @@ function go_confirm(string $url1, string $url2, string $note, bool $top = false)
 /**
  * 页跳转
  *
- * @param string $url
+ * @param string|null $url
  * @param bool $top
  * @param int $head_code
  * @param int $delay 延时跳转(单位秒)
  */
-#[NoReturn]
-function go_url(string $url, bool $top = false, int $head_code = 302, int $delay = 0): void
+function go_url(string $url = null, bool $top = false, int $head_code = 302, int $delay = 0): void
 {
-    // error_php($url);
+    if (empty($url)) {
+        go_back();
+    }
     if ($top) {
         echo '<script type="text/javascript">' . "\n";
         echo "window.top.location.href='{$url}';\n";
@@ -292,7 +294,6 @@ function go_url(string $url, bool $top = false, int $head_code = 302, int $delay
  *
  * @param int $num
  */
-#[NoReturn]
 function go_back(int $num = -1): void
 {
     echo '<script type="text/javascript">', "\n", 'window.history.go(' . $num . ');', "\n", '</script>', "\n";
@@ -305,7 +306,6 @@ function go_back(int $num = -1): void
  * @param string $msg
  * @param string|null $url
  */
-#[NoReturn]
 function go_msg(string $msg, ?string $url = null): void
 {
     if ($url) {
@@ -346,7 +346,6 @@ function msg(string $msg, bool $outer = true, bool $meta = true, string $charset
  * @param bool $close
  * @param string $charset
  */
-#[NoReturn]
 function msg_close(string $msg, bool $close = false, string $charset = 'utf-8'): void
 {
     $rs = "\n" . 'alert(' . json_encode($msg, JSON_UNESCAPED_UNICODE) . ');' . "\n";
@@ -406,7 +405,7 @@ function error(string $msg = '', int $status = 1, mixed $data = null, ?array $ex
  */
 function error_is(mixed $result = null): bool
 {
-    if (empty($result) || !is_array($result) || !array_key_exists('status', $result) || (array_key_exists('status', $result) && $result['status'] == 0)) {
+    if (empty($result) || !is_array($result) || !array_key_exists('status', $result) || $result['status'] == 0) {
         return false;
     } else {
         return true;
@@ -492,7 +491,7 @@ function succeed_data_set(array $result, mixed $data): array
  * @param string $jsonp_callback
  * @param int $json_options 传递给json_encode的option参数
  */
-#[NoReturn] function out(mixed $data, string $type = c::Format_Json, string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
+function out(mixed $data, string $type = c::Format_Json, string $jsonp_callback = '', int $json_options = JSON_UNESCAPED_UNICODE)
 {
     if (empty($type)) {
         $type = c::Format_Json;
@@ -700,7 +699,6 @@ function data(string $filename): mixed
  *
  * @param string $msg
  */
-#[NoReturn]
 function error404(string $msg = '')
 {
     header('Cache-Control: no-cache, must-revalidate, max-age=0');
@@ -743,7 +741,6 @@ function error404(string $msg = '')
  * @param string $error_html
  * @param string $channel
  */
-#[NoReturn]
 function error_php(string $error_msg, string $error_html = '', string $channel = 'php')
 {
     // global_all
@@ -764,7 +761,7 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
         echo $error_html;
     }
     echo '<pre style="font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
-    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths], true) . PHP_EOL.PHP_EOL;
+    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths], true) . PHP_EOL . PHP_EOL;
     debug_print_backtrace();
     echo '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
@@ -1292,7 +1289,7 @@ class ounun
      */
     static public function load_class(string $class)
     {
-        $filename = static::load_class_file_exists($class);
+        $filename = static::load_class_file_exists($class, true);
         if ($filename) {
             require $filename;
         }
@@ -1328,12 +1325,18 @@ class ounun
     /**
      * 加载的类文件是否存在
      *
-     * @param $class
+     * @param string $class
+     * @param bool $is_debug
      * @return string
      */
-    static protected function load_class_file_exists($class): string
+    static public function load_class_file_exists(string $class, bool $is_debug = false): string
     {
+        if(empty($class)){
+            return '';
+        }
+
         // 类库映射
+        $class = $class[0] === '\\' ? substr($class, 1) : $class;
         if (!empty(static::$maps_class[$class])) {
             $file = self::$maps_class[$class];
             // echo "\$file:{$file}\n";
@@ -1345,25 +1348,28 @@ class ounun
         // 查找 PSR-4 prefix
         $filename = strtr($class, '\\', '/') . '.php';
         $firsts   = [explode('\\', $class)[0], ''];
+
         foreach ($firsts as $first) {
             if (isset(static::$maps_path[$first])) {
                 foreach (static::$maps_path[$first] as $v) {
                     if ('' == $v['namespace']) {
                         // print_r(static::$maps_path);
                         $file = $v['path'] . $filename;
-//                                                echo " load_class2  -> \$class1 :{$class}  \$first:{$first}   \$len:{$v['len']}\n".
-//                                                    "                \t\t\$path:{$v['path']}\n".
-//                                                    "                \t\t\$filename:{$filename}\n".
-//                                                    "                \t\t\$file1:{$file} \n";
+//                        echo " load_class2  -> \$class1 :{$class}  \$first:{$first}   \$len:{$v['len']}\n" .
+//                            "                \t\t\$path:{$v['path']}\n" .
+//                            "                \t\t\$filename:{$filename}\n" .
+//                            "                \t\t\$file1:{$file} \n";
+                        // echo $file."\n";
                         if (is_file($file)) {
                             return $file;
                         }
                     } elseif (str_starts_with($class, $v['namespace'])) {
                         $file = $v['path'] . (($v['cut'] && $v['len']) ? substr($filename, $v['len']) : $filename);
-//                                                echo " load_class  -> \$class0 :{$class}  \$first:{$first}  \$len:{$v['len']}\n".
-//                                                    "                \t\t\$path:{$v['path']}\n".
-//                                                    "                \t\t\$filename:{$filename}\n".
-//                                                    "                \t\t\$file1:{$file} \n".var_export($v,true);
+//                        echo " load_class  -> \$class0 :{$class}  \$first:{$first}  \$len:{$v['len']}\n" .
+//                            "                \t\t\$path:{$v['path']}\n" .
+//                            "                \t\t\$filename:{$filename}\n" .
+//                            "                \t\t\$file1:{$file} \n" . var_export($v, true);
+                        // echo $file."\n";
                         if (is_file($file)) {
                             return $file;
                         }
@@ -1371,12 +1377,15 @@ class ounun
                 }
             }
         }
-        $error_msg = __METHOD__. ' $class:'.$class.' ====> bad'."\n";
-        //  error_php($error_msg);
-        echo '<pre style="font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
-        echo 'error:' . $error_msg . PHP_EOL;
-        debug_print_backtrace();
-        echo '</pre>';
+
+        // 是否显示debug
+        if ($is_debug) {
+            $error_msg = __METHOD__ . ' $class:' . $class . ' ====> bad' . "\n";
+            echo '<pre style="font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
+            echo 'error:' . $error_msg . PHP_EOL;
+            debug_print_backtrace();
+            echo '</pre>';
+        }
         return '';
     }
 }
@@ -1472,7 +1481,6 @@ abstract class v
 }
 
 /** Web 开始 */
-#[NoReturn]
 function start_web()
 {
     // 开始
@@ -1534,7 +1542,7 @@ function start_web()
     // debug::header(['$url_mods' => $url_mods,'REQUEST_URI' => $_SERVER['REQUEST_URI'],'$host'=>$host], '', __FILE__, __LINE__);
 
     // URL path_find
-    $find = function (string $class_filename, array $url_mods, array $addon) {
+    $func_find = function (string $class_filename, array $url_mods, array $addon) {
         $paths = ounun::$maps_path['addons'];
         if ($paths && is_array($paths)) {
             foreach ($paths as $v) {
@@ -1555,7 +1563,7 @@ function start_web()
     };
 
     // 模块 快速路由
-    $addon_get = function ($url_mods) use ($find) {
+    $func_addon_get = function ($url_mods) use ($func_find) {
         // 修正App_Name
         $app_name = (ounun::$app_name === ounun::App_Name_Web || in_array(ounun::$app_name, ounun::App_Names))
             ? ounun::$app_name
@@ -1563,6 +1571,7 @@ function start_web()
 
         // 插件路由
         $addon_tag = '';
+        $addon     = [];
         /** @var apps $apps */
         if (isset($url_mods[1]) && (isset(ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $addon = ounun::$addon_route["{$url_mods[0]}/$url_mods[1]"]) && $apps = $addon['apps']) {
             array_shift($url_mods);
@@ -1582,7 +1591,7 @@ function start_web()
             // 插件路由api
             $class_filename = "{$addon_tag}/restful.php";
             $class_name     = "\\addons\\{$addon_tag}\\restful";
-            list($filename, $url_mods) = $find($class_filename, $url_mods, $addon);
+            list($filename, $url_mods) = $func_find($class_filename, $url_mods, $addon);
             if ($filename) {
                 return [$filename, $class_name, $addon_tag, $url_mods];
             }
@@ -1603,18 +1612,16 @@ function start_web()
         debug::header([$addon_tag, $class_filename, $class_name, $addon], '$addon', __FILE__, __LINE__);
 
         // paths
-        if ($class_filename) {
-            list($filename, $url_mods) = $find($class_filename, $url_mods, $addon);
-            if ($filename) {
-                return [$filename, $class_name, $addon_tag, $url_mods];
-            }
+        list($filename, $url_mods) = $func_find($class_filename, $url_mods, $addon);
+        if ($filename) {
+            return [$filename, $class_name, $addon_tag, $url_mods];
         }
         return ['', '', '', $url_mods];
     };
 
     // 设定 模块与方法(缓存)
     /** @var string $classname */
-    list($filename, $classname, $addon_tag, $url_mods) = $addon_get($url_mods);
+    list($filename, $classname, $addon_tag, $url_mods) = $func_addon_get($url_mods);
     debug::header(['$filename' => $filename, '$classname' => $classname, '$addon_tag' => $addon_tag, '$url_mods' => $url_mods], '', __FILE__, __LINE__);
 
     // 包括模块文件
@@ -1666,8 +1673,8 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
     }
 
     return (new console(array_merge($commands, [
-        'help' => \apps\command\help::class,
-        'test' => \apps\command\test::class,
+        'help' => help::class,
+        'test' => test::class,
     ]), $name, $version))->execute($argv);
 }
 

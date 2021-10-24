@@ -24,7 +24,7 @@ class test extends command
         // 命令的名字（"./ounun" 后面的部分）
         $this->name = 'test';
         // 运行 "php think list" 时的简短描述
-        $this->description = 'Test phpunit';
+        $this->description = '单元测试 Test phpunit';
         // 运行命令时使用 "--help" 选项时的完整命令描述
         $this->help = "Test phpunit instructions";
         // parent
