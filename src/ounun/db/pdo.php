@@ -8,7 +8,6 @@ declare (strict_types=1);
 namespace ounun\db;
 
 use Exception;
-use JetBrains\PhpStorm\Pure;
 use ounun;
 use PDOStatement;
 use Throwable;
@@ -85,10 +84,13 @@ class pdo
     protected string $_table = '';
     /** @var string 参数 */
     protected string $_option = '';
-    /** @var array 字段 */
+    /** @var array SELECT字段 */
     protected array $_fields = [];
     /** @var array 字段 */
     protected array $_fields_json = [];
+    /** @var array 字段类型 */
+    protected array $_fields_type = [];
+
     /** @var array 排序字段 */
     protected array $_order = [];
     /** @var array 分组字段 */
@@ -101,16 +103,21 @@ class pdo
     protected string $_where = '';
     /** @var string having条件 */
     protected string $_having = '';
+
     /** @var string 返回关联数据 assoc */
     protected string $_assoc = '';
+
     /** @var array 条件参数keys */
-    protected array $_bind_keys = [];
+    protected array $_bind_fields = [];
     /** @var array 条件参数 */
-    protected array $_bind_param = [];
-    /** @var array 插入时已存在数据 更新内容 */
-    protected array $_duplicate = [];
+    protected array $_bind_values = [];
+
+    /** @var array 插入时已存在数据 更新内容(数据) */
+    protected array $_duplicate_values = [];
+    /** @var array|null 插入时已存在数据 更新内容(操作 = + -) */
+    protected ?array $_duplicate_operate = null;
     /** @var string 插入时已存在数据 更新的扩展 */
-    protected string $_duplicate_ext = '';
+    protected string $_duplicate_extend_str = '';
     /** @var string 关联表 */
     protected string $_join = '';
 
@@ -190,42 +197,38 @@ class pdo
 
     /**
      * 发送一条MySQL查询
+     *
      * @param string $sql
-     * @param array|string $bind_params 条件参数
-     * @param bool $check_active
+     * @param array $bind_params 条件参数
      * @return $this
      */
-    public function query(string $sql = '', array|string $bind_params = [], bool $check_active = true): self
+    public function query(string $sql, array $bind_params = []): self
     {
-        $this->_prepare($this->quote_array($sql, $bind_params['?'] ?? [], $check_active), $check_active);
-        if ($bind_params && is_array($bind_params)) {
-            $bind_params = $this->_values_parse($bind_params);
-        } else {
-            $bind_params = [];
+        if ($bind_params && isset($bind_params['?'])) {
+            $sql = $this->quote_array($sql, $bind_params['?']);
+            unset($bind_params['?']);
         }
-        $this->_execute($bind_params);
+        $this->_prepare($sql)->_execute($bind_params);
         return $this;
     }
 
     /**
      * 发送一条MySQL查询
-     * @param string $sql
-     * @param bool $check_active
+     *
+     * @param string|null $sql
      * @return $this
      */
-    protected function _prepare(string $sql = '', bool $check_active = true): self
+    protected function _prepare(?string $sql = null): self
     {
-        if ($check_active) {
-            $this->active();
-        }
+        $this->active();
         if ($sql) {
             if ($this->_table_prefix_replace) {
                 $sql = str_replace($this->_table_prefix_search, $this->_table_prefix_replace, $sql);
             }
             $this->_last_sql = $sql;
         }
-        $this->_bind_keys = $this->_keys_parse($this->_last_sql);
-        $this->_stmt      = $this->_pdo->prepare($this->_last_sql);
+        $prepare_sql = $this->_fields_parse($this->_last_sql);
+        $this->_stmt = $this->_pdo->prepare($prepare_sql);
         $this->_query_times++;
         return $this;
     }
@@ -255,29 +258,45 @@ class pdo
     }
 
     /**
-     * @param array $data 数据
+     * 插入或替换
+     *
+     * @param array $insert_data 数据
      * @return int 替换(插入)一條或多条記錄
      */
-    public function insert(array $data): int
+    public function insert(array $insert_data): int
     {
         $duplicate = '';
-        if (($this->_duplicate || $this->_duplicate_ext) && $this->_is_replace == false) {
-            $update    = $this->_fields_update($this->_duplicate, $this->_duplicate);
-            $duplicate = 'ON DUPLICATE KEY UPDATE ' . $this->_duplicate_ext . ' ' . implode(' , ', $update);
+        if (($this->_duplicate_values || $this->_duplicate_extend_str) && $this->_is_replace == false) {
+            if ($this->_duplicate_values) {
+                $update_str = $this->_fields_update($this->_duplicate_values, $this->_duplicate_operate ?? $this->_duplicate_values);
+            } else {
+                $update_str = '';
+            }
+            $duplicate = 'ON DUPLICATE KEY UPDATE ' . $this->_duplicate_extend_str . ' ' . implode(' , ', $update_str);
         }
 
-        $fields = $this->_values_parse($this->_is_multiple ? array_shift($data) : $data);
-        $cols   = array_keys($fields);
+        $insert_first_data = $this->_is_multiple ? array_shift($insert_data) : $insert_data;
+        $insert_fields     = array_keys($insert_first_data);
 
-        $this->_prepare(($this->_is_replace ? 'REPLACE' : 'INSERT') . ' ' . $this->_option . ' INTO ' . $this->_table . ' (`' . implode('`, `', $cols) . '`) VALUES (:' . implode(', :', $cols) . ') ' . $duplicate . ';');
-        if ($this->_is_multiple) {
-            $this->_execute($fields);
-            foreach ($data as &$v) {
-                $fields = $this->_values_parse($v);
-                $this->_execute($fields);
+        $this->_prepare(($this->_is_replace ? 'REPLACE' : 'INSERT') . ' ' . $this->_option . ' INTO ' . $this->_table . ' (`' . implode('`, `', $insert_fields) . '`) VALUES (:' . implode(', :', $insert_fields) . ') ' . $duplicate . ';');
+        if ($this->_duplicate_values && $this->_is_replace == false) {
+            if ($this->_is_multiple) {
+                $this->_execute(array_merge($this->_duplicate_values, $insert_first_data));
+                foreach ($insert_data as &$data) {
+                    $this->_execute(array_merge($this->_duplicate_values, $data));
+                }
+            } else {
+                $this->_execute(array_merge($this->_duplicate_values, $insert_first_data));
             }
         } else {
-            $this->_execute($fields);
+            if ($this->_is_multiple) {
+                $this->_execute($insert_first_data);
+                foreach ($insert_data as &$data) {
+                    $this->_execute($data);
+                }
+            } else {
+                $this->_execute($insert_first_data);
+            }
         }
         return (int)$this->_pdo->lastInsertId();
     }
@@ -286,14 +305,14 @@ class pdo
      * @param array $update_data
      * @param array $update_operate
      * @param string $where_str
-     * @param array $where_bind
+     * @param array $where_params
      * @param int $limit
      * @return int
      */
-    public function update(array $update_data, array $update_operate = [], string $where_str = '', array $where_bind = [], int $limit = 1): int
+    public function update(array $update_data, array $update_operate = [], string $where_str = '', array $where_params = [], int $limit = 1): int
     {
-        $fields = $this->_values_parse($this->_is_multiple ? array_shift($update_data) : $update_data);
-        $update = $this->_fields_update($fields, $update_operate);
+        $first_data = $this->_is_multiple ? array_shift($update_data) : $update_data;
+        $update_str = $this->_fields_update($first_data, $update_operate);
 
         if ($where_str) {
             $this->where($where_str)->limit($limit);
@@ -301,55 +320,42 @@ class pdo
             $this->limit($limit);
         }
 
-        $this->_prepare('UPDATE ' . $this->_option . ' ' . $this->_table . ' SET ' . implode(', ', $update) . ' ' . $this->_where . ' ' . $this->_limit . ' ;');
+        $this->_prepare('UPDATE ' . $this->_option . ' ' . $this->_table . ' SET ' . implode(', ', $update_str) . ' ' . $this->_where . ' ' . $this->_limit . ' ;');
 
         if ($this->_is_multiple) {
-            if ($where_bind && is_array($where_bind)) {
-                if (array_keys($where_bind) === range(0, count($where_bind) - 1)) {
-                    // echo __FILE__.':'.__LINE__."\n";
-                    $i                 = 0;
-                    $where_bind_fields = $this->_values_parse($where_bind[$i]);
-                    $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
-                    foreach ($update_data as &$v) {
+            if ($where_params && is_array($where_params)) {
+                if (array_keys($where_params) === range(0, count($where_params) - 1)) {
+                    $i = 0;
+                    $this->_execute(array_merge($this->_bind_values, $first_data, $where_params[$i]));
+                    foreach ($update_data as &$data) {
                         $i++;
-                        $where_bind_fields = $this->_values_parse($where_bind[$i]);
-                        $fields            = $this->_values_parse($v);
-                        $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
+                        $this->_execute(array_merge($this->_bind_values, $data, $where_params[$i]));
                     }
                 } else {
-                    // echo __FILE__.':'.__LINE__."\n";
-                    $where_bind_fields = $this->_values_parse($where_bind);
-                    $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
-                    foreach ($update_data as &$v) {
-                        $where_bind_fields = $this->_values_parse($where_bind);
-                        $fields            = $this->_values_parse($v);
-                        $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
+                    $this->_execute(array_merge($this->_bind_values, $first_data, $where_params));
+                    foreach ($update_data as &$data) {
+                        $this->_execute(array_merge($this->_bind_values, $data, $where_params));
                     }
                 }
             } else {
-                // echo __FILE__.':'.__LINE__."\n";
-                $this->_execute(array_merge($this->_bind_param, $fields));
-                foreach ($update_data as &$v) {
-                    $fields = $this->_values_parse($v);
-                    $this->_execute(array_merge($this->_bind_param, $fields));
+                $this->_execute(array_merge($this->_bind_values, $first_data));
+                foreach ($update_data as &$data) {
+                    $this->_execute(array_merge($this->_bind_values, $data));
                 }
             }
         } else {
-            if ($where_bind && is_array($where_bind)) {
-                if (array_keys($where_bind) === range(0, count($where_bind) - 1)) {
+            if ($where_params && is_array($where_params)) {
+                if (array_keys($where_params) === range(0, count($where_params) - 1)) {
                     // echo __FILE__.':'.__LINE__."\n";
-                    foreach ($where_bind as $where_bind_v) {
-                        $where_bind_fields = $this->_values_parse($where_bind_v);
-                        $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
+                    foreach ($where_params as &$where_params_v) {
+                        $this->_execute(array_merge($this->_bind_values, $first_data, $where_params_v));
                     }
                 } else {
                     // echo __FILE__.':'.__LINE__."\n";
-                    $where_bind_fields = $this->_values_parse($where_bind);
-                    $this->_execute(array_merge($this->_bind_param, $fields, $where_bind_fields));
+                    $this->_execute(array_merge($this->_bind_values, $first_data, $where_params));
                 }
             } else {
-                // echo __FILE__.':'.__LINE__."\n";
-                $this->_execute(array_merge($this->_bind_param, $fields));
+                $this->_execute(array_merge($this->_bind_values, $first_data));
             }
         }
         return $this->_stmt->rowCount();
@@ -364,7 +370,7 @@ class pdo
         if (null == $this->_stmt || $force_prepare) {
             $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
             $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ;')
-                ->_execute($this->_bind_param);
+                ->_execute($this->_bind_values);
         }
         return $this->_stmt->columnCount();
     }
@@ -445,7 +451,7 @@ class pdo
         if (null == $this->_stmt || $force_prepare) {
             $fields = ($this->_fields && is_array($this->_fields)) ? implode(',', $this->_fields) : '*';
             $this->_prepare('SELECT ' . $this->_distinct . ' ' . $fields . ' FROM ' . $this->_table . ' ' . $this->_join . ' ' . $this->_where . ' ' . $this->_group_get() . ' ' . $this->_having . ' ' . $this->_order_get() . ' ' . $this->_limit . ';')
-                ->_execute($this->_bind_param);
+                ->_execute($this->_bind_values);
         }
     }
 
@@ -475,11 +481,11 @@ class pdo
     {
         if ($limit === 0) {
             $this->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ';')
-                ->_execute($this->_bind_param);
+                ->_execute($this->_bind_values);
         } else {
             $this->limit($limit)
                 ->_prepare('DELETE ' . $this->_option . ' FROM ' . $this->_table . ' ' . $this->_where . ' ' . $this->_limit . ';')
-                ->_execute($this->_bind_param);
+                ->_execute($this->_bind_values);
         }
         return $this->_stmt->rowCount(); // 取得前一次 MySQL 操作所影响的记录行数
     }
@@ -535,14 +541,16 @@ class pdo
     /**
      * 插入时已存在数据
      *
-     * @param array $duplicate 更新内容   [字段=>操作]
-     * @param string $duplicate_ext 更新的扩展
+     * @param array $duplicate_values 更新内容   [字段=>操作]
+     * @param array|null $duplicate_operate
+     * @param string $extend_str 更新的扩展
      * @return static
      */
-    public function duplicate(array $duplicate, string $duplicate_ext = ''): static
+    public function duplicate(array $duplicate_values, ?array $duplicate_operate = null, string $extend_str = ''): static
     {
-        $this->_duplicate     = $duplicate;
-        $this->_duplicate_ext = $duplicate_ext;
+        $this->_duplicate_values     = $duplicate_values;
+        $this->_duplicate_operate    = $duplicate_operate;
+        $this->_duplicate_extend_str = $extend_str;
         return $this;
     }
 
@@ -564,6 +572,8 @@ class pdo
     }
 
     /**
+     * 返回段字 - 查询
+     *
      * @param string $field
      * @return static
      */
@@ -574,6 +584,24 @@ class pdo
     }
 
     /**
+     * 设定段字类型
+     *
+     * @param array $field_type
+     * @return static
+     */
+    public function field_type(array $field_type): static
+    {
+        foreach ($field_type as $field => $v) {
+            if (is_array($v) && $v['type']) {
+                $this->_fields_type[$field] = $v;
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * 返回段字中的json字段 - 查询
+     *
      * @param array $fields
      * @return static
      */
@@ -589,6 +617,8 @@ class pdo
     }
 
     /**
+     * 返回关联数据索引字段 - 查询
+     *
      * @param string $assoc 设定返回关联数据 assoc
      * @return static
      */
@@ -599,6 +629,8 @@ class pdo
     }
 
     /**
+     * 关连表
+     *
      * @param string $inner_join
      * @param string $on
      * @return static
@@ -610,6 +642,8 @@ class pdo
     }
 
     /**
+     * 全关连
+     *
      * @param string $inner_join
      * @param string $on
      * @param bool $is_outer
@@ -652,24 +686,23 @@ class pdo
      * 条件
      *
      * @param string $where_str 条件
-     * @param array $bind_params 条件参数
+     * @param array $where_params 条件参数
      * @return static
      */
-    public function where(string $where_str = '', array $bind_params = []): static
+    public function where(string $where_str = '', array $where_params = []): static
     {
         if ($where_str) {
-            if (isset($bind_params['?'])) {
-                $where_str = $this->quote_array($where_str, $bind_params['?']);
-                unset($bind_params['?']);
+            if (isset($where_params['?'])) {
+                $where_str = $this->quote_array($where_str, $where_params['?']);
+                unset($where_params['?']);
             }
             if ($this->_where) {
                 $this->_where = $this->_where . ' ' . $where_str;
             } else {
                 $this->_where = 'WHERE ' . $where_str;
             }
-            if ($bind_params && is_array($bind_params)) {
-                $bind_params       = $this->_values_parse($bind_params);
-                $this->_bind_param = array_merge($this->_bind_param, $bind_params);
+            if ($where_params && is_array($where_params)) {
+                $this->_bind_values = array_merge($this->_bind_values, $where_params);
             }
         }
         return $this;
@@ -679,20 +712,23 @@ class pdo
      * having条件
      *
      * @param string $having_str 条件
-     * @param array $bind_params 条件参数
+     * @param array $having_params 条件参数
      * @return static
      */
-    public function having(string $having_str = '', array $bind_params = []): static
+    public function having(string $having_str = '', array $having_params = []): static
     {
         if ($having_str) {
+            if (isset($having_params['?'])) {
+                $having_str = $this->quote_array($having_str, $having_params['?']);
+                unset($having_params['?']);
+            }
             if ($this->_having) {
                 $this->_having = $this->_having . ' ' . $having_str;
             } else {
                 $this->_having = 'HAVING ' . $having_str;
             }
-            if ($bind_params && is_array($bind_params)) {
-                $bind_params       = $this->_values_parse($bind_params);
-                $this->_bind_param = array_merge($this->_bind_param, $bind_params);
+            if ($having_params && is_array($having_params)) {
+                $this->_bind_values = array_merge($this->_bind_values, $having_params);
             }
         }
         return $this;
@@ -766,9 +802,9 @@ class pdo
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param float $default_value 默认值
-     * @return float
+     * @return float|int
      */
-    public function sum_value(string $field, string $alias = '`sum`', float $default_value = 0): float
+    public function sum_value(string $field, string $alias = '`sum`', float $default_value = 0): float|int
     {
         return (float)$this->sum($field, $alias)->column_value($alias, $default_value);
     }
@@ -791,9 +827,9 @@ class pdo
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param float $default_value 默认值
-     * @return float
+     * @return float|int
      */
-    public function min_value(string $field, string $alias = '`min`', float $default_value = 0): float
+    public function min_value(string $field, string $alias = '`min`', float $default_value = 0): float|int
     {
         return $this->min($field, $alias)->column_value($alias, $default_value);
     }
@@ -816,9 +852,9 @@ class pdo
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param float $default_value 默认值
-     * @return float
+     * @return float|int
      */
-    public function max_value(string $field, string $alias = '`max`', float $default_value = 0)
+    public function max_value(string $field, string $alias = '`max`', float $default_value = 0): float|int
     {
         return $this->max($field, $alias)->column_value($alias, $default_value);
     }
@@ -841,9 +877,9 @@ class pdo
      * @param string $field 字段名
      * @param string $alias 查询别名
      * @param float $default_value 默认值
-     * @return float
+     * @return float|int
      */
-    public function avg_value(string $field, string $alias = '`avg`', float $default_value = 0)
+    public function avg_value(string $field, string $alias = '`avg`', float $default_value = 0): float|int
     {
         return $this->avg($field, $alias)->column_value($alias, $default_value);
     }
@@ -998,7 +1034,7 @@ class pdo
      * @param int $param 值数据类型 PDO::PARAM_INT
      * @return bool
      */
-    public function exists(string $field, $value, int $param = \PDO::PARAM_STR): bool
+    public function exists(string $field, mixed $value, int $param = \PDO::PARAM_STR): bool
     {
         if ($field) {
             $k  = $this->_param2types($param);
@@ -1032,12 +1068,13 @@ class pdo
     }
 
     /**
+     * 为 SQL 查询里的字符串添加引号(数组)
+     *
      * @param string $sql
      * @param array|string $data
-     * @param bool $check_active
      * @return string|null
      */
-    public function quote_array(string $sql, array|string $data = [], bool $check_active = true): string|null
+    public function quote_array(string $sql, array|string $data = []): string|null
     {
         if (str_contains($sql, 'i:?')) {
             $data2 = [];
@@ -1083,10 +1120,10 @@ class pdo
     protected function _types2param(string $types = ''): int
     {
         return match ($types) {
-            'i' => \PDO::PARAM_INT,
+            db::Int, db::Float, 'i' => \PDO::PARAM_INT,
+            db::Bool, 'bool' => \PDO::PARAM_BOOL,
             'b' => \PDO::PARAM_LOB,
             'null' => \PDO::PARAM_NULL,
-            'bool' => \PDO::PARAM_BOOL,
             default => \PDO::PARAM_STR,
         };
     }
@@ -1109,104 +1146,102 @@ class pdo
 
     /**
      * @param string $sql
-     * @return array
+     * @return string
      */
-    protected function _keys_parse(string $sql): array
+    protected function _fields_parse(string $sql): string
     {
-        $splits = preg_split('/(:[A-Za-z0-9_]+)\b/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $result = [];
+        $splits  = preg_split('/((bool)?i?s?\-?\d*:[A-Za-z0-9_]+)/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $result  = [];
+        $search  = [];
+        $replace = [];
         foreach ($splits as $v) {
-            if ($v[0] == ':') {
-                $key          = substr($v, 1);
-                $result[$key] = $key;
+            if (str_contains($v, ':')) {
+                list($type, $field) = explode(':', $v);
+                if ($field && empty($result[$field])) {
+                    if (str_contains($type, '-')) {
+                        list($type2, $length) = explode('-', $type);
+                        $type_param = $this->_types2param($type2);
+                        if (\PDO::PARAM_STR == $type_param) {
+                            $result[$field] = [
+                                'type'       => $type2,
+                                'type_param' => $this->_types2param($type2),
+                                'length'     => (int)$length
+                            ];
+                        }
+                    } else {
+                        $result[$field] = [
+                            'type'       => $type,
+                            'type_param' => $this->_types2param($type)
+                        ];
+                    }
+                    $search[]  = $v;
+                    $replace[] = ":{$field}";
+                }
             }
         }
-        return array_values($result);
+        foreach ($result as $field => $value) {
+            $value2      = $this->_fields_type[$field] ?? $value;
+            $type_param2 = $this->_types2param($value2['type']);
+            if ($type_param2 == $value['type_param']) {
+                $value2['type_param'] = $type_param2;
+                if (\PDO::PARAM_STR == $type_param2 && isset($value['length']) && $value['length'] > 0) {
+                    $value2['length'] = $value['length'];
+                }
+                $this->_fields_type[$field] = $value2;
+                $this->_bind_fields[]       = $field;
+                if (!isset($this->_fields_type[$field])) {
+                    $this->_fields_type[$field] = $value2;
+                }
+            } else {
+                error_php("SQL:Type error Table:{$this->_table} \$fields[{$field}] {$value2['type']}!=" . $this->_param2types($value['type_param']), '', 'mysql');
+            }
+        }
+        return str_replace($search, $replace, $sql);
     }
 
     /**
      * @param array $data
-     * @return array
-     */
-    #[Pure]
-    protected function _values_parse(array $data): array
-    {
-        $fields = [];
-        if ($data) {
-            foreach ($data as $col => &$val) {
-                if (':' === $col[0]) {
-                    list($type, $field) = explode(':', $col);
-                    $fields[$field] = [
-                        'field' => ':' . $field,
-                        'value' => $val,
-                        'type'  => $this->_types2param($type),
-                    ];
-                } elseif (isset($col[1]) && ':' === $col[1]) {
-                    list($type, $field) = explode(':', $col);
-                    $fields[$field] = [
-                        'field' => ':' . $field,
-                        'value' => $val,
-                        'type'  => $this->_types2param($type),
-                    ];
-                } elseif (isset($col[1]) && '-' === $col[1]) {
-                    list($type_length, $field) = explode(':', $col);
-                    list($type, $length) = explode('-', $type_length);
-                    $fields[$field] = [
-                        'field'  => ':' . $field,
-                        'value'  => $val,
-                        'type'   => $this->_types2param($type),
-                        'length' => $length
-                    ];
-                } else {
-                    $fields[$col] = [
-                        'field' => ':' . $col,
-                        'value' => $val,
-                        'type'  => $this->_types2param(''),
-                    ];
-                }
-            }
-        }
-        return $fields;
-    }
-
-    /**
-     * @param array $fields_data
      * @param array $operate
      * @return array
      */
-    protected function _fields_update(array &$fields_data, array &$operate = []): array
+    protected function _fields_update(array &$data, array $operate = []): array
     {
         $update = [];
-        foreach ($fields_data as $col => $val) {
-            if (isset($operate[$col]) && $operate[$col] === self::Update_Add) {
-                $update[] = "`$col` = `{$col}` + :{$col} ";
-            } elseif (isset($operate[$col]) && $operate[$col] === self::Update_Cut) {
-                $update[] = "`$col` = `{$col}` - :{$col} ";
+        foreach ($data as $field => $val) {
+            if (isset($operate[$field]) && $operate[$field] === self::Update_Add) {
+                $update[] = "`$field` = `{$field}` + :{$field} ";
+            } elseif (isset($operate[$field]) && $operate[$field] === self::Update_Cut) {
+                $update[] = "`$field` = `{$field}` - :{$field} ";
             } else {
-                $update[] = "`{$col}` = :{$col} ";
+                $update[] = "`{$field}` = :{$field} ";
             }
         }
         return $update;
     }
 
     /**
-     * @param array $fields
+     * 执行
+     *
+     * @param array $data
      */
-    protected function _execute(array $fields = [])
+    protected function _execute(array $data = [])
     {
-        if ($fields) {
-            foreach ($this->_bind_keys as $key) {
-                $v = $fields[$key] ?? null;
-                if ($v) {
-                    // $i++; echo "{$i} -> field:{$v['field']}, value:{$v['value']}, type:{$v['type']}\n";
-                    if (\PDO::PARAM_STR == $v['type'] && isset($v['length'])) {
-                        $this->_stmt->bindParam($v['field'], $v['value'], $v['type'], $v['length']);
-                    } else {
-                        $this->_stmt->bindParam($v['field'], $v['value'], $v['type']);
+        if ($data) {
+            foreach ($this->_bind_fields as $field) {
+                $types = $this->_fields_type[$field];
+                if ($types) {
+                    if (isset($data[$field])) {
+                        if (\PDO::PARAM_STR == $types['type_param'] && null === $data[$field]) {
+                            $this->_stmt->bindValue(':' . $field, null, \PDO::PARAM_NULL);
+                        } else if (\PDO::PARAM_STR == $types['type_param'] && isset($types['length']) && is_integer($types['length']) && $types['length'] > 1) {
+                            $this->_stmt->bindParam(':' . $field, $data[$field], \PDO::PARAM_STR, $types['length']);
+                        } else {
+                            $this->_stmt->bindValue(':' . $field, $data[$field], $types['type_param']);
+                        }
                     }
                 } else {
                     $this->_stmt->debugDumpParams();
-                    error_php("SQL:Can't find \$fields[{$key}] ", '', 'mysql');
+                    error_php("SQL:Can't find Table:{$this->_table} fields:{$field}  type:null ", '', 'mysql');
                 }
             }
         }
@@ -1216,9 +1251,9 @@ class pdo
         } catch (Exception $e) {
             $this->_stmt->debugDumpParams();
             error_php("Sql Error:" . $e->getMessage() .
-                "\n\tlast_sql:" . $this->_last_sql . "\n" .
-                "\tbind_param:" . json_encode_unescaped($this->_bind_param) . "\n" .
-                "\tfields:" . json_encode_unescaped($fields) . "\n", '', 'mysql');
+                "\n\tlast_sql :" . $this->_last_sql . "\n" .
+                "\tbind_values:" . json_encode_unescaped($this->_bind_values) . "\n" .
+                "\tfields     :" . json_encode_unescaped($data) . "\n", '', 'mysql');
         }
     }
 
@@ -1229,21 +1264,24 @@ class pdo
     {
         $this->_stmt = null;
 
-        $this->_option        = '';
-        $this->_distinct      = '';
-        $this->_fields        = [];
-        $this->_fields_json   = [];
-        $this->_order         = [];
-        $this->_group         = [];
-        $this->_limit         = '';
-        $this->_where         = '';
-        $this->_having        = '';
-        $this->_assoc         = '';
-        $this->_bind_keys     = [];
-        $this->_bind_param    = [];
-        $this->_duplicate     = [];
-        $this->_duplicate_ext = '';
-        $this->_join          = '';
+        $this->_option      = '';
+        $this->_distinct    = '';
+        $this->_fields      = [];
+        $this->_fields_json = [];
+        $this->_fields_type = [];
+        $this->_order       = [];
+        $this->_group       = [];
+        $this->_limit       = '';
+        $this->_where       = '';
+        $this->_having      = '';
+        $this->_assoc       = '';
+        $this->_bind_fields = [];
+        $this->_bind_values = [];
+
+        $this->_duplicate_values     = [];
+        $this->_duplicate_operate    = [];
+        $this->_duplicate_extend_str = '';
+        $this->_join                 = '';
 
         $this->_is_multiple = false;
         $this->_is_replace  = false;

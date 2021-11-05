@@ -127,30 +127,30 @@ class template
     static public function assign_array_get(): array
     {
         return array_merge([
-            '{$page_url}'         => ounun::$page_url,      // 等于"{$lang}/{$app_path}/{$page_file_path}"
-            '{$page_file}'        => ounun::$page_file_path,// 基础path 等于"{'/addon_tag/addon_view'=>$url}/{$path}"
+            '{$page_url}'      => ounun::$page_url,      // 等于"{$lang}/{$app_path}/{$page_file_path}"
+            '{$page_file}'     => ounun::$page_file_path,// 基础path 等于"{'/addon_tag/addon_view'=>$url}/{$path}"
             // 根目录/面面路径
-            '{$page_www}'         => ounun::$page_www,
-            '{$page_wap}'         => ounun::$page_wap,
-            '{$page_mip}'         => ounun::$page_mip,
+            '{$page_www}'      => ounun::$page_www,
+            '{$page_wap}'      => ounun::$page_wap,
+            '{$page_mip}'      => ounun::$page_mip,
             // 根目录
-            '{$root_www}'         => ounun::$root_www,
-            '{$root_wap}'         => ounun::$root_wap,
-            '{$root_mip}'         => ounun::$root_mip,
-            '{$root_api}'         => ounun::$root_api,
+            '{$root_www}'      => ounun::$root_www,
+            '{$root_wap}'      => ounun::$root_wap,
+            '{$root_mip}'      => ounun::$root_mip,
+            '{$root_api}'      => ounun::$root_api,
             // static
-            '{$root_res}'         => ounun::$url_res,
-            '{$root_upload}'      => ounun::$url_upload, '/public/uploads' => ounun::$url_upload,
-            '{$root_static}'      => ounun::$url_static, '/public/static' => ounun::$url_static,
-            '{$root_static_g}'    => ounun::$url_static_g, '/public/static_g' => ounun::$url_static_g,
-            // seo_site
-            '{$site_name}'        => static::$site_tkd_seo['sitename'],
-            '{$site_keywords}'    => static::$site_tkd_seo['keywords'],
-            '{$site_description}' => static::$site_tkd_seo['description'],
-            '{$site_slogan}'      => static::$site_tkd_seo['slogan'],
+            '{$root_res}'      => ounun::$url_res,
+            '{$root_upload}'   => ounun::$url_upload, '/public/uploads' => ounun::$url_upload,
+            '{$root_static}'   => ounun::$url_static, '/public/static' => ounun::$url_static,
+            '{$root_static_g}' => ounun::$url_static_g, '/public/static_g' => ounun::$url_static_g,
+            // site
+            '{$site_name}'     => static::$site_tkd_seo['sitename'],
+//            '{$site_keywords}'    => static::$site_tkd_seo['keywords'],
+//            '{$site_description}' => static::$site_tkd_seo['description'],
+//            '{$site_slogan}'      => static::$site_tkd_seo['slogan'],
             // app_name
-            '{$app_name}'         => ounun::$app_name,
-            '{$app_domain}'       => ounun::$app_domain,
+            '{$app_name}'      => ounun::$app_name,
+            '{$app_domain}'    => ounun::$app_domain,
         ], static::$assign_array);
     }
 
@@ -351,21 +351,21 @@ class template
     {
         $paths = '';
         foreach (static::$paths as $v) {
-            $paths .= '<div style="color: darkcyan;"><strong style="color: blue;">type</strong>:' . $v['type'] . ' <strong <strong style="color: blue;">path</strong>:' . $v['path'] . '</div>';
+            $paths .= '<div style="color: darkcyan;"><strong style="color: blue;">type</strong>:' . $v['type'] . ' <strong style="color: blue;">path</strong>:' . $v['path'] . '</div>';
         }
         $try = '';
         foreach ($this->_try_files as $v) {
             $try .= '<div style="color: darkcyan;">' . $v . '</div>';
         }
-        echo "<div style='font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;'>
+        echo "<div style='font-size: 12px;text-align: left;padding:10px;margin: 20px;border: #EEEEEE 1px dashed;'>
                     <strong style='padding:0 10px 0 0;color: red;'>TemplateFilename: </strong>{$filename} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} " . ($addon_tag ? " <strong style=\"padding:0 10px 0 10px;color: red;\">parameter \$addon_tag:</strong>{$addon_tag}" : '') . "<br />
+                    <strong style='padding:0 10px 0 0;color: red;'>AddonTag: </strong>{$this->_addon_tag} " . ($addon_tag ? " <strong style=\"padding:0 10px 0 10px;color: red;\">parameter</strong> <strong style=\"padding:0 10px 0 10px;color: blue;\">\$addon_tag</strong>:{$addon_tag}" : '') . "<br />
                     <strong style='padding:0 10px 0 0;color: red;'>Style: </strong>{$this->_theme} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dir_Current: </strong>{$this->_current_path} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type: </strong>{$this->_type} <br />
                     <strong style='padding:0 10px 0 0;color: red;'>Type_Default: </strong>{$this->_type_default} <br /><br />
                     <strong style='padding:0 10px 0 0;color: red;'>Dirs: </strong>{$paths} <br />
-                    <strong style='padding:0 10px 0 0;color: red;'>TryFiles: </strong>{$try} 
+                    <strong style='padding:0 10px 0 0;color: red;'>TryFiles: </strong>{$try}
               </div>";
         error_php("Can't find \$filename:{$filename} \$addon_tag:{$addon_tag}");
     }

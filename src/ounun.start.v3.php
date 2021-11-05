@@ -206,9 +206,9 @@ function url_to_mod(string $uri): array
  *
  * @param string $url_original 网址
  * @param bool $ext_req 网址可否带参加数
- * @param string $domain 是否捡查 域名
+ * @param string|null $domain 是否捡查 域名
  */
-function url_check(string $url_original = '', bool $ext_req = true, string $domain = '')
+function url_check(string $url_original = '', bool $ext_req = true, ?string $domain = null)
 {
     // URL去重
     $url       = explode('?', $_SERVER['REQUEST_URI'], 2);
@@ -833,22 +833,16 @@ function environment(): string
  */
 function global_all(string $key, mixed $default = null, ?string $sub_key = null): mixed
 {
-    $ret = $default;
     if ($key && isset(ounun::$global[$key])) {
         if (is_null($sub_key)) {
-            $ret = ounun::$global[$key];
+            return ounun::$global[$key];
         }
         $value = ounun::$global[$key];
         if (is_array($value) && isset($value[$sub_key])) {
-            $ret = $value[$sub_key];
+            return $value[$sub_key];
         }
     }
-    if (is_null($default)) {
-        return $ret;
-    } elseif (empty($ret)) {
-        return $default;
-    }
-    return $ret;
+    return $default;
 }
 
 /**
@@ -1274,11 +1268,13 @@ class ounun
      */
     static public function load_helper(string $path)
     {
-        if (is_file($path . 'app/helper.php')) {
-            require $path . 'app/helper.php';
+        $helper_file = $path . 'app/helper.php';
+        if (is_file($helper_file)) {
+            require $helper_file;
         }
-        if (static::$app_name && is_file($path . 'app/helper.' . static::$app_name . '.php')) {
-            require $path . 'app/helper.' . static::$app_name . '.php';
+        $helper_file_app = $path . 'app/helper.' . static::$app_name . '.php';
+        if (static::$app_name && is_file($helper_file_app)) {
+            require $helper_file_app;
         }
     }
 
@@ -1331,7 +1327,7 @@ class ounun
      */
     static public function load_class_file_exists(string $class, bool $is_debug = false): string
     {
-        if(empty($class)){
+        if (empty($class)) {
             return '';
         }
 
@@ -1464,7 +1460,10 @@ abstract class v
      *
      * @param string $method
      */
-    abstract protected function _initialize(string $method);
+    protected function _initialize(string $method)
+    {
+
+    }
 
     /**
      * 默认 首页
