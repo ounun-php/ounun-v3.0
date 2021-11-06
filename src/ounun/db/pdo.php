@@ -1120,10 +1120,11 @@ class pdo
     protected function _types2param(string $types = ''): int
     {
         return match ($types) {
-            db::Int, db::Float, 'i' => \PDO::PARAM_INT,
+            db::Int,  'i' => \PDO::PARAM_INT,
             db::Bool, 'bool' => \PDO::PARAM_BOOL,
             'b' => \PDO::PARAM_LOB,
             'null' => \PDO::PARAM_NULL,
+           // db::Float => \PDO::PARAM_STR,
             default => \PDO::PARAM_STR,
         };
     }
@@ -1150,7 +1151,7 @@ class pdo
      */
     protected function _fields_parse(string $sql): string
     {
-        $splits  = preg_split('/((bool)?i?s?\-?\d*:[A-Za-z0-9_]+)/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $splits  = preg_split('/((bool)?f?i?s?\-?\d*:[A-Za-z0-9_]+)/', $sql, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $result  = [];
         $search  = [];
         $replace = [];
