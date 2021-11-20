@@ -107,10 +107,10 @@ class html extends driver
      * 读取缓存
      * @access public
      * @param string $name 缓存变量名
-     * @param mixed $default 默认值
+     * @param mixed|int $default 默认值
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
+    public function get(string $key, mixed $default = 0, bool $add_prefix = true, array $options = []):string
     {
         $filename = $this->key_get($key);
         if (!is_file($filename)) {
@@ -125,7 +125,7 @@ class html extends driver
             }
             $this->expire = $expire;
             $content      = substr($content, 32);
-            if ($this->options['data_compress'] && function_exists('gzcompress')) {
+            if ($this->_options['data_compress'] && function_exists('gzcompress')) {
                 //启用数据压缩
                 $content = gzuncompress($content);
             }
@@ -136,10 +136,6 @@ class html extends driver
         }
     }
 
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
-    {
-        // TODO: Implement set() method.
-    }
     /**
      * 写入缓存
      * @access public
@@ -151,7 +147,7 @@ class html extends driver
     public function set2($name, $value, $expire = null)
     {
         if (is_null($expire)) {
-            $expire = $this->options['expire'];
+            $expire = $this->_options['expire'];
         }
         if ($expire instanceof \DateTime) {
             $expire = $expire->getTimestamp() - time();
@@ -161,7 +157,7 @@ class html extends driver
             $first = true;
         }
         $data = serialize($value);
-        if ($this->options['data_compress'] && function_exists('gzcompress')) {
+        if ($this->_options['data_compress'] && function_exists('gzcompress')) {
             //数据压缩
             $data = gzcompress($data, 3);
         }
@@ -334,49 +330,17 @@ class html extends driver
         return file_put_contents($filename, '<?php ' . "return {$str};\n");
     }
 
-
-    public function delete(string $key, bool $add_prefix = true)
+    public function set(string $key, mixed $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
     {
-        // TODO: Implement delete() method.
+        // TODO: Implement set() method.
     }
 
-    public function key_set($key)
-    {
-        // TODO: Implement key() method.
-    }
-
-    public function val($val)
-    {
-        // TODO: Implement val() method.
-    }
-
-    public function get2($sub_key)
-    {
-        // TODO: Implement get2() method.
-    }
-
-
-    public function delete2()
-    {
-        // TODO: Implement delete2() method.
-    }
-
-    public function filename()
-    {
-        // TODO: Implement filename() method.
-    }
-
-    public function mod()
-    {
-        // TODO: Implement mod() method.
-    }
-
-    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement incrby() method.
     }
 
-    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement decrby() method.
     }
@@ -391,17 +355,22 @@ class html extends driver
         // TODO: Implement expire() method.
     }
 
-    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    public function delete(string $key, bool $add_prefix = true): int
+    {
+        // TODO: Implement delete() method.
+    }
+
+    public function hash_hget(string $key, string $field, ?string $default = null, bool $add_prefix = true): ?string
     {
         // TODO: Implement hash_hget() method.
     }
 
-    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
+    public function hash_hset(string $key, string $field, string $value, bool $add_prefix = true): int|bool
     {
         // TODO: Implement hash_hset() method.
     }
 
-    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement hash_hincrby() method.
     }
@@ -411,7 +380,7 @@ class html extends driver
         // TODO: Implement hash_hexists() method.
     }
 
-    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true): bool|int
     {
         // TODO: Implement hash_hdel() method.
     }
@@ -426,7 +395,7 @@ class html extends driver
         // TODO: Implement list_lpush() method.
     }
 
-    public function list_lpop(string $key = '', bool $add_prefix = true)
+    public function list_lpop(string $key = '', bool $add_prefix = true): mixed
     {
         // TODO: Implement list_lpop() method.
     }
@@ -436,7 +405,7 @@ class html extends driver
         // TODO: Implement list_rpush() method.
     }
 
-    public function list_rpop(string $key = '', bool $add_prefix = true)
+    public function list_rpop(string $key = '', bool $add_prefix = true): mixed
     {
         // TODO: Implement list_rpop() method.
     }

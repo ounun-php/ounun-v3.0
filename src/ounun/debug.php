@@ -360,7 +360,7 @@ class debug
             $ret = 1;
         }
         if (empty($ret)) {
-            error_php('debug write error');
+            error_php('debug write error $filename:'.$filename);
         }
         return $this;
     }

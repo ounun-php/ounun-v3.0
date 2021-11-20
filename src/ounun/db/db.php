@@ -101,7 +101,7 @@ class db
     }
 
 
-    static private function json_encode($value)
+    static private function json_encode($value): ?string
     {
         if (is_string($value)) {
             if (strtolower($value) === "null" || "" === $value || "''" === $value || '""' === $value) {
@@ -125,7 +125,6 @@ class db
      * @param array $result
      * @return bool true:新增 false:更新
      */
-    #[Pure]
     static public function is_insert(array $result): bool
     {
         $data = succeed_data($result);
@@ -141,7 +140,6 @@ class db
      * @param array $result
      * @return bool true:自增长新增 false:非自增长
      */
-    #[Pure]
     static public function is_auto_increment(array $result): bool
     {
         $data = succeed_data($result);
@@ -157,7 +155,6 @@ class db
      * @param array $result
      * @return bool true:新增 false:更新
      */
-    #[Pure]
     static public function is_update(array $result): bool
     {
         $data = succeed_data($result);
@@ -240,7 +237,6 @@ class db
      * @param array $result
      * @return int|null 自增长插入ID
      */
-    #[Pure]
     static public function insert_auto_increment_id(array $result): ?int
     {
         $data = succeed_data($result);
@@ -320,6 +316,7 @@ class db
         $data_format = static::format($data, $field_info, true);
 
         list($where_str, $where_paras) = $where ?? static::where_str_paras($primary_data, $primary_data);
+
         $modify_cc = $db->table($table)->where($where_str, $where_paras)->update($data_format);
         return succeed(array_merge($primary_data, ['_type_' => 'update', '_modify_cc_' => $modify_cc]));
     }
@@ -382,23 +379,23 @@ class db
                 if (isset($where_data[$field])) {
                     switch ($operation) {
                         case '=':
-                            $where_str[]         = " `{$field}` =:{$field} ";
+                            $where_str[]         = " `{$field}` = :{$field} ";
                             $where_paras[$field] = $where_data[$field];
                             break;
                         case '>':
-                            $where_str[]         = " `{$field}` >:{$field} ";
+                            $where_str[]         = " `{$field}` > :{$field} ";
                             $where_paras[$field] = $where_data[$field];
                             break;
                         case '>=':
-                            $where_str[]         = " `{$field}` >=:{$field} ";
+                            $where_str[]         = " `{$field}` >= :{$field} ";
                             $where_paras[$field] = $where_data[$field];
                             break;
                         case '<':
-                            $where_str[]         = " `{$field}` <:{$field} ";
+                            $where_str[]         = " `{$field}` < :{$field} ";
                             $where_paras[$field] = $where_data[$field];
                             break;
                         case '<=':
-                            $where_str[]         = " `{$field}` <=:{$field} ";
+                            $where_str[]         = " `{$field}` <= :{$field} ";
                             $where_paras[$field] = $where_data[$field];
                             break;
                         case 'like':
@@ -418,12 +415,12 @@ class db
                             $where_paras[$field] = "%{$where_data[$field]}%";
                             break;
                         case 'between':
-                            $where_str[]                    = " `{$field}` >:{$field}_start and `{$field}` <:{$field}_end ";
+                            $where_str[]                    = " `{$field}` > :{$field}_start and `{$field}` < :{$field}_end ";
                             $where_paras[$field . '_start'] = $where_data[$field . '_start'];
                             $where_paras[$field . '_end']   = $where_data[$field . '_end'];
                             break;
                         case 'between=':
-                            $where_str[]                    = " `{$field}` >=:{$field}_start and `{$field}` <=:{$field}_end ";
+                            $where_str[]                    = " `{$field}` >= :{$field}_start and `{$field}` <= :{$field}_end ";
                             $where_paras[$field . '_start'] = $where_data[$field . '_start'];
                             $where_paras[$field . '_end']   = $where_data[$field . '_end'];
                             break;
@@ -556,13 +553,14 @@ class db
             foreach ($data as $key2 => $data2) {
                 $v .= static::array2xml($data2, $key2, "{$t}\t", $have_parent, $have_parent_auto);
             }
-            if (is_array($data['#'])) {
+            if (isset($data['#']) && is_array($data['#'])) {
                 $a = '';
                 foreach ($data['#'] as $key2 => $data2) {
                     if (is_numeric($data2)) {
-                        if ($data2 && strlen($data2) && '0' == substr($data2, 0, 1) && '.' != substr($data2, 1, 1)) {
+                        if ($data2 && strlen($data2) && str_starts_with($data2, '0') && '.' != substr($data2, 1, 1)) {
                             // 0 开头的字符串
                             // $data2 = $data2;
+
                         } elseif ((float)$data2 != $data2) {
                             $data2 = number_format($data2, 3, '.', '');
                         } else {

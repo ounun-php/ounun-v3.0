@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\cache\driver;
 
 
@@ -80,7 +81,7 @@ class redis extends driver
      * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
+    public function set(string $key, mixed $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
     {
         $this->_times['set'] = ((int)$this->_times['set']) + 1;
         $key1                = $this->key_get($key, $add_prefix);
@@ -112,10 +113,10 @@ class redis extends driver
      * @param string $key 缓存变量名
      * @param mixed $default 默认值
      * @param bool $add_prefix 是否活加前缀
-     * @param array $options   参数 ['compress'=>$compress 是否返回压缩后的数据 ]
+     * @param array $options 参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
+    public function get(string $key, mixed $default = 0, bool $add_prefix = true, array $options = []): mixed
     {
         $this->_times['get'] = ((int)$this->_times['get']) + 1;
         $key                 = $this->key_get($key, $add_prefix);
@@ -124,7 +125,7 @@ class redis extends driver
             return $default;
         }
         // 是否返回压缩后的数据
-        if($options['compress']){
+        if ($options['compress']) {
             return $val;
         }
         // 数据压缩
@@ -160,22 +161,22 @@ class redis extends driver
      */
     public function expire(string $key, int $expire = 0, bool $add_prefix = true): bool
     {
-        if($expire <=0){
+        if ($expire <= 0) {
             return true;
         }
-        $key = $this->key_get($key,$add_prefix);
-        return $this->_handler->expire($key,$expire);
+        $key = $this->key_get($key, $add_prefix);
+        return $this->_handler->expire($key, $expire);
     }
 
     /**
      * 删除缓存
      * @param string $key 缓存变量名
      * @param bool $add_prefix 是否活加前缀
-     * @return bool
+     * @return int
      */
-    public function delete(string $key, bool $add_prefix = true)
+    public function delete(string $key, bool $add_prefix = true): int
     {
-        $key = $this->key_get($key,$add_prefix);
+        $key = $this->key_get($key, $add_prefix);
         return $this->_handler->del($key);
     }
 
@@ -186,7 +187,7 @@ class redis extends driver
      * @param bool $add_prefix 是否活加前缀
      * @return int
      */
-    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         $key = $this->key_get($key, $add_prefix);
         return $this->_handler->incrBy($key, $increment);
@@ -199,7 +200,7 @@ class redis extends driver
      * @param bool $add_prefix 是否活加前缀
      * @return int
      */
-    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         $key = $this->key_get($key, $add_prefix);
         return $this->_handler->decrBy($key, $increment);
@@ -219,11 +220,11 @@ class redis extends driver
      * 返回 key 指定的哈希集中该字段所关联的值
      * @param string $key
      * @param string $field
-     * @param int $default
+     * @param string|null $default
      * @param bool $add_prefix
-     * @return int|string
+     * @return string|null
      */
-    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    public function hash_hget(string $key, string $field, ?string $default = null, bool $add_prefix = true): ?string
     {
         $key = $this->key_get($key, $add_prefix);
         $val = $this->_handler->hGet($key, $field);
@@ -239,9 +240,9 @@ class redis extends driver
      * @param string $field
      * @param mixed $value
      * @param bool $add_prefix
-     * @return bool|int
+     * @return  int|bool
      */
-    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
+    public function hash_hset(string $key, string $field, string $value, bool $add_prefix = true): int|bool
     {
         $key = $this->key_get($key, $add_prefix);
         return $this->_handler->hSet($key, $field, $value);
@@ -255,9 +256,9 @@ class redis extends driver
      * @param string $field
      * @param int $increment
      * @param bool $add_prefix
-     * @return string
+     * @return int
      */
-    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true): int
     {
         $key = $this->key_get($key, $add_prefix);
         return $this->_handler->hIncrBy($key, $field, $increment);
@@ -284,7 +285,7 @@ class redis extends driver
      * @param bool $add_prefix
      * @return bool|int
      */
-    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true): bool|int
     {
         $key = $this->key_get($key, $add_prefix);
         return $this->_handler->hDel($key, $field);
@@ -325,7 +326,7 @@ class redis extends driver
      * @param bool $add_prefix
      * @return mixed
      */
-    public function list_lpop(string $key = '', bool $add_prefix = true)
+    public function list_lpop(string $key = '', bool $add_prefix = true): mixed
     {
         $key = $this->key_get($key, $add_prefix, true);
         return $this->_handler->lPop($key);
@@ -351,7 +352,7 @@ class redis extends driver
      * @param bool $add_prefix
      * @return mixed
      */
-    public function list_rpop(string $key = '', bool $add_prefix = true)
+    public function list_rpop(string $key = '', bool $add_prefix = true): mixed
     {
         $key = $this->key_get($key, $add_prefix, true);
         return $this->_handler->rPop($key);

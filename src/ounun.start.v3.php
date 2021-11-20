@@ -139,7 +139,7 @@ function url_build_query(string $url, ?array $data_query = null, ?array $replace
     $rs     = [];
     $rs_str = '';
     foreach ($data_query as $key => $value) {
-        if (is_string($value) && '{' === $value[0]) {
+        if (is_string($value) && $value && '{' === $value[0]) {
             $rs_str = $key . '=' . $value; // '={page}'
         } elseif (is_array($value)) {
             foreach ($value as $k2 => $v2) {
@@ -717,7 +717,7 @@ function error404(string $msg = '')
                 <div style="text-align: center;"><a href="' . ounun::$root_www . '">返回网站首页</a></div>';
     $is_backtrace = global_all('debug', false, 'backtrace');
     if ($is_backtrace) {
-        echo($msg ? '<div style="border: #EEEEEE 1px solid;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</div>' : '');
+        echo($msg ? '<pre style="border: #EEEEEE 1px dashed;padding: 5px;color: grey;margin-top: 20px;">' . $msg . '</pre>' : '');
         echo '<pre style="font-size: 12px;text-align: left;padding: 10px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
         debug_print_backtrace();
         echo '</pre>';
@@ -761,7 +761,7 @@ function error_php(string $error_msg, string $error_html = '', string $channel =
         echo $error_html;
     }
     echo '<pre style="font-size: 12px;text-align: left;padding: 10px;margin: 20px;border: #EEEEEE 1px dashed;">' . PHP_EOL;
-    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths], true) . PHP_EOL . PHP_EOL;
+    echo '$app:' . json_encode_unescaped(['$app_name' => ounun::$app_name, '$app_path' => ounun::$app_path, '$paths' => ounun::$paths]) . PHP_EOL . PHP_EOL;
     debug_print_backtrace();
     echo '</pre>';
     trigger_error($error_msg, E_USER_ERROR);
@@ -835,11 +835,12 @@ function global_all(string $key, mixed $default = null, ?string $sub_key = null)
 {
     if ($key && isset(ounun::$global[$key])) {
         if (is_null($sub_key)) {
-            return ounun::$global[$key];
+            return ounun::$global[$key] ?: $default;
         }
-        $value = ounun::$global[$key];
-        if (is_array($value) && isset($value[$sub_key])) {
-            return $value[$sub_key];
+        // sub_values
+        $sub_values = ounun::$global[$key];
+        if (is_array($sub_values) && isset($sub_values[$sub_key])) {
+            return $sub_values[$sub_key] ?: $default;
         }
     }
     return $default;
@@ -856,26 +857,24 @@ function global_all(string $key, mixed $default = null, ?string $sub_key = null)
  */
 function global_addons(string $addon_tag, ?string $key = null, mixed $default = null, ?string $sub_key = null): mixed
 {
-    $ret    = $default;
-    $values = ounun::$global_addons[$addon_tag] ?? [];
-    if (is_null($key)) {
-        $ret = $values;
-    }
-    if ($values && isset($values[$key])) {
-        if (is_null($sub_key)) {
-            $ret = $values[$key];
+    if (ounun::$global_addons && isset(ounun::$global_addons[$addon_tag])) {
+        if (is_null($key)) {
+            return ounun::$global_addons[$addon_tag] ?: $default;
         }
-        $value = $values[$key];
-        if (is_array($value) && isset($value[$sub_key])) {
-            $ret = $value[$sub_key];
+        // addon_values
+        $addon_values = ounun::$global_addons[$addon_tag];
+        if ($addon_values && isset($addon_values[$key])) {
+            if (is_null($sub_key)) {
+                return $addon_values[$key] ?: $default;
+            }
+            // sub_values
+            $sub_values = $addon_values[$key];
+            if (is_array($sub_values) && isset($sub_values[$sub_key])) {
+                return $sub_values[$sub_key] ?: $default;
+            }
         }
     }
-    if (is_null($default)) {
-        return $ret;
-    } elseif (empty($ret)) {
-        return $default;
-    }
-    return $ret;
+    return $default;
 }
 
 /**
@@ -963,6 +962,10 @@ class ounun
     public static array $addon_route = [];
     /** @var array 插件addons网址映射url前缀Path(URL)数据 */
     public static array $addon_path = [];
+    /** @var array 插件关联分部(模块) 插件=>part */
+    public static array $addon_part = [];
+    /** @var array 插件关联分部(模块) unique=>id */
+    public static array $part_unique2id = [];
 
     /** @var string 当前面页(文件名)  Page Base 基础path 等于"{'/addon_tag/addon_view'=>$url}/{$path}" */
     public static string $page_file_path = '';

@@ -61,17 +61,22 @@ class mysql extends driver
     }
 
 
-    public function get(string $key, $default = 0, bool $add_prefix = true,array $options = [])
+    public function get(string $key, mixed $default = 0, bool $add_prefix = true, array $options = []): mixed
     {
         // TODO: Implement get() method.
     }
 
-    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function set(string $key, mixed $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
+    {
+        // TODO: Implement set() method.
+    }
+
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement incrby() method.
     }
 
-    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement decrby() method.
     }
@@ -86,22 +91,27 @@ class mysql extends driver
         // TODO: Implement expire() method.
     }
 
-    public function delete(string $key, bool $add_prefix = true)
+    public function delete(string $key, bool $add_prefix = true): int
     {
         // TODO: Implement delete() method.
     }
 
-    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    public function clear()
+    {
+        // TODO: Implement clear() method.
+    }
+
+    public function hash_hget(string $key, string $field, ?string $default = null, bool $add_prefix = true): ?string
     {
         // TODO: Implement hash_hget() method.
     }
 
-    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
+    public function hash_hset(string $key, string $field, string $value, bool $add_prefix = true): int|bool
     {
         // TODO: Implement hash_hset() method.
     }
 
-    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement hash_hincrby() method.
     }
@@ -111,7 +121,7 @@ class mysql extends driver
         // TODO: Implement hash_hexists() method.
     }
 
-    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true): bool|int
     {
         // TODO: Implement hash_hdel() method.
     }
@@ -126,7 +136,7 @@ class mysql extends driver
         // TODO: Implement list_lpush() method.
     }
 
-    public function list_lpop(string $key = '', bool $add_prefix = true)
+    public function list_lpop(string $key = '', bool $add_prefix = true): mixed
     {
         // TODO: Implement list_lpop() method.
     }
@@ -136,7 +146,7 @@ class mysql extends driver
         // TODO: Implement list_rpush() method.
     }
 
-    public function list_rpop(string $key = '', bool $add_prefix = true)
+    public function list_rpop(string $key = '', bool $add_prefix = true): mixed
     {
         // TODO: Implement list_rpop() method.
     }
@@ -154,15 +164,5 @@ class mysql extends driver
     public function key_get(string $key, bool $add_prefix = true, bool $is_list = false): string
     {
         // TODO: Implement key_get() method.
-    }
-
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
-    {
-        // TODO: Implement set() method.
-    }
-
-    public function clear()
-    {
-        // TODO: Implement clear() method.
     }
 }

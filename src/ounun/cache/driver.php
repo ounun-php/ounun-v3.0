@@ -47,7 +47,7 @@ abstract class driver
      * @param array $options 参数 ['compress'=>$compress 是否返回压缩后的数据 ]
      * @return mixed
      */
-    abstract public function get(string $key, $default = 0, bool $add_prefix = true, array $options = []);
+    abstract public function get(string $key, mixed $default = 0, bool $add_prefix = true, array $options = []): mixed;
 
     /**
      * 写入缓存
@@ -59,7 +59,7 @@ abstract class driver
      * @param array $options 参数 ['list_key'=>$list_key 汇总集合list标识 ]
      * @return bool
      */
-    abstract public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = []);
+    abstract public function set(string $key, mixed $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool;
 
     /**
      * 增加之后的value值。（针对数值缓存）
@@ -69,7 +69,7 @@ abstract class driver
      * @param bool $add_prefix 是否活加前缀
      * @return int
      */
-    abstract public function incrby(string $key, int $increment = 1, bool $add_prefix = true);
+    abstract public function incrby(string $key, int $increment = 1, bool $add_prefix = true): int;
 
     /**
      * 返回一个数字：减少之后的value值。（针对数值缓存）
@@ -79,7 +79,7 @@ abstract class driver
      * @param bool $add_prefix 是否活加前缀
      * @return int
      */
-    abstract public function decrby(string $key, int $increment = 1, bool $add_prefix = true);
+    abstract public function decrby(string $key, int $increment = 1, bool $add_prefix = true): int;
 
     /**
      * 返回key是否存在
@@ -105,9 +105,9 @@ abstract class driver
      *
      * @param string $key 缓存变量名
      * @param bool $add_prefix 是否活加前缀
-     * @return bool
+     * @return int
      */
-    abstract public function delete(string $key, bool $add_prefix = true);
+    abstract public function delete(string $key, bool $add_prefix = true): int;
 
     /**
      * 清除所有缓存
@@ -121,11 +121,11 @@ abstract class driver
      *
      * @param string $key
      * @param string $field
-     * @param int $default
+     * @param string|null $default
      * @param bool $add_prefix
-     * @return int|string
+     * @return null|string
      */
-    abstract public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true);
+    abstract public function hash_hget(string $key, string $field, ?string $default = null, bool $add_prefix = true): ?string;
 
     /**
      * 设置 key 指定的哈希集中指定字段的值。
@@ -134,11 +134,11 @@ abstract class driver
      *
      * @param string $key
      * @param string $field
-     * @param mixed $value
+     * @param string $value
      * @param bool $add_prefix
-     * @return string
+     * @return  int|bool
      */
-    abstract public function hash_hset(string $key, string $field, $value, bool $add_prefix = true);
+    abstract public function hash_hset(string $key, string $field, string $value, bool $add_prefix = true):  int|bool;
 
     /**
      * 增加 key 指定的哈希集中指定字段的数值。如果 key 不存在，会创建一个新的哈希集并与 key 关联。如果字段不存在，则字段的值在该操作执行前被设置为 0
@@ -148,9 +148,9 @@ abstract class driver
      * @param string $field
      * @param int $increment
      * @param bool $add_prefix
-     * @return string
+     * @return int
      */
-    abstract public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true);
+    abstract public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true): int;
 
     /**
      * 返回hash里面field是否存在
@@ -171,7 +171,7 @@ abstract class driver
      * @param bool $add_prefix
      * @return bool|int
      */
-    abstract public function hash_hdel(string $key, string $field, bool $add_prefix = true);
+    abstract public function hash_hdel(string $key, string $field, bool $add_prefix = true): bool|int;
 
     /**
      * 返回 key 指定的哈希集中所有的字段和值
@@ -187,6 +187,7 @@ abstract class driver
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
      *
      * @param string $key
+     * @param $value
      * @param bool $add_prefix
      * @return int
      */
@@ -199,7 +200,7 @@ abstract class driver
      * @param bool $add_prefix
      * @return mixed
      */
-    abstract public function list_lpop(string $key = '', bool $add_prefix = true);
+    abstract public function list_lpop(string $key = '', bool $add_prefix = true): mixed;
 
     /**
      * 向存于 key 的列表的尾部插入所有指定的值。如果 key 不存在，那么会创建一个空的列表然后再进行 push 操作。 当 key 保存的不是一个列表，那么会返回一个错误。
@@ -217,7 +218,7 @@ abstract class driver
      * @param bool $add_prefix
      * @return mixed
      */
-    abstract public function list_rpop(string $key = '', bool $add_prefix = true);
+    abstract public function list_rpop(string $key = '', bool $add_prefix = true): mixed;
 
     /**
      * 获取标签包含的缓存标识
@@ -290,7 +291,7 @@ abstract class driver
      * @param mixed $data 缓存数据
      * @return string
      */
-    protected function serialize($data): string
+    protected function serialize(mixed $data): string
     {
         $serialize = $this->_options['serialize'][0] ?? function ($data) {
                 return \json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -305,7 +306,7 @@ abstract class driver
      * @param string $data 缓存数据
      * @return mixed
      */
-    protected function unserialize(string $data)
+    protected function unserialize(string $data): mixed
     {
         $unserialize = $this->_options['serialize'][1] ?? function ($data) {
                 return \json_decode($data, true);
@@ -344,7 +345,7 @@ abstract class driver
      * @return array
      * @throws
      */
-    public function multiple_get(array $keys, $default = 0, bool $add_prefix = true): iterable
+    public function multiple_get(array $keys, mixed $default = 0, bool $add_prefix = true): iterable
     {
         $result = [];
         foreach ($keys as $key) {
@@ -361,7 +362,7 @@ abstract class driver
      * @param bool $add_prefix 是否活加前缀
      * @return bool
      */
-    public function multiple_set($values, $expire = 0, bool $add_prefix = true): bool
+    public function multiple_set(array $values, int $expire = 0, bool $add_prefix = true): bool
     {
         foreach ($values as $key => $val) {
             $result = $this->set($key, $val, $expire, $add_prefix);
@@ -380,7 +381,7 @@ abstract class driver
      * @return bool
      * @throws
      */
-    public function multiple_delete($keys, bool $add_prefix = true): bool
+    public function multiple_delete(array $keys, bool $add_prefix = true): bool
     {
         foreach ($keys as $key) {
             $result = $this->delete($key, $add_prefix);
@@ -396,7 +397,7 @@ abstract class driver
      *
      * @return mixed
      */
-    public function handler()
+    public function handler(): mixed
     {
         return $this->_handler;
     }
@@ -406,7 +407,7 @@ abstract class driver
      * @param mixed $args
      * @return mixed
      */
-    public function __call(string $method, $args)
+    public function __call(string $method, mixed $args)
     {
         if ($this->_handler) {
             return call_user_func_array([$this->_handler, $method], $args);

@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\addons;
 
 
@@ -83,49 +84,49 @@ abstract class logic
         return $this;
     }
 
-//    /**
-//     * 添加数据 - 操作动作
-//     *
-//     * @param mixed $data
-//     * @param string|null $type 类型
-//     * @return array
-//     */
-//    public function data(mixed $data = null, ?string $type = null): array
+    /**
+     * 添加数据 - 操作动作
+     *
+     * @param mixed $data
+     * @param string|null $type 类型
+     * @return array
+     */
+//    public function data_set(mixed $data = null, ?string $type = null): array
 //    {
 //        return error('TODO: Implement data_set() method.');
 //    }
-//
-//    /**
-//     * 获取数据 - 操作动作
-//     *
-//     * @param mixed $data
-//     * @param string|null $type 类型
-//     * @return array
-//     */
+
+    /**
+     * 获取数据 - 操作动作
+     *
+     * @param mixed $data
+     * @param string|null $type 类型
+     * @return array
+     */
 //    public function data_get(array $data = [], ?string $type = null): array
 //    {
 //        return error('TODO: Implement data_get() method.');
 //    }
-//
-//    /**
-//     * 删除 - 操作动作
-//     *
-//     * @param mixed $data 数据
-//     * @param string|null $type 类型
-//     * @return array
-//     */
+
+    /**
+     * 删除 - 操作动作
+     *
+     * @param mixed $data 数据
+     * @param string|null $type 类型
+     * @return array
+     */
 //    public function data_del(array $data = [], ?string $type = null): array
 //    {
 //        return error('TODO: Implement data_del() method.');
 //    }
-//
-//    /**
-//     * 编辑 - 操作动作
-//     *
-//     * @param mixed $data
-//     * @param string|null $type 类型
-//     * @return array
-//     */
+
+    /**
+     * 编辑 - 操作动作
+     *
+     * @param mixed $data
+     * @param string|null $type 类型
+     * @return array
+     */
 //    public function data_edit(array $data = [], ?string $type = null): array
 //    {
 //        return error('TODO: Implement data_edit() method.');

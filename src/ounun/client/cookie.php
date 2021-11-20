@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\client;
 
 
@@ -36,10 +37,10 @@ class cookie
      * cookie设定
      *
      * @param string $key
-     * @param mixed $value
+     * @param mixed|null $value
      * @param int $time
      */
-    public static function set(string $key, $value = null, int $time = 0)
+    public static function set(string $key, mixed $value = null, int $time = 0)
     {
         if (is_null($value)) {
             $time = time() - 3600;
@@ -62,13 +63,13 @@ class cookie
      * 取得cookie
      *
      * @param string $key
-     * @param mixed $default
-     * @return string
+     * @param string|null $default
+     * @return string|null
      */
-    public static function get(string $key,$default = null)
+    public static function get(string $key, ?string $default = null): ?string
     {
         $key = static::$_prefix . $key;
-        return isset($_COOKIE[$key]) ? $_COOKIE[$key] : $default;
+        return $_COOKIE[$key] ?? $default;
     }
 
     /**

@@ -129,11 +129,11 @@ class memcached extends driver
     /**
      * 读取缓存
      * @param  string    $key         缓存变量名
-     * @param  mixed     $default     默认值
+     * @param mixed $default     默认值
      * @param  bool      $add_prefix  是否活加前缀
      * @return mixed
      */
-    public function get(string $key, $default = 0, bool $add_prefix = true, array $options = [])
+    public function get(string $key, mixed $default = 0, bool $add_prefix = true, array $options = []):mixed
     {
         $this->_times['read']  = ((int)$this->_times['read']) + 1;
         if($add_prefix){
@@ -162,7 +162,7 @@ class memcached extends driver
      * @param    bool    $ttl
      * @return bool
      */
-    public function delete(string $key, bool $add_prefix = true, $ttl = false)
+    public function delete2(string $key, bool $add_prefix = true, $ttl = false): bool
     {
         if($add_prefix){
             $key    = $this->get_key($key);
@@ -181,52 +181,17 @@ class memcached extends driver
         return $this->_handler->flush();
     }
 
-    public function key_set($key)
+    public function set(string $key, mixed $value, int $expire = 0, bool $add_prefix = true, array $options = []): bool
     {
-        // TODO: Implement key() method.
+        // TODO: Implement set() method.
     }
 
-    public function val($val)
-    {
-        // TODO: Implement val() method.
-    }
-
-    public function read()
-    {
-        // TODO: Implement read() method.
-    }
-
-    public function write()
-    {
-        // TODO: Implement write() method.
-    }
-
-    public function get2($sub_key)
-    {
-        // TODO: Implement get2() method.
-    }
-
-    public function delete2()
-    {
-        // TODO: Implement delete2() method.
-    }
-
-    public function filename()
-    {
-        // TODO: Implement filename() method.
-    }
-
-    public function mod()
-    {
-        // TODO: Implement mod() method.
-    }
-
-    public function incrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function incrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement incrby() method.
     }
 
-    public function decrby(string $key, int $increment = 1, bool $add_prefix = true)
+    public function decrby(string $key, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement decrby() method.
     }
@@ -241,17 +206,22 @@ class memcached extends driver
         // TODO: Implement expire() method.
     }
 
-    public function hash_hget(string $key, string $field, $default = 0, bool $add_prefix = true)
+    public function delete(string $key, bool $add_prefix = true): int
+    {
+        // TODO: Implement delete() method.
+    }
+
+    public function hash_hget(string $key, string $field, ?string $default = null, bool $add_prefix = true): ?string
     {
         // TODO: Implement hash_hget() method.
     }
 
-    public function hash_hset(string $key, string $field, $value, bool $add_prefix = true)
+    public function hash_hset(string $key, string $field, string $value, bool $add_prefix = true): int|bool
     {
         // TODO: Implement hash_hset() method.
     }
 
-    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true)
+    public function hash_hincrby(string $key, string $field, int $increment = 1, bool $add_prefix = true): int
     {
         // TODO: Implement hash_hincrby() method.
     }
@@ -261,7 +231,7 @@ class memcached extends driver
         // TODO: Implement hash_hexists() method.
     }
 
-    public function hash_hdel(string $key, string $field, bool $add_prefix = true)
+    public function hash_hdel(string $key, string $field, bool $add_prefix = true): bool|int
     {
         // TODO: Implement hash_hdel() method.
     }
@@ -276,7 +246,7 @@ class memcached extends driver
         // TODO: Implement list_lpush() method.
     }
 
-    public function list_lpop(string $key = '', bool $add_prefix = true)
+    public function list_lpop(string $key = '', bool $add_prefix = true): mixed
     {
         // TODO: Implement list_lpop() method.
     }
@@ -286,7 +256,7 @@ class memcached extends driver
         // TODO: Implement list_rpush() method.
     }
 
-    public function list_rpop(string $key = '', bool $add_prefix = true)
+    public function list_rpop(string $key = '', bool $add_prefix = true): mixed
     {
         // TODO: Implement list_rpop() method.
     }
@@ -304,10 +274,5 @@ class memcached extends driver
     public function key_get(string $key, bool $add_prefix = true, bool $is_list = false): string
     {
         // TODO: Implement key_get() method.
-    }
-
-    public function set(string $key, $value, int $expire = 0, bool $add_prefix = true, array $options = [])
-    {
-        // TODO: Implement set() method.
     }
 }

@@ -4,7 +4,7 @@
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
 
-declare (strict_types = 1);
+declare (strict_types=1);
 
 namespace ounun\addons\command;
 
@@ -66,37 +66,37 @@ class command_c
 
     /** @var string 默认执行的命令 */
     const Default_Cmd = 'help';
-    /** @var string  */
+    /** @var string */
     const Color_None = "\033[0m";
-    /** @var string  */
+    /** @var string */
     const Color_Black = "\033[0;30m";
-    /** @var string  */
+    /** @var string */
     const Color_Dark_Gray = "\033[1;30m";
-    /** @var string  */
+    /** @var string */
     const Color_Blue = "\033[0;34m";
-    /** @var string  */
+    /** @var string */
     const Color_Light_BBlue = "\033[1;34m";
-    /** @var string  */
+    /** @var string */
     const Color_Green = "\033[0;32m";      // success
-    /** @var string  */
+    /** @var string */
     const Color_Light_Green = "\033[1;32m";
-    /** @var string  */
+    /** @var string */
     const Color_Cyan = "\033[0;36m";
-    /** @var string  */
+    /** @var string */
     const Color_Light_Cyan = "\033[1;36m";
     /** @var string 红色 */
     const Color_Red = "\033[0;31m";
-    /** @var string  */
+    /** @var string */
     const Color_Light_Red = "\033[1;31m"; // error
-    /** @var string  */
+    /** @var string */
     const Color_Purple = "\033[0;35m";
-    /** @var string  */
+    /** @var string */
     const Color_Light_Purple = "\033[1;35m";
-    /** @var string  */
+    /** @var string */
     const Color_Brown = "\033[0;33m";
-    /** @var string  */
+    /** @var string */
     const Color_Yellow = "\033[1;33m";    // info
-    /** @var string  */
+    /** @var string */
     const Color_Light_Gray = "\033[0;37m";
     /** @var string 灰色 */
     const Color_White = "\033[1;37m";
@@ -189,7 +189,6 @@ class command_c
         self::Task_Status_System_Stop  => '系统终止',
         self::Task_Status_Fail         => '失败',
     ];
-
 
     /** @var int 采集全部 - 模式 */
     const Mode_All = 0;

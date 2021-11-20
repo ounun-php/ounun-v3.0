@@ -168,7 +168,7 @@ class html
         if ($this->_cache_time) {
             // 处理 etag
             $etag      = $this->_cache_time;
-            $etag_http = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '';
+            $etag_http = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
 
             // 处理 cache expire
             header('Expires: ' . gmdate('D, d M Y H:i:s', $this->_time_curr + $this->_time_expire) . ' GMT');
@@ -200,7 +200,7 @@ class html
         $buffer   = ob_get_contents();
         $filesize = strlen($buffer);
         ob_clean();
-        ob_implicit_flush(1);
+        ob_implicit_flush(true);
         // 写文件
         debug::header($filesize, 'xyp-m_size', __FILE__, __LINE__);
         if ($filesize > self::Cache_Mini_Size) {

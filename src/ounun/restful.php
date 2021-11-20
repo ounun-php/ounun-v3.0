@@ -68,7 +68,7 @@ class restful
         // before
         $rs = $this->_construct_before($url_mods);
         if (error_is($rs)) {
-            error_php(error_message($rs));
+            out($rs);
         }
 
         // url_mods

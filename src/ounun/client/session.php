@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\client;
 
 
@@ -42,13 +43,13 @@ class session
      * 内部 获取key的值
      *
      * @param string $key
-     * @param mixed $default
+     * @param mixed|null $default
      * @return mixed
      */
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $key = $this->_prefix . $key;
-        return isset($_SESSION[$key]) ? $_SESSION[$key] : $default;
+        return $_SESSION[$key] ?? $default;
     }
 
     /**
@@ -58,7 +59,7 @@ class session
      * @param mixed $val
      * @return bool
      */
-    public function set(string $key, $val): bool
+    public function set(string $key, mixed $val): bool
     {
         $_SESSION[$this->_prefix . $key] = $val;
         return true;
@@ -70,7 +71,7 @@ class session
      * @param string $key
      * @return bool
      */
-    public function del(string $key)
+    public function del(string $key): bool
     {
         unset($_SESSION[$this->_prefix . $key]);
         return true;
@@ -81,14 +82,25 @@ class session
      *
      * @return bool
      */
-    public function clean()
+    public function clean(): bool
     {
-        if ($this->_prefix && $_SESSION) {
-            $key_len = strlen($this->_prefix);
+        if(empty($_SESSION)){
+            return true;
+        }
+        if(!is_array($_SESSION)){
+            return false;
+        }
+
+        if($this->_prefix){
+            $prefix_len = strlen($this->_prefix);
             foreach ($_SESSION as $k => $v) {
-                if ($this->_prefix == substr($k, 0, $key_len)) {
+                if ($this->_prefix == substr($k, 0, $prefix_len)) {
                     unset($_SESSION[$k]);
                 }
+            }
+        }else{
+            foreach ($_SESSION as $k => $v) {
+                unset($_SESSION[$k]);
             }
         }
         return true;

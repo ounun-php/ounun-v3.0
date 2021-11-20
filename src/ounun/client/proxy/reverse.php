@@ -107,7 +107,7 @@ class reverse
             $this->_cache_filename = $config['cache_filename'];
         }
 
-        $this->_http_if_modified_304 = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? $_SERVER['HTTP_IF_NONE_MATCH'] : '';
+        $this->_http_if_modified_304 = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
 //      $this->_http_code            = 200;
 
         if ($config['is_ssl']) {
@@ -290,7 +290,7 @@ class reverse
     {
         $headers = [];
         foreach ($_SERVER as $name => $value) {
-            if (substr($name, 0, 5) == 'HTTP_') {
+            if (str_starts_with($name, 'HTTP_')) {
                 $name           = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
                 $headers[$name] = $value;
             } elseif ($name == "CONTENT_TYPE") {
