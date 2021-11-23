@@ -662,7 +662,7 @@ class pdo
      */
     public function inner_join(string $inner_join, string $on): static
     {
-        $this->_join = 'INNER JOIN ' . $inner_join . ' ON ' . $on;
+        $this->_join .= 'INNER JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
 
@@ -677,7 +677,7 @@ class pdo
     public function full_join(string $inner_join, string $on, bool $is_outer = false): static
     {
         $outer       = $is_outer ? 'OUTER' : '';
-        $this->_join = 'FULL ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
+        $this->_join .= 'FULL ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
 
@@ -690,7 +690,7 @@ class pdo
     public function left_join(string $inner_join, string $on, bool $is_outer = false): static
     {
         $outer       = $is_outer ? 'OUTER' : '';
-        $this->_join = 'LEFT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
+        $this->_join .= 'LEFT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
 
@@ -703,7 +703,7 @@ class pdo
     public function right_join(string $inner_join, string $on, bool $is_outer = false): static
     {
         $outer       = $is_outer ? 'OUTER' : '';
-        $this->_join = 'RIGHT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
+        $this->_join .= 'RIGHT ' . $outer . ' JOIN ' . $inner_join . ' ON ' . $on;
         return $this;
     }
 

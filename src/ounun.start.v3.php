@@ -1674,10 +1674,8 @@ function start_cli(array $argv, array $commands = [], string $name = 'Ounun Comm
         }
     }
 
-    return (new console(array_merge($commands, [
-        'help' => help::class,
-        'test' => test::class,
-    ]), $name, $version))->execute($argv);
+    $def_commands = ['help' => help::class, 'test' => test::class,];
+    return (new console(array_merge($commands, $def_commands), $name, $version))->execute($argv);
 }
 
 /** 自动加载 src-4 \ounun  */
