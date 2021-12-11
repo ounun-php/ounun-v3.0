@@ -131,7 +131,7 @@ abstract class database_model extends pdo
      * @param string $name
      * @param mixed $value
      */
-    public function data_set(string $name, $value)
+    public function data_set(string $name, mixed $value)
     {
         $this->_data[$name] = $value;
     }
@@ -154,7 +154,7 @@ abstract class database_model extends pdo
      * @param string $name
      * @param mixed $value
      */
-    public function __set(string $name, $value)
+    public function __set(string $name, mixed $value)
     {
         $this->data_set($name, $value);
     }

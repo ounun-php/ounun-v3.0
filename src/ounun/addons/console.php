@@ -9,6 +9,7 @@ namespace ounun\addons;
 
 
 use ounun;
+use ounun\addons\command\command_c;
 
 class console
 {
@@ -72,7 +73,7 @@ class console
         if (empty($argv) || empty($argv_1) || '--help' == $argv_1 || '--list' == $argv_1) {
             /** @var string $command */
             $command = static::$commands[command_c::Default_Cmd] ?? null;
-        } else if ($argv_1) {
+        } else {
             // 系统
             $command = static::$commands[$argv_1] ?? null;
             // 插件
@@ -97,7 +98,7 @@ class console
         if ($command && class_exists($command)) {
             if (is_subclass_of($command, command::class)) {
                 $argv_len = 0;
-                if ($argv && is_array($argv)) {
+                if ($argv) {
                     $argv_len = count($argv);
                     if ($argv_len >= 1) {
                         array_shift($argv);
@@ -113,12 +114,14 @@ class console
                     /** @var command $command_o */
                     $command_o = new $command();
                     $command_o->start();
-                    static::echo(date("Y-m-d H:i:s") . "    running... {$run_cmd}                     --------------------", command_c::Color_Cyan);
+                    static::echo("start command: ", command_c::Color_Dark_Gray,'',0,0,'');
+                    static::echo("{$run_cmd}", command_c::Color_Yellow);
+                    static::echo(date("Y-m-d H:i:s") . "    running...                      --------------------", command_c::Color_Cyan);
                     $command_o->execute($argv);  // 执行指令
                     if ($command_o->state()) {
                         $command_o->stop();
                     }
-                    static::echo(date("Y-m-d H:i:s") . "    done      {$run_cmd}    运行时间:" . str_pad(round($command_o->time(), 4) . '秒', 8) . " --------------------", command_c::Color_Cyan);
+                    static::echo(date("Y-m-d H:i:s") . "    done          运行时间:" . str_pad(round($command_o->time(), 4) . '秒', 8) . " --------------------", command_c::Color_Cyan);
                 }
             } else {
                 static::echo("命令:{$command} 父类不是:" . command::class, command_c::Color_Light_Red);

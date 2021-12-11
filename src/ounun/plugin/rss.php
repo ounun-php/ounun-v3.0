@@ -35,52 +35,60 @@ class rss
      * @param string $xml
      * @param string $rss
      * @param string $encoding
+     * @return rss
      */
-    function header($xml = '1.0', $rss = '2.0', $encoding = 'utf-8')
+    function header(string $xml = '1.0', string $rss = '2.0', string $encoding = 'utf-8'): static
     {
         $this->rss_header = "<?xml version=\"$xml\" encoding=\"$encoding\"?>\n";
         $this->rss_header .= "<rss version=\"$rss\">\n";
+        return $this;
     }
 
     /**
      * @param $channel
+     * @return rss
      */
-    function channel($channel)
+    function channel($channel): static
     {
         $this->rss_channel = "<channel>\n";
         foreach ($channel as $key => $value) {
             $this->rss_channel .= " <$key><![CDATA[" . $value . "]]></$key>\n";
         }
+        return $this;
     }
 
     /**
      * @param $image
+     * @return rss
      */
-    function image($image)
+    function image($image): static
     {
         $this->rss_image = "  <image>\n";
         foreach ($image as $key => $value) {
             $this->rss_image .= " <$key><![CDATA[" . $value . "]]></$key>\n";
         }
         $this->rss_image .= "  </image>\n";
+        return $this;
     }
 
     /**
      * @param $item
+     * @return rss
      */
-    function item($item)
+    function item($item): static
     {
         $this->rss_item .= "<item>\n";
         foreach ($item as $key => $value) {
             $this->rss_item .= " <$key><![CDATA[" . $value . "]]></$key>\n";
         }
         $this->rss_item .= "</item>\n";
+        return $this;
     }
 
     /**
      * @return string
      */
-    function footer()
+    function footer(): string
     {
         $data = $this->rss_header;
         $data .= $this->rss_channel;

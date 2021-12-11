@@ -32,7 +32,7 @@ class sendmail
         $this->sign          = $sign;
 
         $this->smtp_host     = $smtp_host;
-        $this->smtp_port     = $smtp_port ? $smtp_port : 25;
+        $this->smtp_port     = $smtp_port ?: 25;
         $this->smtp_auth     = $smtp_auth;
         $this->smtp_username = $smtp_username;
         $this->smtp_password = $smtp_password;
@@ -45,10 +45,10 @@ class sendmail
         $message = chunk_split(base64_encode(str_replace("\r\n.", " \r\n..", str_replace("\n", "\r\n", str_replace("\r", "\n", str_replace("\r\n", "\n", str_replace("\n\r", "\r", $message)))))));
         $from    = is_null($from) ? '=?' . $this->charset . '?B?' . base64_encode('CmsTop') . "?= <$this->from>" : (preg_match('/^(.+?) \<(.+?)\>$/', $from, $m) ? '=?' . $this->charset . '?B?' . base64_encode($m[1]) . "?= <$m[2]>" : $from);
         if (strpos($to, ',')) {
-            foreach (explode(',', $to) as $touser) {
-                $tousers[] = preg_match('/^(.+?) <(.+?)>$/', $touser, $m) ? '=?' . $this->charset . '?B?' . base64_encode($m[1]) . "?= <$m[2]>" : $touser;
+            foreach (explode(',', $to) as $to_user) {
+                $to_users[] = preg_match('/^(.+?) <(.+?)>$/', $to_user, $m) ? '=?' . $this->charset . '?B?' . base64_encode($m[1]) . "?= <$m[2]>" : $to_user;
             }
-            $to = implode(',', $tousers);
+            $to = implode(',', $to_users);
         }
         $headers = "From: $from{$this->delimiter}X-Priority: 3{$this->delimiter}X-Mailer: Ounun v" . \ounun::$app_version . "{$this->delimiter}MIME-Version: 1.0{$this->delimiter}Content-type: text/html; charset=$this->charset{$this->delimiter}Content-Transfer-Encoding: base64{$this->delimiter}";
         if ($this->mailer == 1) {
@@ -78,7 +78,7 @@ class sendmail
 
         stream_set_blocking($fp, true);
         $last_message = fgets($fp, 512);
-        if (substr($last_message, 0, 3) != '220') {
+        if (!str_starts_with($last_message, '220')) {
             $this->errno = substr($last_message, 0, 3);
             $this->error = $last_message;
             return false;

@@ -63,7 +63,7 @@ class dnspod
      * @param string $lang
      * @param string $error_on_empty
      */
-    public function __construct(string $token, int $token_id, $format = 'json', $lang = 'cn', $error_on_empty = 'no')
+    public function __construct(string $token, int $token_id, string $format = 'json', string $lang = 'cn', string $error_on_empty = 'no')
     {
         $this->_login_token    = $token;
         $this->_login_token_id = $token_id;
@@ -78,7 +78,7 @@ class dnspod
      * @param $domain_id
      * @return array
      */
-    public function record($domain_id)
+    public function record($domain_id): array
     {
         return $this->_api('Record.List', ['domain_id' => $domain_id]);
     }
@@ -91,9 +91,9 @@ class dnspod
      * @param int $ttl
      * @param int $mx
      * @param string $line
-     * @return array|mixed
+     * @return mixed
      */
-    public function record_create($domain_id, $value, $sub_domain = '@', $type = 'CNAME', $ttl = 600, $mx = 10, $line = '默认')
+    public function record_create($domain_id, $value, string $sub_domain = '@', string $type = 'CNAME', int $ttl = 600, int $mx = 10, string $line = '默认'): mixed
     {
         $data = [
             'domain_id'   => $domain_id,
@@ -110,9 +110,9 @@ class dnspod
     /**
      * @param $domain_id
      * @param $record_id
-     * @return array|mixed
+     * @return mixed
      */
-    public function record_remove($domain_id, $record_id)
+    public function record_remove($domain_id, $record_id): mixed
     {
         $data = [
             'domain_id' => $domain_id,
@@ -123,9 +123,9 @@ class dnspod
 
     /**
      * @param $domain_id
-     * @return array|mixed
+     * @return mixed
      */
-    public function domain_remove($domain_id)
+    public function domain_remove($domain_id): mixed
     {
         $data = [
             'domain_id' => $domain_id
@@ -136,9 +136,9 @@ class dnspod
     /**
      * @param $offset
      * @param $length
-     * @return array|mixed
+     * @return  mixed
      */
-    public function domain_list($offset,$length)
+    public function domain_list($offset,$length): mixed
     {
         $data = [
             'offset' => $offset,
@@ -150,9 +150,9 @@ class dnspod
     /**
      * @param $api
      * @param $data
-     * @return array|mixed
+     * @return mixed
      */
-    private function _api($api, $data)
+    private function _api($api, $data): mixed
     {
         if ($api == '' || !is_array($data)) {
             return $this->_message(false, '内部错误：参数错误');
@@ -191,7 +191,7 @@ class dnspod
      * @param bool $is_out
      * @return array
      */
-    private function _message($status, $message, $is_out = false)
+    private function _message($status, $message, bool $is_out = false)
     {
         if ($is_out) {
             $msg = "----------------------------------\n" .
@@ -208,17 +208,17 @@ class dnspod
      *
      * @param string $url
      * @param array $data
-     * @return array|mixed
+     * @return string|array|bool
      */
-    private function _post(string $url,array $data)
+    private function _post(string $url,array $data): string|array|bool
     {
-        if ($url == '' || !is_array($data)) {
-            return $this->_message('danger', '内部错误：参数错误', '');
+        if (empty($url)) {
+            return $this->_message('danger', '内部错误：参数错误');
         }
         // sleep(3);
         $ch = curl_init();
         if (!$ch) {
-            return $this->_message('danger', '内部错误：服务器不支持CURL', '');
+            return $this->_message('danger', '内部错误：服务器不支持CURL');
         }
 
         curl_setopt($ch, CURLOPT_URL, $url);

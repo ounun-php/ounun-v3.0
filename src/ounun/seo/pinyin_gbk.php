@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\seo;
 
 /** 本插件所在目录 */
@@ -20,7 +21,7 @@ class pinyin_gbk
      * Constructor
      *
      * Simply globalizes the $RTR object.  The front
-     * loads the Router class early on so it's not available
+     * loads the Router class early on, so it's not available
      * normally as other classes are.
      *
      */
@@ -42,7 +43,7 @@ class pinyin_gbk
      * @param string $space 拼音之间的间隔
      * @return string
      */
-    public function convert(string $string, $from_encoding = 'gbk', $initial = true, $space = ''): string
+    public function convert(string $string, string $from_encoding = 'gbk', bool $initial = true, string $space = ''): string
     {
         $py = $this->pinyin($string, $from_encoding);
         if ($initial) {
@@ -61,7 +62,7 @@ class pinyin_gbk
      * @param string $from_encoding 汉字编码
      * @return string
      */
-    public function head(string $string, $from_encoding = 'gbk'): string
+    public function head(string $string, string $from_encoding = 'gbk'): string
     {
         $rs = [];
         $py = $this->pinyin($string, $from_encoding);
@@ -77,7 +78,7 @@ class pinyin_gbk
      * @param string $from_encoding
      * @return  array <string, $string>
      */
-    public function pinyin(string $string, $from_encoding = 'gbk'): array
+    public function pinyin(string $string, string $from_encoding = 'gbk'): array
     {
         if ($from_encoding != 'gbk') {
             $string = mb_convert_encoding($string, 'gbk', $from_encoding);

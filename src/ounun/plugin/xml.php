@@ -37,7 +37,7 @@ class xml
         $opened_tags = [];
         $arr         = [];
 
-        $current = &$xml_array; //Refference
+        $current = &$xml_array; //Reference
 
         //Go through the tags.
         $repeated_tag_index = [];//Multiple tags with same name will be turned into an array

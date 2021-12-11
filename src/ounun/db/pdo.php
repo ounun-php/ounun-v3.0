@@ -396,8 +396,8 @@ class pdo
     public function column_one(bool $force_prepare = false): array
     {
         $this->_prepare_column($force_prepare);
+        $rs = $this->_stmt->fetch(\PDO::FETCH_ASSOC) ?: [];
         if ($this->_fields_json) {
-            $rs = $this->_stmt->fetch(\PDO::FETCH_ASSOC);
             if ($rs && is_array($rs)) {
                 foreach ($this->_fields_json as $field) {
                     if (isset($rs[$field])) {
@@ -405,9 +405,8 @@ class pdo
                     }
                 }
             }
-            return $rs;
         }
-        return $this->_stmt->fetch(\PDO::FETCH_ASSOC) ?? [];
+        return $rs;
     }
 
     /**
@@ -453,7 +452,7 @@ class pdo
             }
             return $rs;
         } else {
-            return $this->_stmt->fetchAll(\PDO::FETCH_ASSOC) ?? [];
+            return $this->_stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
         }
     }
 
@@ -979,7 +978,7 @@ class pdo
             }
             $this->trans_commit();
             return $result;
-        } catch (Exception | Throwable $e) {
+        } catch (Exception|Throwable $e) {
             $this->trans_rollback();
             throw $e;
         }

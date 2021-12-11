@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\seo;
 
 
@@ -161,7 +162,7 @@ class domain
      */
     public static function domain(string $host): string
     {
-        $array_domain = explode('.', explode(':',$host)[0]);
+        $array_domain = explode('.', explode(':', $host)[0]);
         $array_num    = count($array_domain);
         if ($array_num <= 2) {
             return $host;
@@ -186,11 +187,11 @@ class domain
      * @param string $host
      * @return string
      */
-    public static function port(string $host):string
+    public static function port(string $host): string
     {
-        $array_port = explode(':',$host);
+        $array_port = explode(':', $host);
         $array_num  = count($array_port);
-        if($array_num < 2){
+        if ($array_num < 2) {
             return '';
         }
         return $array_port[1];

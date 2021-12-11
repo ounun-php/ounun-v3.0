@@ -19,10 +19,10 @@ class client
 
     /**
      * xmlrpc_client constructor.
-     * @param $url
+     * @param string $url
      * @param string $method
      */
-    public function __construct($url, $method = 'POST')
+    public function __construct(string $url, string $method = 'POST')
     {
         $this->url    = $url;
         $this->method = $method;

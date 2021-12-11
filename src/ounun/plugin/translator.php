@@ -3,7 +3,8 @@
  * [Ounun System] Copyright (c) 2019 Ounun.ORG
  * Ounun.ORG is NOT a free software, it is under the license terms, visited https://www.ounun.org/ for more details.
  */
-declare (strict_types = 1);
+declare (strict_types=1);
+
 namespace ounun\plugin;
 
 
@@ -118,7 +119,7 @@ class translator
      * @param $to
      * @return mixed
      */
-    public static function translate($q, $from, $to)
+    public static function translate($q, $from, $to): mixed
     {
         $transConf = $GLOBALS['_sc']['c']['translate'];
         if (empty($from) || empty($to)) {
@@ -131,15 +132,13 @@ class translator
             return $q;
         }
 
-        $allowLangs = self::$allow_langs[$apiType];
-        if (empty($allowLangs)) {
-
+        $allow_lang_list = self::$allow_langs[$apiType];
+        if (empty($allow_lang_list)) {
             return $q;
         }
-        $from = $allowLangs[$from];
-        $to   = $allowLangs[$to];
+        $from = $allow_lang_list[$from];
+        $to   = $allow_lang_list[$to];
         if (empty($from) || empty($to)) {
-
             return $q;
         }
         if ($from == $to) {
@@ -168,24 +167,25 @@ class translator
     {
         $apiConf = $GLOBALS['_sc']['c']['translate']['baidu'];
 
-        $salt = time();
-        $sign = $apiConf['appid'] . $q . $salt . $apiConf['key'];
-        $sign = md5($sign);
-        $data = caiji::html_get('https://api.fanyi.baidu.com/api/trans/vip/translate',
-            null, null, 'utf-8', array('from' => $from, 'to' => $to, 'appid' => $apiConf['appid'], 'salt' => $salt, 'sign' => $sign, 'q' => $q));
-        $data = json_decode($data);
+        $salt      = time();
+        $sign      = $apiConf['appid'] . $q . $salt . $apiConf['key'];
+        $sign      = md5($sign);
+        $post_data = ['from' => $from, 'to' => $to, 'appid' => $apiConf['appid'], 'salt' => $salt, 'sign' => $sign, 'q' => $q];
+        $data      = caiji::html_get('https://api.fanyi.baidu.com/api/trans/vip/translate',
+            null, null, 'utf-8', $post_data);
+        $data      = json_decode($data);
 
         $return = array('success' => false);
         if ($data->error_code) {
             $return['error'] = 'error:' . $data->error_code . '-' . $data->error_msg;
         } else {
-            $transData = '';
+            $trans_data = '';
             foreach ($data->trans_result as $trans) {
-                $transData .= $trans->dst . "\r\n";
+                $trans_data .= $trans->dst . "\r\n";
             }
-            if ($transData) {
+            if ($trans_data) {
                 $return['success'] = true;
-                $return['data']    = $transData;
+                $return['data']    = $trans_data;
             }
         }
 
@@ -286,20 +286,20 @@ class translator
 
     /**
      * @param $api_type
-     * @return array|mixed|string[]|null
+     * @return mixed
      */
-    public static function api_langs_get($api_type)
+    public static function lang_list($api_type): mixed
     {
-        $allow_langs = self::$allow_langs[$api_type];
-        if (!empty($allow_langs) && is_array($allow_langs)) {
-            foreach ($allow_langs as $k => $v) {
+        $allow_lang_list = self::$allow_langs[$api_type];
+        if (!empty($allow_lang_list) && is_array($allow_lang_list)) {
+            foreach ($allow_lang_list as $k => $v) {
                 if (empty(self::$lang[$k])) {
-                    unset($allow_langs[$k]);
+                    unset($allow_lang_list[$k]);
                 } else {
-                    $allow_langs[$k] = self::$lang[$k];
+                    $allow_lang_list[$k] = self::$lang[$k];
                 }
             }
         }
-        return is_array($allow_langs) ? $allow_langs : null;
+        return $allow_lang_list ?: null;
     }
 }
